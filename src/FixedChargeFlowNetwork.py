@@ -55,6 +55,8 @@ class FixedChargeFlowNetwork:
         visual.from_nx(self.network)
         visual.show(str(self.name) + ".html")
 
+    def solveFCNF(self, targetFlow: int):
+        """Solves the FCNF instance via a reduction to a MILP solved in CPLEX"""
 
 
 # Test Driver
