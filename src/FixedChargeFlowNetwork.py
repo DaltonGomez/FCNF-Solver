@@ -7,9 +7,6 @@ class FixedChargeFlowNetwork:
 
     def __init__(self):
         """Initializes a FCFN with a NetworkX instance."""
-        ##################################################################################
-        #   Instance fields of a FCFN
-        ##################################################################################
         self.name = ""
         self.network = nx.DiGraph()
         self.capacities = []
@@ -26,7 +23,7 @@ class FixedChargeFlowNetwork:
         lines = inputFile.readlines()
         inputFile.close()
         # Assign name
-        self.name = lines[0]
+        self.name = lines[0].rstrip()
         lines.pop(0)
         # Assign capacities
         self.capacities = lines[0].split()
@@ -56,9 +53,7 @@ class FixedChargeFlowNetwork:
         visual = netVis("500px", "500px", directed=True)
         # populates the nodes and edges data structures
         visual.from_nx(self.network)
-        # visual.enable_physics(True)
-        # visual.show_buttons(filter=['physics'])
-        visual.show(str(self.network) + ".html")
+        visual.show(str(self.name) + ".html")
 
 
 
