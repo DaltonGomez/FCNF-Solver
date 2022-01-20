@@ -1,6 +1,9 @@
 import os
+
 import networkx as nx
 from pyvis.network import Network as netVis
+from docplex.mp.model import Model
+
 
 class FixedChargeFlowNetwork:
     """Class that defines a Fixed Charge Flow Network."""
@@ -31,16 +34,16 @@ class FixedChargeFlowNetwork:
         # Build network
         for line in lines:
             data = line.split()
-        # Construct sources
+            # Construct sources
             if data[0][0] == "s":
                 self.network.add_node(data[0], fixedCost=data[1], variableCost=data[2])
-        # Construct sinks
+            # Construct sinks
             if data[0][0] == "t":
                 self.network.add_node(data[0], fixedCost=data[1], variableCost=data[2])
-        # Construct intermediate nodes
+            # Construct intermediate nodes
             if data[0][0] == "n":
                 self.network.add_node(data[0])
-        # Construct edges
+            # Construct edges
             if data[0][0] == "e":
                 self.network.add_edge(data[1], data[2], fixedCost=data[3], variableCost=data[4])
         # Test prints
@@ -57,9 +60,17 @@ class FixedChargeFlowNetwork:
 
     def solveFCNF(self, targetFlow: int):
         """Solves the FCNF instance via a reduction to a MILP solved in CPLEX"""
+        m = Model(name='single variable')
+        x = m.binary_var(name="x")
+        c1 = m.add_constraint(x >= 2, ctname="const1")
+        m.set_objective("min", 3 * x)
+        m.print_information()
+        m.solve()
+        m.print_solution()
 
 
 # Test Driver
 FCFN = FixedChargeFlowNetwork()
 FCFN.loadFCFN("small")
 FCFN.drawFCNF()
+FCFN.solveFCNF(5)
