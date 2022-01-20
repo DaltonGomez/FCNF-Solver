@@ -1,7 +1,6 @@
 import os
 
 import networkx as nx
-from docplex.mp.model import Model
 from pyvis.network import Network as netVis
 
 from src.Edge import Edge
@@ -12,7 +11,7 @@ class FixedChargeFlowNetwork:
     """Class that defines a Fixed Charge Flow Network"""
 
     def __init__(self):
-        """Initializes a FCFN with a NetworkX instance"""
+        """Constructor of a FCFN instance with a NetworkX instance and two data dictionaries"""
         self.name = ""
         self.network = nx.DiGraph()
         self.pipelineCapacities = []
@@ -51,7 +50,7 @@ class FixedChargeFlowNetwork:
                 self.network.add_node(data[0])
             # Construct edge objects and add to dictionary and network
             if data[0][0] == "e":
-                # TODO - Account for parallel edge capacities
+                # TODO - Account for parallel edges with differing capacities
                 thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.pipelineCapacities[0]))
                 edgeKey = (data[1], data[2])
                 self.edgesDict[edgeKey] = thisEdge
@@ -63,7 +62,6 @@ class FixedChargeFlowNetwork:
     def drawFCNF(self):
         """Displays the FCNF using PyVis"""
         visual = netVis("500px", "500px", directed=True)
-        # Populates the nodes and edges data structures
         visual.from_nx(self.network)
         visual.show(str(self.name) + ".html")
 
@@ -78,20 +76,3 @@ class FixedChargeFlowNetwork:
         for edge in self.network.edges:
             thisEdge = self.edgesDict[edge]
             thisEdge.printEdgeData()
-
-    def solveFCNF(self, targetFlow: int):
-        """Solves the FCNF instance via a reduction to a MILP solved in CPLEX"""
-        m = Model(name='single variable')
-        x = m.binary_var(name="x")
-        c1 = m.add_constraint(x >= 2, ctname="const1")
-        m.set_objective("min", 3 * x)
-        m.print_information()
-        m.solve()
-        m.print_solution()
-
-
-# Test Driver
-FCFN = FixedChargeFlowNetwork()
-FCFN.loadFCFN("small")
-FCFN.drawFCNF()
-# FCFN.solveFCNF(5)
