@@ -15,7 +15,9 @@ class FixedChargeFlowNetwork:
         self.name = ""
         self.network = nx.DiGraph()
         self.pipelineCapacities = []
+        self.numNodes = 0
         self.nodesDict = {}
+        self.numEdges = 0
         self.edgesDict = {}
 
     def loadFCFN(self, network: str):
@@ -55,9 +57,14 @@ class FixedChargeFlowNetwork:
                 edgeKey = (data[1], data[2])
                 self.edgesDict[edgeKey] = thisEdge
                 self.network.add_edge(data[1], data[2])
+        # Assign network size
+        self.numNodes = len(self.nodesDict)
+        self.numEdges = len(self.edgesDict)
         # Test prints
         self.printAllNodeData()
         self.printAllEdgeData()
+        print("Number of Nodes = " + str(self.numNodes))
+        print("Number of Edges = " + str(self.numEdges))
 
     def drawFCNF(self):
         """Displays the FCNF using PyVis"""
