@@ -1,8 +1,8 @@
 class Node:
-    """Class that defines a node in a Fixed Charge Flow Network."""
+    """Class that defines a node in a Fixed Charge Flow Network"""
 
     def __init__(self, nodeID: str, variableCost: int, capacity: int):
-        """Constructor of a node instance."""
+        """Constructor of a node instance"""
         # Input network attributes
         self.nodeID = nodeID
         if nodeID[0] == "s":
@@ -20,3 +20,15 @@ class Node:
         self.inFlow = 0
         self.outFlow = 0
         self.totalCost = 0
+
+    def printNodeData(self):
+        """Prints all relevant data for a node"""
+        print("=============== NODE ===============")
+        print("Node ID = " + self.nodeID)
+        print("Node Type = " + self.nodeType)
+        print("Variable Cost = " + str(self.variableCost))
+        print("Capacity = " + str(self.capacity))
+        print("\nOpened = " + str(self.opened))
+        print("In-Flow = " + str(self.inFlow))
+        print("Out-Flow = " + str(self.outFlow))
+        print("Total Cost = " + str(self.totalCost))

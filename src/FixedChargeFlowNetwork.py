@@ -4,18 +4,23 @@ import networkx as nx
 from docplex.mp.model import Model
 from pyvis.network import Network as netVis
 
+from src.Edge import Edge
+from src.Node import Node
+
 
 class FixedChargeFlowNetwork:
-    """Class that defines a Fixed Charge Flow Network."""
+    """Class that defines a Fixed Charge Flow Network"""
 
     def __init__(self):
-        """Initializes a FCFN with a NetworkX instance."""
+        """Initializes a FCFN with a NetworkX instance"""
         self.name = ""
         self.network = nx.DiGraph()
         self.pipelineCapacities = []
+        self.nodesDict = {}
+        self.edgesDict = {}
 
     def loadFCFN(self, network: str):
-        """Loads a FCFN from a text file encoding."""
+        """Loads a FCFN from a text file encoding"""
         # Path management
         currDir = os.getcwd()
         networkFile = network + ".txt"
@@ -34,31 +39,45 @@ class FixedChargeFlowNetwork:
         # Build network
         for line in lines:
             data = line.split()
-            # Construct sources
-            if data[0][0] == "s":
-                self.network.add_node(data[0], fixedCost=data[1], variableCost=data[2])
-            # Construct sinks
-            if data[0][0] == "t":
-                self.network.add_node(data[0], fixedCost=data[1], variableCost=data[2])
-            # Construct intermediate nodes
-            if data[0][0] == "n":
+            # Construct sink and source node objects and add to dictionary and network
+            if data[0][0] == "s" or data[0][0] == "t":
+                thisNode = Node(data[0], int(data[1]), int(data[2]))
+                self.nodesDict[data[0]] = thisNode
                 self.network.add_node(data[0])
-            # Construct edges
+            # Construct transshipment node objects and add to dictionary and network
+            if data[0][0] == "n":
+                thisNode = Node(data[0], 0, 0)
+                self.nodesDict[data[0]] = thisNode
+                self.network.add_node(data[0])
+            # Construct edge objects and add to dictionary and network
             if data[0][0] == "e":
-                self.network.add_edge(data[1], data[2], fixedCost=data[3], variableCost=data[4])
+                # TODO - Account for parallel edge capacities
+                thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.pipelineCapacities[0]))
+                edgeKey = (data[1], data[2])
+                self.edgesDict[edgeKey] = thisEdge
+                self.network.add_edge(data[1], data[2])
         # Test prints
-        print(self.network.nodes)
-        for node in self.network.nodes:
-            print(node.fixedCost)
-        print(self.network.edges)
-        print(self.capacities)
+        self.printAllNodeData()
+        self.printAllEdgeData()
 
     def drawFCNF(self):
         """Displays the FCNF using PyVis"""
         visual = netVis("500px", "500px", directed=True)
-        # populates the nodes and edges data structures
+        # Populates the nodes and edges data structures
         visual.from_nx(self.network)
         visual.show(str(self.name) + ".html")
+
+    def printAllNodeData(self):
+        """Prints all the data for each node in the network"""
+        for node in self.network.nodes:
+            thisNode = self.nodesDict[node]
+            thisNode.printNodeData()
+
+    def printAllEdgeData(self):
+        """Prints all the data for each edge in the network"""
+        for edge in self.network.edges:
+            thisEdge = self.edgesDict[edge]
+            thisEdge.printEdgeData()
 
     def solveFCNF(self, targetFlow: int):
         """Solves the FCNF instance via a reduction to a MILP solved in CPLEX"""

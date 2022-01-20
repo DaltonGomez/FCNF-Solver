@@ -1,5 +1,5 @@
 small
-pipelineCapacities= 10 100
+pipelineCapacities= 10 20
 s1 2 50
 s2 3 90
 s3 1 30
