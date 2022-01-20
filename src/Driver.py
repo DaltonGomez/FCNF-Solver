@@ -6,7 +6,7 @@ from src.MILPsolver import MILPsolver
 # Test Driver
 FCFN = FixedChargeFlowNetwork()
 FCFN.loadFCFN("small")
-FCFN.drawFCNF()
+# FCFN.drawFCNF()
 solver = MILPsolver(FCFN, 70)
-solver.testCPLEX()
+# solver.testCPLEX()
 solver.buildModel()

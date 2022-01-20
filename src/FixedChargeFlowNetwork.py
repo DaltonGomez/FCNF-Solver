@@ -19,6 +19,8 @@ class FixedChargeFlowNetwork:
         self.nodesDict = {}
         self.numEdges = 0
         self.edgesDict = {}
+        self.numSources = 0
+        self.numSinks = 0
 
     def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding"""
@@ -40,11 +42,18 @@ class FixedChargeFlowNetwork:
         # Build network
         for line in lines:
             data = line.split()
-            # Construct sink and source node objects and add to dictionary and network
-            if data[0][0] == "s" or data[0][0] == "t":
+            # Construct source node objects and add to dictionary and network
+            if data[0][0] == "s":
                 thisNode = Node(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
                 self.network.add_node(data[0])
+                self.numSources += 1
+            # Construct sink node objects and add to dictionary and network
+            if data[0][0] == "t":
+                thisNode = Node(data[0], int(data[1]), int(data[2]))
+                self.nodesDict[data[0]] = thisNode
+                self.network.add_node(data[0])
+                self.numSinks += 1
             # Construct transshipment node objects and add to dictionary and network
             if data[0][0] == "n":
                 thisNode = Node(data[0], 0, 0)
@@ -60,11 +69,14 @@ class FixedChargeFlowNetwork:
         # Assign network size
         self.numNodes = len(self.nodesDict)
         self.numEdges = len(self.edgesDict)
+
         # Test prints
-        self.printAllNodeData()
-        self.printAllEdgeData()
-        print("Number of Nodes = " + str(self.numNodes))
-        print("Number of Edges = " + str(self.numEdges))
+        # self.printAllNodeData()
+        # self.printAllEdgeData()
+        # print("Number of Nodes = " + str(self.numNodes))
+        # print("Number of Edges = " + str(self.numEdges))
+        # print("Number of Sources = " + str(self.numSources))
+        # print("Number of Sinks = " + str(self.numSinks))
 
     def drawFCNF(self):
         """Displays the FCNF using PyVis"""
