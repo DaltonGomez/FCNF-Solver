@@ -1,8 +1,8 @@
 import os
 
 import networkx as nx
-from pyvis.network import Network as netVis
 from docplex.mp.model import Model
+from pyvis.network import Network as netVis
 
 
 class FixedChargeFlowNetwork:
@@ -12,7 +12,7 @@ class FixedChargeFlowNetwork:
         """Initializes a FCFN with a NetworkX instance."""
         self.name = ""
         self.network = nx.DiGraph()
-        self.capacities = []
+        self.pipelineCapacities = []
 
     def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding."""
@@ -29,8 +29,8 @@ class FixedChargeFlowNetwork:
         self.name = lines[0].rstrip()
         lines.pop(0)
         # Assign capacities
-        self.capacities = lines[0].split()
-        self.capacities.pop(0)
+        self.pipelineCapacities = lines[0].split()
+        self.pipelineCapacities.pop(0)
         # Build network
         for line in lines:
             data = line.split()
@@ -48,6 +48,8 @@ class FixedChargeFlowNetwork:
                 self.network.add_edge(data[1], data[2], fixedCost=data[3], variableCost=data[4])
         # Test prints
         print(self.network.nodes)
+        for node in self.network.nodes:
+            print(node.fixedCost)
         print(self.network.edges)
         print(self.capacities)
 
@@ -73,4 +75,4 @@ class FixedChargeFlowNetwork:
 FCFN = FixedChargeFlowNetwork()
 FCFN.loadFCFN("small")
 FCFN.drawFCNF()
-FCFN.solveFCNF(5)
+# FCFN.solveFCNF(5)
