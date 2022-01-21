@@ -20,4 +20,4 @@ solver.writeSolution()
 # Test of the Visualize Class
 visual = Visualize(FCFN)
 # visual.drawGraphUiOptions(FCFN.name)
-visual.drawGraphHardcodeOptionsTwo(FCFN.name)
+visual.drawGraphHardcodeOptions(FCFN.name)

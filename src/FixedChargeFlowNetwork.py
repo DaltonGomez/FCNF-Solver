@@ -25,6 +25,9 @@ class FixedChargeFlowNetwork:
         self.totalCost = 0
         self.totalFlow = 0
 
+        # Deterministic seed for consistent visualization
+        self.visSeed = 1
+
     def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding"""
         # Path management
@@ -38,6 +41,12 @@ class FixedChargeFlowNetwork:
         inputFile.close()
         # Assign name
         self.name = lines[0].rstrip()
+        lines.pop(0)
+        # Assign seed
+        self.visSeed = lines[0].split()
+        self.visSeed.pop(0)
+        self.visSeed = self.visSeed.pop(0)
+        print(self.visSeed)
         lines.pop(0)
         # Assign capacities
         self.edgeCaps = lines[0].split()
