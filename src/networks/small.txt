@@ -1,5 +1,5 @@
 small
-pipelineCapacities= 10 20
+edgeCaps= 10 20
 s0 2 50
 s1 3 90
 s2 1 30

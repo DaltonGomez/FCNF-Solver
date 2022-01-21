@@ -14,14 +14,13 @@ class FixedChargeFlowNetwork:
         """Constructor of a FCFN instance with a NetworkX instance and two data dictionaries"""
         self.name = ""
         self.network = nx.DiGraph()
-        self.pipelineCapacities = []
+        self.edgeCaps = []
         self.numNodes = 0
         self.numSources = 0
         self.numSinks = 0
         self.nodesDict = {}
         self.numEdges = 0
         self.edgesDict = {}
-        self.edgesMap = {}
 
     def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding"""
@@ -38,8 +37,9 @@ class FixedChargeFlowNetwork:
         self.name = lines[0].rstrip()
         lines.pop(0)
         # Assign capacities
-        self.pipelineCapacities = lines[0].split()
-        self.pipelineCapacities.pop(0)
+        self.edgeCaps = lines[0].split()
+        self.edgeCaps.pop(0)
+        lines.pop(0)
         # Build network
         for line in lines:
             data = line.split()
@@ -63,10 +63,8 @@ class FixedChargeFlowNetwork:
             # Construct edge objects and add to dictionary and network
             if data[0][0] == "e":
                 # TODO - Account for parallel edges with differing capacities
-                thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.pipelineCapacities[0]))
-                edgeKey = (data[1], data[2])
-                self.edgesMap[data[0]] = edgeKey
-                self.edgesDict[edgeKey] = thisEdge
+                thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.edgeCaps[0]))
+                self.edgesDict[data[0]] = thisEdge
                 self.network.add_edge(data[1], data[2])
                 self.nodesDict[data[1]].outgoingEdges.append(data[0])
                 self.nodesDict[data[2]].incomingEdges.append(data[0])
