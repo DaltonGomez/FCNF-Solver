@@ -15,6 +15,10 @@ class Node:
         self.capacity = capacity
         # TODO- Add in fixed costs to source and sink nodes if desired
 
+        # Topology attributes
+        self.incomingEdges = []
+        self.outgoingEdges = []
+
         # Solution attributes
         self.opened = False
         self.inFlow = 0
@@ -28,6 +32,8 @@ class Node:
         print("Node Type = " + self.nodeType)
         print("Variable Cost = " + str(self.variableCost))
         print("Capacity = " + str(self.capacity))
+        print("\nIncoming Edges = " + str(self.incomingEdges))
+        print("Outgoing Edges = " + str(self.outgoingEdges))
         print("\nOpened = " + str(self.opened))
         print("In-Flow = " + str(self.inFlow))
         print("Out-Flow = " + str(self.outFlow))

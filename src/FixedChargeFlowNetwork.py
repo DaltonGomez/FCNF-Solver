@@ -16,11 +16,12 @@ class FixedChargeFlowNetwork:
         self.network = nx.DiGraph()
         self.pipelineCapacities = []
         self.numNodes = 0
+        self.numSources = 0
+        self.numSinks = 0
         self.nodesDict = {}
         self.numEdges = 0
         self.edgesDict = {}
-        self.numSources = 0
-        self.numSinks = 0
+        self.edgesMap = {}
 
     def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding"""
@@ -64,19 +65,14 @@ class FixedChargeFlowNetwork:
                 # TODO - Account for parallel edges with differing capacities
                 thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.pipelineCapacities[0]))
                 edgeKey = (data[1], data[2])
+                self.edgesMap[data[0]] = edgeKey
                 self.edgesDict[edgeKey] = thisEdge
                 self.network.add_edge(data[1], data[2])
+                self.nodesDict[data[1]].outgoingEdges.append(data[0])
+                self.nodesDict[data[2]].incomingEdges.append(data[0])
         # Assign network size
         self.numNodes = len(self.nodesDict)
         self.numEdges = len(self.edgesDict)
-
-        # Test prints
-        # self.printAllNodeData()
-        # self.printAllEdgeData()
-        # print("Number of Nodes = " + str(self.numNodes))
-        # print("Number of Edges = " + str(self.numEdges))
-        # print("Number of Sources = " + str(self.numSources))
-        # print("Number of Sinks = " + str(self.numSinks))
 
     def drawFCNF(self):
         """Displays the FCNF using PyVis"""
@@ -86,12 +82,12 @@ class FixedChargeFlowNetwork:
 
     def printAllNodeData(self):
         """Prints all the data for each node in the network"""
-        for node in self.network.nodes:
+        for node in self.nodesDict:
             thisNode = self.nodesDict[node]
             thisNode.printNodeData()
 
     def printAllEdgeData(self):
         """Prints all the data for each edge in the network"""
-        for edge in self.network.edges:
+        for edge in self.edgesDict:
             thisEdge = self.edgesDict[edge]
             thisEdge.printEdgeData()
