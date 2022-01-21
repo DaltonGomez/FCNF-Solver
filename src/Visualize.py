@@ -42,9 +42,10 @@ class Visualize:
 
     def drawGraphHardcodeOptions(self, name: str):
         """Displays the FCNF using PyVis and a set of hardcoded options"""
-        displayName = name + ".html"
+        displayName = name + str(self.FCFN.minTargetFlow) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "1000px", directed=True)
+        visual.from_nx(self.nx)
         # Sets visualization options using a JSON format (see vis.js documentation)
         visual.set_options("""
             var options = {
@@ -112,14 +113,14 @@ class Visualize:
                 }
             }
             """)
-        visual.from_nx(self.nx)
         visual.show(displayName)
 
     def drawGraphUiOptions(self, name: str):
         """Displays the FCNF using PyVis and provides a UI for customizing options, which can be copied in JSON"""
-        displayName = name + ".html"
+        displayName = name + str(self.FCFN.minTargetFlow) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "800px", directed=True)
+        visual.from_nx(self.nx)
 
         # Starting Layouts
         visual.barnes_hut()
@@ -130,5 +131,4 @@ class Visualize:
         visual.show_buttons()
 
         # Display for UI option customization
-        visual.from_nx(self.nx)
         visual.show(displayName)

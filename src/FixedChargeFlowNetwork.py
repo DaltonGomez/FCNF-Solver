@@ -40,13 +40,15 @@ class FixedChargeFlowNetwork:
         lines = inputFile.readlines()
         inputFile.close()
         # Assign name
-        self.name = lines[0].rstrip()
+        lines.pop(0)
+        self.name = lines[0].split()
+        self.name.pop(0)
+        self.name = self.name.pop(0)
         lines.pop(0)
         # Assign seed
         self.visSeed = lines[0].split()
         self.visSeed.pop(0)
         self.visSeed = self.visSeed.pop(0)
-        print(self.visSeed)
         lines.pop(0)
         # Assign capacities
         self.edgeCaps = lines[0].split()
@@ -55,8 +57,11 @@ class FixedChargeFlowNetwork:
         # Build network
         for line in lines:
             data = line.split()
+            # Ignore comments
+            if data[0][0] == "#":
+                continue
             # Construct source node objects and add to dictionary and network
-            if data[0][0] == "s":
+            elif data[0][0] == "s":
                 thisNode = Node(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
                 self.numSources += 1
