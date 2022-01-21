@@ -1,7 +1,7 @@
 import os
 
-from src.Edge import Edge
-from src.Node import Node
+from src.FixedChargeFlowNetworkSolver.Edge import Edge
+from src.FixedChargeFlowNetworkSolver.Node import Node
 
 
 class FixedChargeFlowNetwork:
@@ -33,7 +33,7 @@ class FixedChargeFlowNetwork:
         # Path management
         currDir = os.getcwd()
         networkFile = network + ".txt"
-        catPath = os.path.join(currDir, "networks", networkFile)
+        catPath = os.path.join(currDir, "../networks", networkFile)
         print("Loading " + networkFile + " from: " + catPath)
         # Open file, parse lines in data stream, and close file
         inputFile = open(catPath, 'r')

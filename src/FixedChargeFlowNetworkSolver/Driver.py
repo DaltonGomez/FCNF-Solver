@@ -1,6 +1,6 @@
-from src.FixedChargeFlowNetwork import FixedChargeFlowNetwork
-from src.MILPsolver import MILPsolver
-from src.Visualize import Visualize
+from src.FixedChargeFlowNetworkSolver.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+from src.FixedChargeFlowNetworkSolver.MILPsolver import MILPsolver
+from src.FixedChargeFlowNetworkSolver.Visualize import Visualize
 
 """PY FILE USED TO RUN THE FCNF-SOLVER"""
 

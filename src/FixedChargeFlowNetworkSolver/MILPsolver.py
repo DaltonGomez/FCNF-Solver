@@ -1,6 +1,6 @@
 from docplex.mp.model import Model
 
-from src.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+from src.FixedChargeFlowNetworkSolver.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class MILPsolver:

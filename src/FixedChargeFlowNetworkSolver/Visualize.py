@@ -1,7 +1,7 @@
 import networkx as nx
 from pyvis.network import Network as netVis
 
-from src.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+from src.FixedChargeFlowNetworkSolver.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class Visualize:
