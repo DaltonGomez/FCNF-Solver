@@ -27,20 +27,122 @@ class Visualize:
             edgeObj = self.FCFN.edgesDict[edge]
             self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black")
 
-    def drawGraph(self, name: str):
+    def drawGraphUiOptions(self, name: str):
         """Displays the FCNF using PyVis"""
         displayName = name + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "800px", directed=True)
-        # Layouts
+
+        # Starting Layouts
         visual.barnes_hut()
         # visual.force_atlas_2based()
         # visual.hrepulsion()
 
         # Other options
-        # visual.show_buttons()
-        # visual.toggle_physics(False)
-        # visual.toggle_stabilization(False)
+        visual.show_buttons()
 
+        # Display for UI option customization
+        visual.from_nx(self.nx)
+        visual.show(displayName)
+
+    def drawGraphHardcodeOptions(self, name: str):
+        """Displays the FCNF using PyVis"""
+        displayName = name + ".html"
+        print("Drawing " + displayName + "...")
+        visual = netVis("800px", "800px", directed=True)
+        # Sets visualization options using a JSON format (see vis.js documentation)
+        visual.set_options("""
+            var options = {
+                "layout": { 
+                    "randomSeed": 2 
+                },
+                "configure": {
+                    "enabled": true
+                },
+                "edges": {
+                    "color": {
+                        "inherit": true
+                    },
+                    "smooth": {
+                        "enabled": false,
+                        "type": "continuous"
+                    }
+                },
+                "interaction": {
+                    "dragNodes": true,
+                    "hideEdgesOnDrag": false,
+                    "hideNodesOnDrag": false
+                },
+                "physics": {
+                    "barnesHut": {
+                        "avoidOverlap": 0,
+                        "centralGravity": 0.3,
+                        "damping": 0.09,
+                        "gravitationalConstant": -80000,
+                        "springConstant": 0.001,
+                        "springLength": 250
+                    },
+                    "enabled": true,
+                    "stabilization": {
+                        "enabled": true,
+                        "fit": true,
+                        "iterations": 1000,
+                        "onlyDynamicEdges": false,
+                        "updateInterval": 50
+                    }
+                }
+            }
+            """)
+        visual.from_nx(self.nx)
+        visual.show(displayName)
+
+    def drawGraphHardcodeOptionsTwo(self, name: str):
+        """Displays the FCNF using PyVis"""
+        displayName = name + ".html"
+        print("Drawing " + displayName + "...")
+        visual = netVis("800px", "800px", directed=True)
+        # Sets visualization options using a JSON format (see vis.js documentation)
+        visual.set_options("""
+            var options = {
+                "layout": { 
+                    "randomSeed": 2 
+                },
+                "configure": {
+                    "enabled": true
+                },
+                "edges": {
+                    "color": {
+                        "inherit": true
+                    },
+                    "smooth": {
+                        "enabled": false,
+                        "type": "continuous"
+                    }
+                },
+                "interaction": {
+                    "dragNodes": true,
+                    "hideEdgesOnDrag": false,
+                    "hideNodesOnDrag": false
+                },
+                "physics": {
+                    "barnesHut": {
+                        "avoidOverlap": 0,
+                        "centralGravity": 0.3,
+                        "damping": 0.09,
+                        "gravitationalConstant": -80000,
+                        "springConstant": 0.001,
+                        "springLength": 250
+                    },
+                    "enabled": true,
+                    "stabilization": {
+                        "enabled": true,
+                        "fit": true,
+                        "iterations": 1000,
+                        "onlyDynamicEdges": false,
+                        "updateInterval": 50
+                    }
+                }
+            }
+            """)
         visual.from_nx(self.nx)
         visual.show(displayName)
