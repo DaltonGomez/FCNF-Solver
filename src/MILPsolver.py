@@ -47,6 +47,7 @@ class MILPsolver:
             sinkCapacity = self.FCFN.nodesDict[sinkKey].capacity
             self.model.add_constraint(self.model.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
 
+        # TODO- Add a print model in English method
         print(self.model.get_constraint_by_name("minFlowConstraint"))
         print(self.model.get_constraint_by_name("s0Cap"))
         print(self.model.get_constraint_by_name("s1Cap"))
