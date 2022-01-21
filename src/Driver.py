@@ -18,6 +18,5 @@ solver.solveModel()
 solver.writeSolution()
 
 # Test of the Visualize Class
-print("Drawing graph...")
 visual = Visualize(FCFN)
-visual.drawGraph()
+visual.drawGraph(FCFN.name)

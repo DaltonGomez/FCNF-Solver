@@ -15,15 +15,32 @@ class Visualize:
 
     def populateGraph(self):
         """Populates a NetworkX instance with the FCFN data"""
-        for node in self.FCFN.nodeDict:
-            self.nx.add_node(node)
-        for edge in self.FCFN.edgeDict:
-            edgeObj = self.FCFN.edgeDict[edge]
-            self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode)
+        for node in self.FCFN.nodesDict:
+            nodeObj = self.FCFN.nodesDict[node]
+            if node[0] == "s":
+                self.nx.add_node(node, value=nodeObj.flow, color="blue")
+            elif node[0] == "t":
+                self.nx.add_node(node, value=nodeObj.flow, color="red")
+            elif node[0] == "n":
+                self.nx.add_node(node, value=nodeObj.flow, color="black")
+        for edge in self.FCFN.edgesDict:
+            edgeObj = self.FCFN.edgesDict[edge]
+            self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black")
 
-    def drawGraph(self):
+    def drawGraph(self, name: str):
         """Displays the FCNF using PyVis"""
-        visual = netVis("500px", "500px", directed=True)
+        displayName = name + ".html"
+        print("Drawing " + displayName + "...")
+        visual = netVis("800px", "800px", directed=True)
+        # Layouts
+        visual.barnes_hut()
+        # visual.force_atlas_2based()
+        # visual.hrepulsion()
+
+        # Other options
+        # visual.show_buttons()
+        # visual.toggle_physics(False)
+        # visual.toggle_stabilization(False)
+
         visual.from_nx(self.nx)
-        visual.show(str(self.FCFN.name) + ".html")
-        print("Showing...")
+        visual.show(displayName)

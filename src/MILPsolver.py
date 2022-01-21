@@ -74,13 +74,13 @@ class MILPsolver:
                                           sum(self.model.edgeFlowVars[i] for i in outgoingIDs),
                                           ctname=ctName)
             # Sink flow conservation
-            if nodeType == "t":
+            elif nodeType == "t":
                 ctName = "t" + str(nodeID) + "Conserv"
                 self.model.add_constraint(self.model.sinkFlowVars[int(nodeID)] ==
                                           sum(self.model.edgeFlowVars[i] for i in incomingIDs),
                                           ctname=ctName)
             # Transshipment flow conservation
-            if nodeType == "n":
+            elif nodeType == "n":
                 ctName = "n" + str(nodeID) + "Conserv"
                 self.model.add_constraint(sum(self.model.edgeFlowVars[i] for i in incomingIDs) - sum(
                     self.model.edgeFlowVars[j] for j in outgoingIDs) == 0, ctname=ctName)

@@ -52,16 +52,16 @@ class FixedChargeFlowNetwork:
                 self.nodesDict[data[0]] = thisNode
                 self.numSources += 1
             # Construct sink node objects and add to dictionary and network
-            if data[0][0] == "t":
+            elif data[0][0] == "t":
                 thisNode = Node(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
                 self.numSinks += 1
             # Construct transshipment node objects and add to dictionary and network
-            if data[0][0] == "n":
+            elif data[0][0] == "n":
                 thisNode = Node(data[0], 0, 0)
                 self.nodesDict[data[0]] = thisNode
             # Construct edge objects and add to dictionary and network
-            if data[0][0] == "e":
+            elif data[0][0] == "e":
                 # TODO - Account for parallel edges with differing capacities
                 thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.edgeCaps[0]))
                 self.edgesDict[data[0]] = thisEdge
