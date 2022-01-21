@@ -21,8 +21,7 @@ class Node:
 
         # Solution attributes
         self.opened = False
-        self.inFlow = 0
-        self.outFlow = 0
+        self.flow = 0
         self.totalCost = 0
 
     def printNodeData(self):
@@ -35,6 +34,5 @@ class Node:
         print("\nIncoming Edges = " + str(self.incomingEdges))
         print("Outgoing Edges = " + str(self.outgoingEdges))
         print("\nOpened = " + str(self.opened))
-        print("In-Flow = " + str(self.inFlow))
-        print("Out-Flow = " + str(self.outFlow))
+        print("Flow = " + str(self.flow))
         print("Total Cost = " + str(self.totalCost))

@@ -1,8 +1,5 @@
 import os
 
-import networkx as nx
-from pyvis.network import Network as netVis
-
 from src.Edge import Edge
 from src.Node import Node
 
@@ -11,9 +8,9 @@ class FixedChargeFlowNetwork:
     """Class that defines a Fixed Charge Flow Network"""
 
     def __init__(self):
-        """Constructor of a FCFN instance with a NetworkX instance and two data dictionaries"""
+        """Constructor of a FCFN instance"""
+        # Input Attributes
         self.name = ""
-        self.network = nx.DiGraph()
         self.edgeCaps = []
         self.numNodes = 0
         self.numSources = 0
@@ -21,6 +18,12 @@ class FixedChargeFlowNetwork:
         self.nodesDict = {}
         self.numEdges = 0
         self.edgesDict = {}
+
+        # Solution Data
+        self.solved = False
+        self.minTargetFlow = 0
+        self.totalCost = 0
+        self.totalFlow = 0
 
     def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding"""
@@ -47,36 +50,26 @@ class FixedChargeFlowNetwork:
             if data[0][0] == "s":
                 thisNode = Node(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
-                self.network.add_node(data[0])
                 self.numSources += 1
             # Construct sink node objects and add to dictionary and network
             if data[0][0] == "t":
                 thisNode = Node(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
-                self.network.add_node(data[0])
                 self.numSinks += 1
             # Construct transshipment node objects and add to dictionary and network
             if data[0][0] == "n":
                 thisNode = Node(data[0], 0, 0)
                 self.nodesDict[data[0]] = thisNode
-                self.network.add_node(data[0])
             # Construct edge objects and add to dictionary and network
             if data[0][0] == "e":
                 # TODO - Account for parallel edges with differing capacities
                 thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.edgeCaps[0]))
                 self.edgesDict[data[0]] = thisEdge
-                self.network.add_edge(data[1], data[2])
                 self.nodesDict[data[1]].outgoingEdges.append(data[0])
                 self.nodesDict[data[2]].incomingEdges.append(data[0])
         # Assign network size
         self.numNodes = len(self.nodesDict)
         self.numEdges = len(self.edgesDict)
-
-    def drawFCNF(self):
-        """Displays the FCNF using PyVis"""
-        visual = netVis("500px", "500px", directed=True)
-        visual.from_nx(self.network)
-        visual.show(str(self.name) + ".html")
 
     def printAllNodeData(self):
         """Prints all the data for each node in the network"""

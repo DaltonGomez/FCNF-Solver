@@ -13,7 +13,6 @@ class MILPsolver:
         self.minTargetFlow = minTargetFlow
         # Solver model
         self.model = Model(name="FCFN-MILP-Solver", log_output=False, cts_by_name=True)
-        # TODO- Turn off parameters as model accuracy is ensured
         # Output attributes
         self.solved = False
         self.totalFlow = 0
@@ -46,16 +45,14 @@ class MILPsolver:
 
         # Capacity constraints of sources
         for i in range(self.FCFN.numSources):
-            sourceKey = "s" + str(i)
-            ctName = sourceKey + "Cap"
-            srcCapacity = self.FCFN.nodesDict[sourceKey].capacity
+            ctName = "s" + str(i) + "Cap"
+            srcCapacity = self.FCFN.nodesDict["s" + str(i)].capacity
             self.model.add_constraint(self.model.sourceFlowVars[i] <= srcCapacity, ctname=ctName)
 
         # Capacity constraints of sinks
         for i in range(self.FCFN.numSinks):
-            sinkKey = "t" + str(i)
-            ctName = sinkKey + "Cap"
-            sinkCapacity = self.FCFN.nodesDict[sinkKey].capacity
+            ctName = "t" + str(i) + "Cap"
+            sinkCapacity = self.FCFN.nodesDict["t" + str(i)].capacity
             self.model.add_constraint(self.model.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
 
         # Conservation of flow constraints
@@ -103,14 +100,57 @@ class MILPsolver:
         print("\nSolving model...")
         self.model.solve()
         self.solved = True
-        print("\nModel solved!!!\nDetails:")
-        print(self.model.get_solve_details())
+        print("\nModel solved!!!")
 
-    def getSolution(self):
+    def writeSolution(self):
         """Prints the solution to the console and updates the FCFN elements with their solution values"""
-        print("=============== SOLUTION ========================")
-        self.model.print_solution()
-        # self.totalCost = self.model.get
+        print("=============== SOLUTION DETAILS ========================")
+        print(self.model.get_solve_details())
+        if self.model.solution is not None:
+            print("Solved by= " + self.model.solution.solved_by + "\n")
+            print("=============== SOLUTION VALUES ========================")
+            self.model.print_solution()
+            self.totalCost = self.model.solution.get_objective_value()
+            self.totalFlow = sum(self.model.solution.get_value_list(self.model.sinkFlowVars))
+            print("Total Flow: " + str(self.totalFlow))
+            # Disperse solution results back to FCFN
+            self.FCFN.solved = True
+            self.FCFN.minTargetFlow = self.minTargetFlow
+            self.FCFN.totalCost = self.totalCost
+            self.FCFN.totalFlow = self.totalFlow
+            # Disperse solution results back to sources
+            sourceValues = self.model.solution.get_value_list(self.model.sourceFlowVars)
+            for i in range(self.FCFN.numSources):
+                thisSource = self.FCFN.nodesDict["s" + str(i)]
+                if sourceValues[i] > 0:
+                    thisSource.opened = True
+                    thisSource.flow = sourceValues[i]
+                    thisSource.totalCost = thisSource.flow * thisSource.variableCost
+            # Disperse solution results back to sources
+            sinkValues = self.model.solution.get_value_list(self.model.sinkFlowVars)
+            for i in range(self.FCFN.numSinks):
+                thisSink = self.FCFN.nodesDict["t" + str(i)]
+                if sinkValues[i] > 0:
+                    thisSink.opened = True
+                    thisSink.flow = sinkValues[i]
+                    thisSink.totalCost = thisSink.flow * thisSink.variableCost
+            # Disperse solution results back to edges
+            edgeValues = self.model.solution.get_value_list(self.model.edgeFlowVars)
+            for i in range(self.FCFN.numEdges):
+                thisEdge = self.FCFN.edgesDict["e" + str(i)]
+                if edgeValues[i] > 0:
+                    thisEdge.opened = True
+                    thisEdge.flow = edgeValues[i]
+                    thisEdge.totalCost = thisEdge.flow * thisEdge.variableCost + thisEdge.fixedCost
+            # Disperse solution results back to transshipment nodes
+            for i in range(self.FCFN.numNodes - (self.FCFN.numSources + self.FCFN.numSinks)):
+                thisNode = self.FCFN.nodesDict["n" + str(i)]
+                for edge in thisNode.incomingEdges:
+                    thisNode.flow += self.FCFN.edgesDict[edge].flow
+                if thisNode.flow > 0:
+                    thisNode.opened = True
+        else:
+            print("No feasible solution exists!")
 
     def printMILPmodel(self):
         """Prints all constraints of the MILP model for the FCFN instance (FOR DEBUGGING- DO NOT CALL ON LARGE INPUTS)"""
