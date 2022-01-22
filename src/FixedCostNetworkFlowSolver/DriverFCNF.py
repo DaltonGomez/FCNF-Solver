@@ -9,6 +9,8 @@ FCNF = FCNF()
 FCNF.loadFCFN("small")
 # FCNF.printAllNodeData()
 # FCNF.printAllEdgeData()
+visual = Visualize(FCNF)
+visual.drawGraph(FCNF.name)
 
 # Test of the MILPsolver Class
 solver = MILP(FCNF, 100)
