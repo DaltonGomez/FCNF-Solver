@@ -1,27 +1,27 @@
 import networkx as nx
 from pyvis.network import Network as netVis
 
-from src.FixedChargeFlowNetworkSolver.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+from src.FCFNparallelEdgesSolver.FCFNparallelEdges import FCFNparallelEdges
 
 
-class Visualize:
-    """Class that allows visualizations of a FCFN"""
+class VisualizePE:
+    """Class that allows visualizations of a FCFN-PE"""
 
-    def __init__(self, FCFN: FixedChargeFlowNetwork):
+    def __init__(self, FCFNpe: FCFNparallelEdges):
         """Constructor of a Visualize instance with NetworkX and PyVis dependencies"""
-        self.FCFN = FCFN
+        self.FCFNpe = FCFNpe
         self.nx = nx.DiGraph()
         self.populateGraph()
 
     def populateGraph(self):
         """Populates a NetworkX instance with the FCFN data"""
         addedTotalCost = False
-        for node in self.FCFN.nodesDict:
-            nodeObj = self.FCFN.nodesDict[node]
+        for node in self.FCFNpe.nodesDict:
+            nodeObj = self.FCFNpe.nodesDict[node]
             if node[0] == "s":
                 if addedTotalCost is False:
                     self.nx.add_node(node, value=nodeObj.flow, color="blue",
-                                     label="Total Cost= " + str(round(self.FCFN.totalCost)))
+                                     label="Total Cost= " + str(round(self.FCFNpe.totalCost)))
                     addedTotalCost = True
                 else:
                     self.nx.add_node(node, value=nodeObj.flow, color="blue")
@@ -32,8 +32,8 @@ class Visualize:
                     self.nx.add_node(node, value=nodeObj.flow, color="black")
                 elif nodeObj.opened is False:
                     self.nx.add_node(node, value=nodeObj.flow, color="grey")
-        for edge in self.FCFN.edgesDict:
-            edgeObj = self.FCFN.edgesDict[edge]
+        for edge in self.FCFNpe.edgesDict:
+            edgeObj = self.FCFNpe.edgesDict[edge]
             if edgeObj.opened is True:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black",
                                  label=str(round(edgeObj.flow)))
@@ -42,7 +42,7 @@ class Visualize:
 
     def drawGraphHardcodeOptions(self, name: str):
         """Displays the FCNF using PyVis and a set of hardcoded options"""
-        displayName = name + str(self.FCFN.minTargetFlow) + ".html"
+        displayName = name + str(self.FCFNpe.minTargetFlow) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "1000px", directed=True)
         visual.from_nx(self.nx)
@@ -50,7 +50,7 @@ class Visualize:
         visual.set_options("""
             var options = {
                 "layout": { 
-                    "randomSeed":""" + str(self.FCFN.visSeed) + "," +
+                    "randomSeed":""" + str(self.FCFNpe.visSeed) + "," +
                            """
                     "improvedLayout": true
                 },
@@ -117,7 +117,7 @@ class Visualize:
 
     def drawGraphUiOptions(self, name: str):
         """Displays the FCNF using PyVis and provides a UI for customizing options, which can be copied in JSON"""
-        displayName = name + str(self.FCFN.minTargetFlow) + ".html"
+        displayName = name + str(self.FCFNpe.minTargetFlow) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "800px", directed=True)
         visual.from_nx(self.nx)

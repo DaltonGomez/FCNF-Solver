@@ -1,24 +1,26 @@
 import os
 
-from src.FixedChargeFlowNetworkSolver.Edge import Edge
-from src.FixedChargeFlowNetworkSolver.Node import Node
+from src.FCFNparallelEdgesSolver.EdgePE import EdgePE
+from src.FCFNparallelEdgesSolver.NodePE import NodePE
 
 
-class FixedChargeFlowNetwork:
-    """Class that defines a Fixed Charge Flow Network"""
-    # TODO - Modify so that the FCFN class can read in from the same file format
+class FCFNparallelEdges:
+    """Class that defines a Fixed Charge Flow Network with parallel edges possible"""
 
     def __init__(self):
-        """Constructor of a FCFN instance"""
+        """Constructor of a FCFNparallelEdges instance"""
         # Input Attributes
         self.name = ""
         self.edgeCaps = []
+        self.edgeFixedCosts = []
+        self.edgeVariableCosts = []
         self.numNodes = 0
         self.numSources = 0
         self.numSinks = 0
         self.nodesDict = {}
         self.numEdges = 0
         self.edgesDict = {}
+        self.numEdgeCaps = 0
 
         # Solution Data
         self.solved = False
@@ -51,9 +53,17 @@ class FixedChargeFlowNetwork:
         self.visSeed.pop(0)
         self.visSeed = self.visSeed.pop(0)
         lines.pop(0)
-        # Assign capacities
+        # Assign potential edge capacities
         self.edgeCaps = lines[0].split()
         self.edgeCaps.pop(0)
+        lines.pop(0)
+        # Assign potential edge fixed costs
+        self.edgeFixedCosts = lines[0].split()
+        self.edgeFixedCosts.pop(0)
+        lines.pop(0)
+        # Assign potential edge variable costs
+        self.edgeVariableCosts = lines[0].split()
+        self.edgeVariableCosts.pop(0)
         lines.pop(0)
         # Build network
         for line in lines:
@@ -63,27 +73,29 @@ class FixedChargeFlowNetwork:
                 continue
             # Construct source node objects and add to dictionary and network
             elif data[0][0] == "s":
-                thisNode = Node(data[0], int(data[1]), int(data[2]))
+                thisNode = NodePE(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
                 self.numSources += 1
             # Construct sink node objects and add to dictionary and network
             elif data[0][0] == "t":
-                thisNode = Node(data[0], int(data[1]), int(data[2]))
+                thisNode = NodePE(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
                 self.numSinks += 1
             # Construct transshipment node objects and add to dictionary and network
             elif data[0][0] == "n":
-                thisNode = Node(data[0], 0, 0)
+                thisNode = NodePE(data[0], 0, 0)
                 self.nodesDict[data[0]] = thisNode
             # Construct edge objects and add to dictionary and network
             elif data[0][0] == "e":
-                thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(self.edgeCaps[0]))
+                # TODO - Account for parallel edges with differing capacities
+                thisEdge = EdgePE(data[0], data[1], data[2])
                 self.edgesDict[data[0]] = thisEdge
                 self.nodesDict[data[1]].outgoingEdges.append(data[0])
                 self.nodesDict[data[2]].incomingEdges.append(data[0])
         # Assign network size
         self.numNodes = len(self.nodesDict)
         self.numEdges = len(self.edgesDict)
+        self.numEdgeCaps = len(self.edgeCaps)
 
     def printAllNodeData(self):
         """Prints all the data for each node in the network"""
