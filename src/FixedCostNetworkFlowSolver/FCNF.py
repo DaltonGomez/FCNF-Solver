@@ -1,14 +1,14 @@
 import os
 
-from src.FCFNparallelEdgesSolver.EdgePE import EdgePE
-from src.FCFNparallelEdgesSolver.NodePE import NodePE
+from src.FixedCostNetworkFlowSolver.Edge import Edge
+from src.FixedCostNetworkFlowSolver.Node import Node
 
 
-class FCFNparallelEdges:
-    """Class that defines a Fixed Charge Flow Network with parallel edges possible"""
+class FCNF:
+    """Class that defines a Fixed Charge Network Flow with parallel edges possible"""
 
     def __init__(self):
-        """Constructor of a FCFNparallelEdges instance"""
+        """Constructor of a FCNF instance"""
         # Input Attributes
         self.name = ""
         self.edgeCaps = []
@@ -73,22 +73,21 @@ class FCFNparallelEdges:
                 continue
             # Construct source node objects and add to dictionary and network
             elif data[0][0] == "s":
-                thisNode = NodePE(data[0], int(data[1]), int(data[2]))
+                thisNode = Node(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
                 self.numSources += 1
             # Construct sink node objects and add to dictionary and network
             elif data[0][0] == "t":
-                thisNode = NodePE(data[0], int(data[1]), int(data[2]))
+                thisNode = Node(data[0], int(data[1]), int(data[2]))
                 self.nodesDict[data[0]] = thisNode
                 self.numSinks += 1
             # Construct transshipment node objects and add to dictionary and network
             elif data[0][0] == "n":
-                thisNode = NodePE(data[0], 0, 0)
+                thisNode = Node(data[0], 0, 0)
                 self.nodesDict[data[0]] = thisNode
             # Construct edge objects and add to dictionary and network
             elif data[0][0] == "e":
-                # TODO - Account for parallel edges with differing capacities
-                thisEdge = EdgePE(data[0], data[1], data[2])
+                thisEdge = Edge(data[0], data[1], data[2])
                 self.edgesDict[data[0]] = thisEdge
                 self.nodesDict[data[1]].outgoingEdges.append(data[0])
                 self.nodesDict[data[2]].incomingEdges.append(data[0])

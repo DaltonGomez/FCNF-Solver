@@ -1,18 +1,18 @@
 class Edge:
-    """Class that defines an edge in a Fixed Charge Flow Network"""
+    """Class that defines an edge in a Fixed Charge Network Flow w/ Parallel Edges"""
 
-    def __init__(self, edgeID: str, fromNode: str, toNode: str, fixedCost: int, variableCost: int, capacity: int):
+    def __init__(self, edgeID: str, fromNode: str, toNode: str):
         """Constructor of an edge instance"""
         # Input network attributes
         self.edgeID = edgeID
         self.fromNode = fromNode
         self.toNode = toNode
-        self.fixedCost = fixedCost
-        self.variableCost = variableCost
-        self.capacity = capacity
 
-        # Solution attributes
+        # Solution attributes - NOTE: The capacity, FC, and VC are determined when an edge is selected by the solver
         self.opened = False
+        self.fixedCost = 0
+        self.variableCost = 0
+        self.capacity = 0
         self.flow = 0
         self.totalCost = 0
 
@@ -22,9 +22,9 @@ class Edge:
         print("Edge ID = " + self.edgeID)
         print("From-Node = " + self.fromNode)
         print("To-Node = " + self.toNode)
+        print("\nOpened = " + str(self.opened))
         print("Fixed Cost = " + str(self.fixedCost))
         print("Variable Cost = " + str(self.variableCost))
         print("Capacity = " + str(self.capacity))
-        print("\nOpened = " + str(self.opened))
         print("Flow = " + str(self.flow))
         print("Total Cost = " + str(self.totalCost))

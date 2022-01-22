@@ -1,5 +1,5 @@
 class Node:
-    """Class that defines a node in a Fixed Charge Flow Network"""
+    """Class that defines a node in a Fixed Charge Network Flow"""
 
     def __init__(self, nodeID: str, variableCost: int, capacity: int):
         """Constructor of a node instance"""
@@ -13,7 +13,6 @@ class Node:
             self.nodeType = "transshipment"
         self.variableCost = variableCost
         self.capacity = capacity
-        # TODO- Add in fixed costs to source and sink nodes if desired
 
         # Topology attributes
         self.incomingEdges = []
