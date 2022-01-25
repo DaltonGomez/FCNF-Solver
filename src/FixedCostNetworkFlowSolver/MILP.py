@@ -5,6 +5,7 @@ from src.FixedCostNetworkFlowSolver.FCNF import FCNF
 
 class MILP:
     """Class that solves a FCNF instance w/ parallel edges optimally via a MILP model within CPLEX 20.1"""
+    # TODO - Make a solution class and remove the solution data from the FCNF class
 
     def __init__(self, FCNFinstance: FCNF, minTargetFlow: int):
         """Constructor of a MILP-Solver instance"""
