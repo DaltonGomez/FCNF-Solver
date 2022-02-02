@@ -42,7 +42,7 @@ class Visualize:
 
     def drawGraph(self, name: str):
         """Displays the FCNF using PyVis and a set of hardcoded options"""
-        displayName = name + str(self.FCNF.minTargetFlow) + ".html"
+        displayName = name + str(self.FCNF.minTargetFlow) + "--" + str(round(self.FCNF.totalCost)) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "1000px", directed=True)
         visual.from_nx(self.nx)

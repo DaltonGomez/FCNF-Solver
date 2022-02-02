@@ -14,7 +14,7 @@ FCNFinstance.loadFCFN("smallOneCap")
 # Test of alpha relaxed class
 alphaFCNF = AlphaFCNF(FCNFinstance)
 print(alphaFCNF.alphaValues)
-solverLP = AlphaLP(alphaFCNF, 35)
+solverLP = AlphaLP(alphaFCNF, 36)
 solverLP.buildModel()
 solverLP.solveModel()
 solverLP.writeSolution()
@@ -23,7 +23,7 @@ visualAlpha = AlphaVisualize(alphaFCNF)
 visualAlpha.drawGraph(alphaFCNF.name)
 
 # Test of the MILPsolver Class
-solver = MILP(FCNFinstance, 35)
+solver = MILP(FCNFinstance, 36)
 solver.buildModel()
 solver.printMILPmodel()
 solver.solveModel()
