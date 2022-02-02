@@ -43,3 +43,5 @@ class AlphaFCNF:
                 trueEdgeCost = edgeObj.flow * int(edgeObj.variableCost) + int(edgeObj.fixedCost)
                 self.trueCost += trueEdgeCost
         self.totalCost = self.trueCost
+
+    # TODO - Add an unsolve option
