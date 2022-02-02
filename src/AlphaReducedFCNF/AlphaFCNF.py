@@ -7,8 +7,6 @@ from src.FixedCostNetworkFlowSolver.FCNF import FCNF
 class AlphaFCNF:
     """Class that defines an alpha-LP reduction of a FCNF problem"""
 
-    # TODO - Continue debugging how the optimal alpha values
-
     def __init__(self, FCNFinstance: FCNF):
         """Constructor of a AlphaFCNF instance"""
         # Input Attributes
@@ -19,7 +17,6 @@ class AlphaFCNF:
         # Solution Data
         self.solved = False
         self.minTargetFlow = 0
-        # TODO- Modify so that we are calculating the true cost, not the "fake cost" returned by the LP
         self.totalCost = 0
         self.totalFlow = 0
 
@@ -41,9 +38,8 @@ class AlphaFCNF:
             for edge in self.FCNF.edgesDict:
                 edgeObj = self.FCNF.edgesDict[edge]
                 if edgeObj.flow == 0:
-                    # TODO- Consider more the difference between these two lines
                     alphaValues.append(1)
-                    # alphaValues.append(0)
+                    # alphaValues.append(0) # Unsure of the importance of these two lines
                 else:
                     alphaValues.append(1 / edgeObj.flow)
         else:
