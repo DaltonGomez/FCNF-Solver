@@ -10,9 +10,8 @@ FCNFinstance = FCNF()
 FCNFinstance.loadFCFN("smallOneCap")
 
 # Test of GA Population
-population = GeneticPopulation(FCNFinstance, 36, 5, 10)
-population.solvePopulation()
-population.rankPopulation()
+population = GeneticPopulation(FCNFinstance, 36, 5, 5)
+population.evolvePopulation()
 
 # Test of the MILPsolver Class
 solver = MILP(FCNFinstance, 36)
