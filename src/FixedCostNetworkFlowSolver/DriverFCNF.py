@@ -7,14 +7,14 @@ from src.FixedCostNetworkFlowSolver.Visualize import Visualize
 
 # Test of the FCFN/Node/Edge Classes
 FCNFinstance = FCNF()
-FCNFinstance.loadFCFN("smallOneCap")
+FCNFinstance.loadFCFN("mediumOneCap")
 
 # Test of GA Population
-population = GeneticPopulation(FCNFinstance, 36, 5, 5)
+population = GeneticPopulation(FCNFinstance, 125, 100, 10)
 population.evolvePopulation()
 
 # Test of the MILPsolver Class
-solver = MILP(FCNFinstance, 36)
+solver = MILP(FCNFinstance, 125)
 solver.buildModel()
 solver.printMILPmodel()
 solver.solveModel()

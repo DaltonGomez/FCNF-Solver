@@ -74,12 +74,16 @@ class GeneticPopulation:
         self.solvePopulation()
         self.rankPopulation()
 
-    def randomMutation(self, individual: AlphaFCNF):
+    def randomSinglePointMutation(self, individual: AlphaFCNF):
         """Mutates an individual at a random gene in the chromosome"""
         random.seed()
-        mutatePoint = random.randint(0, self.population[0].FCNF.numEdges)
+        mutatePoint = random.randint(0, self.FCNF.numEdges - 1)
         individual.alphaValues[mutatePoint] = random.random()
         individual.solved = False
+
+    def randomTotalMutation(self, individual: AlphaFCNF):
+        """Mutates the entire chromosome of an individual"""
+        individual.alphaValues = individual.initializeAlphaValuesRandomly()
 
     def visualizeTopTwo(self, generation: str):
         """Draws the .html file for the top two individuals"""
@@ -101,8 +105,14 @@ class GeneticPopulation:
             self.randomTopTwoCrossover()
             random.seed()
             for individual in self.population:
-                if random.random() < 0.05:
-                    self.randomMutation(individual)
+                # Do not mutate the top two individuals
+                if individual == self.population[0] or individual == self.population[1]:
+                    continue
+                elif random.random() < 0.25:
+                    self.randomSinglePointMutation(individual)
+                elif random.random() < 0.05:
+                    self.randomTotalMutation(individual)
             self.visualizeTop(str(generation))
-            time.sleep(2)
+            # Timeout to ensure correct visualization rendering order
+            time.sleep(0.2)
         return self.population[0]
