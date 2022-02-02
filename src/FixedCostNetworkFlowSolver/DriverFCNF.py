@@ -10,11 +10,17 @@ from src.FixedCostNetworkFlowSolver.Visualize import Visualize
 # Test of the FCFN/Node/Edge Classes
 FCNFinstance = FCNF()
 FCNFinstance.loadFCFN("smallOneCap")
-# FCNF.printAllNodeData()
-# FCNF.printAllEdgeData()
-# visual = Visualize(FCNF)
-# visual.drawGraph(FCNF.name)
 
+# Test of alpha relaxed class
+alphaFCNF = AlphaFCNF(FCNFinstance)
+print(alphaFCNF.alphaValues)
+solverLP = AlphaLP(alphaFCNF, 35)
+solverLP.buildModel()
+solverLP.solveModel()
+solverLP.writeSolution()
+alphaFCNF.calculateTrueCost()
+visualAlpha = AlphaVisualize(alphaFCNF)
+visualAlpha.drawGraph(alphaFCNF.name)
 
 # Test of the MILPsolver Class
 solver = MILP(FCNFinstance, 35)
@@ -22,19 +28,6 @@ solver.buildModel()
 solver.printMILPmodel()
 solver.solveModel()
 solver.writeSolution()
-
 # Test of the Visualize Class
 visual = Visualize(FCNFinstance)
 visual.drawGraph(FCNFinstance.name)
-# FCNF.printAllNodeData()
-# FCNF.printAllEdgeData()
-
-alphaFCNF = AlphaFCNF(FCNFinstance)
-alphaFCNF.resetOriginalFCNFSolution()
-solverLP = AlphaLP(alphaFCNF, 35)
-solverLP.buildModel()
-solverLP.solveModel()
-solverLP.writeSolution()
-visualAlpha = AlphaVisualize(alphaFCNF)
-visualAlpha.drawGraph(alphaFCNF.name)
-print(alphaFCNF.alphaValues)

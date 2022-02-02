@@ -4,3 +4,4 @@
 + Continue debugging how the optimal alpha values
 + Modify so that the FCNF instance is of edge values only (i.e. create a super-source/sink and push all source/sink cost onto the edges from the super-source/sink)
 + Do not worry about the single capacity per edge constraint
++ Create a new class for the solution
