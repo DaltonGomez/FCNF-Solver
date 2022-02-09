@@ -37,37 +37,63 @@ class AlphaPopulation:
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self, softMutationRate: float, hardMutationRate: float):
+    def evolvePopulation(self, softMutationRate: float, hardMutationRate: float, crossoverRate: float):
         """Evolves the population based on the crossover and mutation operators"""
         random.seed()
         for generation in range(self.numGenerations):
-            # Solve unsolved instances and re-rank
+            # Solve unsolved instances, re-rank, and display top individual
             self.solvePopulation()
             self.rankPopulation()
+            self.visualizeTopIndividual(generation)
 
-            # Print statement & visualization w/ timeout to ensure correct visualization rendering order
-            print("Generation= " + str(generation) + "\tBest Individual= " + str(self.population[0].trueCost))
-            self.visualizeIndividual(str(generation), 0)  # Second param = 0 --> Top individual
-            time.sleep(0.5)
+            # Crossover Operators
+            if random.random() < crossoverRate:
+                parentOne = random.randint(0, self.populationSize - 1)
+                parentTwo = random.randint(0, self.populationSize - 1)
+                self.randomSinglePointCrossover(parentOne, parentTwo)
 
-            # Genetic operators
+            # Mutation operators
             for individual in range(self.populationSize):
                 if random.random() < softMutationRate:
-                    self.randomSinglePointMutation(individual)
+                    self.randomSingleMutation(individual)
                 elif random.random() < hardMutationRate:
                     self.randomTotalMutation(individual)
 
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
-    def randomTopTwoCrossover(self):
-        """Crossover of the alpha chromosome at a random point"""
-        pass
+    def randomSinglePointCrossover(self, parentOneIndex: int, parentTwoIndex: int):
+        """Crossover of two individual's alpha chromosome at a random point"""
+        # TODO - Implement from the right side (as well as the left which is what this does)
+        random.seed()
+        parentOne = self.population.pop(parentOneIndex)
+        if parentOneIndex < parentTwoIndex:
+            parentTwo = self.population.pop(parentTwoIndex - 1)  # Adjust for parent two's index change after pop
+        else:
+            parentTwo = self.population.pop(parentTwoIndex)
+        crossoverPoint = random.randint(0, self.FCFN.numEdges - 1)
+        parentOneLeftGenes = []
+        parentTwoLeftGenes = []
+        for i in range(crossoverPoint + 1):
+            parentOneLeftGenes.append(parentOne.alphaValues.pop(0))
+            parentTwoLeftGenes.append(parentTwo.alphaValues.pop(0))
+        parentOneRightGenes = parentOne.alphaValues
+        parentTwoRightGenes = parentTwo.alphaValues
+        offspringOne = AlphaIndividual(self.FCFN)
+        offspringOne.alphaValues = parentTwoLeftGenes
+        for gene in parentOneRightGenes:
+            offspringOne.alphaValues.append(gene)
+        offspringTwo = AlphaIndividual(self.FCFN)
+        offspringTwo.alphaValues = parentOneLeftGenes
+        for gene in parentTwoRightGenes:
+            offspringTwo.alphaValues.append(gene)
+        self.population.append(offspringOne)
+        self.population.append(offspringTwo)
 
     # =================================================
     # ============== MUTATION OPERATORS ==============
     # =================================================
-    def randomSinglePointMutation(self, individualNum: int):
+    def randomSingleMutation(self, individualNum: int):
         """Mutates an individual at a random gene in the chromosome"""
         random.seed()
         mutatePoint = random.randint(0, self.FCFN.numEdges - 1)
@@ -98,6 +124,13 @@ class AlphaPopulation:
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
+    def visualizeTopIndividual(self, generation: int):
+        """Prints the data and draws the graph of the top individual"""
+        # Print statement & visualization w/ timeout to ensure correct visualization rendering order
+        print("Generation= " + str(generation) + "\tBest Individual= " + str(self.population[0].trueCost))
+        self.visualizeIndividual(str(generation), 0)  # Second param = 0 --> Top individual
+        time.sleep(0.5)
+
     def visualizeIndividual(self, generation: str, individualRank: int):
         """Draws the .html file for the top individual"""
         self.rankPopulation()
