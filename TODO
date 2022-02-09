@@ -4,7 +4,8 @@ HIGH-PRIORITY CHANGES & BUGS:
 =============================
 + Update the GA to allow for multiple possible capacities (i.e. parallel edges)
     - Cannot correctly allow for parallel edge opportunity in the reduction
-+ Add method for using NetworkX to randomly generate a network and then parse that into the FCNF class
++ Update the visualization to better display large networks
++ Implement operators that use pathing
 
 
 

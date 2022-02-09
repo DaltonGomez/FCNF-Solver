@@ -1,3 +1,4 @@
+import copy
 import random
 import time
 
@@ -21,13 +22,11 @@ class AlphaPopulation:
             unsolvedFCFN = FixedChargeFlowNetwork()
             unsolvedFCFN.loadFCFN(FCFNinstance.name)
             self.FCFN = unsolvedFCFN
-
         # Population/GA attributes
         self.minTargetFlow = minTargetFlow
         self.populationSize = populationSize
         self.numGenerations = numGenerations
         self.population = []
-
         # Initialize population
         for i in range(populationSize):
             thisIndividual = AlphaIndividual(self.FCFN)
@@ -47,10 +46,11 @@ class AlphaPopulation:
             self.visualizeTopIndividual(generation)
 
             # Crossover Operators
+            self.randomOnePointCrossoverWithoutDeath(0, 1, "fromLeft")
             if random.random() < crossoverRate:
-                parentOne = random.randint(0, self.populationSize - 1)
-                parentTwo = random.randint(0, self.populationSize - 1)
-                self.randomSinglePointCrossover(parentOne, parentTwo)
+                randParentOne = random.randint(0, self.populationSize - 1)
+                randParentTwo = random.randint(0, self.populationSize - 1)
+                self.randomOnePointCrossoverWithDeath(randParentOne, randParentTwo, "fromLeft")
 
             # Mutation operators
             for individual in range(self.populationSize):
@@ -62,15 +62,48 @@ class AlphaPopulation:
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
-    def randomSinglePointCrossover(self, parentOneIndex: int, parentTwoIndex: int):
-        """Crossover of two individual's alpha chromosome at a random point"""
-        # TODO - Implement from the right side (as well as the left which is what this does)
+    def randomOnePointCrossoverWithoutDeath(self, parentOneIndex: int, parentTwoIndex: int, direction: str):
+        """Crossover of 2 chromosomes at a random point where the bottom 2 individuals die off"""
+        random.seed()
+        # Kill off the two weakest individuals
+        self.rankPopulation()
+        self.population.pop(-1)
+        self.population.pop(-1)
+        parentOneChromosome = copy.deepcopy(self.population[parentOneIndex].alphaValues)
+        parentTwoChromosome = copy.deepcopy(self.population[parentTwoIndex].alphaValues)
+        if direction == "fromRight":
+            parentOneChromosome.reverse()
+            parentTwoChromosome.reverse()
+        crossoverPoint = random.randint(0, self.FCFN.numEdges - 1)
+        parentOneLeftGenes = []
+        parentTwoLeftGenes = []
+        for i in range(crossoverPoint + 1):
+            parentOneLeftGenes.append(parentOneChromosome.pop(0))
+            parentTwoLeftGenes.append(parentTwoChromosome.pop(0))
+        parentOneRightGenes = parentOneChromosome
+        parentTwoRightGenes = parentTwoChromosome
+        offspringOne = AlphaIndividual(self.FCFN)
+        offspringOne.alphaValues = parentTwoLeftGenes
+        for gene in parentOneRightGenes:
+            offspringOne.alphaValues.append(gene)
+        offspringTwo = AlphaIndividual(self.FCFN)
+        offspringTwo.alphaValues = parentOneLeftGenes
+        for gene in parentTwoRightGenes:
+            offspringTwo.alphaValues.append(gene)
+        self.population.append(offspringOne)
+        self.population.append(offspringTwo)
+
+    def randomOnePointCrossoverWithDeath(self, parentOneIndex: int, parentTwoIndex: int, direction: str):
+        """Crossover of 2 individual's chromosome at a random point where the parents are removed from the population"""
         random.seed()
         parentOne = self.population.pop(parentOneIndex)
         if parentOneIndex < parentTwoIndex:
             parentTwo = self.population.pop(parentTwoIndex - 1)  # Adjust for parent two's index change after pop
         else:
             parentTwo = self.population.pop(parentTwoIndex)
+        if direction == "fromRight":
+            parentOne.alphaValues.reverse()
+            parentTwo.alphaValues.reverse()
         crossoverPoint = random.randint(0, self.FCFN.numEdges - 1)
         parentOneLeftGenes = []
         parentTwoLeftGenes = []
