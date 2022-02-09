@@ -12,13 +12,14 @@ class AlphaFCNF:
         # Input Attributes
         self.name = FCNFinstance.name + "-Alpha"
         self.FCNF = copy.deepcopy(FCNFinstance)
-        self.alphaValues = self.computeOptimalAlphaValues()
+        self.alphaValues = self.initializeAlphaValuesRandomly()
 
         # Solution Data
         self.solved = False
         self.minTargetFlow = 0
         self.totalCost = 0
         self.totalFlow = 0
+        self.trueCost = 0
 
         # Deterministic seed for consistent visualization
         self.visSeed = FCNFinstance.visSeed
@@ -31,37 +32,14 @@ class AlphaFCNF:
             alphaValues.append(random.random())
         return alphaValues
 
-    def computeOptimalAlphaValues(self):
-        """Computes the optimal alpha values from a solved MILP of a FCNF instance"""
-        alphaValues = []
-        if self.FCNF.solved is True:
-            for edge in self.FCNF.edgesDict:
-                edgeObj = self.FCNF.edgesDict[edge]
-                if edgeObj.flow == 0:
-                    alphaValues.append(1)
-                    # alphaValues.append(0) # Unsure of the importance of these two lines
-                else:
-                    alphaValues.append(1 / edgeObj.flow)
-        else:
-            print("Must solve the original FCNF optimally before computing optimal alpha values")
-        return alphaValues
-
-    def resetOriginalFCNFSolution(self):
-        """Resets the saved solution data in the original FCNF solution"""
-        self.FCNF.solved = False
-        self.FCNF.minTargetFlow = 0
-        self.FCNF.totalCost = 0
-        self.FCNF.totalFlow = 0
+    def calculateTrueCost(self):
+        """Calculates the true cost from the alpha-relaxed LP solution"""
         for node in self.FCNF.nodesDict:
             nodeObj = self.FCNF.nodesDict[node]
-            nodeObj.opened = False
-            nodeObj.flow = 0
-            nodeObj.totalCost = 0
+            self.trueCost += nodeObj.totalCost
         for edge in self.FCNF.edgesDict:
             edgeObj = self.FCNF.edgesDict[edge]
-            edgeObj.opened = False
-            edgeObj.fixedCost = 0
-            edgeObj.variableCost = 0
-            edgeObj.capacity = 0
-            edgeObj.flow = 0
-            edgeObj.totalCost = 0
+            if edgeObj.flow > 0:
+                trueEdgeCost = edgeObj.flow * int(edgeObj.variableCost) + int(edgeObj.fixedCost)
+                self.trueCost += trueEdgeCost
+        self.totalCost = self.trueCost

@@ -36,13 +36,13 @@ class AlphaVisualize:
             edgeObj = self.alphaFCNF.FCNF.edgesDict[edge]
             if edgeObj.opened is True:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black",
-                                 label=edge + "= " + str(round(edgeObj.flow)))
+                                 label=str(round(edgeObj.flow)))
             elif edgeObj.opened is False:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="grey")
 
     def drawGraph(self, name: str):
         """Displays the FCNF using PyVis and a set of hardcoded options"""
-        displayName = name + str(self.alphaFCNF.FCNF.minTargetFlow) + ".html"
+        displayName = name + str(self.alphaFCNF.minTargetFlow) + "--" + str(round(self.alphaFCNF.totalCost)) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "1000px", directed=True)
         visual.from_nx(self.nx)
