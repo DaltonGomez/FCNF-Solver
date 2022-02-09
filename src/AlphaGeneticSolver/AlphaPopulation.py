@@ -1,4 +1,5 @@
 import random
+import time
 
 from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
@@ -18,7 +19,7 @@ class AlphaPopulation:
             self.FCFN = FCFNinstance
         else:
             unsolvedFCFN = FixedChargeFlowNetwork()
-            unsolvedFCFN.loadFCFNfromDisc(FCFNinstance.name)
+            unsolvedFCFN.loadFCFN(FCFNinstance.name)
             self.FCFN = unsolvedFCFN
 
         # Population/GA attributes
@@ -36,60 +37,32 @@ class AlphaPopulation:
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self):
+    def evolvePopulation(self, softMutationRate: float, hardMutationRate: float):
         """Evolves the population based on the crossover and mutation operators"""
         random.seed()
         for generation in range(self.numGenerations):
+            # Solve unsolved instances and re-rank
             self.solvePopulation()
             self.rankPopulation()
+
+            # Print statement & visualization w/ timeout to ensure correct visualization rendering order
             print("Generation= " + str(generation) + "\tBest Individual= " + str(self.population[0].trueCost))
-            self.randomTopTwoCrossover()
+            self.visualizeIndividual(str(generation), 0)  # Second param = 0 --> Top individual
+            time.sleep(0.5)
+
+            # Genetic operators
             for individual in range(self.populationSize):
-                if individual == self.population[0] or individual == self.population[1]:
-                    continue  # Don't mutate the top two individuals
-                # TODO - Modify so that mutation rates are not hardcoded
-                elif random.random() < 0.25:
+                if random.random() < softMutationRate:
                     self.randomSinglePointMutation(individual)
-                elif random.random() < 0.05:
+                elif random.random() < hardMutationRate:
                     self.randomTotalMutation(individual)
-            # Visualization w/ timeout to ensure correct visualization rendering order
-            # self.visualizeTop(str(generation))
-            # time.sleep(0.5)
 
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
     def randomTopTwoCrossover(self):
         """Crossover of the alpha chromosome at a random point"""
-        # Rank population and discard bottom two individuals
-        self.rankPopulation()
-        self.population.pop(-1)
-        self.population.pop(-1)
-        # Get crossover point and direction from RNG
-        random.seed()
-        crossoverPoint = random.randint(0, self.FCFN.numEdges)
-        crossoverDirection = random.randint(0, 2)
-        # Initialize offspring
-        offspringOne = AlphaIndividual(self.FCFN)
-        offspringTwo = AlphaIndividual(self.FCFN)
-        # Conduct crossover
-        if crossoverDirection == 0:
-            for i in range(crossoverPoint):
-                offspringOne.alphaValues.append(self.population[0].alphaValues[i])
-                offspringTwo.alphaValues.append(self.population[1].alphaValues[i])
-            for j in range(crossoverPoint, self.FCFN.numEdges):
-                offspringOne.alphaValues.append(self.population[0].alphaValues[j])
-                offspringTwo.alphaValues.append(self.population[1].alphaValues[j])
-        else:
-            for i in range(crossoverPoint):
-                offspringOne.alphaValues.append(self.population[1].alphaValues[i])
-                offspringTwo.alphaValues.append(self.population[0].alphaValues[i])
-            for j in range(crossoverPoint, self.FCFN.numEdges):
-                offspringOne.alphaValues.append(self.population[1].alphaValues[j])
-                offspringTwo.alphaValues.append(self.population[0].alphaValues[j])
-        # Add offspring into population
-        self.population.append(offspringOne)
-        self.population.append(offspringTwo)
+        pass
 
     # =================================================
     # ============== MUTATION OPERATORS ==============
@@ -125,7 +98,7 @@ class AlphaPopulation:
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
-    def visualizeTop(self, generation: str):
+    def visualizeIndividual(self, generation: str, individualRank: int):
         """Draws the .html file for the top individual"""
         self.rankPopulation()
-        self.population[0].visualizeAlphaNetwork(frontCatName=generation + "-")
+        self.population[individualRank].visualizeAlphaNetwork(frontCatName=generation + "-")

@@ -13,9 +13,10 @@ flowNetwork = FixedChargeFlowNetwork()
 flowNetwork.loadFCFN("small1")
 
 # TEST OF GA POPULATION
-population = AlphaPopulation(flowNetwork, 35, 25, 5)
+population = AlphaPopulation(flowNetwork, 10, 25, 5)
 population.evolvePopulation()
-flowNetwork.executeSolver(35)
+flowNetwork.executeSolver(10)
+flowNetwork.visualizeNetwork()
 
 # TEST OF GA POPULATION
 # population = AlphaPopulation(flowNetwork, 35, 25, 5)

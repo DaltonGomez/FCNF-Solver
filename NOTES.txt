@@ -1,0 +1,31 @@
+    def randomTopTwoCrossover(self):
+        """Crossover of the alpha chromosome at a random point"""
+        # Rank population and discard bottom two individuals
+        self.rankPopulation()
+        self.population.pop(-1)
+        self.population.pop(-1)
+        # Get crossover point and direction from RNG
+        random.seed()
+        crossoverPoint = random.randint(0, self.FCFN.numEdges)
+        crossoverDirection = random.randint(0, 2)
+        # Initialize offspring
+        offspringOne = AlphaIndividual(self.FCFN)
+        offspringTwo = AlphaIndividual(self.FCFN)
+        # Conduct crossover
+        if crossoverDirection == 0:
+            for i in range(crossoverPoint):
+                offspringOne.alphaValues.append(self.population[0].alphaValues[i])
+                offspringTwo.alphaValues.append(self.population[1].alphaValues[i])
+            for j in range(crossoverPoint, self.FCFN.numEdges):
+                offspringOne.alphaValues.append(self.population[0].alphaValues[j])
+                offspringTwo.alphaValues.append(self.population[1].alphaValues[j])
+        else:
+            for i in range(crossoverPoint):
+                offspringOne.alphaValues.append(self.population[1].alphaValues[i])
+                offspringTwo.alphaValues.append(self.population[0].alphaValues[i])
+            for j in range(crossoverPoint, self.FCFN.numEdges):
+                offspringOne.alphaValues.append(self.population[1].alphaValues[j])
+                offspringTwo.alphaValues.append(self.population[0].alphaValues[j])
+        # Add offspring into population
+        self.population.append(offspringOne)
+        self.population.append(offspringTwo)
