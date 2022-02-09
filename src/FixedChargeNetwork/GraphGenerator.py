@@ -1,3 +1,4 @@
+import os
 import random
 
 import networkx as nx
@@ -43,7 +44,7 @@ class GraphGenerator:
                 sourceSinksAssigned[randNode] = 1
                 cap = random.randint(0, self.nodeCapLimit)
                 cost = random.randint(0, self.nodeCostLimit)
-                self.outputFCFN.addNode("s", sourceID, cap, cost)
+                self.outputFCFN.addNode("s", sourceID, cost, cap)
                 self.nodeMap[randNode] = "s" + str(sourceID)
                 self.outputFCFN.numSources += 1
                 sourceID += 1
@@ -57,7 +58,7 @@ class GraphGenerator:
                 sourceSinksAssigned[randNode] = 1
                 cap = random.randint(0, self.nodeCapLimit)
                 cost = random.randint(0, self.nodeCostLimit)
-                self.outputFCFN.addNode("t", sinkID, cap, cost)
+                self.outputFCFN.addNode("t", sinkID, cost, cap)
                 self.nodeMap[randNode] = "t" + str(sinkID)
                 self.outputFCFN.numSinks += 1
                 sinkID += 1
@@ -103,7 +104,52 @@ class GraphGenerator:
         """Draws the randomly generator network with PyVis"""
         self.outputFCFN.visualizeNetwork()
 
-    def saveFCFNtoDisc(self):
+    def saveFCFN(self):
         """Saves an unsolved version of a NetworkX-generated FCFN as a .txt file within the project directory"""
-        # TODO - Implement
-        pass
+        # Path management
+        currDir = os.getcwd()
+        networkFile = self.outputFCFN.name + ".txt"
+        catPath = os.path.join(currDir, "networks", networkFile)
+        print("Saving " + networkFile + " to: " + catPath)
+        # Construct output block
+        outputBlock = ["# Network name, visualization seed, and parallel edge data", "Name= " + self.outputFCFN.name,
+                       "VisualSeed= " + str(self.outputFCFN.visSeed)]
+        edgeCapsLine = "EdgeCaps= "
+        for edgeCap in self.outputFCFN.edgeCaps:
+            edgeCapsLine = edgeCapsLine + str(edgeCap) + " "
+        outputBlock.append(edgeCapsLine)
+        edgeFCLine = "EdgeFixedCosts= "
+        for edgeFC in self.outputFCFN.edgeFixedCosts:
+            edgeFCLine = edgeFCLine + str(edgeFC) + " "
+        outputBlock.append(edgeFCLine)
+        edgeVCLine = "EdgeVariableCosts= "
+        for edgeVC in self.outputFCFN.edgeVariableCosts:
+            edgeVCLine = edgeVCLine + str(edgeVC) + " "
+        outputBlock.append(edgeVCLine)
+        outputBlock.append("#")
+        outputBlock.append("# Additional comments can be added below with a leading '#'")
+        outputBlock.append("#")
+        outputBlock.append("# Source nodes of form: <id, variableCost, capacity>")
+        for i in range(self.outputFCFN.numSources):
+            srcObj = self.outputFCFN.nodesDict["s" + str(i)]
+            outputBlock.append("s" + str(i) + " " + str(srcObj.variableCost) + " " + str(srcObj.capacity))
+        outputBlock.append("#")
+        outputBlock.append("# Sink nodes of form: <id, variableCost, capacity>")
+        for i in range(self.outputFCFN.numSinks):
+            sinkObj = self.outputFCFN.nodesDict["t" + str(i)]
+            outputBlock.append("t" + str(i) + " " + str(sinkObj.variableCost) + " " + str(sinkObj.capacity))
+        outputBlock.append("#")
+        outputBlock.append("# Intermediate nodes of form: <id>")
+        for i in range(self.outputFCFN.numIntermediateNodes):
+            outputBlock.append("n" + str(i))
+        outputBlock.append("#")
+        outputBlock.append("# Edges of form: <id, fromNode, toNode>")
+        for i in range(self.outputFCFN.numEdges):
+            edjObj = self.outputFCFN.edgesDict["e" + str(i)]
+            outputBlock.append("e" + str(i) + " " + edjObj.fromNode + " " + edjObj.toNode)
+        # Open file, write lines in output block, and close file
+        with open(catPath, "w") as outputFile:
+            for line in outputBlock:
+                outputFile.write(line)
+                outputFile.write('\n')
+        outputFile.close()

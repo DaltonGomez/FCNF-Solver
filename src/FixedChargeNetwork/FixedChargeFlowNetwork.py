@@ -79,7 +79,7 @@ class FixedChargeFlowNetwork:
     # =================================================
     # ============== DATA IN/OUT METHODS ==============
     # =================================================
-    def loadFCFNfromDisc(self, network: str):
+    def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding"""
         # Path management
         currDir = os.getcwd()
@@ -87,7 +87,7 @@ class FixedChargeFlowNetwork:
         catPath = os.path.join(currDir, "networks", networkFile)
         print("Loading " + networkFile + " from: " + catPath)
         # Open file, parse lines in data stream, and close file
-        inputFile = open(catPath, 'r')
+        inputFile = open(catPath, "r")
         lines = inputFile.readlines()
         inputFile.close()
         # Assign name
