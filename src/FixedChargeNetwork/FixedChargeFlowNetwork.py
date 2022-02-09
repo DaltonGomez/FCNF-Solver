@@ -39,6 +39,26 @@ class FixedChargeFlowNetwork:
         self.visualizer = None
         self.visSeed = 1
 
+    def addNode(self, nodeType: str, idNum: int, variableCost: int, capacity: int):
+        """Adds a new node to a FCFN instance- Used only in Graph Generation"""
+        nodeName = nodeType + str(idNum)
+        thisNode = Node(nodeName, variableCost, capacity)
+        self.nodesDict[nodeName] = thisNode
+        self.numNodes += 1
+        if nodeType == "s":
+            self.numSources += 1
+        elif nodeType == "t":
+            self.numSinks += 1
+        elif nodeType == "n":
+            self.numIntermediateNodes += 1
+
+    def addEdge(self, idNum: int, fromNode: str, toNode: str):
+        """Adds a new edge to a FCFN instance- Used only in Graph Generation"""
+        edgeName = "e" + str(idNum)
+        thisEdge = Edge(edgeName, fromNode, toNode)
+        self.edgesDict[edgeName] = thisEdge
+        self.numEdges += 1
+
     # ============================================
     # ============== SOLVER METHODS ==============
     # ============================================
@@ -138,16 +158,6 @@ class FixedChargeFlowNetwork:
         self.numNodes = len(self.nodesDict)
         self.numEdges = len(self.edgesDict)
         self.numEdgeCaps = len(self.edgeCaps)
-
-    def generateRandomFCFN(self):
-        """Generates a random Fixed Charge Flow Network using NetworkX"""
-        # TODO - Implement
-        pass
-
-    def saveFCFNtoDisc(self):
-        """Saves an unsolved version of a NetworkX-generated FCFN as a .txt file within the project directory"""
-        # TODO - Implement
-        pass
 
     def saveSolutionToDisc(self):
         """Saves all the data of a Fixed Charge Flow Network solution"""
