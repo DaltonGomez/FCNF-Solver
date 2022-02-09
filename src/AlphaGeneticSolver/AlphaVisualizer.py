@@ -1,27 +1,26 @@
 import networkx as nx
 from pyvis.network import Network as netVis
 
-from src.AlphaReducedFCNF.AlphaFCNF import AlphaFCNF
 
-
-class AlphaVisualize:
+class AlphaVisualizer:
     """Class that allows visualizations of an alpha-reduced FCFN"""
 
-    def __init__(self, alphaFCFNinstance: AlphaFCNF):
-        """Constructor of a Visualize instance with NetworkX and PyVis dependencies"""
-        self.alphaFCNF = alphaFCFNinstance
+    def __init__(self, individual):
+        """Constructor of a AlphaVisualizer instance with NetworkX and PyVis dependencies
+        NOTE: individual must be of type Individual (Not type hinted to prevent circular import)"""
+        self.individual = individual
         self.nx = nx.DiGraph()
         self.populateGraph()
 
     def populateGraph(self):
-        """Populates a NetworkX instance with the FCFN data"""
+        """Populates a NetworkX instance with the AlphaIndividual data"""
         addedTotalCost = False
-        for node in self.alphaFCNF.FCNF.nodesDict:
-            nodeObj = self.alphaFCNF.FCNF.nodesDict[node]
+        for node in self.individual.FCNF.nodesDict:
+            nodeObj = self.individual.FCNF.nodesDict[node]
             if node[0] == "s":
                 if addedTotalCost is False:
                     self.nx.add_node(node, value=nodeObj.flow, color="blue",
-                                     label="Total Cost= " + str(round(self.alphaFCNF.totalCost)))
+                                     label="True Cost= " + str(round(self.individual.trueCost)))
                     addedTotalCost = True
                 else:
                     self.nx.add_node(node, value=nodeObj.flow, color="blue")
@@ -32,8 +31,8 @@ class AlphaVisualize:
                     self.nx.add_node(node, value=nodeObj.flow, color="black")
                 elif nodeObj.opened is False:
                     self.nx.add_node(node, value=nodeObj.flow, color="grey")
-        for edge in self.alphaFCNF.FCNF.edgesDict:
-            edgeObj = self.alphaFCNF.FCNF.edgesDict[edge]
+        for edge in self.individual.FCNF.edgesDict:
+            edgeObj = self.individual.FCNF.edgesDict[edge]
             if edgeObj.opened is True:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black",
                                  label=str(round(edgeObj.flow)))
@@ -42,7 +41,7 @@ class AlphaVisualize:
 
     def drawGraph(self, name: str):
         """Displays the FCNF using PyVis and a set of hardcoded options"""
-        displayName = name + str(self.alphaFCNF.minTargetFlow) + "--" + str(round(self.alphaFCNF.totalCost)) + ".html"
+        displayName = name + "_Cost=" + str(round(self.individual.trueCost)) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "1000px", directed=True)
         visual.from_nx(self.nx)
@@ -50,7 +49,7 @@ class AlphaVisualize:
         visual.set_options("""
             var options = {
                 "layout": { 
-                    "randomSeed":""" + str(self.alphaFCNF.FCNF.visSeed) + "," +
+                    "randomSeed":""" + str(self.individual.FCNF.visSeed) + "," +
                            """
                     "improvedLayout": true
                 },

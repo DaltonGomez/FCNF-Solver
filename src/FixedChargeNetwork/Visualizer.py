@@ -6,8 +6,8 @@ class Visualizer:
     """Class that allows visualizations of a FCFN using PyVis and NetworkX"""
 
     def __init__(self, FCFNinstance):
-        """Constructor of a Visualize instance with NetworkX and PyVis dependencies
-         NOTE: FCFNinstance must be of type FixedChargeFlowNetwork (Not type hinted to prevent circular import)"""
+        """Constructor of a Visualizer instance with NetworkX and PyVis dependencies
+        NOTE: FCFNinstance must be of type FixedChargeFlowNetwork (Not type hinted to prevent circular import)"""
         self.FCFN = FCFNinstance
         self.nx = nx.DiGraph()
         self.populateGraph()
@@ -20,7 +20,7 @@ class Visualizer:
             if node[0] == "s":
                 if addedTotalCost is False:
                     self.nx.add_node(node, value=nodeObj.flow, color="blue",
-                                     label="Total Cost= " + str(round(self.FCFN.totalCost)))
+                                     label="Optimal Cost= " + str(round(self.FCFN.totalCost)))
                     addedTotalCost = True
                 else:
                     self.nx.add_node(node, value=nodeObj.flow, color="blue")

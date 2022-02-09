@@ -27,7 +27,7 @@ class ExactSolver:
                                                                    name="e", lb=0)
 
         # =================== CONSTRAINTS ===================
-        # Minimum flow constraint (constructed as the sum of all sinks in-flows)
+        # Minimum flow constraint (Constructed as the sum of all sinks in-flows)
         self.model.add_constraint(
             sum(self.model.sinkFlowVars[i] for i in range(self.FCFN.numSinks)) >= self.minTargetFlow,
             ctname="minFlow")
@@ -150,8 +150,8 @@ class ExactSolver:
                         thisEdge.variableCost = self.FCFN.edgeVariableCosts[j]
                         thisEdge.flow = edgeValues[(i, j)]
                         thisEdge.totalCost = thisEdge.flow * int(thisEdge.variableCost) + int(thisEdge.fixedCost)
-            # Disperse solution results back to transshipment nodes
-            for i in range(self.FCFN.numNodes - (self.FCFN.numSources + self.FCFN.numSinks)):
+            # Disperse solution results back to intermediate nodes
+            for i in range(self.FCFN.numIntermediateNodes):
                 thisNode = self.FCFN.nodesDict["n" + str(i)]
                 for edge in thisNode.incomingEdges:
                     thisNode.flow += self.FCFN.edgesDict[edge].flow
