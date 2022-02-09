@@ -53,7 +53,7 @@ class AlphaPopulation:
                     self.randomTotalMutation(individual)
             self.visualizeTop(str(generation))
             # Timeout to ensure correct visualization rendering order
-            time.sleep(0.2)
+            time.sleep(0.5)
 
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
@@ -98,4 +98,4 @@ class AlphaPopulation:
     def visualizeTop(self, generation: str):
         """Draws the .html file for the top individual"""
         self.rankPopulation()
-        self.population[0].visualizeAlphaNetwork()
+        self.population[0].visualizeAlphaNetwork(frontCatName=generation + "-")

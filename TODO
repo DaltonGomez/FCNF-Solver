@@ -61,3 +61,16 @@ First Cross-Over Method Attempt:
         self.population.append(offspringTwo)
         self.solvePopulation()
         self.rankPopulation()
+
+
+        if self.relaxedSolver is None:
+            self.relaxedSolver = AlphaSolver(self, minTargetFlow)
+            self.relaxedSolver.buildModel()
+            self.relaxedSolver.solveModel()
+            self.relaxedSolver.writeSolution()
+            self.calculateTrueCost()
+            self.relaxedSolver.printSolverOverview()
+        elif self.relaxedSolver.isRun is True and self.isSolved is False:
+            print("No feasible solution exists for the network and target!")
+        elif self.relaxedSolver.isRun is True and self.isSolved is True:
+            print("Model is already solved- Call print solution to view solution!")

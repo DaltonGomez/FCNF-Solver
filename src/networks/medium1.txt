@@ -1,5 +1,5 @@
 # Network name, visualization seed, and parallel edge data
-Name= mediumOneCap
+Name= medium1
 VisualSeed= 4
 EdgeCaps= 20
 EdgeFixedCosts= 18

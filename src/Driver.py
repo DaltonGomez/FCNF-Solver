@@ -5,14 +5,14 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # Test of the FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFNfromDisc("medium1")
+flowNetwork.loadFCFNfromDisc("small1")
 
 # Test of GA Algo.
-population = AlphaPopulation(flowNetwork, 125, 10, 10)
+population = AlphaPopulation(flowNetwork, 35, 10, 10)
 population.evolvePopulation()
 
 # Test of MILP
-flowNetwork.executeSolver(125)
+flowNetwork.executeSolver(35)
 flowNetwork.visualizeNetwork()
 
 # Test of alpha individual

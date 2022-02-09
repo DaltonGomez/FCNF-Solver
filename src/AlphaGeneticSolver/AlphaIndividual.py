@@ -37,17 +37,12 @@ class AlphaIndividual:
     # ============================================
     def executeAlphaSolver(self, minTargetFlow: int):
         """Solves the FCFN approximately with an alpha-reduced LP model in CPLEX"""
-        if self.relaxedSolver is None:
-            self.relaxedSolver = AlphaSolver(self, minTargetFlow)
-            self.relaxedSolver.buildModel()
-            self.relaxedSolver.solveModel()
-            self.relaxedSolver.writeSolution()
-            self.calculateTrueCost()
-            self.relaxedSolver.printSolverOverview()
-        elif self.relaxedSolver.isRun is True and self.isSolved is False:
-            print("No feasible solution exists for the network and target!")
-        elif self.relaxedSolver.isRun is True and self.isSolved is True:
-            print("Model is already solved- Call print solution to view solution!")
+        self.relaxedSolver = AlphaSolver(self, minTargetFlow)
+        self.relaxedSolver.buildModel()
+        self.relaxedSolver.solveModel()
+        self.relaxedSolver.writeSolution()
+        self.calculateTrueCost()
+        self.relaxedSolver.printSolverOverview()
 
     def calculateTrueCost(self):
         """Calculates the true cost from the alpha-relaxed LP solution"""
@@ -68,11 +63,13 @@ class AlphaIndividual:
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
-    def visualizeAlphaNetwork(self, catName=""):
+    def visualizeAlphaNetwork(self, frontCatName="", endCatName=""):
         """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
         if self.visualizer is None:
             self.visualizer = AlphaVisualizer(self)
-            self.visualizer.drawGraph(self.name + catName)
+            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
+        else:
+            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
 
     def initializeAlphaValues(self, initializationMethod: str, constant=0):
         """Initializes an individual's alpha values using the input method"""
