@@ -1,5 +1,6 @@
 from docplex.mp.model import Model
 
+
 class ExactSolver:
     """Class that solves a FixedChargeFlowNetwork instance w/ parallel edges exactly via a MILP model within CPLEX 20.1"""
 
@@ -108,10 +109,10 @@ class ExactSolver:
 
     def solveModel(self):
         """Solves the MILP model in CPLEX"""
-        print("\nAttempting to solve model...")
+        print("Attempting to solve model...")
         self.model.solve()
         self.isRun = True
-        print("\nSolver execution complete...")
+        print("Solver execution complete...\n")
 
     def writeSolution(self):
         """Writes the solution to the FCFN instance by updating output attributes across the FCFN, nodes, and edges"""
@@ -158,6 +159,13 @@ class ExactSolver:
                     thisNode.opened = True
         else:
             print("No feasible solution exists!")
+
+    def printSolverOverview(self):
+        """Prints the most important and concise details of the solver, model and solution"""
+        self.model.print_information()
+        if self.isRun is True:
+            print("Total Cost: " + str(self.FCFN.totalCost))
+            print("Total Flow: " + str(self.FCFN.totalFlow))
 
     def printModel(self):
         """Prints all constraints of the MILP model for the FCFN instance (FOR DEBUGGING- DON'T CALL ON LARGE INPUTS)"""

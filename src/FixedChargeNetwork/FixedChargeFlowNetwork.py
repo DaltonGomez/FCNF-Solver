@@ -3,6 +3,7 @@ import os
 from src.FixedChargeNetwork.Edge import Edge
 from src.FixedChargeNetwork.ExactSolver import ExactSolver
 from src.FixedChargeNetwork.Node import Node
+from src.FixedChargeNetwork.Visualizer import Visualizer
 
 
 class FixedChargeFlowNetwork:
@@ -13,7 +14,7 @@ class FixedChargeFlowNetwork:
     # =========================================
     def __init__(self):
         """Constructor of a FCNF instance"""
-        # Input Network Attributes
+        # Input Network Attributes & Topology
         self.name = ""
         self.edgeCaps = []
         self.numEdgeCaps = 0
@@ -27,15 +28,16 @@ class FixedChargeFlowNetwork:
         self.numEdges = 0
         self.edgesDict = {}
 
-        # Deterministic seed for consistent visualization
-        self.visSeed = 1
-
         # Solution Data
         self.solver = None
         self.isSolved = False
         self.minTargetFlow = 0
         self.totalCost = 0
         self.totalFlow = 0
+
+        # Visualization Data
+        self.visualizer = None
+        self.visSeed = 1
 
     # ============================================
     # ============== SOLVER METHODS ==============
@@ -47,10 +49,20 @@ class FixedChargeFlowNetwork:
             self.solver.buildModel()
             self.solver.solveModel()
             self.solver.writeSolution()
+            self.solver.printSolverOverview()
         elif self.solver.isRun is True and self.isSolved is False:
             print("No feasible solution exists for the network and target!")
         elif self.solver.isRun is True and self.isSolved is True:
             print("Model is already solved- Call print solution to view solution!")
+
+    # ===================================================
+    # ============== VISUALIZATION METHODS ==============
+    # ===================================================
+    def visualizeNetwork(self, catName=""):
+        """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
+        if self.visualizer is None:
+            self.visualizer = Visualizer(self)
+            self.visualizer.drawGraph(self.name + catName)
 
     # =================================================
     # ============== DATA IN/OUT METHODS ==============
@@ -142,9 +154,9 @@ class FixedChargeFlowNetwork:
         # TODO - Implement
         pass
 
-    # ===========================================================
-    # ============== VISUALIZATION & PRINT METHODS ==============
-    # ===========================================================
+    # ===========================================
+    # ============== PRINT METHODS ==============
+    # ===========================================
     def printAllNodeData(self):
         """Prints all the data for each node in the network"""
         for node in self.nodesDict:
@@ -156,3 +168,17 @@ class FixedChargeFlowNetwork:
         for edge in self.edgesDict:
             thisEdge = self.edgesDict[edge]
             thisEdge.printEdgeData()
+
+    def printFullModel(self):
+        """Prints the solution data of the MILP solver to the console"""
+        if self.solver is not None:
+            self.solver.printModel()
+        else:
+            print("Solver must be initialized and executed before printing the model!")
+
+    def printFullSolution(self):
+        """Prints the solution data of the MILP solver to the console"""
+        if self.solver is not None:
+            self.solver.printSolution()
+        else:
+            print("Solver must be initialized and executed before printing the solution!")
