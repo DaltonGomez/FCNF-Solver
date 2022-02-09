@@ -16,7 +16,6 @@ class AlphaSolver:
 
     def buildModel(self):
         """Builds the decision variables, constraints, and object function of the LP model from the AlphaIndividual instance"""
-        # TODO - Revise to account for parallel edges
         # =================== DECISION VARIABLES ===================
         # Source and sink decision variables
         self.model.sourceFlowVars = self.model.continuous_var_list(self.individual.FCFN.numSources, name="s")
@@ -52,6 +51,7 @@ class AlphaSolver:
             self.model.add_constraint(self.model.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
 
         # Only one capacity per edge constraints
+        # TODO - Revise to account for parallel edges (Currently throws a bug!)
         for i in range(self.individual.FCFN.numEdges):
             for j in range(self.individual.FCFN.numEdgeCaps):
                 ctName = "e" + str(i) + "_" + str(j) + "OneFlowPerEdge"

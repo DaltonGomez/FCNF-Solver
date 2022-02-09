@@ -18,7 +18,7 @@ class AlphaIndividual:
         self.idNumber = individualNum
         self.FCFN = copy.deepcopy(FCFNinstance)
         self.alphaValues = None
-        self.initializeAlphaValuesConstantly(0.5)
+        self.initializeAlphaValuesRandomly()
 
         # Solution Data
         self.relaxedSolver = None
