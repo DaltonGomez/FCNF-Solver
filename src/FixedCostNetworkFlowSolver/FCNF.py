@@ -9,9 +9,10 @@ class FCNF:
 
     def __init__(self):
         """Constructor of a FCNF instance"""
-        # Input Attributes
+        # Input Network Attributes
         self.name = ""
         self.edgeCaps = []
+        self.numEdgeCaps = 0
         self.edgeFixedCosts = []
         self.edgeVariableCosts = []
         self.numNodes = 0
@@ -20,7 +21,9 @@ class FCNF:
         self.nodesDict = {}
         self.numEdges = 0
         self.edgesDict = {}
-        self.numEdgeCaps = 0
+
+        # Deterministic seed for consistent visualization
+        self.visSeed = 1
 
         # Solution Data
         self.solved = False
@@ -28,15 +31,12 @@ class FCNF:
         self.totalCost = 0
         self.totalFlow = 0
 
-        # Deterministic seed for consistent visualization
-        self.visSeed = 1
-
     def loadFCFN(self, network: str):
         """Loads a FCFN from a text file encoding"""
         # Path management
         currDir = os.getcwd()
         networkFile = network + ".txt"
-        catPath = os.path.join(currDir, "../networks", networkFile)
+        catPath = os.path.join(currDir, "networks", networkFile)
         print("Loading " + networkFile + " from: " + catPath)
         # Open file, parse lines in data stream, and close file
         inputFile = open(catPath, 'r')

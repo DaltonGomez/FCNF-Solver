@@ -1,8 +1,7 @@
 # TODO:
 
-+ Modify so that we are calculating the true cost, not the "fake cost" returned by the LP
-+ Continue debugging how the optimal alpha values
++ Continue debugging how to get the optimal alpha values
 + Modify so that the FCNF instance is of edge values only (i.e. create a super-source/sink and push all source/sink cost onto the edges from the super-source/sink)
 + Do not worry about the single capacity per edge constraint
 + Create a new class for the solution
-+ REFACTOR ENTIRE CODEBASE
++ Add method for using NetworkX to randomly generate a network and then parse that into the FCNF class
