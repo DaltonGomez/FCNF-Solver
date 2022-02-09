@@ -15,11 +15,8 @@ from src.FixedChargeNetwork.GraphGenerator import GraphGenerator
 # flowNetwork.visualizeNetwork()
 
 # Test of Random Graph Generator
-graphGen = GraphGenerator(50, 0.2, 5, 5, 75, 25)
-print(graphGen.network.edges)
+graphGen = GraphGenerator(500, 0.2, 25, 25, 75, 25)
 flowNetwork = graphGen.finalizeRandomNetwork("rand1", 1, [10], [10], [1])
-flowNetwork.printAllEdgeData()
-flowNetwork.printAllNodeData()
 flowNetwork.executeSolver(35)
 flowNetwork.visualizeNetwork()
 

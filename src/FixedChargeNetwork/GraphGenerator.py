@@ -77,7 +77,6 @@ class GraphGenerator:
         # Add edges into FCFN instance and update node topology
         edgeID = 0
         for edge in self.network.edges:
-            print(edge)
             fromNode = self.nodeMap[edge[0]]
             toNode = self.nodeMap[edge[1]]
             self.outputFCFN.addEdge(edgeID, fromNode, toNode)

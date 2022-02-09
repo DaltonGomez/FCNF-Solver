@@ -168,6 +168,7 @@ class AlphaSolver:
         """Prints the most important and concise details of the solver, model and solution"""
         self.model.print_information()
         if self.isRun is True:
+            self.model.print_solution()
             print("Fake Cost: " + str(self.individual.fakeCost))
             print("Total Flow: " + str(self.individual.totalFlow))
             print("True Cost: " + str(self.individual.trueCost))
