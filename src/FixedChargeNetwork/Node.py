@@ -1,5 +1,5 @@
 class Node:
-    """Class that defines a node in a Fixed Charge Network Flow"""
+    """Class that defines a node in a Fixed Charge Flow Network"""
 
     def __init__(self, nodeID: str, variableCost: int, capacity: int):
         """Constructor of a node instance"""
@@ -10,7 +10,7 @@ class Node:
         elif nodeID[0] == "t":
             self.nodeType = "sink"
         elif nodeID[0] == "n":
-            self.nodeType = "transshipment"
+            self.nodeType = "intermediate"
         self.variableCost = variableCost
         self.capacity = capacity
 

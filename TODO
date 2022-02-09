@@ -1,8 +1,23 @@
 # TODO:
 
-+ Modify so that we are calculating the true cost, not the "fake cost" returned by the LP
-+ Continue debugging how the optimal alpha values
+HIGH-PRIORITY CHANGES & BUGS:
+=============================
++ Update the GA to allow for multiple possible capacities (i.e. parallel edges)
+    - Cannot correctly allow for parallel edge opportunity in the reduction
++ Add method for using NetworkX to randomly generate a network and then parse that into the FCNF class
+
+
+
+LOW PRIORITY CHANGES & QUALITY OF LIFE:
+=======================================
++ Continue debugging how to get the optimal alpha values
++ Change input data (e.g. capacities, fixed costs, variable costs, etc.) to be of type float and not int
+
+
+
+POSSIBLE CHANGES & IDEAS:
+=========================
 + Modify so that the FCNF instance is of edge values only (i.e. create a super-source/sink and push all source/sink cost onto the edges from the super-source/sink)
-+ Do not worry about the single capacity per edge constraint
-+ Create a new class for the solution
-+ REFACTOR ENTIRE CODEBASE
+    - Not only would this drastically change the network, node, edge, and solver classes, it would also lead to hard to interpret visualization
++ Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost is convex
+

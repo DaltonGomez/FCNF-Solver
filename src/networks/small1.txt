@@ -1,5 +1,5 @@
 # Network name, visualization seed, and parallel edge data
-Name= smallOneCap
+Name= small1
 VisualSeed= 5
 EdgeCaps= 20
 EdgeFixedCosts= 18
@@ -16,7 +16,7 @@ s2 1 30
 t0 4 120
 t1 1 20
 #
-# Transshipment (intermediate) nodes of form: <id>
+# Intermediate nodes of form: <id>
 n0
 n1
 n2
@@ -24,7 +24,7 @@ n3
 n4
 n5
 #
-# Edges of form: <id, outNode, inNode>
+# Edges of form: <id, fromNode, toNode>
 e0 s0 n2
 e1 n2 n0
 e2 n2 n3
