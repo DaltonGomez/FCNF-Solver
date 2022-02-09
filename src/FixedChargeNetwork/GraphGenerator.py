@@ -22,13 +22,13 @@ class GraphGenerator:
         self.network = nx.DiGraph()
         self.nodeMap = {}  # Tracks NX node ordering vs. output node ordering to maintain consistency
         self.generateRandomNetwork()
-        self.buildRandomNetwork()
+        self.parseRandomNetwork()
 
     def generateRandomNetwork(self):
         """Generates a random Fixed Charge Flow Network using NetworkX"""
         self.network = nx.fast_gnp_random_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
 
-    def buildRandomNetwork(self):
+    def parseRandomNetwork(self):
         """Randomly assigns nodes as sources or sinks up to the input limit"""
         random.seed()
         # Track sources and sinks already assigned
@@ -87,10 +87,6 @@ class GraphGenerator:
             toNodeObj.incomingEdges.append("e" + str(edgeID))
             edgeID += 1
 
-    def drawRandomNetwork(self):
-        """Draws the randomly generator network with PyVis"""
-        self.outputFCFN.visualizeNetwork()
-
     def finalizeRandomNetwork(self, name: str, visSeed: int, edgeCaps: list, edgeFixedCost: list,
                               edgeVariableCosts: list):
         """Adds on remaining attributes to complete the FCFN and returns the object"""
@@ -103,6 +99,10 @@ class GraphGenerator:
         self.outputFCFN.numNodes = len(self.outputFCFN.nodesDict)
         self.outputFCFN.numEdges = len(self.outputFCFN.edgesDict)
         return self.outputFCFN
+
+    def visualizeRandomNetwork(self):
+        """Draws the randomly generator network with PyVis"""
+        self.outputFCFN.visualizeNetwork()
 
     def saveFCFNtoDisc(self):
         """Saves an unsolved version of a NetworkX-generated FCFN as a .txt file within the project directory"""
