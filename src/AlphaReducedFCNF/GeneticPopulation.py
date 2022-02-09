@@ -4,13 +4,13 @@ import time
 from src.AlphaReducedFCNF.AlphaFCNF import AlphaFCNF
 from src.AlphaReducedFCNF.AlphaLP import AlphaLP
 from src.AlphaReducedFCNF.AlphaVisualize import AlphaVisualize
-from src.FixedCostNetworkFlowSolver.FCNF import FCNF
+from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class GeneticPopulation:
     """Class that manages a population of alpha-reduced genetic algorithms"""
 
-    def __init__(self, FCNFinstance: FCNF, targetFlow: int, populationSize: int, numGenerations: int):
+    def __init__(self, FCNFinstance: FixedChargeFlowNetwork, targetFlow: int, populationSize: int, numGenerations: int):
         """Constructor of a GeneticPopulation instance"""
         self.FCNF = FCNFinstance
         self.targetFlow = targetFlow

@@ -1,27 +1,25 @@
-from src.AlphaReducedFCNF.GeneticPopulation import GeneticPopulation
-from src.FixedCostNetworkFlowSolver.FCNF import FCNF
-from src.FixedCostNetworkFlowSolver.MILP import MILP
-from src.FixedCostNetworkFlowSolver.Visualize import Visualize
+from src.FixedChargeNetwork.ExactSolver import ExactSolver
+from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """PY FILE USED TO RUN THE PARALLEL-EDGES-FCNF-SOLVER"""
 
 # Test of the FCFN/Node/Edge Classes
-FCNFinstance = FCNF()
-FCNFinstance.loadFCFN("mediumOneCap")
-
-# Test of GA Population
-population = GeneticPopulation(FCNFinstance, 125, 100, 10)
-population.evolvePopulation()
+FCFNinstance = FixedChargeFlowNetwork()
+FCFNinstance.loadFCFNfromDisc("mediumOneCap")
 
 # Test of the MILPsolver Class
-solver = MILP(FCNFinstance, 125)
+solver = ExactSolver(FCFNinstance, 125)
 solver.buildModel()
-solver.printMILPmodel()
+solver.printModel()
 solver.solveModel()
 solver.writeSolution()
 # Test of the Visualize Class
-visual = Visualize(FCNFinstance)
-visual.drawGraph(FCNFinstance.name)
+# visual = Visualize(FCFNinstance)
+# visual.drawGraph(FCFNinstance.name)
+
+# Test of GA Population
+# population = GeneticPopulation(FCFNinstance, 125, 100, 10)
+# population.evolvePopulation()
 
 # Test of alpha relaxed class
 # alphaFCNF = AlphaFCNF(FCNFinstance)

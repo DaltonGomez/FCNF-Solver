@@ -1,13 +1,13 @@
 import networkx as nx
 from pyvis.network import Network as netVis
 
-from src.FixedCostNetworkFlowSolver.FCNF import FCNF
+from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class Visualize:
     """Class that allows visualizations of a FCFN"""
 
-    def __init__(self, FCFNinstance: FCNF):
+    def __init__(self, FCFNinstance: FixedChargeFlowNetwork):
         """Constructor of a Visualize instance with NetworkX and PyVis dependencies"""
         self.FCNF = FCFNinstance
         self.nx = nx.DiGraph()

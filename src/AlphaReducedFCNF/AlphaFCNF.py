@@ -1,13 +1,13 @@
 import copy
 import random
 
-from src.FixedCostNetworkFlowSolver.FCNF import FCNF
+from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class AlphaFCNF:
     """Class that defines an alpha-LP reduction of a FCNF problem"""
 
-    def __init__(self, FCNFinstance: FCNF):
+    def __init__(self, FCNFinstance: FixedChargeFlowNetwork):
         """Constructor of a AlphaFCNF instance"""
         # Input Attributes
         self.name = FCNFinstance.name + "-Alpha"

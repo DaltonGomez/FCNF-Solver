@@ -1,12 +1,16 @@
 import os
 
-from src.FixedCostNetworkFlowSolver.Edge import Edge
-from src.FixedCostNetworkFlowSolver.Node import Node
+from src.FixedChargeNetwork.Edge import Edge
+from src.FixedChargeNetwork.ExactSolver import ExactSolver
+from src.FixedChargeNetwork.Node import Node
 
 
-class FCNF:
-    """Class that defines a Fixed Charge Network Flow with parallel edges possible"""
+class FixedChargeFlowNetwork:
+    """Class that defines a Fixed Charge Flow Network with parallel edges allowed"""
 
+    # =========================================
+    # ============== CONSTRUCTOR ==============
+    # =========================================
     def __init__(self):
         """Constructor of a FCNF instance"""
         # Input Network Attributes
@@ -18,6 +22,7 @@ class FCNF:
         self.numNodes = 0
         self.numSources = 0
         self.numSinks = 0
+        self.numIntermediateNodes = 0
         self.nodesDict = {}
         self.numEdges = 0
         self.edgesDict = {}
@@ -26,12 +31,31 @@ class FCNF:
         self.visSeed = 1
 
         # Solution Data
-        self.solved = False
+        self.solver = None
+        self.isSolved = False
         self.minTargetFlow = 0
         self.totalCost = 0
         self.totalFlow = 0
 
-    def loadFCFN(self, network: str):
+    # ============================================
+    # ============== SOLVER METHODS ==============
+    # ============================================
+    def executeSolver(self, minTargetFlow: int):
+        """Solves the FCFN exactly with a MILP model in CPLEX"""
+        if self.solver is None:
+            self.solver = ExactSolver(self, minTargetFlow)  # FYI- ExactSolver constructor does not have FCFN type hint
+            self.solver.buildModel()
+            self.solver.solveModel()
+            self.solver.writeSolution()
+        elif self.solver.isRun is True and self.isSolved is False:
+            print("No feasible solution exists for the network and target!")
+        elif self.solver.isRun is True and self.isSolved is True:
+            print("Model is already solved- Call print solution to view solution!")
+
+    # =================================================
+    # ============== DATA IN/OUT METHODS ==============
+    # =================================================
+    def loadFCFNfromDisc(self, network: str):
         """Loads a FCFN from a text file encoding"""
         # Path management
         currDir = os.getcwd()
@@ -51,19 +75,25 @@ class FCNF:
         # Assign seed
         self.visSeed = lines[0].split()
         self.visSeed.pop(0)
-        self.visSeed = self.visSeed.pop(0)
+        self.visSeed = int(self.visSeed.pop(0))
         lines.pop(0)
         # Assign potential edge capacities
-        self.edgeCaps = lines[0].split()
-        self.edgeCaps.pop(0)
+        edgeCapStrings = lines[0].split()
+        edgeCapStrings.pop(0)
+        edgeCapMap = map(int, edgeCapStrings)
+        self.edgeCaps = list(edgeCapMap)
         lines.pop(0)
         # Assign potential edge fixed costs
-        self.edgeFixedCosts = lines[0].split()
-        self.edgeFixedCosts.pop(0)
+        edgeFCStrings = lines[0].split()
+        edgeFCStrings.pop(0)
+        edgeFCMap = map(int, edgeFCStrings)
+        self.edgeFixedCosts = list(edgeFCMap)
         lines.pop(0)
         # Assign potential edge variable costs
-        self.edgeVariableCosts = lines[0].split()
-        self.edgeVariableCosts.pop(0)
+        edgeVCStrings = lines[0].split()
+        edgeVCStrings.pop(0)
+        edgeVCMap = map(int, edgeVCStrings)
+        self.edgeVariableCosts = list(edgeVCMap)
         lines.pop(0)
         # Build network
         for line in lines:
@@ -85,6 +115,7 @@ class FCNF:
             elif data[0][0] == "n":
                 thisNode = Node(data[0], 0, 0)
                 self.nodesDict[data[0]] = thisNode
+                self.numIntermediateNodes += 1
             # Construct edge objects and add to dictionary and network
             elif data[0][0] == "e":
                 thisEdge = Edge(data[0], data[1], data[2])
@@ -96,6 +127,24 @@ class FCNF:
         self.numEdges = len(self.edgesDict)
         self.numEdgeCaps = len(self.edgeCaps)
 
+    def generateRandomFCFN(self):
+        """Generates a random Fixed Charge Flow Network using NetworkX"""
+        # TODO - Implement
+        pass
+
+    def saveFCFNtoDisc(self):
+        """Saves an unsolved version of a NetworkX-generated FCFN as a .txt file within the project directory"""
+        # TODO - Implement
+        pass
+
+    def saveSolutionToDisc(self):
+        """Saves all the data of a Fixed Charge Flow Network solution"""
+        # TODO - Implement
+        pass
+
+    # ===========================================================
+    # ============== VISUALIZATION & PRINT METHODS ==============
+    # ===========================================================
     def printAllNodeData(self):
         """Prints all the data for each node in the network"""
         for node in self.nodesDict:

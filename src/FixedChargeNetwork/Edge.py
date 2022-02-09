@@ -1,5 +1,5 @@
 class Edge:
-    """Class that defines an edge in a Fixed Charge Network Flow w/ Parallel Edges"""
+    """Class that defines an edge in a Fixed Charge Flow Network w/ Parallel Edges"""
 
     def __init__(self, edgeID: str, fromNode: str, toNode: str):
         """Constructor of an edge instance"""
