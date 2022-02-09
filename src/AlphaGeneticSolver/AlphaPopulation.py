@@ -1,5 +1,4 @@
 import random
-import time
 
 from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
@@ -30,7 +29,7 @@ class AlphaPopulation:
 
         # Initialize population
         for i in range(populationSize):
-            thisIndividual = AlphaIndividual(i, self.FCFN)
+            thisIndividual = AlphaIndividual(self.FCFN)
             thisIndividual.initializeAlphaValues("random")
             self.population.append(thisIndividual)
 
@@ -43,6 +42,8 @@ class AlphaPopulation:
         for generation in range(self.numGenerations):
             self.solvePopulation()
             self.rankPopulation()
+            print("Generation= " + str(generation) + "\tBest Individual= " + str(self.population[0].trueCost))
+            self.randomTopTwoCrossover()
             for individual in range(self.populationSize):
                 if individual == self.population[0] or individual == self.population[1]:
                     continue  # Don't mutate the top two individuals
@@ -51,16 +52,44 @@ class AlphaPopulation:
                     self.randomSinglePointMutation(individual)
                 elif random.random() < 0.05:
                     self.randomTotalMutation(individual)
-            self.visualizeTop(str(generation))
-            # Timeout to ensure correct visualization rendering order
-            time.sleep(0.5)
+            # Visualization w/ timeout to ensure correct visualization rendering order
+            # self.visualizeTop(str(generation))
+            # time.sleep(0.5)
 
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
     def randomTopTwoCrossover(self):
         """Crossover of the alpha chromosome at a random point"""
-        pass
+        # Rank population and discard bottom two individuals
+        self.rankPopulation()
+        self.population.pop(-1)
+        self.population.pop(-1)
+        # Get crossover point and direction from RNG
+        random.seed()
+        crossoverPoint = random.randint(0, self.FCFN.numEdges)
+        crossoverDirection = random.randint(0, 2)
+        # Initialize offspring
+        offspringOne = AlphaIndividual(self.FCFN)
+        offspringTwo = AlphaIndividual(self.FCFN)
+        # Conduct crossover
+        if crossoverDirection == 0:
+            for i in range(crossoverPoint):
+                offspringOne.alphaValues.append(self.population[0].alphaValues[i])
+                offspringTwo.alphaValues.append(self.population[1].alphaValues[i])
+            for j in range(crossoverPoint, self.FCFN.numEdges):
+                offspringOne.alphaValues.append(self.population[0].alphaValues[j])
+                offspringTwo.alphaValues.append(self.population[1].alphaValues[j])
+        else:
+            for i in range(crossoverPoint):
+                offspringOne.alphaValues.append(self.population[1].alphaValues[i])
+                offspringTwo.alphaValues.append(self.population[0].alphaValues[i])
+            for j in range(crossoverPoint, self.FCFN.numEdges):
+                offspringOne.alphaValues.append(self.population[1].alphaValues[j])
+                offspringTwo.alphaValues.append(self.population[0].alphaValues[j])
+        # Add offspring into population
+        self.population.append(offspringOne)
+        self.population.append(offspringTwo)
 
     # =================================================
     # ============== MUTATION OPERATORS ==============
@@ -69,13 +98,16 @@ class AlphaPopulation:
         """Mutates an individual at a random gene in the chromosome"""
         random.seed()
         mutatePoint = random.randint(0, self.FCFN.numEdges - 1)
-        self.population[individualNum].alphaValues[mutatePoint] = random.random()
-        self.population[individualNum].isSolved = False
+        mutatedIndividual = AlphaIndividual(self.FCFN)
+        mutatedIndividual.alphaValues = self.population[individualNum].alphaValues
+        mutatedIndividual.alphaValues[mutatePoint] = random.random()
+        self.population[individualNum] = mutatedIndividual
 
     def randomTotalMutation(self, individualNum: int):
         """Mutates the entire chromosome of an individual"""
-        self.population[individualNum].initializeAlphaValuesRandomly()
-        self.population[individualNum].isSolved = False
+        mutatedIndividual = AlphaIndividual(self.FCFN)
+        mutatedIndividual.initializeAlphaValuesRandomly()
+        self.population[individualNum] = mutatedIndividual
 
     # ============================================
     # ============== HELPER METHODS ==============
@@ -89,8 +121,6 @@ class AlphaPopulation:
     def rankPopulation(self):
         """Ranks the population from least cost to greatest (i.e. fitness)"""
         self.population.sort(key=lambda x: x.trueCost, reverse=False)  # reverse=False ranks least to greatest
-        for individual in self.population:
-            print(individual.trueCost)
 
     # ===================================================
     # ============== VISUALIZATION METHODS ==============

@@ -111,10 +111,10 @@ class AlphaSolver:
 
     def solveModel(self):
         """Solves the alpha-relaxed LP model in CPLEX"""
-        print("Attempting to solve model...")
+        # print("Attempting to solve model...")
         self.model.solve()
         self.isRun = True
-        print("Solver execution complete...\n")
+        # print("Solver execution complete...\n")
 
     def writeSolution(self):
         """Writes the solution to the individual instance by updating output attributes across the FCFN, nodes, and edges"""

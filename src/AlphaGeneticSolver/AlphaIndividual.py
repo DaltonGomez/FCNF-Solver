@@ -11,11 +11,10 @@ class AlphaIndividual:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, individualNum: int, FCFNinstance):
+    def __init__(self, FCFNinstance):
         """Constructor of a AlphaFCNF instance"""
         # Input Attributes
-        self.name = FCFNinstance.name + "-Alpha" + str(individualNum)
-        self.idNumber = individualNum
+        self.name = FCFNinstance.name + "-Alpha"
         self.FCFN = copy.deepcopy(FCFNinstance)
         self.alphaValues = None
         self.initializeAlphaValuesRandomly()
@@ -42,7 +41,7 @@ class AlphaIndividual:
         self.relaxedSolver.solveModel()
         self.relaxedSolver.writeSolution()
         self.calculateTrueCost()
-        self.relaxedSolver.printSolverOverview()
+        # self.relaxedSolver.printSolverOverview()
 
     def calculateTrueCost(self):
         """Calculates the true cost from the alpha-relaxed LP solution"""
