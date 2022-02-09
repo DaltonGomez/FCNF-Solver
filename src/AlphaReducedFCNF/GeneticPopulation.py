@@ -108,6 +108,7 @@ class GeneticPopulation:
                 # Do not mutate the top two individuals
                 if individual == self.population[0] or individual == self.population[1]:
                     continue
+                # TODO - Modify so that mutation rates are not hardcoded
                 elif random.random() < 0.25:
                     self.randomSinglePointMutation(individual)
                 elif random.random() < 0.05:
