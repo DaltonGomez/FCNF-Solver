@@ -44,20 +44,12 @@ class FixedChargeFlowNetwork:
         nodeName = nodeType + str(idNum)
         thisNode = Node(nodeName, variableCost, capacity)
         self.nodesDict[nodeName] = thisNode
-        self.numNodes += 1
-        if nodeType == "s":
-            self.numSources += 1
-        elif nodeType == "t":
-            self.numSinks += 1
-        elif nodeType == "n":
-            self.numIntermediateNodes += 1
 
     def addEdge(self, idNum: int, fromNode: str, toNode: str):
         """Adds a new edge to a FCFN instance- Used only in Graph Generation"""
         edgeName = "e" + str(idNum)
         thisEdge = Edge(edgeName, fromNode, toNode)
         self.edgesDict[edgeName] = thisEdge
-        self.numEdges += 1
 
     # ============================================
     # ============== SOLVER METHODS ==============
