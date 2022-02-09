@@ -149,7 +149,7 @@ class ExactSolver:
                         thisEdge.fixedCost = self.FCFN.edgeFixedCosts[j]
                         thisEdge.variableCost = self.FCFN.edgeVariableCosts[j]
                         thisEdge.flow = edgeValues[(i, j)]
-                        thisEdge.totalCost = thisEdge.flow * int(thisEdge.variableCost) + int(thisEdge.fixedCost)
+                        thisEdge.totalCost = thisEdge.flow * thisEdge.variableCost + thisEdge.fixedCost
             # Disperse solution results back to intermediate nodes
             for i in range(self.FCFN.numIntermediateNodes):
                 thisNode = self.FCFN.nodesDict["n" + str(i)]

@@ -15,8 +15,8 @@ class AlphaVisualizer:
     def populateGraph(self):
         """Populates a NetworkX instance with the AlphaIndividual data"""
         addedTotalCost = False
-        for node in self.individual.FCNF.nodesDict:
-            nodeObj = self.individual.FCNF.nodesDict[node]
+        for node in self.individual.FCFN.nodesDict:
+            nodeObj = self.individual.FCFN.nodesDict[node]
             if node[0] == "s":
                 if addedTotalCost is False:
                     self.nx.add_node(node, value=nodeObj.flow, color="blue",
@@ -31,8 +31,8 @@ class AlphaVisualizer:
                     self.nx.add_node(node, value=nodeObj.flow, color="black")
                 elif nodeObj.opened is False:
                     self.nx.add_node(node, value=nodeObj.flow, color="grey")
-        for edge in self.individual.FCNF.edgesDict:
-            edgeObj = self.individual.FCNF.edgesDict[edge]
+        for edge in self.individual.FCFN.edgesDict:
+            edgeObj = self.individual.FCFN.edgesDict[edge]
             if edgeObj.opened is True:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black",
                                  label=str(round(edgeObj.flow)))
@@ -49,7 +49,7 @@ class AlphaVisualizer:
         visual.set_options("""
             var options = {
                 "layout": { 
-                    "randomSeed":""" + str(self.individual.FCNF.visSeed) + "," +
+                    "randomSeed":""" + str(self.individual.FCFN.visSeed) + "," +
                            """
                     "improvedLayout": true
                 },

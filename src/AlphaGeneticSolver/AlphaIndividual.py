@@ -16,7 +16,7 @@ class AlphaIndividual:
         # Input Attributes
         self.name = FCFNinstance.name + "-Alpha" + str(individualNum)
         self.idNumber = individualNum
-        self.FCNF = copy.deepcopy(FCFNinstance)
+        self.FCFN = copy.deepcopy(FCFNinstance)
         self.alphaValues = None
         self.initializeAlphaValuesConstantly(0.5)
 
@@ -38,8 +38,7 @@ class AlphaIndividual:
     def executeAlphaSolver(self, minTargetFlow: int):
         """Solves the FCFN approximately with an alpha-reduced LP model in CPLEX"""
         if self.relaxedSolver is None:
-            self.relaxedSolver = AlphaSolver(self,
-                                             minTargetFlow)  # FYI- ExactSolver constructor does not have FCFN type hint
+            self.relaxedSolver = AlphaSolver(self, minTargetFlow)
             self.relaxedSolver.buildModel()
             self.relaxedSolver.solveModel()
             self.relaxedSolver.writeSolution()
@@ -54,11 +53,11 @@ class AlphaIndividual:
         """Calculates the true cost from the alpha-relaxed LP solution"""
         if self.isSolved is True:
             cost = 0
-            for node in self.FCNF.nodesDict:
-                nodeObj = self.FCNF.nodesDict[node]
+            for node in self.FCFN.nodesDict:
+                nodeObj = self.FCFN.nodesDict[node]
                 cost += nodeObj.totalCost
-            for edge in self.FCNF.edgesDict:
-                edgeObj = self.FCNF.edgesDict[edge]
+            for edge in self.FCFN.edgesDict:
+                edgeObj = self.FCFN.edgesDict[edge]
                 if edgeObj.flow > 0:
                     trueEdgeCost = edgeObj.flow * edgeObj.variableCost + edgeObj.fixedCost
                     cost += trueEdgeCost
@@ -86,7 +85,7 @@ class AlphaIndividual:
         """Initializes all alpha values to the input constant"""
         random.seed()
         theseAlphaValues = []
-        for i in range(self.FCNF.numEdges):
+        for i in range(self.FCFN.numEdges):
             theseAlphaValues.append(constant)
         self.alphaValues = theseAlphaValues
 
@@ -94,6 +93,6 @@ class AlphaIndividual:
         """Randomly initializes alpha values on [0, 1]"""
         random.seed()
         theseAlphaValues = []
-        for i in range(self.FCNF.numEdges):
+        for i in range(self.FCFN.numEdges):
             theseAlphaValues.append(random.random())
         self.alphaValues = theseAlphaValues
