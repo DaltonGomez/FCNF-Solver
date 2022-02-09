@@ -54,7 +54,7 @@ class ExactSolver:
             self.model.add_constraint(self.model.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
 
         # Only one capacity per edge constraints
-        # TODO - Remove/comment out this constraint as it can be implied by convex capacity vs. cost functions
+        # TODO - Remove/comment out this constraint as it can be implied by convex capacity vs. cost functions?
         for i in range(self.FCFN.numEdges):
             ctName = "e" + str(i) + "CapPerEdge"
             self.model.add_constraint(

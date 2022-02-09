@@ -3,7 +3,7 @@ Name= small
 VisualSeed= 5
 EdgeCaps= 10 20 50 100
 EdgeFixedCosts= 10 18 40 72
-EdgeVariableCosts= 1 1 1 1
+EdgeVariableCosts= 1 2 3 4
 #
 # Additional comments can be added below with a leading '#'
 #
