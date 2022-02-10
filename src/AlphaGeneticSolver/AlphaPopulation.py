@@ -30,7 +30,7 @@ class AlphaPopulation:
         # Initialize population
         for i in range(populationSize):
             thisIndividual = AlphaIndividual(self.FCFN)
-            thisIndividual.initializeAlphaValues("random")
+            thisIndividual.initializeAlphaValuesRandomly()
             self.population.append(thisIndividual)
 
     # ============================================

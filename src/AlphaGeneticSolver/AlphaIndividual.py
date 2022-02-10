@@ -62,13 +62,6 @@ class AlphaIndividual:
     # ==========================================================
     # ============== ALPHA INITIALIZATION METHODS ==============
     # ==========================================================
-    def initializeAlphaValues(self, initializationMethod: str, constant=0):
-        """Initializes an individual's alpha values using the input method"""
-        if initializationMethod == "random":
-            self.initializeAlphaValuesRandomly()
-        elif initializationMethod == "constant":
-            self.initializeAlphaValuesConstantly(constant)
-
     def initializeAlphaValuesConstantly(self, constant: float):
         """Initializes all alpha values to the input constant"""
         random.seed()
@@ -83,6 +76,14 @@ class AlphaIndividual:
         theseAlphaValues = []
         for i in range(self.FCFN.numEdges):
             theseAlphaValues.append(random.random())
+        self.alphaValues = theseAlphaValues
+
+    def initializeAlphaValuesRandomlyOnRange(self, lowerBound: float, upperBound: float):
+        """Randomly initializes alpha values on [LB, UB] range"""
+        random.seed()
+        theseAlphaValues = []
+        for i in range(self.FCFN.numEdges):
+            theseAlphaValues.append(random.uniform(lowerBound, upperBound))
         self.alphaValues = theseAlphaValues
 
     # ===================================================
