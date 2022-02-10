@@ -1,0 +1,599 @@
+# Network name, visualization seed, and parallel edge data
+Name= r100-5
+VisualSeed= 5
+EdgeCaps= 20 
+EdgeFixedCosts= 50 
+EdgeVariableCosts= 1 
+#
+# Additional comments can be added below with a leading '#'
+#
+# Source nodes of form: <id, variableCost, capacity>
+s0 9 3
+s1 1 30
+s2 17 38
+s3 2 10
+s4 10 46
+s5 0 6
+s6 17 2
+s7 11 31
+s8 14 0
+s9 4 13
+#
+# Sink nodes of form: <id, variableCost, capacity>
+t0 8 34
+t1 17 0
+t2 1 50
+t3 19 17
+t4 5 21
+t5 5 12
+t6 10 20
+t7 2 18
+t8 7 23
+t9 13 33
+#
+# Intermediate nodes of form: <id>
+n0
+n1
+n2
+n3
+n4
+n5
+n6
+n7
+n8
+n9
+n10
+n11
+n12
+n13
+n14
+n15
+n16
+n17
+n18
+n19
+n20
+n21
+n22
+n23
+n24
+n25
+n26
+n27
+n28
+n29
+n30
+n31
+n32
+n33
+n34
+n35
+n36
+n37
+n38
+n39
+n40
+n41
+n42
+n43
+n44
+n45
+n46
+n47
+n48
+n49
+n50
+n51
+n52
+n53
+n54
+n55
+n56
+n57
+n58
+n59
+n60
+n61
+n62
+n63
+n64
+n65
+n66
+n67
+n68
+n69
+n70
+n71
+n72
+n73
+n74
+n75
+n76
+n77
+n78
+n79
+#
+# Edges of form: <id, fromNode, toNode>
+e0 t2 n6
+e1 t2 n8
+e2 t2 n18
+e3 t2 n55
+e4 t9 n6
+e5 t9 n47
+e6 t9 n48
+e7 t9 n66
+e8 t9 n70
+e9 n0 n17
+e10 n0 n65
+e11 n0 n69
+e12 n1 n55
+e13 n1 n78
+e14 n2 n4
+e15 n2 n57
+e16 n3 n11
+e17 n3 n40
+e18 n3 n49
+e19 n3 n69
+e20 n4 n22
+e21 n4 n60
+e22 n4 n64
+e23 n4 n68
+e24 n5 n4
+e25 n5 n8
+e26 n5 n14
+e27 n5 n23
+e28 n5 n30
+e29 n5 n50
+e30 s0 n7
+e31 s0 s1
+e32 t1 n15
+e33 t1 n22
+e34 t1 n49
+e35 t1 n52
+e36 t1 n54
+e37 t1 n62
+e38 t1 n68
+e39 t1 n77
+e40 s2 n36
+e41 s2 n50
+e42 n6 n33
+e43 n6 t4
+e44 n6 n54
+e45 n6 n61
+e46 n6 n78
+e47 t5 t6
+e48 t5 n59
+e49 t5 n74
+e50 t5 n75
+e51 t5 n78
+e52 n7 n60
+e53 n7 n61
+e54 n7 n65
+e55 n8 s0
+e56 n8 n44
+e57 n8 n50
+e58 n8 s5
+e59 n9 n4
+e60 n9 n35
+e61 n9 n41
+e62 n9 n46
+e63 n9 n55
+e64 n9 n65
+e65 n9 n70
+e66 n10 s7
+e67 n10 s1
+e68 n10 n72
+e69 n11 n5
+e70 n11 n10
+e71 n11 n39
+e72 n11 n41
+e73 n12 n22
+e74 n12 s6
+e75 n12 n29
+e76 n12 n33
+e77 n12 s3
+e78 n12 n38
+e79 n12 n54
+e80 n13 n38
+e81 n13 n60
+e82 n14 n52
+e83 n14 n54
+e84 n14 n77
+e85 n15 n5
+e86 n15 n31
+e87 n15 n50
+e88 n15 s8
+e89 n15 n64
+e90 n15 n76
+e91 n16 s0
+e92 n16 s5
+e93 n17 n7
+e94 n18 n19
+e95 n18 n22
+e96 n18 s7
+e97 n18 n68
+e98 n19 n8
+e99 n19 n10
+e100 n19 n13
+e101 n19 n49
+e102 n19 n65
+e103 n20 n5
+e104 n20 n14
+e105 n20 n47
+e106 n20 n52
+e107 n20 n61
+e108 n20 n63
+e109 n20 n78
+e110 n21 t2
+e111 n21 n13
+e112 n21 n19
+e113 n21 n47
+e114 n21 s1
+e115 n21 n60
+e116 n21 n69
+e117 n22 n16
+e118 n22 n29
+e119 n22 t6
+e120 n22 n78
+e121 n22 n79
+e122 n23 s2
+e123 n24 n0
+e124 n24 n5
+e125 n24 t4
+e126 n24 n63
+e127 n24 n69
+e128 s6 n4
+e129 s6 n26
+e130 s6 n36
+e131 s6 t4
+e132 s6 n68
+e133 s6 n73
+e134 n25 n2
+e135 n25 n12
+e136 n25 n22
+e137 n25 n47
+e138 n25 n70
+e139 n26 n7
+e140 n26 n27
+e141 n26 n50
+e142 n26 n54
+e143 n26 n68
+e144 n27 n2
+e145 n27 t5
+e146 n27 n11
+e147 n27 n31
+e148 n27 n32
+e149 n27 n48
+e150 n27 n69
+e151 n28 s6
+e152 n28 n47
+e153 n28 n64
+e154 n29 t2
+e155 n29 n30
+e156 n29 n48
+e157 n29 n59
+e158 n29 s4
+e159 n29 n79
+e160 n30 n3
+e161 n30 n11
+e162 n30 n40
+e163 n30 n68
+e164 s7 n13
+e165 s7 n21
+e166 s7 n59
+e167 s7 n64
+e168 n31 n40
+e169 n31 n41
+e170 n31 s1
+e171 n31 s5
+e172 n31 n68
+e173 n32 t9
+e174 n32 t3
+e175 n32 n42
+e176 t3 n7
+e177 t3 n8
+e178 t3 n10
+e179 t3 s3
+e180 t3 n37
+e181 t3 n50
+e182 t3 n60
+e183 n33 n27
+e184 n33 t4
+e185 n33 n47
+e186 n33 s8
+e187 n33 n60
+e188 s3 n2
+e189 s3 n27
+e190 s3 n63
+e191 s3 n74
+e192 n34 n4
+e193 n34 n6
+e194 n35 n2
+e195 n35 t1
+e196 n35 n11
+e197 n35 n39
+e198 n36 n0
+e199 n36 t5
+e200 n36 s7
+e201 n36 s3
+e202 n36 n37
+e203 n36 n58
+e204 n37 n6
+e205 n37 n34
+e206 n37 t8
+e207 n38 n9
+e208 n38 n23
+e209 n38 s9
+e210 n38 n72
+e211 n38 n76
+e212 n38 n78
+e213 n39 n11
+e214 n39 n64
+e215 n39 s4
+e216 t4 t9
+e217 t4 n30
+e218 t4 n40
+e219 t4 s1
+e220 t4 n56
+e221 n40 n3
+e222 n40 n18
+e223 n40 n41
+e224 n40 n42
+e225 n40 n53
+e226 n40 s4
+e227 n41 n5
+e228 n41 n33
+e229 n41 n57
+e230 n41 n72
+e231 n41 s4
+e232 n42 t1
+e233 n42 n27
+e234 n42 n38
+e235 n42 n39
+e236 n42 n65
+e237 n43 n39
+e238 n44 t9
+e239 n44 n22
+e240 n44 t3
+e241 n44 s3
+e242 n44 s8
+e243 n44 n62
+e244 t8 n4
+e245 t8 s0
+e246 t8 n25
+e247 t8 s7
+e248 t8 n35
+e249 t8 n38
+e250 n45 n19
+e251 n45 n27
+e252 n45 n29
+e253 n45 n30
+e254 n45 n38
+e255 n45 n42
+e256 n45 n69
+e257 n46 t9
+e258 n46 n61
+e259 n46 n64
+e260 n46 n72
+e261 n47 n14
+e262 n47 n28
+e263 n47 n31
+e264 n47 n32
+e265 n47 n48
+e266 n47 n49
+e267 n48 n4
+e268 n48 n7
+e269 n48 n22
+e270 n48 n28
+e271 n48 s7
+e272 s1 n7
+e273 s1 n45
+e274 s1 n60
+e275 s1 n70
+e276 n49 s2
+e277 n49 n34
+e278 n49 t8
+e279 n49 n50
+e280 n50 n3
+e281 n50 n16
+e282 n50 n46
+e283 n50 s1
+e284 n50 n54
+e285 n50 t7
+e286 n50 n64
+e287 n51 n31
+e288 n51 n38
+e289 n51 n42
+e290 n51 n48
+e291 n51 n50
+e292 n51 s8
+e293 n51 n63
+e294 n52 t2
+e295 n52 n17
+e296 n52 n21
+e297 n52 n25
+e298 n52 n48
+e299 n52 n70
+e300 n53 t9
+e301 n53 n10
+e302 n53 n14
+e303 n53 n15
+e304 n53 n28
+e305 n53 n48
+e306 n53 n58
+e307 n53 n75
+e308 n54 n1
+e309 n54 s2
+e310 n54 n8
+e311 n54 n12
+e312 n54 n17
+e313 n54 n39
+e314 n54 n53
+e315 n54 n77
+e316 n55 n20
+e317 n55 n28
+e318 n55 n38
+e319 n55 n42
+e320 n55 n61
+e321 n55 n70
+e322 t7 n28
+e323 t7 s3
+e324 t7 n49
+e325 t7 t6
+e326 n56 n6
+e327 n56 t5
+e328 n56 n35
+e329 n56 t6
+e330 n56 s9
+e331 n56 n69
+e332 t6 n8
+e333 t6 n27
+e334 t6 n29
+e335 t6 n50
+e336 n57 n12
+e337 n57 n14
+e338 n57 n46
+e339 n57 n49
+e340 n57 n71
+e341 n57 n75
+e342 n58 s3
+e343 n58 n36
+e344 n58 n43
+e345 n58 n49
+e346 n58 n74
+e347 s9 n21
+e348 s9 n35
+e349 s9 n46
+e350 s9 n75
+e351 s8 n8
+e352 s8 n10
+e353 s8 s3
+e354 s8 n51
+e355 s8 n66
+e356 n59 n16
+e357 n59 n72
+e358 n59 n78
+e359 s5 s0
+e360 s5 s7
+e361 s5 n42
+e362 s5 n74
+e363 n60 n0
+e364 n60 n29
+e365 n60 n47
+e366 n60 n71
+e367 n61 n15
+e368 n61 n30
+e369 n61 s3
+e370 n61 n37
+e371 n61 t8
+e372 n61 n54
+e373 n61 n62
+e374 n62 n30
+e375 n62 n49
+e376 n62 n63
+e377 n63 n6
+e378 n63 n31
+e379 n63 n41
+e380 n63 n48
+e381 n63 n72
+e382 n64 n11
+e383 n64 n36
+e384 n64 n75
+e385 n65 n9
+e386 n65 n40
+e387 n65 n79
+e388 n66 n11
+e389 n66 n26
+e390 n66 s3
+e391 n66 n64
+e392 n67 n3
+e393 n67 t5
+e394 n67 n28
+e395 n67 n38
+e396 n67 n49
+e397 n67 s4
+e398 n68 n34
+e399 n68 n37
+e400 n68 n49
+e401 n68 n67
+e402 n68 n73
+e403 n68 n76
+e404 n68 t0
+e405 n69 n6
+e406 n69 n29
+e407 n69 n60
+e408 n70 n14
+e409 n70 n21
+e410 n70 s6
+e411 n71 n31
+e412 n71 t8
+e413 n71 s5
+e414 n71 n60
+e415 n71 n68
+e416 n71 n72
+e417 n72 s0
+e418 n72 s2
+e419 n72 n28
+e420 n72 n42
+e421 n72 n45
+e422 n72 n49
+e423 n72 n56
+e424 n72 n58
+e425 n72 n73
+e426 n72 n77
+e427 n73 n21
+e428 n73 n33
+e429 n73 n52
+e430 n73 n65
+e431 n74 n12
+e432 n74 n44
+e433 n74 t7
+e434 n74 n65
+e435 n74 n75
+e436 n75 n22
+e437 n75 n44
+e438 n75 n47
+e439 n75 n52
+e440 n75 n56
+e441 n75 n72
+e442 n75 n76
+e443 n75 n79
+e444 n76 n13
+e445 n76 n19
+e446 n76 n23
+e447 n76 n63
+e448 n76 n77
+e449 t0 n4
+e450 t0 n8
+e451 t0 n22
+e452 t0 n24
+e453 t0 n57
+e454 t0 n64
+e455 n77 t2
+e456 n77 n11
+e457 n77 n23
+e458 n77 n27
+e459 n77 n29
+e460 n77 t8
+e461 n77 s1
+e462 n77 n52
+e463 n77 n73
+e464 s4 n10
+e465 s4 n11
+e466 s4 n25
+e467 s4 n60
+e468 s4 n78
+e469 n78 n9
+e470 n78 n14
+e471 n78 n39
+e472 n78 n43
+e473 n79 s0
+e474 n79 n9
+e475 n79 n17
+e476 n79 n19
+e477 n79 n34
+e478 n79 n39
+e479 n79 n40
+e480 n79 n57
+e481 n79 n64
+e482 n79 n74

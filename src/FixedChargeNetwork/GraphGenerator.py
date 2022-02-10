@@ -28,6 +28,8 @@ class GraphGenerator:
     def generateRandomNetwork(self):
         """Generates a random Fixed Charge Flow Network using NetworkX"""
         self.network = nx.fast_gnp_random_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
+        # self.network = nx.binomial_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
+        # self.network = nx.erdos_renyi_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
 
     def parseRandomNetwork(self):
         """Randomly assigns nodes as sources or sinks up to the input limit"""

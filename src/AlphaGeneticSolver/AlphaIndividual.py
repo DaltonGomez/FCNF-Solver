@@ -59,17 +59,9 @@ class AlphaIndividual:
         else:
             print("The individual must be solved to calculate its true cost!")
 
-    # ===================================================
-    # ============== VISUALIZATION METHODS ==============
-    # ===================================================
-    def visualizeAlphaNetwork(self, frontCatName="", endCatName=""):
-        """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
-        if self.visualizer is None:
-            self.visualizer = AlphaVisualizer(self)
-            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
-        else:
-            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
-
+    # ==========================================================
+    # ============== ALPHA INITIALIZATION METHODS ==============
+    # ==========================================================
     def initializeAlphaValues(self, initializationMethod: str, constant=0):
         """Initializes an individual's alpha values using the input method"""
         if initializationMethod == "random":
@@ -92,3 +84,14 @@ class AlphaIndividual:
         for i in range(self.FCFN.numEdges):
             theseAlphaValues.append(random.random())
         self.alphaValues = theseAlphaValues
+
+    # ===================================================
+    # ============== VISUALIZATION METHODS ==============
+    # ===================================================
+    def visualizeAlphaNetwork(self, frontCatName="", endCatName=""):
+        """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
+        if self.visualizer is None:
+            self.visualizer = AlphaVisualizer(self)
+            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
+        else:
+            self.visualizer.drawGraph(frontCatName + self.name + endCatName)

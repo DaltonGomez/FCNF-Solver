@@ -14,16 +14,10 @@ class Visualizer:
 
     def populateGraph(self):
         """Populates a NetworkX instance with the FCFN data"""
-        addedTotalCost = False  # Boolean flag to place the total cost on the first source, s0
         for node in self.FCFN.nodesDict:
             nodeObj = self.FCFN.nodesDict[node]
             if node[0] == "s":
-                if addedTotalCost is False:
-                    self.nx.add_node(node, value=nodeObj.flow, color="blue",
-                                     label="Optimal Cost= " + str(round(self.FCFN.totalCost)))
-                    addedTotalCost = True
-                else:
-                    self.nx.add_node(node, value=nodeObj.flow, color="blue")
+                self.nx.add_node(node, value=nodeObj.flow, color="blue")
             elif node[0] == "t":
                 self.nx.add_node(node, value=nodeObj.flow, color="red")
             elif node[0] == "n":
@@ -34,8 +28,7 @@ class Visualizer:
         for edge in self.FCFN.edgesDict:
             edgeObj = self.FCFN.edgesDict[edge]
             if edgeObj.opened is True:
-                self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black",
-                                 label=str(round(edgeObj.flow)))
+                self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black")
             elif edgeObj.opened is False:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="grey")
 
@@ -47,51 +40,74 @@ class Visualizer:
         visual.from_nx(self.nx)
         # Sets visualization options using a JSON format (see vis.js documentation)
         visual.set_options("""
-            var options = {
-                "layout": { 
-                    "randomSeed":""" + str(self.FCFN.visSeed) + "," +
+                    var options = {
+                        "autoResize": true,
+                        "width": "1000px",
+                        "height": "800px",
+                        "layout": { 
+                            "randomSeed":""" + str(self.FCFN.visSeed) + "," +
                            """
                     "improvedLayout": true
-                },
-                "autoResize": true,
-                "nodes": {
-                    "borderWidth": 2,
-                    "borderWidthSelected": 2,
-                    "font": {
-                        "color": "rgba(221,212,0,1)",
-                        "size": 30,
-                        "strokeWidth": 5,
-                        "strokeColor": "rgba(0,0,0,1)"
-                    },
-                    "labelHighlightBold": false,
-                    "physics": false,
-                    "shadow": {
-                        "enabled": true
-                    },
-                    "size": 5
                 },
                 "configure": {
                     "enabled": false
                 },
-                "edges": {
+                "nodes": {
+                    "physics": true,
+                    "size": 6,
+                    "borderWidth": 3,
                     "color": {
                         "inherit": true
                     },
                     "font": {
-                        "color": "rgba(12, 224, 54, 1)",
-                        "size": 30,
-                        "strokeWidth": 5,
+                        "size": 0,
+                        "color": "rgba(0,0,0,1)",
+                        "strokeWidth": 0,
                         "strokeColor": "rgba(0,0,0,1)"
                     },
-                    "smooth": {
-                        "enabled": false,
-                        "type": "continuous"
+                    "scaling": {
+                        "min": 10,
+                        "max": 60
                     },
                     "shadow": {
-                        "enabled": true
+                        "enabled": true,
+                        "size": 15,
+                        "color": "rgba(0,0,0,0.5)"
+                    }
+                },
+                "edges": {
+                    "physics": true,
+                    "color": {
+                        "inherit": true
+                    },
+                    "font": {
+                        "size": 0,
+                        "color": "rgba(0,0,0,1)",
+                        "strokeWidth": 0,
+                        "strokeColor": "rgba(0,0,0,1)"
+                    },
+                    "arrowStrikethrough": false,
+                    "arrows": {
+                        "to": {
+                            "scaleFactor": 2
+                        }
+                    },
+                    "scaling": {
+                        "min": 1,
+                        "max": 25
+                    },
+                    "smooth": {
+                        "enabled": false
+                    },
+                    "shadow": {
+                        "enabled": true,
+                        "size": 15,
+                        "color": "rgba(0,0,0,0.5)"
                     }
                 },
                 "interaction": {
+                    "dragView": true,
+                    "zoomView": true,
                     "dragNodes": false,
                     "selectable": false,
                     "selectConnectedEdges": false,
@@ -100,15 +116,19 @@ class Visualizer:
                     "hideNodesOnDrag": false
                 },
                 "physics": {
-                    "barnesHut": {
-                        "avoidOverlap": 10,
-                        "centralGravity": 0.3,
-                        "damping": 0.09,
-                        "gravitationalConstant": -80000,
-                        "springConstant": 0.001,
-                        "springLength": 250
+                    "enabled": true,
+                    "stabilization": {
+                        "enabled": true,
+                        "fit": true
                     },
-                    "enabled": true
+                    "barnesHut": {
+                        "avoidOverlap": 1,
+                        "centralGravity": 0.2,
+                        "damping": 0.90,
+                        "gravitationalConstant": -100000,
+                        "springConstant": 0.001,
+                        "springLength": 500
+                    }
                 }
             }
             """)
