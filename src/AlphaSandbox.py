@@ -4,23 +4,24 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 """USED FOR EXPERIMENTATION WITH ALPHA VALUES"""
 
 # TEST OF GRAPH GENERATOR
-# graphGen = GraphGenerator(100, 0.02, 10, 10, 50, 20)
-# graphGen.finalizeRandomNetwork("r100-2", 3, [50], [20], [1])
+# graphGen = GraphGenerator(500, 0.01, 20, 20, 50, 20)
+# graphGen.finalizeRandomNetwork("r500-1", 3, [50], [20], [1])
 # graphGen.saveFCFN()
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-2")
-
-# TEST OF MILP
-flowNetwork.executeSolver(80)
-flowNetwork.visualizeNetwork()
+flowNetwork.loadFCFN("r100-4")
 
 # TEST OF ALPHA INDIVIDUAL
 alphaFN = AlphaIndividual(flowNetwork)
-alphaFN.initializeAlphaValuesRandomlyOnRange(0, 0.5)
-alphaFN.executeAlphaSolver(80)
+alphaFN.initializeAlphaValuesConstantly(0.15)
+alphaFN.executeAlphaSolver(150)
 alphaFN.visualizeAlphaNetwork(frontCatName="1")
+alphaFN.allUsedPaths()
+
+# TEST OF MILP
+# flowNetwork.executeSolver(80)
+# flowNetwork.visualizeNetwork()
 
 # TEST OF GA POPULATION
 # population = AlphaPopulation(flowNetwork, 80, 25, 1)
