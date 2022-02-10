@@ -3,8 +3,7 @@
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
 + Update the GA to allow for multiple possible capacities (i.e. parallel edges)
-    - Cannot correctly allow for parallel edge opportunity in the reduction
-+ Update the visualization to better display large networks
+    - Cannot currently formulate LP constraints that force one capacity per edge in relaxed-LP
 + Implement operators that use pathing
 
 
