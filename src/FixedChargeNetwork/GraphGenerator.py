@@ -82,12 +82,16 @@ class GraphGenerator:
         for edge in self.network.edges:
             fromNode = self.nodeMap[edge[0]]
             toNode = self.nodeMap[edge[1]]
-            self.outputFCFN.addEdge(edgeID, fromNode, toNode)
-            fromNodeObj = self.outputFCFN.nodesDict[fromNode]
-            fromNodeObj.outgoingEdges.append("e" + str(edgeID))
-            toNodeObj = self.outputFCFN.nodesDict[toNode]
-            toNodeObj.incomingEdges.append("e" + str(edgeID))
-            edgeID += 1
+            # If an edge is from a sink or to a source, do not add the edge
+            if fromNode[0] == "t" or toNode[0] == "s":
+                continue
+            else:
+                self.outputFCFN.addEdge(edgeID, fromNode, toNode)
+                fromNodeObj = self.outputFCFN.nodesDict[fromNode]
+                fromNodeObj.outgoingEdges.append("e" + str(edgeID))
+                toNodeObj = self.outputFCFN.nodesDict[toNode]
+                toNodeObj.incomingEdges.append("e" + str(edgeID))
+                edgeID += 1
 
     def finalizeRandomNetwork(self, name: str, visSeed: int, edgeCaps: list, edgeFixedCost: list,
                               edgeVariableCosts: list):

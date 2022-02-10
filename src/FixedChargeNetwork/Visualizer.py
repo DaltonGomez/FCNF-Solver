@@ -47,91 +47,91 @@ class Visualizer:
                         "layout": { 
                             "randomSeed":""" + str(self.FCFN.visSeed) + "," +
                            """
-                    "improvedLayout": true
-                },
-                "configure": {
-                    "enabled": false
-                },
-                "nodes": {
-                    "physics": true,
-                    "size": 6,
-                    "borderWidth": 3,
-                    "color": {
-                        "inherit": true
-                    },
-                    "font": {
-                        "size": 0,
-                        "color": "rgba(0,0,0,1)",
-                        "strokeWidth": 0,
-                        "strokeColor": "rgba(0,0,0,1)"
-                    },
-                    "scaling": {
-                        "min": 10,
-                        "max": 60
-                    },
-                    "shadow": {
-                        "enabled": true,
-                        "size": 15,
-                        "color": "rgba(0,0,0,0.5)"
-                    }
-                },
-                "edges": {
-                    "physics": true,
-                    "color": {
-                        "inherit": true
-                    },
-                    "font": {
-                        "size": 0,
-                        "color": "rgba(0,0,0,1)",
-                        "strokeWidth": 0,
-                        "strokeColor": "rgba(0,0,0,1)"
-                    },
-                    "arrowStrikethrough": false,
-                    "arrows": {
-                        "to": {
-                            "scaleFactor": 2
+                        "improvedLayout": true
+                        },
+                        "configure": {
+                            "enabled": false
+                        },
+                        "nodes": {
+                            "physics": true,
+                            "size": 6,
+                            "borderWidth": 3,
+                            "color": {
+                                "inherit": true
+                            },
+                            "font": {
+                                "size": 0,
+                                "color": "rgba(0,0,0,1)",
+                                "strokeWidth": 0,
+                                "strokeColor": "rgba(0,0,0,1)"
+                            },
+                            "scaling": {
+                                "min": 10,
+                                "max": 60
+                            },
+                            "shadow": {
+                                "enabled": true,
+                                "size": 15,
+                                "color": "rgba(0,0,0,0.5)"
+                            }
+                        },
+                        "edges": {
+                            "physics": true,
+                            "color": {
+                                "inherit": true
+                            },
+                            "font": {
+                                "size": 0,
+                                "color": "rgba(0,0,0,1)",
+                                "strokeWidth": 0,
+                                "strokeColor": "rgba(0,0,0,1)"
+                            },
+                            "arrowStrikethrough": false,
+                            "arrows": {
+                                "to": {
+                                    "scaleFactor": 2
+                                }
+                            },
+                            "scaling": {
+                                "min": 1,
+                                "max": 25
+                            },
+                            "smooth": {
+                                "enabled": false
+                            },
+                            "shadow": {
+                                "enabled": true,
+                                "size": 15,
+                                "color": "rgba(0,0,0,0.5)"
+                            }
+                        },
+                        "interaction": {
+                            "dragView": true,
+                            "zoomView": true,
+                            "dragNodes": false,
+                            "selectable": false,
+                            "selectConnectedEdges": false,
+                            "hoverConnectedEdges": false,
+                            "hideEdgesOnDrag": false,
+                            "hideNodesOnDrag": false
+                        },
+                        "physics": {
+                            "enabled": true,
+                            "stabilization": {
+                                "enabled": true,
+                                "fit": true
+                            },
+                            "barnesHut": {
+                                "avoidOverlap": 1,
+                                "centralGravity": 0.2,
+                                "damping": 0.90,
+                                "gravitationalConstant": -100000,
+                                "springConstant": 0.001,
+                                "springLength": 500
+                            }
                         }
-                    },
-                    "scaling": {
-                        "min": 1,
-                        "max": 25
-                    },
-                    "smooth": {
-                        "enabled": false
-                    },
-                    "shadow": {
-                        "enabled": true,
-                        "size": 15,
-                        "color": "rgba(0,0,0,0.5)"
                     }
-                },
-                "interaction": {
-                    "dragView": true,
-                    "zoomView": true,
-                    "dragNodes": false,
-                    "selectable": false,
-                    "selectConnectedEdges": false,
-                    "hoverConnectedEdges": false,
-                    "hideEdgesOnDrag": false,
-                    "hideNodesOnDrag": false
-                },
-                "physics": {
-                    "enabled": true,
-                    "stabilization": {
-                        "enabled": true,
-                        "fit": true
-                    },
-                    "barnesHut": {
-                        "avoidOverlap": 1,
-                        "centralGravity": 0.2,
-                        "damping": 0.90,
-                        "gravitationalConstant": -100000,
-                        "springConstant": 0.001,
-                        "springLength": 500
-                    }
-                }
-            }
-            """)
+                    """)
         visual.show(displayName)
 
     def drawGraphUiOptions(self, name: str):

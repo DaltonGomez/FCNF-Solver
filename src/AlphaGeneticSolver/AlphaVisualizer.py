@@ -40,12 +40,12 @@ class AlphaVisualizer:
         visual.from_nx(self.nx)
         # Sets visualization options using a JSON format (see vis.js documentation)
         visual.set_options("""
-            var options = {
-                "autoResize": true,
-                "width": "1000px",
-                "height": "800px",
-                "layout": { 
-                    "randomSeed":""" + str(self.individual.FCFN.visSeed) + "," +
+                    var options = {
+                        "autoResize": true,
+                        "width": "1000px",
+                        "height": "800px",
+                        "layout": { 
+                            "randomSeed":""" + str(self.individual.FCFN.visSeed) + "," +
                            """
                     "improvedLayout": true
                 },
@@ -109,7 +109,7 @@ class AlphaVisualizer:
                     "dragView": true,
                     "zoomView": true,
                     "dragNodes": false,
-                    "selectable": false,
+                    "selectable": true,
                     "selectConnectedEdges": false,
                     "hoverConnectedEdges": false,
                     "hideEdgesOnDrag": false,

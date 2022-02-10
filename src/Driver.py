@@ -1,19 +1,20 @@
 from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+from src.FixedChargeNetwork.GraphGenerator import GraphGenerator
 
 """DRIVER PY FILE"""
 
 # TEST OF RANDOM GRAPH GENERATOR
-# graphGen = GraphGenerator(100, 0.05, 10, 10, 50, 20)
-# graphGen.finalizeRandomNetwork("r100-5", 1, [20], [50], [1])
-# graphGen.saveFCFN()
+graphGen = GraphGenerator(100, 0.01, 10, 10, 50, 20)
+graphGen.finalizeRandomNetwork("r100-1", 3, [50], [20], [1])
+graphGen.saveFCFN()
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-5")
+flowNetwork.loadFCFN("r100-1")
 
 # TEST OF GA POPULATION
-population = AlphaPopulation(flowNetwork, 150, 25, 1)
+population = AlphaPopulation(flowNetwork, 80, 25, 50)
 population.evolvePopulation(0.25, 0.05, 0.75)
 
 # TEST OF MILP

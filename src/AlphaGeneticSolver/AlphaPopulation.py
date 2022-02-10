@@ -38,6 +38,7 @@ class AlphaPopulation:
     # ============================================
     def evolvePopulation(self, softMutationRate: float, hardMutationRate: float, crossoverRate: float):
         """Evolves the population based on the crossover and mutation operators"""
+        # TODO - Revise to match traditional GA structure
         random.seed()
         for generation in range(self.numGenerations):
             # Solve unsolved instances, re-rank, and display top individual
@@ -167,4 +168,4 @@ class AlphaPopulation:
     def visualizeIndividual(self, generation: str, individualRank: int):
         """Draws the .html file for the top individual"""
         self.rankPopulation()
-        self.population[individualRank].visualizeAlphaNetwork(frontCatName=generation + "-")
+        self.population[individualRank].visualizeAlphaNetwork(endCatName=generation)
