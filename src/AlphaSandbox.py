@@ -11,12 +11,13 @@ flowNetwork.loadFCFN("r100-3")
 alphaFN = AlphaIndividual(flowNetwork)
 alphaFN.initializeAlphaValuesConstantly(0.15)
 alphaFN.executeAlphaSolver(100)
-alphaFN.visualizeAlphaNetwork(frontCatName="1")
-# alphaFN.allUsedPaths()
+alphaFN.visualizeAlphaNetwork(endCatName="1")
+alphaFN.allUsedPaths()
+alphaFN.pathsVsElementsCost()
 
 # TEST OF MILP
-flowNetwork.executeSolver(100)
-flowNetwork.visualizeNetwork()
+# flowNetwork.executeSolver(100)
+# flowNetwork.visualizeNetwork()
 
 """
 # TEST OF CONSTANT ALPHA VALUES ACROSS INDIVIDUALS

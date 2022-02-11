@@ -26,7 +26,7 @@ class AlphaPopulation:
         self.populationSize = populationSize
         self.numGenerations = numGenerations
         self.population = []
-        # Evolution Hyperparameters (Tune with .setHyperparameters())
+        # Evolution Hyperparameters- Tune with setHyperparameters() method
         self.crossoverRate = 0.75
         self.mutationRate = 0.05
         # Initialize population

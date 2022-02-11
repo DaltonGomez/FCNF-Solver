@@ -96,7 +96,7 @@ class ExactSolver:
 
     def solveModel(self):
         """Solves the MILP model in CPLEX"""
-        print("Attempting to solve model...")
+        print("\nAttempting to solve model...")
         self.model.solve()
         self.isRun = True
         print("Solver execution complete...\n")

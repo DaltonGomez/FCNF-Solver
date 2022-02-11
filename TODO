@@ -2,12 +2,10 @@
 
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
-+ Update the GA to allow for multiple possible capacities (i.e. parallel edges)
-    - Cannot currently formulate LP constraints that force one capacity per edge in relaxed-LP
-    - OR Get rid of a parallel edges and go back to capacity, FC, VC assigned per edge
 + Implement operators that use pathing
     + Compute the bang-for-buck of paths as capacity/total cost ratio
     + Do mutations that update alphas along an entire path
+    + Consider implementing full source-allSink trees
 
 
 

@@ -1,3 +1,5 @@
+from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
+from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """DRIVER PY FILE"""
@@ -8,15 +10,20 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-5")
+flowNetwork.loadFCFN("r100-3")
 
-# TEST OF SOLVERS
-# alpha = AlphaIndividual(flowNetwork)
-# alpha.executeAlphaSolver(100)
-# alpha.visualizeAlphaNetwork()
-flowNetwork.executeSolver(80)
+# TEST OF ALPHA INDIVIDUAL
+alphaFN = AlphaIndividual(flowNetwork)
+alphaFN.initializeAlphaValuesConstantly(0.15)
+alphaFN.executeAlphaSolver(100)
+alphaFN.visualizeAlphaNetwork(endCatName="1")
+# alphaFN.allUsedPaths()
+
+# TEST OF MILP
+flowNetwork.executeSolver(100)
 flowNetwork.visualizeNetwork()
 
 # TEST OF GA POPULATION
-# population = AlphaPopulation(flowNetwork, 80, 25, 50)
-# population.evolvePopulation(0.25, 0.05, 0.75)
+population = AlphaPopulation(flowNetwork, 80, 25, 50)
+population.setHyperparameters(0.05, 0.75)
+population.evolvePopulation()
