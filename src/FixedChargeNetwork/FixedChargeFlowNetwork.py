@@ -7,7 +7,7 @@ from src.FixedChargeNetwork.Visualizer import Visualizer
 
 
 class FixedChargeFlowNetwork:
-    """Class that defines a Fixed Charge Flow Network with parallel edges allowed"""
+    """Class that defines a Fixed Charge Flow Network"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
@@ -16,10 +16,6 @@ class FixedChargeFlowNetwork:
         """Constructor of a FCNF instance"""
         # Input Network Attributes & Topology
         self.name = ""
-        self.edgeCaps = []
-        self.numEdgeCaps = 0
-        self.edgeFixedCosts = []
-        self.edgeVariableCosts = []
         self.numNodes = 0
         self.numSources = 0
         self.numSinks = 0
@@ -40,15 +36,15 @@ class FixedChargeFlowNetwork:
         self.visSeed = 1
 
     def addNode(self, nodeType: str, idNum: int, variableCost: int, capacity: int):
-        """Adds a new node to a FCFN instance- Used only in Graph Generation"""
+        """Adds a new node to a FCFN instance- CALL ONLY FROM GraphGeneration Class"""
         nodeName = nodeType + str(idNum)
         thisNode = Node(nodeName, variableCost, capacity)
         self.nodesDict[nodeName] = thisNode
 
-    def addEdge(self, idNum: int, fromNode: str, toNode: str):
-        """Adds a new edge to a FCFN instance- Used only in Graph Generation"""
+    def addEdge(self, idNum: int, fromNode: str, toNode: str, fixedCost: int, variableCost: int, capacity: int):
+        """Adds a new edge to a FCFN instance- CALL ONLY FROM GraphGeneration Class"""
         edgeName = "e" + str(idNum)
-        thisEdge = Edge(edgeName, fromNode, toNode)
+        thisEdge = Edge(edgeName, fromNode, toNode, fixedCost, variableCost, capacity)
         self.edgesDict[edgeName] = thisEdge
 
     # ============================================
@@ -101,24 +97,6 @@ class FixedChargeFlowNetwork:
         self.visSeed.pop(0)
         self.visSeed = int(self.visSeed.pop(0))
         lines.pop(0)
-        # Assign potential edge capacities
-        edgeCapStrings = lines[0].split()
-        edgeCapStrings.pop(0)
-        edgeCapMap = map(int, edgeCapStrings)
-        self.edgeCaps = list(edgeCapMap)
-        lines.pop(0)
-        # Assign potential edge fixed costs
-        edgeFCStrings = lines[0].split()
-        edgeFCStrings.pop(0)
-        edgeFCMap = map(int, edgeFCStrings)
-        self.edgeFixedCosts = list(edgeFCMap)
-        lines.pop(0)
-        # Assign potential edge variable costs
-        edgeVCStrings = lines[0].split()
-        edgeVCStrings.pop(0)
-        edgeVCMap = map(int, edgeVCStrings)
-        self.edgeVariableCosts = list(edgeVCMap)
-        lines.pop(0)
         # Build network
         for line in lines:
             data = line.split()
@@ -142,14 +120,13 @@ class FixedChargeFlowNetwork:
                 self.numIntermediateNodes += 1
             # Construct edge objects and add to dictionary and network
             elif data[0][0] == "e":
-                thisEdge = Edge(data[0], data[1], data[2])
+                thisEdge = Edge(data[0], data[1], data[2], int(data[3]), int(data[4]), int(data[5]))
                 self.edgesDict[data[0]] = thisEdge
                 self.nodesDict[data[1]].outgoingEdges.append(data[0])
                 self.nodesDict[data[2]].incomingEdges.append(data[0])
         # Assign network size
         self.numNodes = len(self.nodesDict)
         self.numEdges = len(self.edgesDict)
-        self.numEdgeCaps = len(self.edgeCaps)
 
     def saveSolutionToDisc(self):
         """Saves all the data of a Fixed Charge Flow Network solution"""

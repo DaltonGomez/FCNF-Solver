@@ -9,15 +9,21 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 class GraphGenerator:
     """Class that generators graphs and saves them to .txt encodes as test instances"""
 
-    def __init__(self, nodes: int, edgeProbability: float, sources: int, sinks: int, nodeCapLimit: int,
-                 nodeCostLimit: int):
+    def __init__(self, name: str, numNodes: int, edgeProbability: float, numSources: int, numSinks: int,
+                 nodeCostBounds: list, nodeCapBounds: list, edgeFixedCostBounds: list, edgeVariableCostBounds: list,
+                 edgeCapacityBounds: list, visSeed: int):
         """Constructor of a GraphGenerator instance"""
-        self.nodes = nodes
+        self.name = name
+        self.visSeed = visSeed
+        self.numNodes = numNodes
         self.edgeProbability = edgeProbability
-        self.sources = sources
-        self.sinks = sinks
-        self.nodeCapLimit = nodeCapLimit
-        self.nodeCostLimit = nodeCostLimit
+        self.numSources = numSources
+        self.numSinks = numSinks
+        self.nodeCapBounds = nodeCapBounds
+        self.nodeCostBounds = nodeCostBounds
+        self.edgeFixedCostBounds = edgeFixedCostBounds
+        self.edgeVariableCostBounds = edgeVariableCostBounds
+        self.edgeCapacityBounds = edgeCapacityBounds
         self.outputFCFN = FixedChargeFlowNetwork()
 
         self.network = nx.DiGraph()
@@ -27,7 +33,7 @@ class GraphGenerator:
 
     def generateRandomNetwork(self):
         """Generates a random Fixed Charge Flow Network using NetworkX"""
-        self.network = nx.fast_gnp_random_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
+        self.network = nx.fast_gnp_random_graph(self.numNodes, self.edgeProbability, seed=None, directed=True)
         # self.network = nx.binomial_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
         # self.network = nx.erdos_renyi_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
 
@@ -36,16 +42,16 @@ class GraphGenerator:
         random.seed()
         # Track sources and sinks already assigned
         sourceSinksAssigned = []
-        for i in range(self.nodes):
+        for i in range(self.numNodes):
             sourceSinksAssigned.append(0)
         # Randomly assign all sources
         sourceID = 0
-        while self.outputFCFN.numSources < self.sources:
-            randNode = random.randint(0, self.nodes - 1)
+        while self.outputFCFN.numSources < self.numSources:
+            randNode = random.randint(0, self.numNodes - 1)
             if sourceSinksAssigned[randNode] == 0:
                 sourceSinksAssigned[randNode] = 1
-                cap = random.randint(0, self.nodeCapLimit)
-                cost = random.randint(0, self.nodeCostLimit)
+                cost = random.randint(self.nodeCostBounds[0], self.nodeCostBounds[1])
+                cap = random.randint(self.nodeCapBounds[0], self.nodeCapBounds[1])
                 self.outputFCFN.addNode("s", sourceID, cost, cap)
                 self.nodeMap[randNode] = "s" + str(sourceID)
                 self.outputFCFN.numSources += 1
@@ -54,12 +60,12 @@ class GraphGenerator:
                 continue
         # Randomly assign all sinks
         sinkID = 0
-        while self.outputFCFN.numSinks < self.sinks:
-            randNode = random.randint(0, self.nodes - 1)
+        while self.outputFCFN.numSinks < self.numSinks:
+            randNode = random.randint(0, self.numNodes - 1)
             if sourceSinksAssigned[randNode] == 0:
                 sourceSinksAssigned[randNode] = 1
-                cap = random.randint(0, self.nodeCapLimit)
-                cost = random.randint(0, self.nodeCostLimit)
+                cost = random.randint(self.nodeCostBounds[0], self.nodeCostBounds[1])
+                cap = random.randint(self.nodeCapBounds[0], self.nodeCapBounds[1])
                 self.outputFCFN.addNode("t", sinkID, cost, cap)
                 self.nodeMap[randNode] = "t" + str(sinkID)
                 self.outputFCFN.numSinks += 1
@@ -68,7 +74,7 @@ class GraphGenerator:
                 continue
         # Assign all intermediate nodes
         intermediateNodeID = 0
-        for n in range(self.nodes):
+        for n in range(self.numNodes):
             if sourceSinksAssigned[n] == 0:
                 sourceSinksAssigned[n] = 1
                 self.outputFCFN.addNode("n", intermediateNodeID, 0, 0)
@@ -86,22 +92,17 @@ class GraphGenerator:
             if fromNode[0] == "t" or toNode[0] == "s":
                 continue
             else:
-                self.outputFCFN.addEdge(edgeID, fromNode, toNode)
+                fixedCost = random.randint(self.edgeFixedCostBounds[0], self.edgeFixedCostBounds[1])
+                variableCost = random.randint(self.edgeVariableCostBounds[0], self.edgeVariableCostBounds[1])
+                capacity = random.randint(self.edgeCapacityBounds[0], self.edgeCapacityBounds[1])
+                self.outputFCFN.addEdge(edgeID, fromNode, toNode, fixedCost, variableCost, capacity)
                 fromNodeObj = self.outputFCFN.nodesDict[fromNode]
                 fromNodeObj.outgoingEdges.append("e" + str(edgeID))
                 toNodeObj = self.outputFCFN.nodesDict[toNode]
                 toNodeObj.incomingEdges.append("e" + str(edgeID))
                 edgeID += 1
-
-    def finalizeRandomNetwork(self, name: str, visSeed: int, edgeCaps: list, edgeFixedCost: list,
-                              edgeVariableCosts: list):
-        """Adds on remaining attributes to complete the FCFN and returns the object"""
-        self.outputFCFN.name = name
-        self.outputFCFN.visSeed = visSeed
-        self.outputFCFN.edgeCaps = edgeCaps
-        self.outputFCFN.numEdgeCaps = len(edgeCaps)
-        self.outputFCFN.edgeFixedCosts = edgeFixedCost
-        self.outputFCFN.edgeVariableCosts = edgeVariableCosts
+        self.outputFCFN.name = self.name
+        self.outputFCFN.visSeed = self.visSeed
         self.outputFCFN.numNodes = len(self.outputFCFN.nodesDict)
         self.outputFCFN.numEdges = len(self.outputFCFN.edgesDict)
         return self.outputFCFN
@@ -119,23 +120,9 @@ class GraphGenerator:
         print("Saving " + networkFile + " to: " + catPath)
         # Construct output block
         outputBlock = ["# Network name, visualization seed, and parallel edge data", "Name= " + self.outputFCFN.name,
-                       "VisualSeed= " + str(self.outputFCFN.visSeed)]
-        edgeCapsLine = "EdgeCaps= "
-        for edgeCap in self.outputFCFN.edgeCaps:
-            edgeCapsLine = edgeCapsLine + str(edgeCap) + " "
-        outputBlock.append(edgeCapsLine)
-        edgeFCLine = "EdgeFixedCosts= "
-        for edgeFC in self.outputFCFN.edgeFixedCosts:
-            edgeFCLine = edgeFCLine + str(edgeFC) + " "
-        outputBlock.append(edgeFCLine)
-        edgeVCLine = "EdgeVariableCosts= "
-        for edgeVC in self.outputFCFN.edgeVariableCosts:
-            edgeVCLine = edgeVCLine + str(edgeVC) + " "
-        outputBlock.append(edgeVCLine)
-        outputBlock.append("#")
-        outputBlock.append("# Additional comments can be added below with a leading '#'")
-        outputBlock.append("#")
-        outputBlock.append("# Source nodes of form: <id, variableCost, capacity>")
+                       "VisualSeed= " + str(self.outputFCFN.visSeed), "#",
+                       "# Additional comments can be added below with a leading '#'", "#",
+                       "# Source nodes of form: <id, variableCost, capacity>"]
         for i in range(self.outputFCFN.numSources):
             srcObj = self.outputFCFN.nodesDict["s" + str(i)]
             outputBlock.append("s" + str(i) + " " + str(srcObj.variableCost) + " " + str(srcObj.capacity))
@@ -152,7 +139,9 @@ class GraphGenerator:
         outputBlock.append("# Edges of form: <id, fromNode, toNode>")
         for i in range(self.outputFCFN.numEdges):
             edjObj = self.outputFCFN.edgesDict["e" + str(i)]
-            outputBlock.append("e" + str(i) + " " + edjObj.fromNode + " " + edjObj.toNode)
+            outputBlock.append(
+                "e" + str(i) + " " + edjObj.fromNode + " " + edjObj.toNode + " " + str(edjObj.fixedCost) + " " + str(
+                    edjObj.variableCost) + " " + str(edjObj.capacity))
         # Open file, write lines in output block, and close file
         with open(catPath, "w") as outputFile:
             for line in outputBlock:

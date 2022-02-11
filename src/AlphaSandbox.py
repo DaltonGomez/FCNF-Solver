@@ -1,4 +1,3 @@
-from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """USED FOR EXPERIMENTATION WITH ALPHA VALUES"""
@@ -10,18 +9,18 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-4")
+flowNetwork.loadFCFN("small")
 
 # TEST OF ALPHA INDIVIDUAL
-alphaFN = AlphaIndividual(flowNetwork)
-alphaFN.initializeAlphaValuesConstantly(0.15)
-alphaFN.executeAlphaSolver(150)
-alphaFN.visualizeAlphaNetwork(frontCatName="1")
-alphaFN.allUsedPaths()
+# alphaFN = AlphaIndividual(flowNetwork)
+# alphaFN.initializeAlphaValuesConstantly(0.15)
+# alphaFN.executeAlphaSolver(150)
+# alphaFN.visualizeAlphaNetwork(frontCatName="1")
+# alphaFN.allUsedPaths()
 
 # TEST OF MILP
-# flowNetwork.executeSolver(80)
-# flowNetwork.visualizeNetwork()
+flowNetwork.executeSolver(35)
+flowNetwork.visualizeNetwork()
 
 # TEST OF GA POPULATION
 # population = AlphaPopulation(flowNetwork, 80, 25, 1)
