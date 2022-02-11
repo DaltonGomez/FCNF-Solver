@@ -2,7 +2,7 @@ from docplex.mp.model import Model
 
 
 class AlphaSolver:
-    """Class that solves an alpha-reduced FCFN instance w/ via a LP model within CPLEX 20.1"""
+    """Class that solves an alpha-reduced FCFN instance w/ via a LP model within CPLEX"""
 
     def __init__(self, alphaIndividual, minTargetFlow: int):
         """Constructor of an AlphaSolver instance
@@ -20,9 +20,7 @@ class AlphaSolver:
         # Source and sink decision variables
         self.model.sourceFlowVars = self.model.continuous_var_list(self.individual.FCFN.numSources, name="s")
         self.model.sinkFlowVars = self.model.continuous_var_list(self.individual.FCFN.numSinks, name="t")
-        self.model.edgeFlowVars = self.model.continuous_var_matrix(self.individual.FCFN.numEdges,
-                                                                   self.individual.FCFN.numEdgeCaps,
-                                                                   name="e", lb=0)
+        self.model.edgeFlowVars = self.model.continuous_var_list(self.individual.FCFN.numEdges, name="e", lb=0)
 
         # =================== CONSTRAINTS ===================
         # Minimum flow constraint (Constructed as the sum of all sinks in-flows)
@@ -32,11 +30,9 @@ class AlphaSolver:
 
         # Edge opening/capacity constraints
         for i in range(self.individual.FCFN.numEdges):
-            for j in range(self.individual.FCFN.numEdgeCaps):
-                ctName = "e" + str(i) + "_" + str(j) + "Cap"
-                edgeCapacity = self.individual.FCFN.edgeCaps[j]
-                self.model.add_constraint(
-                    self.model.edgeFlowVars[(i, j)] <= edgeCapacity, ctname=ctName)
+            ctName = "e" + str(i) + "Cap"
+            edgeCapacity = self.individual.FCFN.edgesDict["e" + str(i)].capacity
+            self.model.add_constraint(self.model.edgeFlowVars[i] <= edgeCapacity, ctname=ctName)
 
         # Capacity constraints of sources
         for i in range(self.individual.FCFN.numSources):
@@ -49,14 +45,6 @@ class AlphaSolver:
             ctName = "t" + str(i) + "Cap"
             sinkCapacity = self.individual.FCFN.nodesDict["t" + str(i)].capacity
             self.model.add_constraint(self.model.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
-
-        # Only one capacity per edge constraints
-        # TODO - Revise to account for parallel edges (Currently throws a bug!)
-        for i in range(self.individual.FCFN.numEdges):
-            for j in range(self.individual.FCFN.numEdgeCaps):
-                ctName = "e" + str(i) + "_" + str(j) + "OneFlowPerEdge"
-                self.model.add_constraint(self.model.edgeFlowVars[(i, j)] <= sum(
-                    self.model.edgeFlowVars[(i, k)] for k in range(self.individual.FCFN.numEdgeCaps)), ctname=ctName)
 
         # Conservation of flow constraints
         for node in self.individual.FCFN.nodesDict:
@@ -74,24 +62,20 @@ class AlphaSolver:
             if nodeType == "s":
                 ctName = "s" + str(nodeID) + "Conserv"
                 self.model.add_constraint(self.model.sourceFlowVars[int(nodeID)] ==
-                                          sum(self.model.edgeFlowVars[(i, j)] for i in outgoingIDs for j in
-                                              range(self.individual.FCFN.numEdgeCaps)),
+                                          sum(self.model.edgeFlowVars[i] for i in outgoingIDs),
                                           ctname=ctName)
             # Sink flow conservation
             elif nodeType == "t":
                 ctName = "t" + str(nodeID) + "Conserv"
                 self.model.add_constraint(self.model.sinkFlowVars[int(nodeID)] ==
-                                          sum(self.model.edgeFlowVars[(i, j)] for i in incomingIDs for j in
-                                              range(self.individual.FCFN.numEdgeCaps)),
+                                          sum(self.model.edgeFlowVars[i] for i in incomingIDs),
                                           ctname=ctName)
             # Transshipment flow conservation
             elif nodeType == "n":
                 ctName = "n" + str(nodeID) + "Conserv"
                 self.model.add_constraint(sum(
-                    self.model.edgeFlowVars[(i, j)] for i in incomingIDs for j in
-                    range(self.individual.FCFN.numEdgeCaps)) - sum(
-                    self.model.edgeFlowVars[(m, n)] for m in outgoingIDs for n in
-                    range(self.individual.FCFN.numEdgeCaps)) == 0,
+                    self.model.edgeFlowVars[i] for i in incomingIDs) - sum(
+                    self.model.edgeFlowVars[j] for j in outgoingIDs) == 0,
                                           ctname=ctName)
         # =================== OBJECTIVE FUNCTION ===================
         self.model.set_objective("min",
@@ -103,11 +87,11 @@ class AlphaSolver:
                                      self.model.sinkFlowVars[j] * self.individual.FCFN.nodesDict[
                                          "t" + str(j)].variableCost for j
                                      in range(self.individual.FCFN.numSinks)) + sum(
-                                     self.model.edgeFlowVars[(m, n)] * (self.individual.FCFN.edgeVariableCosts[n] +
-                                                                        self.individual.alphaValues[m] *
-                                                                        self.individual.FCFN.edgeFixedCosts[n]) for m
-                                     in range(self.individual.FCFN.numEdges) for n in
-                                     range(self.individual.FCFN.numEdgeCaps)))
+                                     self.model.edgeFlowVars[n] * (
+                                             self.individual.FCFN.edgesDict["e" + str(n)].variableCost +
+                                             self.individual.alphaValues[n] *
+                                             self.individual.FCFN.edgesDict["e" + str(n)].fixedCost) for n in
+                                     range(self.individual.FCFN.numEdges)))
 
     def solveModel(self):
         """Solves the alpha-relaxed LP model in CPLEX"""
@@ -141,17 +125,13 @@ class AlphaSolver:
                     thisSink.flow = sinkValues[i]
                     thisSink.totalCost = thisSink.flow * thisSink.variableCost
             # Disperse solution results back to edges
-            edgeValues = self.model.solution.get_value_dict(self.model.edgeFlowVars)
+            edgeValues = self.model.solution.get_value_list(self.model.edgeFlowVars)
             for i in range(self.individual.FCFN.numEdges):
                 thisEdge = self.individual.FCFN.edgesDict["e" + str(i)]
-                for j in range(self.individual.FCFN.numEdgeCaps):
-                    if edgeValues[(i, j)] > 0:
-                        thisEdge.opened = True
-                        thisEdge.capacity = self.individual.FCFN.edgeCaps[j]
-                        thisEdge.fixedCost = self.individual.FCFN.edgeFixedCosts[j]
-                        thisEdge.variableCost = self.individual.FCFN.edgeVariableCosts[j]
-                        thisEdge.flow = edgeValues[(i, j)]
-                        thisEdge.totalCost = thisEdge.flow * thisEdge.variableCost + thisEdge.fixedCost
+                if edgeValues[i] > 0:
+                    thisEdge.opened = True
+                    thisEdge.flow = edgeValues[i]
+                    thisEdge.totalCost = thisEdge.flow * thisEdge.variableCost + thisEdge.fixedCost
             # Disperse solution results back to intermediate nodes
             for i in range(self.individual.FCFN.numIntermediateNodes):
                 thisNode = self.individual.FCFN.nodesDict["n" + str(i)]
@@ -190,13 +170,10 @@ class AlphaSolver:
         for i in range(self.individual.FCFN.numSinks):
             print(self.model.get_constraint_by_name("t" + str(i) + "Conserv"))
             print(self.model.get_constraint_by_name("t" + str(i) + "Cap"))
-        for i in range(
-                self.individual.FCFN.numNodes - (self.individual.FCFN.numSources + self.individual.FCFN.numSinks)):
+        for i in range(self.individual.FCFN.numIntermediateNodes):
             print(self.model.get_constraint_by_name("n" + str(i) + "Conserv"))
         for i in range(self.individual.FCFN.numEdges):
-            for j in range(self.individual.FCFN.numEdgeCaps):
-                print(self.model.get_constraint_by_name("e" + str(i) + "_" + str(j) + "Cap"))
-                print(self.model.get_constraint_by_name("e" + str(i) + "_" + str(j) + "OneFlowPerEdge"))
+            print(self.model.get_constraint_by_name("e" + str(i) + "Cap"))
 
     def printSolution(self):
         """Prints the solution data of the Individual instance solved by the alpha-reduced LP model"""

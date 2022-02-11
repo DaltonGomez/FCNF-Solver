@@ -12,31 +12,38 @@ class AlphaPopulation:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, FCFNinstance: FixedChargeFlowNetwork, minTargetFlow: int, populationSize: int,
-                 numGenerations: int):
+    def __init__(self, FCFN: FixedChargeFlowNetwork, minTargetFlow: int, populationSize: int, numGenerations: int):
         """Constructor of a Population instance"""
         # Input network and topology data (NOTE: Input network must be unsolved. If it's not, reload from disc.)
-        if FCFNinstance.isSolved is False:
-            self.FCFN = FCFNinstance
+        if FCFN.isSolved is False:
+            self.FCFN = FCFN
         else:
             unsolvedFCFN = FixedChargeFlowNetwork()
-            unsolvedFCFN.loadFCFN(FCFNinstance.name)
+            unsolvedFCFN.loadFCFN(FCFN.name)
             self.FCFN = unsolvedFCFN
-        # Population/GA attributes
+        # Population/GA Attributes
         self.minTargetFlow = minTargetFlow
         self.populationSize = populationSize
         self.numGenerations = numGenerations
         self.population = []
+        # Evolution Hyperparameters (Tune with .setHyperparameters())
+        self.crossoverRate = 0.75
+        self.mutationRate = 0.05
         # Initialize population
         for i in range(populationSize):
             thisIndividual = AlphaIndividual(self.FCFN)
             thisIndividual.initializeAlphaValuesRandomly()
             self.population.append(thisIndividual)
 
+    def setHyperparameters(self, crossoverRate: float, mutationRate: float):
+        """Sets the hyperparameters dictating how the population evolves"""
+        self.crossoverRate = crossoverRate
+        self.mutationRate = mutationRate
+
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self, softMutationRate: float, hardMutationRate: float, crossoverRate: float):
+    def evolvePopulation(self):
         """Evolves the population based on the crossover and mutation operators"""
         # TODO - Revise to match traditional GA structure
         random.seed()
@@ -48,16 +55,16 @@ class AlphaPopulation:
 
             # Crossover Operators
             self.randomOnePointCrossoverWithoutDeath(0, 1, "fromLeft")
-            if random.random() < crossoverRate:
+            if random.random() < self.crossoverRate:
                 randParentOne = random.randint(0, self.populationSize - 1)
                 randParentTwo = random.randint(0, self.populationSize - 1)
                 self.randomOnePointCrossoverWithDeath(randParentOne, randParentTwo, "fromLeft")
 
             # Mutation operators
             for individual in range(self.populationSize):
-                if random.random() < softMutationRate:
+                if random.random() < self.mutationRate * 5:
                     self.randomSingleMutation(individual)
-                elif random.random() < hardMutationRate:
+                elif random.random() < self.mutationRate:
                     self.randomTotalMutation(individual)
 
     # =================================================

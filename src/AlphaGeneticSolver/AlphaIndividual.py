@@ -6,7 +6,6 @@ from src.AlphaGeneticSolver.AlphaSolver import AlphaSolver
 from src.AlphaGeneticSolver.AlphaVisualizer import AlphaVisualizer
 
 
-# noinspection PyMethodMayBeStatic
 class AlphaIndividual:
     """Class that defines an alpha-LP reduction of a FCFN problem"""
 
@@ -91,6 +90,7 @@ class AlphaIndividual:
                         visitedEdges.append(outgoingEdge)
                         nextNode = edgeObj.toNode
                         stack.insert(0, nextNode)
+        # TODO - Finish implementing pathing and delete print statements
         print("\n")
         print(visitedNodes)
         print(visitedEdges)
@@ -119,11 +119,11 @@ class AlphaIndividual:
             self.paths.append(thisPath)
             thisPath.printPathData()
         # Source has multiple paths/is a tree
+        # TODO - Update to recursively decompose trees into their component sub-paths by calling the DFS method
         else:
             thisPath = AlphaPath(visitedNodes, visitedEdges, False, self.FCFN)
             self.paths.append(thisPath)
             thisPath.printPathData()
-            # TODO - Update to recursively decompose trees into their component sub-paths by calling the DFS method
 
     def numCommonEdges(self, visitedEdges: list, nextPossibleEdges: list):
         """Counts the number of common edges between two list"""

@@ -171,7 +171,6 @@ class ExactSolver:
         for i in range(self.FCFN.numNodes - (self.FCFN.numSources + self.FCFN.numSinks)):
             print(self.model.get_constraint_by_name("n" + str(i) + "Conserv"))
         for i in range(self.FCFN.numEdges):
-            print(self.model.get_constraint_by_name("e" + str(i) + "CapPerEdge"))
             print(self.model.get_constraint_by_name("e" + str(i) + "CapAndOpen"))
 
     def printSolution(self):
