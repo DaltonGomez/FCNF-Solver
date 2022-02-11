@@ -151,11 +151,11 @@ class AlphaIndividual:
                 common += 1
         return common
 
-    def calculateTrueCostByPaths(self):
+    def calculateTotalCostByPaths(self):
         """Computes the true cost of the complete network by the paths and not the nodes/edges"""
         costByPaths = 0
         for path in self.paths:
-            costByPaths += path.trueCost
+            costByPaths += path.totalCost
         return costByPaths
 
     def pathsVsElementsCost(self):
@@ -177,7 +177,7 @@ class AlphaIndividual:
         for t in range(self.FCFN.numSinks):
             trueSinkCost += self.FCFN.nodesDict["t" + str(t)].totalCost
         print("TRUE TOTAL COST = " + str(self.trueCost))
-        print("PATH TOTAL COST = " + str(self.calculateTrueCostByPaths()))
+        print("PATH TOTAL COST = " + str(self.calculateTotalCostByPaths()))
         print("True Edge Cost = " + str(trueEdgeCost))
         print("Path Edge Cost = " + str(edgeCostByPaths))
         print("True Source Cost = " + str(trueSourceCost))

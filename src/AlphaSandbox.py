@@ -14,6 +14,7 @@ alphaFN.executeAlphaSolver(100)
 alphaFN.visualizeAlphaNetwork(endCatName="1")
 alphaFN.allUsedPaths()
 alphaFN.pathsVsElementsCost()
+alphaFN.printAllPathData()
 
 # TEST OF MILP
 # flowNetwork.executeSolver(100)
