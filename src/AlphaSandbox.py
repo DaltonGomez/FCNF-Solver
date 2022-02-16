@@ -4,12 +4,12 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 """USED FOR EXPERIMENTATION WITH ALPHA VALUES"""
 
 # TEST OF RANDOM GRAPH GENERATOR
-# graphGen = GraphGenerator("r500-5", 500, 0.05, 2, 4, [100, 100], [100, 100], [20, 200], [1, 10], [100, 100], 3)
+# graphGen = GraphGenerator("r500-4(2,4)", 500, 0.04, 2, 4, [100, 100], [100, 100], [20, 200], [1, 10], [100, 100], 3)
 # graphGen.saveFCFN()
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r500-5")
+flowNetwork.loadFCFN("r500-5(2,4)")
 
 ga = AlphaPopulation(flowNetwork, 200, 1, 1)
 ga.population[0].executeAlphaSolver(200)
