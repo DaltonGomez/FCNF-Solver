@@ -34,7 +34,8 @@ class AlphaVisualizer:
 
     def drawGraph(self, name: str):
         """Displays the FCNF using PyVis and a set of hardcoded options"""
-        displayName = name + "_Cost=" + str(round(self.individual.trueCost)) + ".html"
+        displayName = name + "_Cost=" + str(round(self.individual.trueCost)) + "_Target=" + str(
+            round(self.individual.minTargetFlow)) + ".html"
         print("Drawing " + displayName + "...")
         visual = netVis("800px", "1000px", directed=True)
         visual.from_nx(self.nx)

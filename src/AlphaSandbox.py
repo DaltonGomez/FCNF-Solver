@@ -9,14 +9,22 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r500-5(2,4)")
+flowNetwork.loadFCFN("r100-5(10,10)")
 
+ga = AlphaPopulation(flowNetwork, 200, 10, 1)
+ga.initializePopulation([0.0, 1.0])
+print(ga.tournamentSelection(5, 2))
+
+"""
+# Test of path-based mutation
 ga = AlphaPopulation(flowNetwork, 200, 1, 1)
-ga.population[0].executeAlphaSolver(200)
-ga.population[0].visualizeAlphaNetwork(endCatName="1")
-ga.randomPathBasedMutation(0)
-ga.population[0].executeAlphaSolver(200)
-ga.population[0].visualizeAlphaNetwork(endCatName="2")
+ga.initializePopulation([0.0, 1.0])
+for i in range(10):
+    ga.population[0].executeAlphaSolver(200)
+    ga.population[0].visualizeAlphaNetwork(endCatName=str(i))
+    ga.mostDensePathMutation(0, 0 + i/20, 1 + i/20)
+    # ga.mostDensePathMutation(0, 0 + i / 20, 1 + i / 20)
+"""
 
 # TEST OF ALPHA INDIVIDUAL
 # alphaFN = AlphaIndividual(flowNetwork)
@@ -27,7 +35,7 @@ ga.population[0].visualizeAlphaNetwork(endCatName="2")
 # alphaFN.printAllPathData()
 
 # TEST OF MILP
-# flowNetwork.executeSolver(100)
+# flowNetwork.executeSolver(200)
 # flowNetwork.visualizeNetwork()
 
 """

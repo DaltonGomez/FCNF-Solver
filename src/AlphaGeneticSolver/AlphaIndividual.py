@@ -162,16 +162,8 @@ class AlphaIndividual:
             theseAlphaValues.append(constant)
         self.alphaValues = theseAlphaValues
 
-    def initializeAlphaValuesRandomly(self):
-        """Randomly initializes alpha values on [0, 1]"""
-        random.seed()
-        theseAlphaValues = []
-        for i in range(self.FCFN.numEdges):
-            theseAlphaValues.append(random.random())
-        self.alphaValues = theseAlphaValues
-
-    def initializeAlphaValuesRandomlyOnRange(self, lowerBound: float, upperBound: float):
-        """Randomly initializes alpha values on [LB, UB] range"""
+    def initializeAlphaValuesRandomly(self, lowerBound=0.0, upperBound=1.0):
+        """Randomly initializes alpha values on [LB, UB] range, which defaults to [0, 1]"""
         random.seed()
         theseAlphaValues = []
         for i in range(self.FCFN.numEdges):
