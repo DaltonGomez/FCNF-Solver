@@ -9,6 +9,7 @@ HIGH-PRIORITY CHANGES & BUGS:
 + Reorganize AlphaIndividual so that each one does not hold an entire instance of the FCFN
     + Do THIS^ by decoupling a FCFN instance from a FCFN solution instance
 + Break-up path-based operators to have selection (of the paths) methods and crossover/mutation methods
++ Implement hyper-operators that delegate to a specific method based on an input argument
 
 
 

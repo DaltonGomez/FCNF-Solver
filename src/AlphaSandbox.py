@@ -9,11 +9,16 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-5(10,10)")
+# flowNetwork.loadFCFN("r100-5(10,10)")
+flowNetwork.loadFCFN("small")
 
-ga = AlphaPopulation(flowNetwork, 200, 10, 1)
+ga = AlphaPopulation(flowNetwork, 20, 2, 1)
 ga.initializePopulation([0.0, 1.0])
-print(ga.tournamentSelection(5, 2))
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+ga.randomOnePointCrossoverWithParentReplacement(0, 1, "fromLeft")
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
 
 """
 # Test of path-based mutation

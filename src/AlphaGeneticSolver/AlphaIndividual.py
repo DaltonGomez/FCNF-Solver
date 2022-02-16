@@ -36,7 +36,7 @@ class AlphaIndividual:
     # ============================================
     # ============== SOLVER METHODS ==============
     # ============================================
-    def executeAlphaSolver(self, minTargetFlow: int):
+    def executeAlphaSolver(self, minTargetFlow: int) -> None:
         """Solves the FCFN approximately with an alpha-relaxed LP model in CPLEX"""
         self.relaxedSolver = AlphaSolver(self, minTargetFlow)
         self.relaxedSolver.buildModel()
@@ -45,7 +45,7 @@ class AlphaIndividual:
         self.calculateTrueCost()
         # self.relaxedSolver.printSolverOverview()
 
-    def calculateTrueCost(self):
+    def calculateTrueCost(self) -> None:
         """Calculates the true cost from the alpha-relaxed LP solution"""
         if self.isSolved is True:
             cost = 0
@@ -64,7 +64,7 @@ class AlphaIndividual:
     # =============================================
     # ============== PATHING METHODS ==============
     # =============================================
-    def allUsedPaths(self):
+    def allUsedPaths(self) -> None:
         """Computes all the source-sink paths that have a positive flow"""
         for i in range(self.FCFN.numSources):
             source = "s" + str(i)
@@ -73,7 +73,7 @@ class AlphaIndividual:
                 visited = self.depthFirstSearch(source)
                 self.constructPaths(visited)
 
-    def depthFirstSearch(self, startNode: str, incomingEdge=""):
+    def depthFirstSearch(self, startNode: str, incomingEdge="") -> list:
         """DFS implementation used in computing all used paths"""
         stack = []
         visitedNodes = []
@@ -96,7 +96,7 @@ class AlphaIndividual:
                         stack.insert(0, nextNode)
         return [visitedNodes, visitedEdges]
 
-    def constructPaths(self, visited: list):
+    def constructPaths(self, visited: list) -> None:
         """Constructs all positive flow paths originating from a single source"""
         visitedNodes = visited[0]
         visitedEdges = visited[1]
@@ -143,7 +143,7 @@ class AlphaIndividual:
                         self.constructPaths(recursiveVisited)
 
     @staticmethod
-    def numCommonEdges(visitedEdges: list, nextPossibleEdges: list):
+    def numCommonEdges(visitedEdges: list, nextPossibleEdges: list) -> int:
         """Counts the number of common edges between two list"""
         common = 0
         for edge in visitedEdges:
@@ -154,7 +154,7 @@ class AlphaIndividual:
     # ==========================================================
     # ============== ALPHA INITIALIZATION METHODS ==============
     # ==========================================================
-    def initializeAlphaValuesConstantly(self, constant: float):
+    def initializeAlphaValuesConstantly(self, constant: float) -> None:
         """Initializes all alpha values to the input constant"""
         random.seed()
         theseAlphaValues = []
@@ -162,7 +162,7 @@ class AlphaIndividual:
             theseAlphaValues.append(constant)
         self.alphaValues = theseAlphaValues
 
-    def initializeAlphaValuesRandomly(self, lowerBound=0.0, upperBound=1.0):
+    def initializeAlphaValuesRandomly(self, lowerBound=0.0, upperBound=1.0) -> None:
         """Randomly initializes alpha values on [LB, UB] range, which defaults to [0, 1]"""
         random.seed()
         theseAlphaValues = []
@@ -173,7 +173,7 @@ class AlphaIndividual:
     # =========================================================
     # ============== VISUALIZATION/PRINT METHODS ==============
     # =========================================================
-    def visualizeAlphaNetwork(self, frontCatName="", endCatName=""):
+    def visualizeAlphaNetwork(self, frontCatName="", endCatName="") -> None:
         """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
         if self.visualizer is None:
             self.visualizer = AlphaVisualizer(self)
@@ -181,14 +181,14 @@ class AlphaIndividual:
         else:
             self.visualizer.drawGraph(frontCatName + self.name + endCatName)
 
-    def calculateTotalCostByPaths(self):
+    def calculateTotalCostByPaths(self) -> int:
         """Computes the true cost of the complete network by the paths and not the nodes/edges"""
         costByPaths = 0
         for path in self.paths:
             costByPaths += path.totalCost
         return costByPaths
 
-    def pathsVsElementsCost(self):
+    def pathsVsElementsCost(self) -> None:
         """Compares true costs found by pathing vs. enumerating individual elements"""
         edgeCostByPaths = 0
         sourceCostByPaths = 0
@@ -215,7 +215,7 @@ class AlphaIndividual:
         print("True Sink Cost = " + str(trueSinkCost))
         print("Path Sink Cost = " + str(sinkCostByPaths))
 
-    def printAllPathData(self):
+    def printAllPathData(self) -> None:
         """Prints all the data for each path in the network"""
         for path in self.paths:
             path.printPathData()

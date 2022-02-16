@@ -16,7 +16,7 @@ class Edge:
         self.flow = 0
         self.totalCost = 0
 
-    def printEdgeData(self):
+    def printEdgeData(self) -> None:
         """Prints all relevant data for an edge"""
         print("=============== Edge ===============")
         print("Edge ID = " + self.edgeID)

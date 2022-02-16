@@ -35,13 +35,13 @@ class FixedChargeFlowNetwork:
         self.visualizer = None
         self.visSeed = 1
 
-    def addNode(self, nodeType: str, idNum: int, variableCost: int, capacity: int):
+    def addNode(self, nodeType: str, idNum: int, variableCost: int, capacity: int) -> None:
         """Adds a new node to a FCFN instance- CALL ONLY FROM GraphGeneration Class"""
         nodeName = nodeType + str(idNum)
         thisNode = Node(nodeName, variableCost, capacity)
         self.nodesDict[nodeName] = thisNode
 
-    def addEdge(self, idNum: int, fromNode: str, toNode: str, fixedCost: int, variableCost: int, capacity: int):
+    def addEdge(self, idNum: int, fromNode: str, toNode: str, fixedCost: int, variableCost: int, capacity: int) -> None:
         """Adds a new edge to a FCFN instance- CALL ONLY FROM GraphGeneration Class"""
         edgeName = "e" + str(idNum)
         thisEdge = Edge(edgeName, fromNode, toNode, fixedCost, variableCost, capacity)
@@ -50,7 +50,7 @@ class FixedChargeFlowNetwork:
     # ============================================
     # ============== SOLVER METHODS ==============
     # ============================================
-    def executeSolver(self, minTargetFlow: int):
+    def executeSolver(self, minTargetFlow: int) -> None:
         """Solves the FCFN exactly with a MILP model in CPLEX"""
         if self.solver is None:
             self.solver = ExactSolver(self, minTargetFlow)  # FYI- ExactSolver constructor does not have FCFN type hint
@@ -66,7 +66,7 @@ class FixedChargeFlowNetwork:
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
-    def visualizeNetwork(self, catName=""):
+    def visualizeNetwork(self, catName="") -> None:
         """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
         if self.visualizer is None:
             self.visualizer = Visualizer(self)
@@ -75,7 +75,7 @@ class FixedChargeFlowNetwork:
     # =================================================
     # ============== DATA IN/OUT METHODS ==============
     # =================================================
-    def loadFCFN(self, network: str):
+    def loadFCFN(self, network: str) -> None:
         """Loads a FCFN from a text file encoding"""
         # Path management
         currDir = os.getcwd()
@@ -128,7 +128,7 @@ class FixedChargeFlowNetwork:
         self.numNodes = len(self.nodesDict)
         self.numEdges = len(self.edgesDict)
 
-    def saveSolutionToDisc(self):
+    def saveSolutionToDisc(self) -> None:
         """Saves all the data of a Fixed Charge Flow Network solution"""
         # TODO - Implement
         pass
@@ -136,26 +136,26 @@ class FixedChargeFlowNetwork:
     # ===========================================
     # ============== PRINT METHODS ==============
     # ===========================================
-    def printAllNodeData(self):
+    def printAllNodeData(self) -> None:
         """Prints all the data for each node in the network"""
         for node in self.nodesDict:
             thisNode = self.nodesDict[node]
             thisNode.printNodeData()
 
-    def printAllEdgeData(self):
+    def printAllEdgeData(self) -> None:
         """Prints all the data for each edge in the network"""
         for edge in self.edgesDict:
             thisEdge = self.edgesDict[edge]
             thisEdge.printEdgeData()
 
-    def printFullModel(self):
+    def printFullModel(self) -> None:
         """Prints the solution data of the MILP solver to the console"""
         if self.solver is not None:
             self.solver.printModel()
         else:
             print("Solver must be initialized and executed before printing the model!")
 
-    def printFullSolution(self):
+    def printFullSolution(self) -> None:
         """Prints the solution data of the MILP solver to the console"""
         if self.solver is not None:
             self.solver.printSolution()

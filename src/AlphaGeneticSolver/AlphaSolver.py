@@ -14,7 +14,7 @@ class AlphaSolver:
         self.model = Model(name="AlphaFCFN-LP-RelaxedSolver", log_output=False, cts_by_name=True)
         self.isRun = False
 
-    def buildModel(self):
+    def buildModel(self) -> None:
         """Builds the decision variables, constraints, and object function of the LP model from the AlphaIndividual instance"""
         # =================== DECISION VARIABLES ===================
         # Source and sink decision variables
@@ -93,14 +93,14 @@ class AlphaSolver:
                                              self.individual.FCFN.edgesDict["e" + str(n)].fixedCost) for n in
                                      range(self.individual.FCFN.numEdges)))
 
-    def solveModel(self):
+    def solveModel(self) -> None:
         """Solves the alpha-relaxed LP model in CPLEX"""
         # print("Attempting to solve model...")
         self.model.solve()
         self.isRun = True
         # print("Solver execution complete...\n")
 
-    def writeSolution(self):
+    def writeSolution(self) -> None:
         """Writes the solution to the individual instance by updating output attributes across the FCFN, nodes, and edges"""
         if self.model.solution is not None:
             # Disperse solution results back to individual
@@ -144,7 +144,7 @@ class AlphaSolver:
         else:
             print("No feasible solution exists!")
 
-    def printSolverOverview(self):
+    def printSolverOverview(self) -> None:
         """Prints the most important and concise details of the solver, model and solution"""
         self.model.print_information()
         if self.isRun is True:
@@ -153,7 +153,7 @@ class AlphaSolver:
             print("Total Flow: " + str(self.individual.totalFlow))
             print("True Cost: " + str(self.individual.trueCost))
 
-    def printModel(self):
+    def printModel(self) -> None:
         """Prints all constraints of the alpha-relaxed LP model for the Individual instance (FOR DEBUGGING- DON'T CALL ON LARGE INPUTS)"""
         print("=============== MILP MODEL OF FCNF INSTANCE ========================")
         self.model.print_information()
@@ -175,7 +175,7 @@ class AlphaSolver:
         for i in range(self.individual.FCFN.numEdges):
             print(self.model.get_constraint_by_name("e" + str(i) + "Cap"))
 
-    def printSolution(self):
+    def printSolution(self) -> None:
         """Prints the solution data of the Individual instance solved by the alpha-relaxed LP model"""
         print("=============== SOLUTION DETAILS ========================")
         print(self.model.get_solve_details())

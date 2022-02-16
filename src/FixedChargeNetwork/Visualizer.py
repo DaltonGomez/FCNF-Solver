@@ -12,7 +12,7 @@ class Visualizer:
         self.nx = nx.DiGraph()
         self.populateGraph()
 
-    def populateGraph(self):
+    def populateGraph(self) -> None:
         """Populates a NetworkX instance with the FCFN data"""
         for node in self.FCFN.nodesDict:
             nodeObj = self.FCFN.nodesDict[node]
@@ -32,7 +32,7 @@ class Visualizer:
             elif edgeObj.opened is False:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="grey")
 
-    def drawGraph(self, name: str):
+    def drawGraph(self, name: str) -> None:
         """Displays the FCNF using PyVis and a set of hardcoded options"""
         displayName = name + "_Cost=" + str(round(self.FCFN.totalCost)) + "_Target=" + str(
             round(self.FCFN.minTargetFlow)) + ".html"
@@ -135,7 +135,7 @@ class Visualizer:
                     """)
         visual.show(displayName)
 
-    def drawGraphUiOptions(self, name: str):
+    def drawGraphUiOptions(self, name: str) -> None:
         """Displays the FCNF using PyVis and provides a UI for customizing options, which can be copied as JSON"""
         displayName = name + str(self.FCFN.minTargetFlow) + ".html"
         print("Drawing " + displayName + "...")

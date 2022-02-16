@@ -14,7 +14,7 @@ class ExactSolver:
         self.model = Model(name="FCFN-MILP-ExactSolver", log_output=False, cts_by_name=True)
         self.isRun = False
 
-    def buildModel(self):
+    def buildModel(self) -> None:
         """Builds the decision variables, constraints, and object function of the MILP model from the FCFN instance"""
         # =================== DECISION VARIABLES ===================
         # Source and sink decision variables
@@ -94,14 +94,14 @@ class ExactSolver:
                                      m in
                                      range(self.FCFN.numEdges)))
 
-    def solveModel(self):
+    def solveModel(self) -> None:
         """Solves the MILP model in CPLEX"""
         print("\nAttempting to solve model...")
         self.model.solve()
         self.isRun = True
         print("Solver execution complete...\n")
 
-    def writeSolution(self):
+    def writeSolution(self) -> None:
         """Writes the solution to the FCFN instance by updating output attributes across the FCFN, nodes, and edges"""
         if self.model.solution is not None:
             # Disperse solution results back to FCFN
@@ -143,7 +143,7 @@ class ExactSolver:
         else:
             print("No feasible solution exists!")
 
-    def printSolverOverview(self):
+    def printSolverOverview(self) -> None:
         """Prints the most important and concise details of the solver, model and solution"""
         self.model.print_information()
         if self.isRun is True:
@@ -151,7 +151,7 @@ class ExactSolver:
             print("Total Cost: " + str(self.FCFN.totalCost))
             print("Total Flow: " + str(self.FCFN.totalFlow))
 
-    def printModel(self):
+    def printModel(self) -> None:
         """Prints all constraints of the MILP model for the FCFN instance (FOR DEBUGGING- DON'T CALL ON LARGE INPUTS)"""
         print("=============== MILP MODEL OF FCNF INSTANCE ========================")
         self.model.print_information()
@@ -173,7 +173,7 @@ class ExactSolver:
         for i in range(self.FCFN.numEdges):
             print(self.model.get_constraint_by_name("e" + str(i) + "CapAndOpen"))
 
-    def printSolution(self):
+    def printSolution(self) -> None:
         """Prints the solution data of the FCFN instance solved by the MILP model"""
         print("=============== SOLUTION DETAILS ========================")
         print(self.model.get_solve_details())

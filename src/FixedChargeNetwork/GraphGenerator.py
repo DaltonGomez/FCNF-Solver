@@ -31,14 +31,14 @@ class GraphGenerator:
         self.generateRandomNetwork()
         self.parseRandomNetwork()
 
-    def generateRandomNetwork(self):
+    def generateRandomNetwork(self) -> None:
         """Generates a random Fixed Charge Flow Network using NetworkX"""
         self.network = nx.fast_gnp_random_graph(self.numNodes, self.edgeProbability, seed=None, directed=True)
         # Other types of NetworkX random graph generators:
         # self.network = nx.binomial_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
         # self.network = nx.erdos_renyi_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
 
-    def parseRandomNetwork(self):
+    def parseRandomNetwork(self) -> FixedChargeFlowNetwork:
         """Randomly assigns nodes as sources or sinks up to the input limit"""
         random.seed()
         # Track sources and sinks already assigned
@@ -108,11 +108,11 @@ class GraphGenerator:
         self.outputFCFN.numEdges = len(self.outputFCFN.edgesDict)
         return self.outputFCFN
 
-    def visualizeRandomNetwork(self):
+    def visualizeRandomNetwork(self) -> None:
         """Draws the randomly generator network with PyVis"""
         self.outputFCFN.visualizeNetwork()
 
-    def saveFCFN(self):
+    def saveFCFN(self) -> None:
         """Saves an unsolved version of a NetworkX-generated FCFN as a .txt file within the project directory"""
         # Path management
         currDir = os.getcwd()

@@ -23,7 +23,7 @@ class Node:
         self.flow = 0
         self.totalCost = 0
 
-    def printNodeData(self):
+    def printNodeData(self) -> None:
         """Prints all relevant data for a node"""
         print("=============== NODE ===============")
         print("Node ID = " + self.nodeID)

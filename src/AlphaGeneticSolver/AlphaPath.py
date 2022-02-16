@@ -30,7 +30,7 @@ class AlphaPath:
         self.totalCost = self.startCost + self.endCost + self.routingCost
         self.totalCostPerFlow = round(self.totalCost / self.flow)
 
-    def printPathData(self):
+    def printPathData(self) -> None:
         """Prints all relevant data for a path"""
         if self.truePath is True:
             print("=============== TRUE PATH ===============")
@@ -55,7 +55,7 @@ class AlphaPath:
             print("Routing Cost = " + str(self.routingCost))
             print("Cost Per Unit Flow = " + str(self.routingCostPerFlow))
 
-    def printPathTopology(self):
+    def printPathTopology(self) -> None:
         """Prints only the nodes and edges of a path"""
         print("=============== PATH ===============")
         print("Nodes:")

@@ -12,7 +12,7 @@ class AlphaVisualizer:
         self.nx = nx.DiGraph()
         self.populateGraph()
 
-    def populateGraph(self):
+    def populateGraph(self) -> None:
         """Populates a NetworkX instance with the AlphaIndividual data"""
         for node in self.individual.FCFN.nodesDict:
             nodeObj = self.individual.FCFN.nodesDict[node]
@@ -32,7 +32,7 @@ class AlphaVisualizer:
             elif edgeObj.opened is False:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="grey")
 
-    def drawGraph(self, name: str):
+    def drawGraph(self, name: str) -> None:
         """Displays the FCNF using PyVis and a set of hardcoded options"""
         displayName = name + "_Cost=" + str(round(self.individual.trueCost)) + "_Target=" + str(
             round(self.individual.minTargetFlow)) + ".html"
@@ -135,7 +135,7 @@ class AlphaVisualizer:
             """)
         visual.show(displayName)
 
-    def drawGraphUiOptions(self, name: str):
+    def drawGraphUiOptions(self, name: str) -> None:
         """Displays the FCNF using PyVis and provides a UI for customizing options, which can be copied as JSON"""
         displayName = name + "_Cost=" + str(round(self.individual.trueCost)) + ".html"
         print("Drawing " + displayName + "...")
@@ -147,7 +147,7 @@ class AlphaVisualizer:
         visual.show_buttons()  # Display for UI option customization
         visual.show(displayName)
 
-    def drawSmallGraph(self, name: str):
+    def drawSmallGraph(self, name: str) -> None:
         """Displays a SMALL FCNF using PyVis and a set of hardcoded options"""
         displayName = name + "_Cost=" + str(round(self.individual.trueCost)) + ".html"
         print("Drawing " + displayName + "...")

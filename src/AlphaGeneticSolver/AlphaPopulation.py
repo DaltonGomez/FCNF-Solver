@@ -31,12 +31,12 @@ class AlphaPopulation:
         self.crossoverRate = 0.75
         self.mutationRate = 0.05
 
-    def setHyperparameters(self, crossoverRate: float, mutationRate: float):
+    def setHyperparameters(self, crossoverRate: float, mutationRate: float) -> None:
         """Sets the hyperparameters dictating how the population evolves"""
         self.crossoverRate = crossoverRate
         self.mutationRate = mutationRate
 
-    def initializePopulation(self, initialAlphaRange: list):
+    def initializePopulation(self, initialAlphaRange: list) -> None:
         """Initializes the population with alpha values, solves each individual, and ranks"""
         # Initialize population
         for i in range(self.populationSize):
@@ -50,7 +50,7 @@ class AlphaPopulation:
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self):
+    def evolvePopulation(self) -> AlphaIndividual:
         """Evolves the population based on the selection, crossover and mutation operators
         Pseudocode:
         initialize(population)
@@ -69,7 +69,7 @@ class AlphaPopulation:
 
             # CROSSOVER
             if random.random() < self.crossoverRate:
-                self.randomOnePointCrossoverWithoutDeath(0, 1, "fromLeft")
+                self.randomOnePointCrossoverWithParentReplacement(0, 1, "fromLeft")
 
             # MUTATION
             for individual in range(self.populationSize):
@@ -80,32 +80,37 @@ class AlphaPopulation:
             self.solvePopulation()
             self.rankPopulation()
             self.visualizeTopIndividual(generation)
+        return self.population[0]
 
     # =================================================
     # ============== SELECTION OPERATORS ==============
     # =================================================
-    def randomSelection(self):
-        """Returns a random individual in the population"""
+    def randomSelection(self, selectionSize: int) -> list:
+        """Returns a random subset of individuals in the population (w/o replacement)"""
         random.seed()
-        randIndividualIndex = random.randint(0, self.populationSize - 1)
-        return randIndividualIndex
+        populationIDs = []
+        for i in range(self.populationSize):
+            populationIDs.append(i)
+        randomIndividualsIDs = random.sample(populationIDs, selectionSize)
+        return randomIndividualsIDs
 
-    def topSelection(self):
-        """Returns the top individual in the population"""
-        topIndividual = self.population[0]
-        return 0
+    def topSelection(self, selectionSize: int) -> list:
+        """Returns the top n individuals in the population"""
+        self.rankPopulation()
+        topIndividualIDs = []
+        # topIndividuals = []
+        for i in range(selectionSize):
+            topIndividualIDs.append(i)
+            # topIndividuals.append(self.population[i])
+        return topIndividualIDs
 
-    def topTwoSelection(self):
-        """Returns the top two individuals in the population"""
-        topTwoIndividuals = [self.population[0], self.population[1]]
-        return [0, 1]
-
-    def rouletteWheelSelection(self):
+    def rouletteWheelSelection(self) -> list:
         """Selects individuals probabilistically by their normalized fitness"""
-        # TODO - Implement
+        self.rankPopulation()
+
         pass
 
-    def tournamentSelection(self, tournamentSize: int, sectionSize: int):
+    def tournamentSelection(self, tournamentSize: int, selectionSize: int) -> list:
         """Selects the best two individuals out of a randomly chosen subset of size n"""
         random.seed()
         # Select subset of population
@@ -120,7 +125,7 @@ class AlphaPopulation:
             tournament.append((individual, cost))
         tournament.sort(key=lambda c: c[1], reverse=False)
         selection = []
-        for i in range(sectionSize):
+        for i in range(selectionSize):
             topPick = tournament.pop(0)
             selection.append(topPick[0])
         return selection
@@ -128,13 +133,11 @@ class AlphaPopulation:
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
-    def randomOnePointCrossoverWithoutDeath(self, parentOneIndex: int, parentTwoIndex: int, direction: str):
+    def randomOnePointCrossoverWithWeakestTwoReplacement(self, parentOneIndex: int, parentTwoIndex: int,
+                                                         direction: str) -> None:
         """Crossover of 2 chromosomes at a random point where the bottom 2 individuals die off"""
         random.seed()
-        # Kill off the two weakest individuals
         self.rankPopulation()
-        self.population.pop(-1)
-        self.population.pop(-1)
         parentOneChromosome = copy.deepcopy(self.population[parentOneIndex].alphaValues)
         parentTwoChromosome = copy.deepcopy(self.population[parentTwoIndex].alphaValues)
         if direction == "fromRight":
@@ -156,10 +159,15 @@ class AlphaPopulation:
         offspringTwo.alphaValues = parentOneLeftGenes
         for gene in parentTwoRightGenes:
             offspringTwo.alphaValues.append(gene)
+        # Kill off weakest two individuals
+        self.population.pop(-1)
+        self.population.pop(-1)
+        # Add in offspring
         self.population.append(offspringOne)
         self.population.append(offspringTwo)
 
-    def randomOnePointCrossoverWithDeath(self, parentOneIndex: int, parentTwoIndex: int, direction: str):
+    def randomOnePointCrossoverWithParentReplacement(self, parentOneIndex: int, parentTwoIndex: int,
+                                                     direction: str) -> None:
         """Crossover of 2 individual's chromosome at a random point where the parents are removed from the population"""
         random.seed()
         parentOne = self.population.pop(parentOneIndex)
@@ -189,14 +197,14 @@ class AlphaPopulation:
         self.population.append(offspringOne)
         self.population.append(offspringTwo)
 
-    def pathBasedCrossover(self):
+    def pathBasedCrossover(self) -> None:
         """Crossover based on the cost/flow density of all paths"""
         # TODO - Implement
 
     # =================================================
     # ============== MUTATION OPERATORS ==============
     # =================================================
-    def randomSingleMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0):
+    def randomSingleMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
         """Mutates an individual at only one random gene in the chromosome"""
         random.seed()
         mutatePoint = random.randint(0, self.FCFN.numEdges - 1)
@@ -205,13 +213,13 @@ class AlphaPopulation:
         mutatedIndividual.alphaValues[mutatePoint] = random.uniform(lowerBound, upperBound)
         self.population[individualNum] = mutatedIndividual
 
-    def randomTotalMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0):
+    def randomTotalMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
         """Mutates the entire chromosome of an individual"""
         mutatedIndividual = AlphaIndividual(self.FCFN)
         mutatedIndividual.initializeAlphaValuesRandomly(lowerBound=lowerBound, upperBound=upperBound)
         self.population[individualNum] = mutatedIndividual
 
-    def randomSinglePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0):
+    def randomSinglePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
         """Mutates one entire path of an individual randomly"""
         random.seed()
         parentIndividual = self.population[individualNum]
@@ -226,7 +234,7 @@ class AlphaPopulation:
             mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
         self.population[individualNum] = mutatedIndividual
 
-    def mostDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0):
+    def mostDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
         """Mutates an individual's entire path that has the highest cost/flow density"""
         parentIndividual = self.population[individualNum]
         # If the paths have not been computed for the individual, do so
@@ -246,7 +254,7 @@ class AlphaPopulation:
             mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
         self.population[individualNum] = mutatedIndividual
 
-    def leastDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0):
+    def leastDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
         """Mutates an individual's entire path that has the lowest cost/flow density"""
         parentIndividual = self.population[individualNum]
         # If the paths have not been computed for the individual, do so
@@ -269,27 +277,27 @@ class AlphaPopulation:
     # ============================================
     # ============== HELPER METHODS ==============
     # ============================================
-    def solvePopulation(self):
+    def solvePopulation(self) -> None:
         """Solves the alpha-relaxed LP of each individual in the population"""
         for individual in self.population:
             if individual.isSolved is False:
                 individual.executeAlphaSolver(self.minTargetFlow)
 
-    def rankPopulation(self):
+    def rankPopulation(self) -> None:
         """Ranks the population from least cost to greatest (i.e. fitness)"""
         self.population.sort(key=lambda x: x.trueCost, reverse=False)  # reverse=False ranks least to greatest
 
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
-    def visualizeTopIndividual(self, generation: int):
+    def visualizeTopIndividual(self, generation: int) -> None:
         """Prints the data and draws the graph of the top individual"""
         # Print statement & visualization w/ timeout to ensure correct visualization rendering order
         print("Generation= " + str(generation) + "\tBest Individual= " + str(self.population[0].trueCost))
         self.visualizeIndividual(str(generation), 0)  # Second param = 0 --> Top individual
-        time.sleep(0.5)
 
-    def visualizeIndividual(self, generation: str, individualRank: int):
+    def visualizeIndividual(self, generation: str, individualRank: int) -> None:
         """Draws the .html file for the top individual"""
         self.rankPopulation()
         self.population[individualRank].visualizeAlphaNetwork(endCatName=generation)
+        time.sleep(0.25)
