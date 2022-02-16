@@ -6,6 +6,7 @@ HIGH-PRIORITY CHANGES & BUGS:
     + Compute the bang-for-buck of paths as capacity/total cost ratio
     + Do mutations that update alphas along an entire path
     + Consider implementing full source-allSink trees
++ Reorganize AlphaIndividual so that each one does not hold an entire instance of the FCFN
 
 
 

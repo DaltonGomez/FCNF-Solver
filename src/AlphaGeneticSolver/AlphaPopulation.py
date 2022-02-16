@@ -44,28 +44,53 @@ class AlphaPopulation:
     # ============== EVOLUTION LOOP ==============
     # ============================================
     def evolvePopulation(self):
-        """Evolves the population based on the crossover and mutation operators"""
-        # TODO - Revise to match traditional GA structure
+        """Evolves the population based on the selection, crossover and mutation operators
+        Pseudocode:
+        initialize(population)
+        while termination is not met:
+            crossover(selection(population))
+            mutate(selection(population))
+            evaluate(population)
+        return bestIndividual(population)
+        """
         random.seed()
         for generation in range(self.numGenerations):
-            # Solve unsolved instances, re-rank, and display top individual
-            self.solvePopulation()
-            self.rankPopulation()
-            self.visualizeTopIndividual(generation)
 
-            # Crossover Operators
+            # CROSSOVER
             self.randomOnePointCrossoverWithoutDeath(0, 1, "fromLeft")
             if random.random() < self.crossoverRate:
                 randParentOne = random.randint(0, self.populationSize - 1)
                 randParentTwo = random.randint(0, self.populationSize - 1)
                 self.randomOnePointCrossoverWithDeath(randParentOne, randParentTwo, "fromLeft")
 
-            # Mutation operators
+            # MUTATION
             for individual in range(self.populationSize):
                 if random.random() < self.mutationRate * 5:
                     self.randomSingleMutation(individual)
                 elif random.random() < self.mutationRate:
                     self.randomTotalMutation(individual)
+
+            # EVALUATE
+            self.solvePopulation()
+            self.rankPopulation()
+            self.visualizeTopIndividual(generation)
+
+    # =================================================
+    # ============== SELECTION OPERATORS ==============
+    # =================================================
+    def topTwoSelection(self):
+        """Returns the top two individuals in the population"""
+        return [self.population[0], self.population[1]]
+
+    def rouletteWheelSelection(self):
+        """Selects individuals probabilistically by their normalized fitness"""
+        # TODO - Implement
+        pass
+
+    def tournamentSelection(self, tournamentSize: int):
+        """Selects the best two individuals out of a randomly chosen subset of size n"""
+        # TODO - Implement
+        pass
 
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
@@ -131,6 +156,10 @@ class AlphaPopulation:
         self.population.append(offspringOne)
         self.population.append(offspringTwo)
 
+    def pathBasedCrossover(self):
+        """Crossover based on the cost/flow density of all paths"""
+        # TODO - Implement
+
     # =================================================
     # ============== MUTATION OPERATORS ==============
     # =================================================
@@ -148,6 +177,10 @@ class AlphaPopulation:
         mutatedIndividual = AlphaIndividual(self.FCFN)
         mutatedIndividual.initializeAlphaValuesRandomly()
         self.population[individualNum] = mutatedIndividual
+
+    def pathBasedMutation(self, individualNum: int):
+        """Mutates the entire path of an individual based on the cost/flow density of all paths"""
+        # TODO - Implement
 
     # ============================================
     # ============== HELPER METHODS ==============
