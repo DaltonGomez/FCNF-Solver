@@ -1,20 +1,30 @@
-from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
+from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """USED FOR EXPERIMENTATION WITH ALPHA VALUES"""
 
+# TEST OF RANDOM GRAPH GENERATOR
+# graphGen = GraphGenerator("r500-5", 500, 0.05, 2, 4, [100, 100], [100, 100], [20, 200], [1, 10], [100, 100], 3)
+# graphGen.saveFCFN()
+
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-3")
+flowNetwork.loadFCFN("r500-5")
+
+ga = AlphaPopulation(flowNetwork, 200, 1, 1)
+ga.population[0].executeAlphaSolver(200)
+ga.population[0].visualizeAlphaNetwork(endCatName="1")
+ga.randomPathBasedMutation(0)
+ga.population[0].executeAlphaSolver(200)
+ga.population[0].visualizeAlphaNetwork(endCatName="2")
 
 # TEST OF ALPHA INDIVIDUAL
-alphaFN = AlphaIndividual(flowNetwork)
-alphaFN.initializeAlphaValuesConstantly(0.15)
-alphaFN.executeAlphaSolver(100)
-alphaFN.visualizeAlphaNetwork(endCatName="1")
-alphaFN.allUsedPaths()
-alphaFN.pathsVsElementsCost()
-alphaFN.printAllPathData()
+# alphaFN = AlphaIndividual(flowNetwork)
+# alphaFN.executeAlphaSolver(100)
+# alphaFN.visualizeAlphaNetwork(endCatName="1")
+# alphaFN.allUsedPaths()
+# alphaFN.pathsVsElementsCost()
+# alphaFN.printAllPathData()
 
 # TEST OF MILP
 # flowNetwork.executeSolver(100)

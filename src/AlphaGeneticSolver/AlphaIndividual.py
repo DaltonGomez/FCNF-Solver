@@ -151,6 +151,44 @@ class AlphaIndividual:
                 common += 1
         return common
 
+    # ==========================================================
+    # ============== ALPHA INITIALIZATION METHODS ==============
+    # ==========================================================
+    def initializeAlphaValuesConstantly(self, constant: float):
+        """Initializes all alpha values to the input constant"""
+        random.seed()
+        theseAlphaValues = []
+        for i in range(self.FCFN.numEdges):
+            theseAlphaValues.append(constant)
+        self.alphaValues = theseAlphaValues
+
+    def initializeAlphaValuesRandomly(self):
+        """Randomly initializes alpha values on [0, 1]"""
+        random.seed()
+        theseAlphaValues = []
+        for i in range(self.FCFN.numEdges):
+            theseAlphaValues.append(random.random())
+        self.alphaValues = theseAlphaValues
+
+    def initializeAlphaValuesRandomlyOnRange(self, lowerBound: float, upperBound: float):
+        """Randomly initializes alpha values on [LB, UB] range"""
+        random.seed()
+        theseAlphaValues = []
+        for i in range(self.FCFN.numEdges):
+            theseAlphaValues.append(random.uniform(lowerBound, upperBound))
+        self.alphaValues = theseAlphaValues
+
+    # =========================================================
+    # ============== VISUALIZATION/PRINT METHODS ==============
+    # =========================================================
+    def visualizeAlphaNetwork(self, frontCatName="", endCatName=""):
+        """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
+        if self.visualizer is None:
+            self.visualizer = AlphaVisualizer(self)
+            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
+        else:
+            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
+
     def calculateTotalCostByPaths(self):
         """Computes the true cost of the complete network by the paths and not the nodes/edges"""
         costByPaths = 0
@@ -189,41 +227,3 @@ class AlphaIndividual:
         """Prints all the data for each path in the network"""
         for path in self.paths:
             path.printPathData()
-
-    # ==========================================================
-    # ============== ALPHA INITIALIZATION METHODS ==============
-    # ==========================================================
-    def initializeAlphaValuesConstantly(self, constant: float):
-        """Initializes all alpha values to the input constant"""
-        random.seed()
-        theseAlphaValues = []
-        for i in range(self.FCFN.numEdges):
-            theseAlphaValues.append(constant)
-        self.alphaValues = theseAlphaValues
-
-    def initializeAlphaValuesRandomly(self):
-        """Randomly initializes alpha values on [0, 1]"""
-        random.seed()
-        theseAlphaValues = []
-        for i in range(self.FCFN.numEdges):
-            theseAlphaValues.append(random.random())
-        self.alphaValues = theseAlphaValues
-
-    def initializeAlphaValuesRandomlyOnRange(self, lowerBound: float, upperBound: float):
-        """Randomly initializes alpha values on [LB, UB] range"""
-        random.seed()
-        theseAlphaValues = []
-        for i in range(self.FCFN.numEdges):
-            theseAlphaValues.append(random.uniform(lowerBound, upperBound))
-        self.alphaValues = theseAlphaValues
-
-    # ===================================================
-    # ============== VISUALIZATION METHODS ==============
-    # ===================================================
-    def visualizeAlphaNetwork(self, frontCatName="", endCatName=""):
-        """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
-        if self.visualizer is None:
-            self.visualizer = AlphaVisualizer(self)
-            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
-        else:
-            self.visualizer.drawGraph(frontCatName + self.name + endCatName)

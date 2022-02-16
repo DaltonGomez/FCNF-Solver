@@ -178,9 +178,21 @@ class AlphaPopulation:
         mutatedIndividual.initializeAlphaValuesRandomly()
         self.population[individualNum] = mutatedIndividual
 
-    def pathBasedMutation(self, individualNum: int):
-        """Mutates the entire path of an individual based on the cost/flow density of all paths"""
-        # TODO - Implement
+    def randomPathBasedMutation(self, individualNum: int):
+        """Mutates one entire path of an individual randomly"""
+        random.seed()
+        parentIndividual = self.population[individualNum]
+        # If the paths have not been computed for the individual, do so
+        if len(parentIndividual.paths) == 0:
+            parentIndividual.allUsedPaths()
+        mutatedPath = random.choice(parentIndividual.paths)
+        print(mutatedPath.edges)
+        mutatedIndividual = AlphaIndividual(self.FCFN)
+        mutatedIndividual.alphaValues = parentIndividual.alphaValues
+        for edge in mutatedPath.edges:
+            edgeNum = int(edge.lstrip("e"))
+            mutatedIndividual.alphaValues[edgeNum] = random.random()  # TODO - Currently randomizing on [0, 1]. Change?
+        self.population[individualNum] = mutatedIndividual
 
     # ============================================
     # ============== HELPER METHODS ==============

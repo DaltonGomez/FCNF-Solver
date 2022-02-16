@@ -7,7 +7,8 @@ HIGH-PRIORITY CHANGES & BUGS:
     + Do mutations that update alphas along an entire path
     + Consider implementing full source-allSink trees
 + Reorganize AlphaIndividual so that each one does not hold an entire instance of the FCFN
-
+    + Do THIS^ by decoupling a FCFN instance from a FCFN solution instance
++ Update GraphGenerator saves all input params as a header in the .txt file
 
 
 

@@ -34,6 +34,7 @@ class GraphGenerator:
     def generateRandomNetwork(self):
         """Generates a random Fixed Charge Flow Network using NetworkX"""
         self.network = nx.fast_gnp_random_graph(self.numNodes, self.edgeProbability, seed=None, directed=True)
+        # Other types of NetworkX random graph generators:
         # self.network = nx.binomial_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
         # self.network = nx.erdos_renyi_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
 
@@ -118,10 +119,20 @@ class GraphGenerator:
         networkFile = self.outputFCFN.name + ".txt"
         catPath = os.path.join(currDir, "networks", networkFile)
         print("Saving " + networkFile + " to: " + catPath)
-        # Construct output block
-        outputBlock = ["# Network name, visualization seed, and parallel edge data", "Name= " + self.outputFCFN.name,
-                       "VisualSeed= " + str(self.outputFCFN.visSeed), "#",
-                       "# Additional comments can be added below with a leading '#'", "#",
+        # Construct output block by beginning with graph metadata collated in a header
+        outputBlock = ["# Network name and visualization seed",
+                       "Name= " + self.outputFCFN.name,
+                       "VisualSeed= " + str(self.outputFCFN.visSeed),
+                       "#", "# numNodes= " + str(self.numNodes),
+                       "# edgeProb= " + str(self.edgeProbability),
+                       "# numSources= " + str(self.numSources),
+                       "# numSinks= " + str(self.numSinks),
+                       "# nodeCapBounds= " + str(self.nodeCapBounds),
+                       "# nodeCostBounds= " + str(self.nodeCostBounds),
+                       "# edgeFixedCostBounds= " + str(self.edgeFixedCostBounds),
+                       "# edgeVariableCostBounds= " + str(self.edgeVariableCostBounds),
+                       "# edgeCapacityBounds= " + str(self.edgeCapacityBounds),
+                       "#", "# Additional comments can be added below with a leading '#'", "#",
                        "# Source nodes of form: <id, variableCost, capacity>"]
         for i in range(self.outputFCFN.numSources):
             srcObj = self.outputFCFN.nodesDict["s" + str(i)]
