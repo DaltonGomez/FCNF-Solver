@@ -7,7 +7,7 @@ from src.AlphaGeneticSolver.AlphaVisualizer import AlphaVisualizer
 
 
 class AlphaIndividual:
-    """Class that defines an alpha-LP reduction of a FCFN problem"""
+    """Class that defines an alpha-LP relaxation of a FCFN problem"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
