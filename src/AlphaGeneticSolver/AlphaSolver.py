@@ -2,7 +2,7 @@ from docplex.mp.model import Model
 
 
 class AlphaSolver:
-    """Class that solves an alpha-reduced FCFN instance w/ via a LP model within CPLEX"""
+    """Class that solves an alpha-relaxed FCFN instance w/ via a LP model within CPLEX"""
 
     def __init__(self, alphaIndividual, minTargetFlow: int):
         """Constructor of an AlphaSolver instance
@@ -11,7 +11,7 @@ class AlphaSolver:
         self.individual = alphaIndividual
         self.minTargetFlow = minTargetFlow
         # Solver model
-        self.model = Model(name="AlphaFCFN-LP-ReducedSolver", log_output=False, cts_by_name=True)
+        self.model = Model(name="AlphaFCFN-LP-RelaxedSolver", log_output=False, cts_by_name=True)
         self.isRun = False
 
     def buildModel(self):
@@ -154,7 +154,7 @@ class AlphaSolver:
             print("True Cost: " + str(self.individual.trueCost))
 
     def printModel(self):
-        """Prints all constraints of the alpha-reduced LP model for the Individual instance (FOR DEBUGGING- DON'T CALL ON LARGE INPUTS)"""
+        """Prints all constraints of the alpha-relaxed LP model for the Individual instance (FOR DEBUGGING- DON'T CALL ON LARGE INPUTS)"""
         print("=============== MILP MODEL OF FCNF INSTANCE ========================")
         self.model.print_information()
         print("=============== OBJECTIVE FUNCTION ========================")
@@ -176,7 +176,7 @@ class AlphaSolver:
             print(self.model.get_constraint_by_name("e" + str(i) + "Cap"))
 
     def printSolution(self):
-        """Prints the solution data of the Individual instance solved by the alpha-reduced LP model"""
+        """Prints the solution data of the Individual instance solved by the alpha-relaxed LP model"""
         print("=============== SOLUTION DETAILS ========================")
         print(self.model.get_solve_details())
         if self.individual.FCFN.isSolved is True:

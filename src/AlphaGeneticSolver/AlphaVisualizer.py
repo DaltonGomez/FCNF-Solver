@@ -3,7 +3,7 @@ from pyvis.network import Network as netVis
 
 
 class AlphaVisualizer:
-    """Class that allows visualizations of an alpha-reduced FCFN"""
+    """Class that allows visualizations of an alpha-relaxed FCFN"""
 
     def __init__(self, individual):
         """Constructor of a AlphaVisualizer instance with NetworkX and PyVis dependencies

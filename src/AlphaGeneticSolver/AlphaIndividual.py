@@ -37,7 +37,7 @@ class AlphaIndividual:
     # ============== SOLVER METHODS ==============
     # ============================================
     def executeAlphaSolver(self, minTargetFlow: int):
-        """Solves the FCFN approximately with an alpha-reduced LP model in CPLEX"""
+        """Solves the FCFN approximately with an alpha-relaxed LP model in CPLEX"""
         self.relaxedSolver = AlphaSolver(self, minTargetFlow)
         self.relaxedSolver.buildModel()
         self.relaxedSolver.solveModel()

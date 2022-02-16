@@ -7,7 +7,7 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class AlphaPopulation:
-    """Class that manages a population of alpha-reduced individuals and handles the genetic algorithm operators"""
+    """Class that manages a population of alpha-relaxed individuals and handles the genetic algorithm operators"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
@@ -153,7 +153,7 @@ class AlphaPopulation:
     # ============== HELPER METHODS ==============
     # ============================================
     def solvePopulation(self):
-        """Solves the alpha-reduced LP of each individual in the population"""
+        """Solves the alpha-relaxed LP of each individual in the population"""
         for individual in self.population:
             if individual.isSolved is False:
                 individual.executeAlphaSolver(self.minTargetFlow)

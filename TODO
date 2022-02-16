@@ -12,7 +12,6 @@ HIGH-PRIORITY CHANGES & BUGS:
 
 LOW PRIORITY CHANGES & QUALITY OF LIFE:
 =======================================
-+ Continue debugging how to get the optimal alpha values
 + Change input data (e.g. capacities, fixed costs, variable costs, etc.) to be of type float and not int
 
 
@@ -21,5 +20,5 @@ POSSIBLE CHANGES & IDEAS:
 =========================
 + Modify so that the FCNF instance is of edge values only (i.e. create a super-source/sink and push all source/sink cost onto the edges from the super-source/sink)
     - Not only would this drastically change the network, node, edge, and solver classes, it would also lead to hard to interpret visualization
-+ Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost is convex
++ Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
 
