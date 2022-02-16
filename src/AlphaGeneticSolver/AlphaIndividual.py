@@ -16,7 +16,7 @@ class AlphaIndividual:
         """Constructor of a AlphaFCNF instance"""
         # Input Attributes
         self.name = FCFNinstance.name + "-Alpha"
-        self.FCFN = copy.deepcopy(FCFNinstance)
+        self.FCFN = copy.deepcopy(FCFNinstance)  # TODO- Remove this deepCopy() call! Way too slow!
         self.alphaValues = None
         self.initializeAlphaValuesRandomly()
 
