@@ -34,8 +34,7 @@ class AlphaPopulation:
         """Sets the hyperparameters dictating how the population evolves"""
         self.crossoverRate = crossoverRate
         self.mutationRate = mutationRate
-        # TODO - Add in additional hyperparameters
-        # TODO - Build tuning experiment
+        # TODO - Add in additional hyperparameters and build tuning experiment
 
     def initializePopulation(self, initialAlphas: list) -> None:
         """Initializes the population with alpha values, solves each individual, and ranks"""
@@ -51,18 +50,10 @@ class AlphaPopulation:
     # ============== EVOLUTION LOOP ==============
     # ============================================
     def evolvePopulation(self, drawing=True) -> AlphaIndividual:
-        """Evolves the population based on the selection, crossover and mutation operators
-        @:param drawing = {True, False}
-        Pseudocode:
-        initialize(population)
-        while termination is not met:
-            crossover(selection(population))
-            mutate(selection(population))
-            evaluate(population)
-        return bestIndividual(population)
-        """
+        """Evolves the population based on the selection, crossover and mutation operators\n
+        :param bool drawing: A boolean to enable/disable top individual html rendering per generation"""
         random.seed()
-        # If population is not initialized, do so
+        # INITIALIZATION
         if len(self.population) == 0:
             self.initializePopulation([0.0, 1.0])
         # MAIN EVOLUTION LOOP
@@ -71,7 +62,7 @@ class AlphaPopulation:
             for crossover in range(crossoverAttemptsPerGeneration):
                 if random.random() < self.crossoverRate:
                     # SELECTION
-                    individuals = self.tournamentSelection(2, int(self.populationSize * 0.3))
+                    individuals = self.tournamentSelection(2, 4)
                     individualZeroPaths = self.rouletteWheelPathSelection(individuals[0], 1, "mostDense")
                     individualOnePaths = self.rouletteWheelPathSelection(individuals[1], 1, "mostDense")
                     # CROSSOVER
@@ -174,8 +165,10 @@ class AlphaPopulation:
         return selectedPaths
 
     def densityBasedPathSelection(self, individualID: int, selectionSize: int, selectionOrder: str) -> list:
-        """Returns the n most dense (flow/cost ratio) paths for the individual
-        @:param selectionOrder = {"mostDense", "leastDense"}"""
+        """Returns the n most dense (flow/cost ratio) paths for the individual\n
+        :param int individualID: Index of individual in population
+        :param int selectionSize: Number of paths returned
+        :param str selectionOrder: "mostDense" selects with highest flow per cost density; "leastDense" with lowest"""
         individual = self.population[individualID]
         # Compute paths and resize return selection length if necessary
         if len(individual.paths) == 0:
@@ -197,8 +190,10 @@ class AlphaPopulation:
         return selectedPaths
 
     def rouletteWheelPathSelection(self, individualID: int, selectionSize: int, selectionOrder: str) -> list:
-        """Selects paths from an individual probabilistically by their normalized fitness (i.e. flow per cost density)
-        @:param selectionOrder = {"mostDense", "leastDense"}"""
+        """Selects paths from an individual probabilistically by their normalized fitness (i.e. flow per cost density)\n
+        :param int individualID: Index of individual in population
+        :param int selectionSize: Number of paths returned
+        :param str selectionOrder: "mostDense" selects with highest flow per cost density; "leastDense" with lowest"""
         random.seed()
         individual = self.population[individualID]
         # Compute paths and resize return selection length if necessary
@@ -239,8 +234,11 @@ class AlphaPopulation:
 
     def tournamentPathSelection(self, individualID: int, selectionSize: int, tournamentSize: int,
                                 selectionOrder: str) -> list:
-        """Selects the best k paths out of a randomly chosen subset of size n
-        @:param selectionOrder = {"mostDense", "leastDense"}"""
+        """Selects the best k paths out of a randomly chosen subset of size n\n
+        :param int individualID: Index of individual in population
+        :param int selectionSize: Number of paths returned
+        :param int tournamentSize: Size of tournament used to generate selection
+        :param str selectionOrder: "mostDense" selects with highest flow per cost density; "leastDense" with lowest"""
         random.seed()
         individual = self.population[individualID]
         # Compute paths and resize return selection length if necessary
@@ -269,8 +267,12 @@ class AlphaPopulation:
     # =================================================
     def pathBasedCrossover(self, parentOneID: int, parentTwoID: int, parentOnePaths: list,
                            parentTwoPaths: list, replacementStrategy: str) -> None:
-        """Crossover based on the flow per cost density of paths of the parents
-        @:param replacementStrategy = {"replaceParents", "replaceWeakestTwo"}"""
+        """Crossover based on the flow per cost density of paths of the parents\n
+        :param int parentOneID: Index of first parent in population
+        :param int parentTwoID: Index of second parent in population
+        :param list parentOnePaths: List of paths to be crossed-over from parent 1 to parent 2 (Can be any length)
+        :param list parentTwoPaths: List of paths to be crossed-over from parent 2 to parent 1 (Can be any length)
+        :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals"""
         random.seed()
         # Create two offspring, each identical to one parent
         parentOne = self.population[parentOneID]
@@ -303,17 +305,18 @@ class AlphaPopulation:
 
     def randomOnePointCrossover(self, parentOneID: int, parentTwoID: int, direction: str,
                                 replacementStrategy: str) -> None:
-        """Crossover of 2 chromosomes at a single random point
-        @:param direction = {"fromLeft", "fromRight"}
-        @:param replacementStrategy = {"replaceParents", "replaceWeakestTwo"}"""
+        """Crossover of 2 chromosomes at a single random point\n
+        :param int parentOneID: Index of first parent in population
+        :param int parentTwoID: Index of second parent in population
+        :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals
+        :param str direction: "fromLeft" finds crossover point from left; "fromRight" finds crossover point from right"""
         random.seed()
-        parentOneChromosome = copy.deepcopy(self.population[parentOneID].alphaValues)
-        parentTwoChromosome = copy.deepcopy(self.population[parentTwoID].alphaValues)
+        parentOneChromosome = copy.copy(self.population[parentOneID].alphaValues)
+        parentTwoChromosome = copy.copy(self.population[parentTwoID].alphaValues)
+        # If from right, reverse input chromosomes
         if direction == "fromRight":
-            pass
-            # TODO- Revise the fromRight direction. Currently not working!
-            # parentOneChromosome.reverse()
-            # parentTwoChromosome.reverse()
+            parentOneChromosome.reverse()
+            parentTwoChromosome.reverse()
         crossoverPoint = random.randint(0, self.FCFN.numEdges - 1)
         parentOneLeftGenes = []
         parentTwoLeftGenes = []
@@ -330,6 +333,10 @@ class AlphaPopulation:
         offspringTwo.alphaValues = parentOneLeftGenes
         for gene in parentTwoRightGenes:
             offspringTwo.alphaValues.append(gene)
+        # If from right, reverse output chromosomes
+        if direction == "fromRight":
+            offspringOne.alphaValues.reverse()
+            offspringTwo.alphaValues.reverse()
         # Add offspring into the population via the replacement strategy
         if replacementStrategy == "replaceParents":
             self.population[parentOneID] = offspringOne
@@ -342,10 +349,40 @@ class AlphaPopulation:
             self.population.append(offspringOne)
             self.population.append(offspringTwo)
 
-    def randomTwoPointCrossover(self):
-        """Crosses over the chromosomes of two individuals at two points"""
-        # TODO- Implement
-        pass
+    def randomTwoPointCrossover(self, parentOneID: int, parentTwoID: int, replacementStrategy: str) -> None:
+        """Crossover of 2 chromosomes at a two random points\n
+        :param int parentOneID: Index of first parent in population
+        :param int parentTwoID: Index of second parent in population
+        :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals"""
+        random.seed()
+        parentOneChromosome = self.population[parentOneID].alphaValues
+        parentTwoChromosome = self.population[parentTwoID].alphaValues
+        # If from right, reverse input chromosomes
+        crossoverPointOne = random.randint(0, self.FCFN.numEdges - 3)
+        crossoverPointTwo = random.randint(crossoverPointOne, self.FCFN.numEdges - 1)
+        parentOneInteriorGenes = []
+        parentTwoInteriorGenes = []
+        for i in range(crossoverPointOne, crossoverPointTwo):
+            parentOneInteriorGenes.append(parentOneChromosome[i])
+            parentTwoInteriorGenes.append(parentTwoChromosome[i])
+        offspringOne = AlphaIndividual(self.FCFN)
+        offspringOne.alphaValues = parentOneChromosome
+        offspringTwo = AlphaIndividual(self.FCFN)
+        offspringTwo.alphaValues = parentTwoChromosome
+        for i in range(crossoverPointOne, crossoverPointTwo):
+            offspringOne.alphaValues[i] = parentTwoInteriorGenes[i - crossoverPointOne]
+            offspringTwo.alphaValues[i] = parentOneInteriorGenes[i - crossoverPointOne]
+        # Add offspring into the population via the replacement strategy
+        if replacementStrategy == "replaceParents":
+            self.population[parentOneID] = offspringOne
+            self.population[parentTwoID] = offspringTwo
+        elif replacementStrategy == "replaceWeakestTwo":
+            # Kill weakest two individuals
+            self.rankPopulation()
+            self.population.pop(-1)
+            self.population.pop(-1)
+            self.population.append(offspringOne)
+            self.population.append(offspringTwo)
 
     # =================================================
     # ============== MUTATION OPERATORS ==============

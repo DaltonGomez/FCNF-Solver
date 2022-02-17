@@ -1,25 +1,36 @@
 from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
-from src.FixedChargeNetwork.GraphGenerator import GraphGenerator
 
 """USED FOR EXPERIMENTATION WITH ALPHA VALUES"""
 
 # TEST OF RANDOM GRAPH GENERATOR
-graphGen = GraphGenerator("r2000-5(50,50)", 2000, 0.05, 50, 50, [200, 2000], [500, 500], [20, 200], [1, 30], [100, 100],
-                          3)
-graphGen.saveFCFN()
+# graphGen = GraphGenerator("r2000-5(50,50)", 2000, 0.05, 50, 50, [200, 2000], [500, 500], [20, 200], [1, 30], [100, 100], 3)
+# graphGen.saveFCFN()
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r2000-5(50,50)")
-# flowNetwork.loadFCFN("small")
+# flowNetwork.loadFCFN("r2000-5(50,50)")
+flowNetwork.loadFCFN("small")
+
+# Test of Random-Point Crossover
+ga = AlphaPopulation(flowNetwork, 20, 4, 1)
+ga.initializePopulation([0.0, 1.0])
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+print(ga.population[2].alphaValues)
+print(ga.population[3].alphaValues)
+ga.randomOnePointCrossover(0, 1, "fromLeft", "replaceWeakestTwo")
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+print(ga.population[2].alphaValues)
+print(ga.population[3].alphaValues)
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 2500, 10, 40)
-GA.evolvePopulation(drawing=False)
+# GA = AlphaPopulation(flowNetwork, 2500, 1, 1)
+# GA.evolvePopulation(drawing=False)
 
 # TEST OF MILP
-flowNetwork.executeSolver(2500)
+# flowNetwork.executeSolver(2500)
 # flowNetwork.visualizeNetwork()
 
 """
@@ -39,15 +50,26 @@ print(ga.population[1].alphaValues)
 
 """
 # Test of Random-Point Crossover
+ga = AlphaPopulation(flowNetwork, 20, 4, 1)
+ga.initializePopulation([0.0, 1.0])
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+print(ga.population[2].alphaValues)
+print(ga.population[3].alphaValues)
+ga.randomOnePointCrossover(0, 1, "fromLeft", "replaceParents")
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+print(ga.population[2].alphaValues)
+print(ga.population[3].alphaValues)
+"""
+
+"""
+# Test of Two-Point Crossover
 ga = AlphaPopulation(flowNetwork, 20, 2, 1)
 ga.initializePopulation([0.0, 1.0])
 print(ga.population[0].alphaValues)
 print(ga.population[1].alphaValues)
-pOnePaths = ga.densityBasedPathSelection(0, 1, "mostDense")
-print(pOnePaths[0].edges)
-pTwoPaths = ga.densityBasedPathSelection(1, 1, "mostDense")
-print(pTwoPaths[0].edges)
-ga.randomOnePointCrossover(0, 1, "fromLeft", "replaceWeakestTwo")
+ga.randomTwoPointCrossover(0, 1, "replaceParents")
 print(ga.population[0].alphaValues)
 print(ga.population[1].alphaValues)
 """
