@@ -70,7 +70,7 @@ class AlphaSolver:
                 self.model.add_constraint(self.model.sinkFlowVars[int(nodeID)] ==
                                           sum(self.model.edgeFlowVars[i] for i in incomingIDs),
                                           ctname=ctName)
-            # Transshipment flow conservation
+            # Intermediate node flow conservation
             elif nodeType == "n":
                 ctName = "n" + str(nodeID) + "Conserv"
                 self.model.add_constraint(sum(
@@ -101,46 +101,47 @@ class AlphaSolver:
         # print("Solver execution complete...\n")
 
     def writeSolution(self) -> None:
-        """Writes the solution to the individual instance by updating output attributes across the FCFN, nodes, and edges"""
+        """Writes the solution to the individual by updating output variables in the openedNodes and openedEdges dicts"""
         if self.model.solution is not None:
             # Disperse solution results back to individual
             self.individual.isSolved = True
             self.individual.minTargetFlow = self.minTargetFlow
             self.individual.fakeCost = self.model.solution.get_objective_value()
             self.individual.totalFlow = sum(self.model.solution.get_value_list(self.model.sinkFlowVars))
-            # Disperse solution results back to sources
+            # CONSTRUCT OPENED NODES DICT
+            # Extract source values
             sourceValues = self.model.solution.get_value_list(self.model.sourceFlowVars)
             for i in range(self.individual.FCFN.numSources):
                 thisSource = self.individual.FCFN.nodesDict["s" + str(i)]
                 if sourceValues[i] > 0:
-                    thisSource.opened = True
-                    thisSource.flow = sourceValues[i]
-                    thisSource.totalCost = thisSource.flow * thisSource.variableCost
-            # Disperse solution results back to sources
+                    flow = sourceValues[i]
+                    totalCost = flow * thisSource.variableCost
+                    self.individual.openedNodesDict["s" + str(i)] = (flow, totalCost)
+            # Extract sink values
             sinkValues = self.model.solution.get_value_list(self.model.sinkFlowVars)
             for i in range(self.individual.FCFN.numSinks):
                 thisSink = self.individual.FCFN.nodesDict["t" + str(i)]
                 if sinkValues[i] > 0:
-                    thisSink.opened = True
-                    thisSink.flow = sinkValues[i]
-                    thisSink.totalCost = thisSink.flow * thisSink.variableCost
-            # Disperse solution results back to edges
+                    flow = sinkValues[i]
+                    totalCost = flow * thisSink.variableCost
+                    self.individual.openedNodesDict["t" + str(i)] = (flow, totalCost)
+            # Extract edge values
             edgeValues = self.model.solution.get_value_list(self.model.edgeFlowVars)
             for i in range(self.individual.FCFN.numEdges):
                 thisEdge = self.individual.FCFN.edgesDict["e" + str(i)]
                 if edgeValues[i] > 0:
-                    thisEdge.opened = True
-                    thisEdge.flow = edgeValues[i]
-                    thisEdge.totalCost = thisEdge.flow * thisEdge.variableCost + thisEdge.fixedCost
-            # Disperse solution results back to intermediate nodes
+                    flow = edgeValues[i]
+                    totalCost = flow * thisEdge.variableCost + thisEdge.fixedCost
+                    self.individual.openedEdgesDict["e" + str(i)] = (flow, totalCost)
+            # Extract intermediate node values
             for i in range(self.individual.FCFN.numIntermediateNodes):
                 thisNode = self.individual.FCFN.nodesDict["n" + str(i)]
+                flow = 0
                 for edge in thisNode.incomingEdges:
-                    thisNode.flow += self.individual.FCFN.edgesDict[edge].flow
-                if thisNode.flow > 0:
-                    thisNode.opened = True
-            # Compute the true cost of the solution under the FCFN model
-            self.individual.calculateTrueCost()
+                    edgeID = int(edge.lstrip("e"))
+                    flow += edgeValues[edgeID]
+                    if flow > 0:
+                        self.individual.openedNodesDict["n" + str(i)] = (flow, 0)
         else:
             print("No feasible solution exists!")
 
@@ -179,11 +180,11 @@ class AlphaSolver:
         """Prints the solution data of the Individual instance solved by the alpha-relaxed LP model"""
         print("=============== SOLUTION DETAILS ========================")
         print(self.model.get_solve_details())
-        if self.individual.FCFN.isSolved is True:
+        if self.individual.isSolved is True:
             print("Solved by= " + self.model.solution.solved_by + "\n")
             print("=============== SOLUTION VALUES ========================")
             self.model.print_solution()
-            print("Total Cost: " + str(self.individual.FCFN.totalCost))
-            print("Total Flow: " + str(self.individual.FCFN.totalFlow))
+            print("Total Cost: " + str(self.individual.trueCost))
+            print("Total Flow: " + str(self.individual.totalFlow))
         else:
             print("No feasible solution exists!")

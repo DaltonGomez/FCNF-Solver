@@ -1,4 +1,3 @@
-import copy
 import random
 
 from src.AlphaGeneticSolver.AlphaPath import AlphaPath
@@ -16,8 +15,8 @@ class AlphaIndividual:
         """Constructor of a AlphaFCNF instance"""
         # Input Attributes
         self.name = FCFNinstance.name + "-Alpha"
-        self.FCFN = copy.deepcopy(FCFNinstance)  # TODO- Remove this deepCopy() call! Way too slow!
-        self.alphaValues = None
+        self.FCFN = FCFNinstance  # NOTE: Solution data should not get pushed back to the FCFN solver
+        self.alphaValues = []
         self.initializeAlphaValuesRandomly()
 
         # Solution Data
@@ -26,6 +25,9 @@ class AlphaIndividual:
         self.minTargetFlow = 0
         self.fakeCost = 0
         self.totalFlow = 0
+        # Opened nodes and edges, where values are tuples of (flow, totalCost)
+        self.openedNodesDict = {}
+        self.openedEdgesDict = {}
         self.trueCost = 0
         self.paths = []
 
@@ -44,19 +46,17 @@ class AlphaIndividual:
         self.relaxedSolver.writeSolution()
         self.calculateTrueCost()
         # self.relaxedSolver.printSolverOverview()
+        # self.relaxedSolver.printModel()
+        # self.relaxedSolver.printSolution()
 
     def calculateTrueCost(self) -> None:
         """Calculates the true cost from the alpha-relaxed LP solution"""
         if self.isSolved is True:
             cost = 0
-            for node in self.FCFN.nodesDict:
-                nodeObj = self.FCFN.nodesDict[node]
-                cost += nodeObj.totalCost
-            for edge in self.FCFN.edgesDict:
-                edgeObj = self.FCFN.edgesDict[edge]
-                if edgeObj.flow > 0:
-                    trueEdgeCost = edgeObj.flow * edgeObj.variableCost + edgeObj.fixedCost
-                    cost += trueEdgeCost
+            for node in self.openedNodesDict.values():
+                cost += node[1]
+            for edge in self.openedEdgesDict.values():
+                cost += edge[1]
             self.trueCost = cost
         else:
             print("The individual must be solved to calculate its true cost!")
@@ -173,10 +173,10 @@ class AlphaIndividual:
     # =========================================================
     # ============== VISUALIZATION/PRINT METHODS ==============
     # =========================================================
-    def visualizeAlphaNetwork(self, frontCatName="", endCatName="") -> None:
+    def visualizeAlphaNetwork(self, frontCatName="", endCatName="", graphType="fullGraph") -> None:
         """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
         if self.visualizer is None:
-            self.visualizer = AlphaVisualizer(self)
+            self.visualizer = AlphaVisualizer(self, graphType)
             self.visualizer.drawGraph(frontCatName + self.name + endCatName)
         else:
             self.visualizer.drawGraph(frontCatName + self.name + endCatName)

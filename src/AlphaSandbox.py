@@ -13,11 +13,15 @@ flowNetwork = FixedChargeFlowNetwork()
 flowNetwork.loadFCFN("small")
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 20, 2, 1)
-GA.evolvePopulation(drawing=False)
+GA = AlphaPopulation(flowNetwork, 20, 1, 1)
+GA.initializePopulation([0.0, 1.0])
+GA.visualizeIndividual(0, 0)
+# alphaInd = GA.population[0]
+# alphaInd.executeAlphaSolver()
+# GA.evolvePopulation(drawing=False)
 
 # TEST OF MILP
-# flowNetwork.executeSolver(2500)
+# flowNetwork.executeSolver(20)
 # flowNetwork.visualizeNetwork()
 
 """

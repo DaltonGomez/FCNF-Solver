@@ -1,6 +1,6 @@
 # Network name, visualization seed, and parallel edge data
 Name= small
-VisualSeed= 5
+VisualSeed= 3
 EdgeCaps= 10 20 50 100
 EdgeFixedCosts= 10 18 40 72
 EdgeVariableCosts= 1 2 3 4
