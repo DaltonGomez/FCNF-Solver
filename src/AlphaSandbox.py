@@ -9,13 +9,25 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-# flowNetwork.loadFCFN("r100-5(10,10)")
-flowNetwork.loadFCFN("r500-5(2,4)")
+flowNetwork.loadFCFN("r100-5(10,10)")
+# flowNetwork.loadFCFN("r500-5(2,4)")
 
-ga = AlphaPopulation(flowNetwork, 200, 5, 1)
+ga = AlphaPopulation(flowNetwork, 200, 1, 2)
 ga.initializePopulation([0.0, 1.0])
-ga.printAllCosts()
-print(ga.rouletteWheelSelection(3))
+
+"""
+# Test of Density Based Path Selection Operators
+ga = AlphaPopulation(flowNetwork, 200, 1, 2)
+ga.initializePopulation([0.0, 1.0])
+ga.population[0].printAllPathData()
+print(len(ga.population[0].paths))
+selectedPaths = ga.densityBasedPathSelection(0, 2, "mostDense")
+selectedPaths = ga.rouletteWheelPathSelection(0, 2, "mostDense")
+selectedPaths = ga.tournamentPathSelection(0, 4, 2, "mostDense")
+for path in selectedPaths:
+    print(path.edges)
+    print(path.flowPerCostDensity)
+"""
 
 """
 # Test of RandomOnePointCrossover

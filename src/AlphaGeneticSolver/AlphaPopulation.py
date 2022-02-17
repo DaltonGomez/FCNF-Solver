@@ -1,6 +1,5 @@
 import copy
 import random
-import sys
 import time
 
 from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
@@ -43,8 +42,8 @@ class AlphaPopulation:
             thisIndividual = AlphaIndividual(self.FCFN)
             thisIndividual.initializeAlphaValuesRandomly(lowerBound=initialAlphas[0], upperBound=initialAlphas[1])
             self.population.append(thisIndividual)
-            self.solvePopulation()
-            self.rankPopulation()
+        self.solvePopulation()
+        self.rankPopulation()
 
     # ============================================
     # ============== EVOLUTION LOOP ==============
@@ -81,9 +80,9 @@ class AlphaPopulation:
             self.visualizeTopIndividual(generation)
         return self.population[0]
 
-    # =================================================
-    # ============== SELECTION OPERATORS ==============
-    # =================================================
+    # ============================================================
+    # ============== INDIVIDUAL SELECTION OPERATORS ==============
+    # ============================================================
     def randomSelection(self, selectionSize: int) -> list:
         """Returns a random subset of individuals in the population (w/o replacement)"""
         random.seed()
@@ -119,15 +118,14 @@ class AlphaPopulation:
         selectionSet = set()
         while len(selectionSet) < selectionSize:
             rng = random.random()
-            print(rng)
-            for p in range(len(self.population)):
-                if rng < cumulativeProbabilities[p]:
-                    selectionSet.add(p)
+            for individual in range(len(self.population)):
+                if rng < cumulativeProbabilities[individual]:
+                    selectionSet.add(individual)
                     break
         return list(selectionSet)
 
     def tournamentSelection(self, tournamentSize: int, selectionSize: int) -> list:
-        """Selects the best two individuals out of a randomly chosen subset of size n"""
+        """Selects the best k individuals out of a randomly chosen subset of size n"""
         random.seed()
         # Select subset of population
         populationIDs = []
@@ -144,6 +142,103 @@ class AlphaPopulation:
         for i in range(selectionSize):
             topPick = tournament.pop(0)
             selection.append(topPick[0])
+        return selection
+
+    # ============================================================
+    # ============== PATH SELECTION OPERATORS ====================
+    # ============================================================
+    def randomPathSelection(self, individualID: int, selectionSize: int) -> list:
+        """Returns a random subset of paths in an individual (w/o replacement)"""
+        random.seed()
+        individual = self.population[individualID]
+        # Compute paths and resize return selection length if necessary
+        if len(individual.paths) == 0:
+            individual.allUsedPaths()
+        if selectionSize > len(individual.paths):
+            selectionSize = len(individual.paths)
+        # Randomly sample the paths list
+        selectedPaths = random.sample(individual.paths, selectionSize)
+        return selectedPaths
+
+    def densityBasedPathSelection(self, individualID: int, selectionSize: int, selectionOrder: str) -> list:
+        """Returns the n most dense (flow/cost ratio) paths for the individual
+        @:param selectionOrder = {"mostDense", "leastDense"}"""
+        individual = self.population[individualID]
+        # Compute paths and resize return selection length if necessary
+        if len(individual.paths) == 0:
+            individual.allUsedPaths()
+        if selectionSize > len(individual.paths):
+            selectionSize = len(individual.paths)
+        # Sort based on selectionOrder
+        if selectionOrder == "mostDense":
+            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=True)
+        elif selectionOrder == "leastDense":
+            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=False)
+        # Select paths subset from beginning of full path list
+        selectedPaths = []
+        for p in range(selectionSize):
+            selectedPaths.append(individual.paths[p])
+        return selectedPaths
+
+    def rouletteWheelPathSelection(self, individualID: int, selectionSize: int, selectionOrder: str) -> list:
+        """Selects paths from an individual probabilistically by their normalized fitness (i.e. flow per cost density)
+        @:param selectionOrder = {"mostDense", "leastDense"}"""
+        random.seed()
+        individual = self.population[individualID]
+        # Compute paths and resize return selection length if necessary
+        if len(individual.paths) == 0:
+            individual.allUsedPaths()
+        if selectionSize > len(individual.paths):
+            selectionSize = len(individual.paths)
+        # Sort based on selectionOrder
+        if selectionOrder == "mostDense":
+            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=True)
+        elif selectionOrder == "leastDense":
+            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=False)
+        # Build cumulative probability function
+        cumulativeFitness = 0
+        for p in range(len(individual.paths)):
+            cumulativeFitness += individual.paths[p].flowPerCostDensity
+        cumulativeProbabilities = [individual.paths[0].flowPerCostDensity / cumulativeFitness]
+        for i in range(1, len(individual.paths)):
+            cumulativeProbabilities.append(
+                (individual.paths[i].flowPerCostDensity / cumulativeFitness) + cumulativeProbabilities[i - 1])
+        # Build selected paths set
+        selectedPaths = []
+        duplicateCheckingSet = set()
+        while len(selectedPaths) < selectionSize:
+            rng = random.random()
+            for p in range(len(individual.paths)):
+                if rng < cumulativeProbabilities[p]:
+                    # Utilize a hashable combo of the path's source and sink to prevent duplication
+                    hashableID = individual.paths[p].start + individual.paths[p].end
+                    if hashableID not in duplicateCheckingSet:
+                        selectedPaths.append(individual.paths[p])
+                        duplicateCheckingSet.add(hashableID)
+                        break
+        return selectedPaths
+
+    def tournamentPathSelection(self, individualID: int, tournamentSize: int, selectionSize: int,
+                                selectionOrder: str) -> list:
+        """Selects the best k paths out of a randomly chosen subset of size n"""
+        random.seed()
+        individual = self.population[individualID]
+        # Compute paths and resize return selection length if necessary
+        if len(individual.paths) == 0:
+            individual.allUsedPaths()
+        if selectionSize > len(individual.paths):
+            selectionSize = len(individual.paths)
+        # Select random subset of paths
+        tournament = random.sample(individual.paths, tournamentSize)
+        # Sort based on selectionOrder
+        if selectionOrder == "mostDense":
+            tournament.sort(key=lambda p: p.flowPerCostDensity, reverse=True)
+        elif selectionOrder == "leastDense":
+            tournament.sort(key=lambda p: p.flowPerCostDensity, reverse=False)
+        # Select and return
+        selection = []
+        for i in range(selectionSize):
+            selection.append(tournament.pop(0))
         return selection
 
     # =================================================
@@ -235,59 +330,16 @@ class AlphaPopulation:
         mutatedIndividual.initializeAlphaValuesRandomly(lowerBound=lowerBound, upperBound=upperBound)
         self.population[individualNum] = mutatedIndividual
 
-    def randomSinglePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
-        """Mutates one entire path of an individual randomly"""
+    def selectedPathsMutation(self, individualNum: int, selectedPaths: list, lowerBound=0.0, upperBound=1.0) -> None:
+        """Mutates all the edges in the selected paths of an individual"""
         random.seed()
         parentIndividual = self.population[individualNum]
-        # If the paths have not been computed for the individual, do so
-        if len(parentIndividual.paths) == 0:
-            parentIndividual.allUsedPaths()
-        mutatedPath = random.choice(parentIndividual.paths)
         mutatedIndividual = AlphaIndividual(self.FCFN)
         mutatedIndividual.alphaValues = parentIndividual.alphaValues
-        for edge in mutatedPath.edges:
-            edgeNum = int(edge.lstrip("e"))
-            mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
-        self.population[individualNum] = mutatedIndividual
-
-    def mostDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
-        """Mutates the entire path of an individual's highest flow/cost density path"""
-        parentIndividual = self.population[individualNum]
-        # If the paths have not been computed for the individual, do so
-        if len(parentIndividual.paths) == 0:
-            parentIndividual.allUsedPaths()
-            parentIndividual.printAllPathData()
-        maxDensity = 0
-        mutatedPath = None
-        for path in parentIndividual.paths:
-            if path.flowPerCostDensity > maxDensity:
-                maxDensity = path.flowPerCostDensity
-                mutatedPath = path
-        mutatedIndividual = AlphaIndividual(self.FCFN)
-        mutatedIndividual.alphaValues = parentIndividual.alphaValues
-        for edge in mutatedPath.edges:
-            edgeNum = int(edge.lstrip("e"))
-            mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
-        self.population[individualNum] = mutatedIndividual
-
-    def leastDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
-        """Mutates the entire path of an individual's lowest flow/cost density path"""
-        parentIndividual = self.population[individualNum]
-        # If the paths have not been computed for the individual, do so
-        if len(parentIndividual.paths) == 0:
-            parentIndividual.allUsedPaths()
-            parentIndividual.printAllPathData()
-        minDensity = sys.maxsize
-        mutatedPath = None
-        for path in parentIndividual.paths:
-            if path.flowPerCostDensity < minDensity:
-                minDensity = path.flowPerCostDensity
-                mutatedPath = path
-        mutatedIndividual = AlphaIndividual(self.FCFN)
-        mutatedIndividual.alphaValues = parentIndividual.alphaValues
-        for edge in mutatedPath.edges:
-            edgeNum = int(edge.lstrip("e"))
-            mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
+        for path in selectedPaths:
+            for edge in path.edges:
+                edgeNum = int(edge.lstrip("e"))
+                mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
         self.population[individualNum] = mutatedIndividual
 
     # ============================================

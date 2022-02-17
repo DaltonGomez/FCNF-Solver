@@ -23,12 +23,12 @@ class AlphaPath:
         for edge in self.edges:
             edgeCost = FCFN.edgesDict[edge].totalCost
             self.routingCost += edgeCost
-        self.flowPerCostDensity = round(self.flow / self.routingCost)
+        self.flowPerCostDensity = self.flow / self.routingCost
         # The source cost data is accurate but the sink is widely inaccurate- would not use
         self.startCost = FCFN.nodesDict[self.start].variableCost * FCFN.edgesDict[self.edges[0]].flow
         self.endCost = FCFN.nodesDict[self.end].variableCost * FCFN.edgesDict[self.edges[-1]].flow
         self.totalCost = self.startCost + self.endCost + self.routingCost
-        self.totalFlowPerCostDensity = round(self.flow / self.totalCost)
+        self.totalFlowPerCostDensity = self.flow / self.totalCost
 
     def printPathData(self) -> None:
         """Prints all relevant data for a path"""

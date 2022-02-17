@@ -217,5 +217,7 @@ class AlphaIndividual:
 
     def printAllPathData(self) -> None:
         """Prints all the data for each path in the network"""
+        if len(self.paths) == 0:
+            self.allUsedPaths()
         for path in self.paths:
             path.printPathData()
