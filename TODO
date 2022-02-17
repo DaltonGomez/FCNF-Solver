@@ -2,13 +2,8 @@
 
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
-+ Implement operators that use pathing
-    + Compute the bang-for-buck of paths as capacity/total cost ratio
-    + Do mutations that update alphas along an entire path
-    + Consider implementing full source-allSink trees
 + Reorganize AlphaIndividual so that each one does not hold an entire instance of the FCFN
     + Do THIS^ by decoupling a FCFN instance from a FCFN solution instance
-+ Break-up path-based operators to have selection (of the paths) methods and crossover/mutation methods
 + Implement hyper-operators that delegate to a specific method based on an input argument
 + Set up tuning experiment and find larger test beds
 
