@@ -27,13 +27,15 @@ class AlphaPopulation:
         self.numGenerations = numGenerations
         self.population = []
         # Evolution Hyperparameters- Tune with setHyperparameters() method
-        self.crossoverRate = 0.75
-        self.mutationRate = 0.05
+        self.crossoverRate = 0.90
+        self.mutationRate = 0.03
 
     def setHyperparameters(self, crossoverRate: float, mutationRate: float) -> None:
         """Sets the hyperparameters dictating how the population evolves"""
         self.crossoverRate = crossoverRate
         self.mutationRate = mutationRate
+        # TODO - Add in additional hyperparameters
+        # TODO - Build tuning experiment
 
     def initializePopulation(self, initialAlphas: list) -> None:
         """Initializes the population with alpha values, solves each individual, and ranks"""
@@ -59,21 +61,26 @@ class AlphaPopulation:
         return bestIndividual(population)
         """
         random.seed()
-        # Ensure population was initialized; otherwise, do so
+        # If population is not initialized, do so
         if len(self.population) == 0:
             self.initializePopulation([0.0, 1.0])
         # MAIN EVOLUTION LOOP
+        crossoverAttemptsPerGeneration = 1
         for generation in range(self.numGenerations):
-
-            # CROSSOVER
-            if random.random() < self.crossoverRate:
-                self.randomOnePointCrossover(0, 1, "fromLeft", "replaceWeakestTwo")
-
+            for crossover in range(crossoverAttemptsPerGeneration):
+                if random.random() < self.crossoverRate:
+                    # SELECTION
+                    individuals = self.tournamentSelection(2, int(self.populationSize * 0.3))
+                    individualZeroPaths = self.rouletteWheelPathSelection(individuals[0], 1, "mostDense")
+                    individualOnePaths = self.rouletteWheelPathSelection(individuals[1], 1, "mostDense")
+                    # CROSSOVER
+                    self.pathBasedCrossover(individuals[0], individuals[1], individualZeroPaths, individualOnePaths,
+                                            "replaceWeakestTwo")
             # MUTATION
             for individual in range(len(self.population)):
                 if random.random() < self.mutationRate:
-                    self.randomSingleMutation(individual)
-
+                    selectedPaths = self.rouletteWheelPathSelection(individual, 1, "mostDense")
+                    self.selectedPathsMutation(individual, selectedPaths)
             # EVALUATE
             self.solvePopulation()
             self.rankPopulation()
@@ -124,7 +131,7 @@ class AlphaPopulation:
                     break
         return list(selectionSet)
 
-    def tournamentSelection(self, tournamentSize: int, selectionSize: int) -> list:
+    def tournamentSelection(self, selectionSize: int, tournamentSize: int) -> list:
         """Selects the best k individuals out of a randomly chosen subset of size n"""
         random.seed()
         # Select subset of population
@@ -218,7 +225,7 @@ class AlphaPopulation:
                         break
         return selectedPaths
 
-    def tournamentPathSelection(self, individualID: int, tournamentSize: int, selectionSize: int,
+    def tournamentPathSelection(self, individualID: int, selectionSize: int, tournamentSize: int,
                                 selectionOrder: str) -> list:
         """Selects the best k paths out of a randomly chosen subset of size n
         @:param selectionOrder = {"mostDense", "leastDense"}"""
@@ -259,12 +266,12 @@ class AlphaPopulation:
         offspringTwo.alphaValues = copy.deepcopy(parentTwo.alphaValues)
         # For each path, push all of parent one's alpha values to offspring two
         for path in parentOnePaths:
-            for edge in path:
+            for edge in path.edges:
                 edgeNum = int(edge.lstrip("e"))
                 offspringTwo.alphaValues[edgeNum] = parentOne.alphaValues[edgeNum]
         # For each path, push all of parent one's alpha values to offspring two
         for path in parentTwoPaths:
-            for edge in path:
+            for edge in path.edges:
                 edgeNum = int(edge.lstrip("e"))
                 offspringOne.alphaValues[edgeNum] = parentTwo.alphaValues[edgeNum]
         # Add offspring into the population via the replacement strategy
@@ -288,8 +295,10 @@ class AlphaPopulation:
         parentOneChromosome = copy.deepcopy(self.population[parentOneID].alphaValues)
         parentTwoChromosome = copy.deepcopy(self.population[parentTwoID].alphaValues)
         if direction == "fromRight":
-            parentOneChromosome.reverse()
-            parentTwoChromosome.reverse()
+            pass
+            # TODO- Revise the fromRight direction. Currently not working!
+            # parentOneChromosome.reverse()
+            # parentTwoChromosome.reverse()
         crossoverPoint = random.randint(0, self.FCFN.numEdges - 1)
         parentOneLeftGenes = []
         parentTwoLeftGenes = []
@@ -317,6 +326,11 @@ class AlphaPopulation:
             self.population.pop(-1)
             self.population.append(offspringOne)
             self.population.append(offspringTwo)
+
+    def randomTwoPointCrossover(self):
+        """Crosses over the chromosomes of two individuals at two points"""
+        # TODO- Implement
+        pass
 
     # =================================================
     # ============== MUTATION OPERATORS ==============

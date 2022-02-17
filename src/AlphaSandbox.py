@@ -9,11 +9,51 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-5(10,10)")
+flowNetwork.loadFCFN("small")
 # flowNetwork.loadFCFN("r500-5(2,4)")
 
-ga = AlphaPopulation(flowNetwork, 200, 1, 2)
+# Test of RandomOnePointCrossover
+ga = AlphaPopulation(flowNetwork, 20, 2, 1)
 ga.initializePopulation([0.0, 1.0])
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+pOnePaths = ga.densityBasedPathSelection(0, 1, "mostDense")
+print(pOnePaths[0].edges)
+pTwoPaths = ga.densityBasedPathSelection(1, 1, "mostDense")
+print(pTwoPaths[0].edges)
+ga.randomOnePointCrossover(0, 1, "fromLeft", "replaceWeakestTwo")
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+
+"""
+# Test of Path-Based Crossover
+ga = AlphaPopulation(flowNetwork, 20, 2, 1)
+ga.initializePopulation([0.0, 1.0])
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+pOnePaths = ga.densityBasedPathSelection(0, 1, "mostDense")
+print(pOnePaths[0].edges)
+pTwoPaths = ga.densityBasedPathSelection(1, 1, "mostDense")
+print(pTwoPaths[0].edges)
+ga.pathBasedCrossover(0, 1, pOnePaths, pTwoPaths, "replaceWeakestTwo")
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+"""
+
+"""
+# Test of Random-Point Crossover
+ga = AlphaPopulation(flowNetwork, 20, 2, 1)
+ga.initializePopulation([0.0, 1.0])
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+pOnePaths = ga.densityBasedPathSelection(0, 1, "mostDense")
+print(pOnePaths[0].edges)
+pTwoPaths = ga.densityBasedPathSelection(1, 1, "mostDense")
+print(pTwoPaths[0].edges)
+ga.randomOnePointCrossover(0, 1, "fromLeft", "replaceWeakestTwo")
+print(ga.population[0].alphaValues)
+print(ga.population[1].alphaValues)
+"""
 
 """
 # Test of Density Based Path Selection Operators
