@@ -13,6 +13,7 @@ class GraphGenerator:
                  nodeCostBounds: list, nodeCapBounds: list, edgeFixedCostBounds: list, edgeVariableCostBounds: list,
                  edgeCapacityBounds: list, visSeed: int):
         """Constructor of a GraphGenerator instance"""
+        # Input Parameters
         self.name = name
         self.visSeed = visSeed
         self.numNodes = numNodes
@@ -24,19 +25,21 @@ class GraphGenerator:
         self.edgeFixedCostBounds = edgeFixedCostBounds
         self.edgeVariableCostBounds = edgeVariableCostBounds
         self.edgeCapacityBounds = edgeCapacityBounds
-        self.outputFCFN = FixedChargeFlowNetwork()
 
+        # Network creation
         self.network = nx.DiGraph()
+        self.outputFCFN = FixedChargeFlowNetwork()
         self.nodeMap = {}  # Tracks NX node ordering vs. output node ordering to maintain consistency
-        self.generateRandomNetwork()
-        self.parseRandomNetwork()
+        self.network = self.generateRandomNetwork()
+        self.outputFCFN = self.parseRandomNetwork()
 
-    def generateRandomNetwork(self) -> None:
+    def generateRandomNetwork(self) -> nx:
         """Generates a random Fixed Charge Flow Network using NetworkX"""
         self.network = nx.fast_gnp_random_graph(self.numNodes, self.edgeProbability, seed=None, directed=True)
         # Other types of NetworkX random graph generators:
         # self.network = nx.binomial_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
         # self.network = nx.erdos_renyi_graph(self.nodes, self.edgeProbability, seed=None, directed=True)
+        return self.network
 
     def parseRandomNetwork(self) -> FixedChargeFlowNetwork:
         """Randomly assigns nodes as sources or sinks up to the input limit"""
@@ -108,10 +111,6 @@ class GraphGenerator:
         self.outputFCFN.numEdges = len(self.outputFCFN.edgesDict)
         return self.outputFCFN
 
-    def visualizeRandomNetwork(self) -> None:
-        """Draws the randomly generator network with PyVis"""
-        self.outputFCFN.visualizeNetwork()
-
     def saveFCFN(self) -> None:
         """Saves an unsolved version of a NetworkX-generated FCFN as a .txt file within the project directory"""
         # Path management
@@ -161,3 +160,7 @@ class GraphGenerator:
                 outputFile.write(line)
                 outputFile.write('\n')
         outputFile.close()
+
+    def visualizeRandomNetwork(self) -> None:
+        """Draws the randomly generator network with PyVis"""
+        self.outputFCFN.visualizeNetwork()

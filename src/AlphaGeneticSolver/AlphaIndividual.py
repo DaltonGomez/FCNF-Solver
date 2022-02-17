@@ -15,7 +15,7 @@ class AlphaIndividual:
         """Constructor of a AlphaFCNF instance"""
         # Input Attributes
         self.name = FCFNinstance.name + "-Alpha"
-        self.FCFN = FCFNinstance  # NOTE: Solution data should not get pushed back to the FCFN solver
+        self.FCFN = FCFNinstance  # NOTE: Solution data should not get pushed back to the FCFN instance
         self.alphaValues = []
         self.initializeAlphaValuesRandomly()
 

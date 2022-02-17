@@ -5,15 +5,18 @@ from pyvis.network import Network as netVis
 class Visualizer:
     """Class that allows visualizations of a FCFN using PyVis and NetworkX"""
 
-    def __init__(self, FCFNinstance):
+    def __init__(self, FCFNinstance, graphType="fullGraph"):
         """Constructor of a Visualizer instance with NetworkX and PyVis dependencies
         NOTE: FCFNinstance must be of type FixedChargeFlowNetwork (Not type hinted to prevent circular import)"""
         self.FCFN = FCFNinstance
         self.nx = nx.DiGraph()
-        self.populateGraph()
+        if graphType == "fullGraph":
+            self.populateFullGraph()
+        elif graphType == "solutionOnly":
+            self.populateSolutionGraphOnly()
 
-    def populateGraph(self) -> None:
-        """Populates a NetworkX instance with the FCFN data"""
+    def populateFullGraph(self) -> None:
+        """Populates a NetworkX instance with the full graph data of a FCNF instance"""
         for node in self.FCFN.nodesDict:
             nodeObj = self.FCFN.nodesDict[node]
             if node[0] == "s":
@@ -31,6 +34,22 @@ class Visualizer:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black")
             elif edgeObj.opened is False:
                 self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="grey")
+
+    def populateSolutionGraphOnly(self) -> None:
+        """Populates a NetworkX instance with only the solution data of a solved FCFN instance"""
+        for node in self.FCFN.nodesDict:
+            nodeObj = self.FCFN.nodesDict[node]
+            if nodeObj.opened is True:
+                if node[0] == "s":
+                    self.nx.add_node(node, value=nodeObj.flow, color="blue")
+                elif node[0] == "t":
+                    self.nx.add_node(node, value=nodeObj.flow, color="red")
+                elif node[0] == "n":
+                    self.nx.add_node(node, value=nodeObj.flow, color="black")
+        for edge in self.FCFN.edgesDict:
+            edgeObj = self.FCFN.edgesDict[edge]
+            if edgeObj.opened is True:
+                self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeObj.flow, color="black")
 
     def drawGraph(self, name: str) -> None:
         """Displays the FCNF using PyVis and a set of hardcoded options"""

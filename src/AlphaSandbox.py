@@ -14,12 +14,18 @@ flowNetwork.loadFCFN("r100-3(10,10)")
 # flowNetwork.loadFCFN("small")
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 400, 5, 5)
+GA = AlphaPopulation(flowNetwork, 400, 5, 1)
 GA.evolvePopulation(drawing=True)
 
 # TEST OF MILP
 flowNetwork.executeSolver(400)
-flowNetwork.visualizeNetwork()
+flowNetwork.visualizeNetwork(catName="_OPT")
+
+# TEST OF MILP
+flowNetwork2 = FixedChargeFlowNetwork()
+flowNetwork2.loadFCFN("r100-3(10,10)")
+flowNetwork2.executeSolver(200)
+flowNetwork2.visualizeNetwork(catName="_OPT2")
 
 """
 # Test of Path-Based Crossover

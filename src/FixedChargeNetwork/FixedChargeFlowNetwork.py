@@ -36,13 +36,13 @@ class FixedChargeFlowNetwork:
         self.visSeed = 1
 
     def addNode(self, nodeType: str, idNum: int, variableCost: int, capacity: int) -> None:
-        """Adds a new node to a FCFN instance- CALL ONLY FROM GraphGeneration Class"""
+        """Adds a new node to a FCFN instance- CALL ONLY FROM GraphGeneration CLASS"""
         nodeName = nodeType + str(idNum)
         thisNode = Node(nodeName, variableCost, capacity)
         self.nodesDict[nodeName] = thisNode
 
     def addEdge(self, idNum: int, fromNode: str, toNode: str, fixedCost: int, variableCost: int, capacity: int) -> None:
-        """Adds a new edge to a FCFN instance- CALL ONLY FROM GraphGeneration Class"""
+        """Adds a new edge to a FCFN instance- CALL ONLY FROM GraphGeneration CLASS"""
         edgeName = "e" + str(idNum)
         thisEdge = Edge(edgeName, fromNode, toNode, fixedCost, variableCost, capacity)
         self.edgesDict[edgeName] = thisEdge

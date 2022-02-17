@@ -147,6 +147,8 @@ class ExactSolver:
         """Prints the most important and concise details of the solver, model and solution"""
         self.model.print_information()
         if self.isRun is True:
+            print(self.model.get_solve_details())
+            print("Solved by= " + self.model.solution.solved_by + "\n")
             self.model.print_solution()
             print("Total Cost: " + str(self.FCFN.totalCost))
             print("Total Flow: " + str(self.FCFN.totalFlow))
