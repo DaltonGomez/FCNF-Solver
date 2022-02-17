@@ -67,7 +67,7 @@ class AlphaPopulation:
 
             # CROSSOVER
             if random.random() < self.crossoverRate:
-                self.randomOnePointCrossoverWithParentReplacement(0, 1, "fromLeft")
+                self.randomOnePointCrossover(0, 1, "fromLeft", "replaceWeakestTwo")
 
             # MUTATION
             for individual in range(len(self.population)):
@@ -245,8 +245,8 @@ class AlphaPopulation:
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
-    def pathBasedCrossoverWithParentReplacement(self, parentOneID: int, parentTwoID: int, parentOnePaths: list,
-                                                parentTwoPaths: list, replacementStrategy: str) -> None:
+    def pathBasedCrossover(self, parentOneID: int, parentTwoID: int, parentOnePaths: list,
+                           parentTwoPaths: list, replacementStrategy: str) -> None:
         """Crossover based on the flow per cost density of paths of the parents
         @:param replacementStrategy = {"replaceParents", "replaceWeakestTwo"}"""
         random.seed()
