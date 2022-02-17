@@ -1,7 +1,6 @@
 import random
 
 from src.AlphaGeneticSolver.AlphaPath import AlphaPath
-from src.AlphaGeneticSolver.AlphaSolver import AlphaSolver
 from src.AlphaGeneticSolver.AlphaVisualizer import AlphaVisualizer
 
 
@@ -20,7 +19,6 @@ class AlphaIndividual:
         self.initializeAlphaValuesRandomly()
 
         # Solution Data
-        self.relaxedSolver = None
         self.isSolved = False
         self.minTargetFlow = 0
         self.fakeCost = 0
@@ -38,15 +36,6 @@ class AlphaIndividual:
     # ============================================
     # ============== SOLVER METHODS ==============
     # ============================================
-    def executeAlphaSolver(self, minTargetFlow: int) -> None:
-        """Solves the FCFN approximately with an alpha-relaxed LP model in CPLEX"""
-        self.relaxedSolver = AlphaSolver(self, minTargetFlow)
-        self.relaxedSolver.buildModel()
-        self.relaxedSolver.solveModel()
-        self.relaxedSolver.writeSolution()
-        self.calculateTrueCost()
-        # self.relaxedSolver.printSolverOverview()
-
     def calculateTrueCost(self) -> None:
         """Calculates the true cost from the alpha-relaxed LP solution"""
         if self.isSolved is True:

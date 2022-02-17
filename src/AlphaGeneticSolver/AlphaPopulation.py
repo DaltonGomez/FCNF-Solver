@@ -3,6 +3,7 @@ import random
 import time
 
 from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
+from src.AlphaGeneticSolver.AlphaSolver import AlphaSolver
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
@@ -21,12 +22,13 @@ class AlphaPopulation:
             unsolvedFCFN = FixedChargeFlowNetwork()
             unsolvedFCFN.loadFCFN(FCFN.name)
             self.FCFN = unsolvedFCFN
-        # Population/GA Attributes
+        # Population & Solver Instances
         self.minTargetFlow = minTargetFlow
-        self.populationSize = populationSize
-        self.numGenerations = numGenerations
+        self.alphaSolver = AlphaSolver(self.FCFN, minTargetFlow)
         self.population = []
         # Evolution Hyperparameters- Tune with setHyperparameters() method
+        self.populationSize = populationSize
+        self.numGenerations = numGenerations
         self.crossoverRate = 0.90
         self.mutationRate = 0.03
 
@@ -80,6 +82,26 @@ class AlphaPopulation:
             if drawing is True:
                 self.visualizeIndividual(generation, 0)
         return self.population[0]
+
+    # ======================================================
+    # ============== SOLVER & RANKING METHODS ==============
+    # ======================================================
+    def solvePopulation(self) -> None:
+        """Solves the alpha-relaxed LP of each individual in the population"""
+        for individual in self.population:
+            if individual.isSolved is False:
+                self.solveIndividual(individual)
+
+    def solveIndividual(self, individual: AlphaIndividual) -> None:
+        """Solves a single individual by calling AlphaSolver and returns the solution to the individual"""
+        self.alphaSolver.updateObjectiveFunction(individual.alphaValues)
+        self.alphaSolver.solveModel()
+        self.alphaSolver.writeSolution(individual)
+        individual.calculateTrueCost()
+
+    def rankPopulation(self) -> None:
+        """Ranks the population from least cost to greatest (i.e. fitness)"""
+        self.population.sort(key=lambda x: x.trueCost, reverse=False)  # reverse=False ranks least to greatest
 
     # ============================================================
     # ============== INDIVIDUAL SELECTION OPERATORS ==============
@@ -180,9 +202,9 @@ class AlphaPopulation:
             selectionSize = len(individual.paths)
         # Sort based on selectionOrder
         if selectionOrder == "mostDense":
-            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=True)
+            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=True)
         elif selectionOrder == "leastDense":
-            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=False)
+            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=False)
         # Select paths subset from beginning of full path list
         selectedPaths = []
         for p in range(selectionSize):
@@ -206,9 +228,9 @@ class AlphaPopulation:
             selectionSize = len(individual.paths)
         # Sort based on selectionOrder
         if selectionOrder == "mostDense":
-            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=True)
+            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=True)
         elif selectionOrder == "leastDense":
-            individual.paths.sort(key=lambda p: p.flowPerCostDensity, reverse=False)
+            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=False)
         # Build cumulative probability function
         cumulativeFitness = 0
         for p in range(len(individual.paths)):
@@ -414,19 +436,6 @@ class AlphaPopulation:
                 mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
         self.population[individualNum] = mutatedIndividual
 
-    # ============================================
-    # ============== HELPER METHODS ==============
-    # ============================================
-    def solvePopulation(self) -> None:
-        """Solves the alpha-relaxed LP of each individual in the population"""
-        for individual in self.population:
-            if individual.isSolved is False:
-                individual.executeAlphaSolver(self.minTargetFlow)
-
-    def rankPopulation(self) -> None:
-        """Ranks the population from least cost to greatest (i.e. fitness)"""
-        self.population.sort(key=lambda x: x.trueCost, reverse=False)  # reverse=False ranks least to greatest
-
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
@@ -444,3 +453,9 @@ class AlphaPopulation:
         print("Generation= " + str(generation) + "\tBest Individual= " + str(
             self.population[0].trueCost) + "\tFull Cost List:")
         print(costList)
+
+    def printCurrentSolverOverview(self) -> None:
+        """Prints out the current status of the solver"""
+        self.alphaSolver.printCurrentSolverDetails()
+        # self.alphaSolver.printCurrentModel()
+        # self.alphaSolver.printCurrentSolution()
