@@ -1,4 +1,3 @@
-import copy
 import random
 
 from src.AlphaGeneticSolver.AlphaPath import AlphaPath
@@ -16,8 +15,8 @@ class AlphaIndividual:
         """Constructor of a AlphaFCNF instance"""
         # Input Attributes
         self.name = FCFNinstance.name + "-Alpha"
-        self.FCFN = copy.deepcopy(FCFNinstance)  # TODO- Remove this deepCopy() call! Way too slow!
-        self.alphaValues = None
+        self.FCFN = FCFNinstance  # NOTE: Solution data should not get pushed back to the FCFN solver
+        self.alphaValues = []
         self.initializeAlphaValuesRandomly()
 
         # Solution Data
@@ -26,12 +25,15 @@ class AlphaIndividual:
         self.minTargetFlow = 0
         self.fakeCost = 0
         self.totalFlow = 0
+        # Opened nodes and edges, where values are tuples of (flow, totalCost)
+        self.openedNodesDict = {}
+        self.openedEdgesDict = {}
         self.trueCost = 0
         self.paths = []
 
         # Visualization Data
         self.visualizer = None
-        self.visSeed = 1
+        self.visSeed = self.FCFN.visSeed
 
     # ============================================
     # ============== SOLVER METHODS ==============
@@ -49,14 +51,10 @@ class AlphaIndividual:
         """Calculates the true cost from the alpha-relaxed LP solution"""
         if self.isSolved is True:
             cost = 0
-            for node in self.FCFN.nodesDict:
-                nodeObj = self.FCFN.nodesDict[node]
-                cost += nodeObj.totalCost
-            for edge in self.FCFN.edgesDict:
-                edgeObj = self.FCFN.edgesDict[edge]
-                if edgeObj.flow > 0:
-                    trueEdgeCost = edgeObj.flow * edgeObj.variableCost + edgeObj.fixedCost
-                    cost += trueEdgeCost
+            for node in self.openedNodesDict.values():
+                cost += node[1]
+            for edge in self.openedEdgesDict.values():
+                cost += edge[1]
             self.trueCost = cost
         else:
             print("The individual must be solved to calculate its true cost!")
@@ -66,12 +64,13 @@ class AlphaIndividual:
     # =============================================
     def allUsedPaths(self) -> None:
         """Computes all the source-sink paths that have a positive flow"""
-        for i in range(self.FCFN.numSources):
-            source = "s" + str(i)
-            srcObj = self.FCFN.nodesDict[source]
-            if srcObj.flow > 0:
-                visited = self.depthFirstSearch(source)
-                self.constructPaths(visited)
+        if self.isSolved is False:
+            print("Cannot compute paths on an unsolved instance!")
+        else:
+            for node in self.openedNodesDict.keys():
+                if node[0] == "s":
+                    visited = self.depthFirstSearch(node)
+                    self.constructPaths(visited)
 
     def depthFirstSearch(self, startNode: str, incomingEdge="") -> list:
         """DFS implementation used in computing all used paths"""
@@ -82,15 +81,19 @@ class AlphaIndividual:
         if incomingEdge != "":
             visitedEdges.append(incomingEdge)
             visitedNodes.append(self.FCFN.edgesDict[incomingEdge].fromNode)
+        # Push starting node onto stack and repeat until stack is empty
         stack.insert(0, startNode)
         while len(stack) > 0:
             node = stack.pop(0)
+            # If next node hasn't been visited, visit node
             if node not in visitedNodes:
                 visitedNodes.append(node)
                 nodeObj = self.FCFN.nodesDict[node]
+                # Check all outgoing edges of the node and traverse them to the next node if edge was opened
                 for outgoingEdge in nodeObj.outgoingEdges:
-                    edgeObj = self.FCFN.edgesDict[outgoingEdge]
-                    if edgeObj.flow > 0:
+                    if outgoingEdge in self.openedEdgesDict.keys():
+                        edgeObj = self.FCFN.edgesDict[outgoingEdge]
+                        # Mark the visited edge and add the next node onto the stack
                         visitedEdges.append(outgoingEdge)
                         nextNode = edgeObj.toNode
                         stack.insert(0, nextNode)
@@ -109,14 +112,14 @@ class AlphaIndividual:
                 branchPoints.append(nodeObj.nodeID)
         # Source has single path
         if len(branchPoints) == 0:
-            thisPath = AlphaPath(visitedNodes, visitedEdges, self.FCFN)
+            thisPath = AlphaPath(visitedNodes, visitedEdges, self)
             self.paths.append(thisPath)
         # Source has multiple paths/branching (i.e. is a tree) and should be recursively split into arc segments
         else:
             # Branching at the source (i.e. multiple paths leaving from a single source)
             if branchPoints[0][0] == "s":
                 for outgoingEdge in self.FCFN.nodesDict[branchPoints[0]].outgoingEdges:
-                    if self.FCFN.edgesDict[outgoingEdge].flow > 0:
+                    if outgoingEdge in self.openedEdgesDict.keys():
                         # For all edges leaving the source with flow, recurse on DFS/Construct Paths
                         recursiveVisited = self.depthFirstSearch(self.FCFN.edgesDict[outgoingEdge].toNode,
                                                                  outgoingEdge)
@@ -133,11 +136,11 @@ class AlphaIndividual:
                     edgesBeforeBranch.append(visitedEdges.pop(0))
                     currentNode = visitedNodes[0]
                 # Package as an arc segment
-                pathBefore = AlphaPath(nodesBeforeBranch, edgesBeforeBranch, self.FCFN)
+                pathBefore = AlphaPath(nodesBeforeBranch, edgesBeforeBranch, self)
                 self.paths.append(pathBefore)
                 # Recurse on DFS/Construct Paths for remaining arc segments
                 for outgoingEdge in self.FCFN.nodesDict[branchPoints[0]].outgoingEdges:
-                    if self.FCFN.edgesDict[outgoingEdge].flow > 0:
+                    if outgoingEdge in self.openedEdgesDict.keys():
                         recursiveVisited = self.depthFirstSearch(self.FCFN.edgesDict[outgoingEdge].toNode,
                                                                  outgoingEdge)
                         self.constructPaths(recursiveVisited)
@@ -173,10 +176,10 @@ class AlphaIndividual:
     # =========================================================
     # ============== VISUALIZATION/PRINT METHODS ==============
     # =========================================================
-    def visualizeAlphaNetwork(self, frontCatName="", endCatName="") -> None:
+    def visualizeAlphaNetwork(self, frontCatName="", endCatName="", graphType="fullGraph") -> None:
         """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
         if self.visualizer is None:
-            self.visualizer = AlphaVisualizer(self)
+            self.visualizer = AlphaVisualizer(self, graphType)
             self.visualizer.drawGraph(frontCatName + self.name + endCatName)
         else:
             self.visualizer.drawGraph(frontCatName + self.name + endCatName)
@@ -198,14 +201,15 @@ class AlphaIndividual:
             sourceCostByPaths += path.startCost
             sinkCostByPaths += path.endCost
         trueEdgeCost = 0
-        for i in range(self.FCFN.numEdges):
-            trueEdgeCost += self.FCFN.edgesDict["e" + str(i)].totalCost
+        for edgeValue in self.openedEdgesDict.values():
+            trueEdgeCost += edgeValue[1]
         trueSourceCost = 0
-        for s in range(self.FCFN.numSources):
-            trueSourceCost += self.FCFN.nodesDict["s" + str(s)].totalCost
         trueSinkCost = 0
-        for t in range(self.FCFN.numSinks):
-            trueSinkCost += self.FCFN.nodesDict["t" + str(t)].totalCost
+        for node in self.openedEdgesDict:
+            if node[0][0] == "s":
+                trueSourceCost += node[1][1]
+            if node[0][0] == "t":
+                trueSinkCost += node[1][1]
         print("TRUE TOTAL COST = " + str(self.trueCost))
         print("PATH TOTAL COST = " + str(self.calculateTotalCostByPaths()))
         print("True Edge Cost = " + str(trueEdgeCost))

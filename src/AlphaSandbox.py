@@ -10,15 +10,16 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
 # flowNetwork.loadFCFN("r2000-5(50,50)")
-flowNetwork.loadFCFN("small")
+flowNetwork.loadFCFN("r100-3(10,10)")
+# flowNetwork.loadFCFN("small")
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 20, 2, 1)
-GA.evolvePopulation(drawing=False)
+GA = AlphaPopulation(flowNetwork, 400, 5, 5)
+GA.evolvePopulation(drawing=True)
 
 # TEST OF MILP
-# flowNetwork.executeSolver(2500)
-# flowNetwork.visualizeNetwork()
+flowNetwork.executeSolver(400)
+flowNetwork.visualizeNetwork()
 
 """
 # Test of Path-Based Crossover
