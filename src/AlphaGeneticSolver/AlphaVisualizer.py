@@ -5,10 +5,10 @@ from pyvis.network import Network as netVis
 class AlphaVisualizer:
     """Class that allows visualizations of an alpha-relaxed FCFN"""
 
-    def __init__(self, individual, graphType="fullGraph"):
+    def __init__(self, alphaIndividual, graphType="fullGraph"):
         """Constructor of a AlphaVisualizer instance with NetworkX and PyVis dependencies
         NOTE: individual must be of type AlphaIndividual (Not type hinted to prevent circular import)"""
-        self.individual = individual
+        self.individual = alphaIndividual
         self.nx = nx.DiGraph()
         if graphType == "fullGraph":
             self.populateFullGraph()

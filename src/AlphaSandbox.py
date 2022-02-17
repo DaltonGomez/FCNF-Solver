@@ -10,12 +10,16 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
 # flowNetwork.loadFCFN("r2000-5(50,50)")
-flowNetwork.loadFCFN("small")
+flowNetwork.loadFCFN("r100-3(10,10)")
+# flowNetwork.loadFCFN("small")
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 20, 1, 1)
+GA = AlphaPopulation(flowNetwork, 400, 1, 1)
 GA.initializePopulation([0.0, 1.0])
 GA.visualizeIndividual(0, 0)
+print(GA.population[0].openedNodesDict.keys())
+print(GA.population[0].openedEdgesDict.keys())
+GA.population[0].printAllPathData()
 # alphaInd = GA.population[0]
 # alphaInd.executeAlphaSolver()
 # GA.evolvePopulation(drawing=False)

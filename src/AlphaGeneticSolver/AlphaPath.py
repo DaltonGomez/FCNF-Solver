@@ -1,10 +1,10 @@
 class AlphaPath:
-    """Class that stores and manipulates paths within a FCFN"""
+    """Class that stores opened paths within an alpha individual and computes path-based data"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, nodes: list, edges: list, FCFN):
+    def __init__(self, nodes: list, edges: list, alphaIndividual):
         """Constructor of a Path instance
         NOTE: Paths are not 100% accurate representation of flow!"""
         self.nodes = nodes
@@ -17,16 +17,16 @@ class AlphaPath:
         else:
             self.truePath = False
         # Best guess at the flow of a path- the amount leaving the start node at the first edge on the path
-        self.flow = FCFN.edgesDict[self.edges[0]].flow
+        self.flow = alphaIndividual.openedEdgesDict[self.edges[0]][0]
         # Compute the total routing cost and routing cost per unit flow metric
         self.routingCost = 0
         for edge in self.edges:
-            edgeCost = FCFN.edgesDict[edge].totalCost
+            edgeCost = alphaIndividual.openedEdgesDict[edge][1]
             self.routingCost += edgeCost
         self.flowPerCostDensity = self.flow / self.routingCost
         # The source cost data is accurate but the sink is widely inaccurate- would not use
-        self.startCost = FCFN.nodesDict[self.start].variableCost * FCFN.edgesDict[self.edges[0]].flow
-        self.endCost = FCFN.nodesDict[self.end].variableCost * FCFN.edgesDict[self.edges[-1]].flow
+        self.startCost = alphaIndividual.openedNodesDict[self.start][1]
+        self.endCost = alphaIndividual.openedNodesDict[self.end][1]
         self.totalCost = self.startCost + self.endCost + self.routingCost
         self.totalFlowPerCostDensity = self.flow / self.totalCost
 
