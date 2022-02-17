@@ -45,7 +45,7 @@ class AlphaIndividual:
         self.relaxedSolver.solveModel()
         self.relaxedSolver.writeSolution()
         self.calculateTrueCost()
-        self.relaxedSolver.printSolverOverview()
+        # self.relaxedSolver.printSolverOverview()
 
     def calculateTrueCost(self) -> None:
         """Calculates the true cost from the alpha-relaxed LP solution"""
