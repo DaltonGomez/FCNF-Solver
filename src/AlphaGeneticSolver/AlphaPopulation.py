@@ -62,7 +62,7 @@ class AlphaPopulation:
             for crossover in range(crossoverAttemptsPerGeneration):
                 if random.random() < self.crossoverRate:
                     # SELECTION
-                    individuals = self.tournamentSelection(2, 4)
+                    individuals = self.tournamentSelection(2, 2)
                     individualZeroPaths = self.rouletteWheelPathSelection(individuals[0], 1, "mostDense")
                     individualOnePaths = self.rouletteWheelPathSelection(individuals[1], 1, "mostDense")
                     # CROSSOVER

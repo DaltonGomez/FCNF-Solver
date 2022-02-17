@@ -12,22 +12,9 @@ flowNetwork = FixedChargeFlowNetwork()
 # flowNetwork.loadFCFN("r2000-5(50,50)")
 flowNetwork.loadFCFN("small")
 
-# Test of Random-Point Crossover
-ga = AlphaPopulation(flowNetwork, 20, 4, 1)
-ga.initializePopulation([0.0, 1.0])
-print(ga.population[0].alphaValues)
-print(ga.population[1].alphaValues)
-print(ga.population[2].alphaValues)
-print(ga.population[3].alphaValues)
-ga.randomOnePointCrossover(0, 1, "fromLeft", "replaceWeakestTwo")
-print(ga.population[0].alphaValues)
-print(ga.population[1].alphaValues)
-print(ga.population[2].alphaValues)
-print(ga.population[3].alphaValues)
-
 # TEST OF GENETIC ALGORITHM
-# GA = AlphaPopulation(flowNetwork, 2500, 1, 1)
-# GA.evolvePopulation(drawing=False)
+GA = AlphaPopulation(flowNetwork, 20, 2, 1)
+GA.evolvePopulation(drawing=False)
 
 # TEST OF MILP
 # flowNetwork.executeSolver(2500)
