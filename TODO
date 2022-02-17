@@ -10,6 +10,7 @@ HIGH-PRIORITY CHANGES & BUGS:
     + Do THIS^ by decoupling a FCFN instance from a FCFN solution instance
 + Break-up path-based operators to have selection (of the paths) methods and crossover/mutation methods
 + Implement hyper-operators that delegate to a specific method based on an input argument
++ Set up tuning experiment and find larger test beds
 
 
 

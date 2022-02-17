@@ -50,8 +50,9 @@ class AlphaPopulation:
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self) -> AlphaIndividual:
+    def evolvePopulation(self, drawing=True) -> AlphaIndividual:
         """Evolves the population based on the selection, crossover and mutation operators
+        @:param drawing = {True, False}
         Pseudocode:
         initialize(population)
         while termination is not met:
@@ -84,7 +85,9 @@ class AlphaPopulation:
             # EVALUATE
             self.solvePopulation()
             self.rankPopulation()
-            self.visualizeTopIndividual(generation)
+            self.printAllCosts(generation)
+            if drawing is True:
+                self.visualizeIndividual(generation, 0)
         return self.population[0]
 
     # ============================================================
@@ -161,6 +164,9 @@ class AlphaPopulation:
         # Compute paths and resize return selection length if necessary
         if len(individual.paths) == 0:
             individual.allUsedPaths()
+            # If the number of paths is still zero, return an empty list
+            if len(individual.paths) == 0:
+                return []
         if selectionSize > len(individual.paths):
             selectionSize = len(individual.paths)
         # Randomly sample the paths list
@@ -174,6 +180,9 @@ class AlphaPopulation:
         # Compute paths and resize return selection length if necessary
         if len(individual.paths) == 0:
             individual.allUsedPaths()
+            # If the number of paths is still zero, return an empty list
+            if len(individual.paths) == 0:
+                return []
         if selectionSize > len(individual.paths):
             selectionSize = len(individual.paths)
         # Sort based on selectionOrder
@@ -195,6 +204,9 @@ class AlphaPopulation:
         # Compute paths and resize return selection length if necessary
         if len(individual.paths) == 0:
             individual.allUsedPaths()
+            # If the number of paths is still zero, return an empty list
+            if len(individual.paths) == 0:
+                return []
         if selectionSize > len(individual.paths):
             selectionSize = len(individual.paths)
         # Sort based on selectionOrder
@@ -234,6 +246,9 @@ class AlphaPopulation:
         # Compute paths and resize return selection length if necessary
         if len(individual.paths) == 0:
             individual.allUsedPaths()
+            # If the number of paths is still zero, return an empty list
+            if len(individual.paths) == 0:
+                return []
         if selectionSize > len(individual.paths):
             selectionSize = len(individual.paths)
         # Select random subset of paths
@@ -378,21 +393,17 @@ class AlphaPopulation:
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
-    def visualizeTopIndividual(self, generation: int) -> None:
-        """Prints the data and draws the graph of the top individual"""
-        # Print statement & visualization w/ timeout to ensure correct visualization rendering order
-        print("Generation= " + str(generation) + "\tBest Individual= " + str(self.population[0].trueCost))
-        self.visualizeIndividual(str(generation), 0)  # Second param = 0 --> Top individual
-
-    def visualizeIndividual(self, generation: str, individualRank: int) -> None:
+    def visualizeIndividual(self, generation: int, individualRank: int) -> None:
         """Draws the .html file for an individual"""
-        self.rankPopulation()
-        self.population[individualRank].visualizeAlphaNetwork(endCatName=generation)
+        # Visualization w/ timeout to ensure the correct rendering order
+        self.population[individualRank].visualizeAlphaNetwork(endCatName=str(generation))
         time.sleep(0.25)
 
-    def printAllCosts(self) -> None:
+    def printAllCosts(self, generation: int) -> None:
         """Prints an ordered list of the individual's cost"""
         costList = []
         for i in range(len(self.population)):
             costList.append(round(self.population[i].trueCost))
+        print("Generation= " + str(generation) + "\tBest Individual= " + str(
+            self.population[0].trueCost) + "\tFull Cost List:")
         print(costList)
