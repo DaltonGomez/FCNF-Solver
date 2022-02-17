@@ -1,7 +1,14 @@
+from datetime import datetime
+
 from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """USED FOR EXPERIMENTATION"""
+
+# WALL CLOCK TIME STAMP
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Start Time =", current_time)
 
 # TEST OF RANDOM GRAPH GENERATOR
 # graphGen = GraphGenerator("r2000-5(50,50)", 2000, 0.05, 50, 50, [200, 2000], [500, 500], [20, 200], [1, 30], [100, 100], 3)
@@ -9,17 +16,17 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-# flowNetwork.loadFCFN("r2000-5(50,50)")
-flowNetwork.loadFCFN("r100-3(10,10)")
-# flowNetwork.loadFCFN("small")
+flowNetwork.loadFCFN("r2000-5(50,50)")
+# flowNetwork.loadFCFN("r100-3(10,10)")
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 400, 10, 10)
-GA.evolvePopulation(drawing=True)
+GA = AlphaPopulation(flowNetwork, 2500, 1, 1)
+GA.initializePopulation([0, 1.0])
+GA.visualizeIndividual(0, 0)
 
 # TEST OF MILP
-flowNetwork.executeSolver(400)
-flowNetwork.visualizeNetwork(catName="_OPT")
+# flowNetwork.executeSolver(400)
+# flowNetwork.visualizeNetwork(catName="_OPT")
 
 """
 # Test of Path-Based Crossover
