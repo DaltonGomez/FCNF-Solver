@@ -1,7 +1,7 @@
 from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
-"""USED FOR EXPERIMENTATION WITH ALPHA VALUES"""
+"""USED FOR EXPERIMENTATION"""
 
 # TEST OF RANDOM GRAPH GENERATOR
 # graphGen = GraphGenerator("r2000-5(50,50)", 2000, 0.05, 50, 50, [200, 2000], [500, 500], [20, 200], [1, 30], [100, 100], 3)
@@ -14,20 +14,12 @@ flowNetwork.loadFCFN("r100-3(10,10)")
 # flowNetwork.loadFCFN("small")
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 400, 5, 1)
-GA.initializePopulation([0, 1])
-GA.visualizeIndividual(0, 0)
-GA.visualizeIndividual(0, 4)
+GA = AlphaPopulation(flowNetwork, 400, 10, 10)
+GA.evolvePopulation(drawing=True)
 
 # TEST OF MILP
 flowNetwork.executeSolver(400)
 flowNetwork.visualizeNetwork(catName="_OPT")
-
-# TEST OF MILP
-flowNetwork2 = FixedChargeFlowNetwork()
-flowNetwork2.loadFCFN("r100-3(10,10)")
-flowNetwork2.executeSolver(200)
-flowNetwork2.visualizeNetwork(catName="_OPT2")
 
 """
 # Test of Path-Based Crossover
