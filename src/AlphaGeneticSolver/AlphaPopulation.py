@@ -220,7 +220,8 @@ class AlphaPopulation:
 
     def tournamentPathSelection(self, individualID: int, tournamentSize: int, selectionSize: int,
                                 selectionOrder: str) -> list:
-        """Selects the best k paths out of a randomly chosen subset of size n"""
+        """Selects the best k paths out of a randomly chosen subset of size n
+        @:param selectionOrder = {"mostDense", "leastDense"}"""
         random.seed()
         individual = self.population[individualID]
         # Compute paths and resize return selection length if necessary
@@ -244,13 +245,48 @@ class AlphaPopulation:
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
-    def randomOnePointCrossoverWithWeakestTwoReplacement(self, parentOneIndex: int, parentTwoIndex: int,
-                                                         direction: str) -> None:
-        """Crossover of 2 chromosomes at a random point where the bottom 2 individuals die off"""
+    def pathBasedCrossoverWithParentReplacement(self, parentOneID: int, parentTwoID: int, parentOnePaths: list,
+                                                parentTwoPaths: list, replacementStrategy: str) -> None:
+        """Crossover based on the flow per cost density of paths of the parents
+        @:param replacementStrategy = {"replaceParents", "replaceWeakestTwo"}"""
         random.seed()
-        self.rankPopulation()
-        parentOneChromosome = copy.deepcopy(self.population[parentOneIndex].alphaValues)
-        parentTwoChromosome = copy.deepcopy(self.population[parentTwoIndex].alphaValues)
+        # Create two offspring, each identical to one parent
+        parentOne = self.population[parentOneID]
+        parentTwo = self.population[parentTwoID]
+        offspringOne = AlphaIndividual(self.FCFN)
+        offspringOne.alphaValues = copy.deepcopy(parentOne.alphaValues)
+        offspringTwo = AlphaIndividual(self.FCFN)
+        offspringTwo.alphaValues = copy.deepcopy(parentTwo.alphaValues)
+        # For each path, push all of parent one's alpha values to offspring two
+        for path in parentOnePaths:
+            for edge in path:
+                edgeNum = int(edge.lstrip("e"))
+                offspringTwo.alphaValues[edgeNum] = parentOne.alphaValues[edgeNum]
+        # For each path, push all of parent one's alpha values to offspring two
+        for path in parentTwoPaths:
+            for edge in path:
+                edgeNum = int(edge.lstrip("e"))
+                offspringOne.alphaValues[edgeNum] = parentTwo.alphaValues[edgeNum]
+        # Add offspring into the population via the replacement strategy
+        if replacementStrategy == "replaceParents":
+            self.population[parentOneID] = offspringOne
+            self.population[parentTwoID] = offspringTwo
+        elif replacementStrategy == "replaceWeakestTwo":
+            # Kill weakest two individuals
+            self.rankPopulation()
+            self.population.pop(-1)
+            self.population.pop(-1)
+            self.population.append(offspringOne)
+            self.population.append(offspringTwo)
+
+    def randomOnePointCrossover(self, parentOneID: int, parentTwoID: int, direction: str,
+                                replacementStrategy: str) -> None:
+        """Crossover of 2 chromosomes at a single random point
+        @:param direction = {"fromLeft", "fromRight"}
+        @:param replacementStrategy = {"replaceParents", "replaceWeakestTwo"}"""
+        random.seed()
+        parentOneChromosome = copy.deepcopy(self.population[parentOneID].alphaValues)
+        parentTwoChromosome = copy.deepcopy(self.population[parentTwoID].alphaValues)
         if direction == "fromRight":
             parentOneChromosome.reverse()
             parentTwoChromosome.reverse()
@@ -270,47 +306,17 @@ class AlphaPopulation:
         offspringTwo.alphaValues = parentOneLeftGenes
         for gene in parentTwoRightGenes:
             offspringTwo.alphaValues.append(gene)
-        # Kill off weakest two individuals
-        self.population.pop(-1)
-        self.population.pop(-1)
-        # Add in offspring
-        self.population.append(offspringOne)
-        self.population.append(offspringTwo)
-
-    def randomOnePointCrossoverWithParentReplacement(self, parentOneIndex: int, parentTwoIndex: int,
-                                                     direction: str) -> None:
-        """Crossover of 2 individual's chromosome at a random point where the parents are removed from the population"""
-        random.seed()
-        parentOne = self.population.pop(parentOneIndex)
-        if parentOneIndex < parentTwoIndex:
-            parentTwo = self.population.pop(parentTwoIndex - 1)  # Adjust for parent two's index change after pop
-        else:
-            parentTwo = self.population.pop(parentTwoIndex)
-        if direction == "fromRight":
-            parentOne.alphaValues.reverse()
-            parentTwo.alphaValues.reverse()
-        crossoverPoint = random.randint(0, self.FCFN.numEdges - 1)
-        parentOneLeftGenes = []
-        parentTwoLeftGenes = []
-        for i in range(crossoverPoint + 1):
-            parentOneLeftGenes.append(parentOne.alphaValues.pop(0))
-            parentTwoLeftGenes.append(parentTwo.alphaValues.pop(0))
-        parentOneRightGenes = parentOne.alphaValues
-        parentTwoRightGenes = parentTwo.alphaValues
-        offspringOne = AlphaIndividual(self.FCFN)
-        offspringOne.alphaValues = parentTwoLeftGenes
-        for gene in parentOneRightGenes:
-            offspringOne.alphaValues.append(gene)
-        offspringTwo = AlphaIndividual(self.FCFN)
-        offspringTwo.alphaValues = parentOneLeftGenes
-        for gene in parentTwoRightGenes:
-            offspringTwo.alphaValues.append(gene)
-        self.population.append(offspringOne)
-        self.population.append(offspringTwo)
-
-    def pathBasedCrossover(self) -> None:
-        """Crossover based on the cost/flow density of all paths"""
-        # TODO - Implement
+        # Add offspring into the population via the replacement strategy
+        if replacementStrategy == "replaceParents":
+            self.population[parentOneID] = offspringOne
+            self.population[parentTwoID] = offspringTwo
+        elif replacementStrategy == "replaceWeakestTwo":
+            # Kill weakest two individuals
+            self.rankPopulation()
+            self.population.pop(-1)
+            self.population.pop(-1)
+            self.population.append(offspringOne)
+            self.population.append(offspringTwo)
 
     # =================================================
     # ============== MUTATION OPERATORS ==============
