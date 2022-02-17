@@ -10,8 +10,15 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
 # flowNetwork.loadFCFN("r100-5(10,10)")
-flowNetwork.loadFCFN("small")
+flowNetwork.loadFCFN("r500-5(2,4)")
 
+ga = AlphaPopulation(flowNetwork, 200, 5, 1)
+ga.initializePopulation([0.0, 1.0])
+ga.printAllCosts()
+print(ga.rouletteWheelSelection(3))
+
+"""
+# Test of RandomOnePointCrossover
 ga = AlphaPopulation(flowNetwork, 20, 2, 1)
 ga.initializePopulation([0.0, 1.0])
 print(ga.population[0].alphaValues)
@@ -19,6 +26,19 @@ print(ga.population[1].alphaValues)
 ga.randomOnePointCrossoverWithParentReplacement(0, 1, "fromLeft")
 print(ga.population[0].alphaValues)
 print(ga.population[1].alphaValues)
+"""
+
+"""
+# Test of rouletteWheelSelection(3)
+ga = AlphaPopulation(flowNetwork, 200, 5, 1)
+ga.initializePopulation([0.0, 1.0])
+extraInd = AlphaIndividual(flowNetwork)
+extraInd.initializeAlphaValuesRandomly(0, 500)
+extraInd.executeAlphaSolver(200)
+ga.population.append(extraInd)
+ga.printAllCosts()
+print(ga.rouletteWheelSelection(3))
+"""
 
 """
 # Test of path-based mutation

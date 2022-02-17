@@ -23,12 +23,12 @@ class AlphaPath:
         for edge in self.edges:
             edgeCost = FCFN.edgesDict[edge].totalCost
             self.routingCost += edgeCost
-        self.routingCostPerFlow = round(self.routingCost / self.flow)
+        self.flowPerCostDensity = round(self.flow / self.routingCost)
         # The source cost data is accurate but the sink is widely inaccurate- would not use
         self.startCost = FCFN.nodesDict[self.start].variableCost * FCFN.edgesDict[self.edges[0]].flow
         self.endCost = FCFN.nodesDict[self.end].variableCost * FCFN.edgesDict[self.edges[-1]].flow
         self.totalCost = self.startCost + self.endCost + self.routingCost
-        self.totalCostPerFlow = round(self.totalCost / self.flow)
+        self.totalFlowPerCostDensity = round(self.flow / self.totalCost)
 
     def printPathData(self) -> None:
         """Prints all relevant data for a path"""
@@ -42,7 +42,7 @@ class AlphaPath:
             print(self.edges)
             print("Flow = " + str(self.flow))
             print("Routing Cost = " + str(self.routingCost))
-            print("Cost Per Unit Flow = " + str(self.routingCostPerFlow))
+            print("Flow Per Cost Density = " + str(self.flowPerCostDensity))
         else:
             print("=============== ARC SEGMENT ===============")
             print("Source/Start = " + self.start)
@@ -53,7 +53,7 @@ class AlphaPath:
             print(self.edges)
             print("Flow = " + str(self.flow))
             print("Routing Cost = " + str(self.routingCost))
-            print("Cost Per Unit Flow = " + str(self.routingCostPerFlow))
+            print("Flow Per Cost Density = " + str(self.flowPerCostDensity))
 
     def printPathTopology(self) -> None:
         """Prints only the nodes and edges of a path"""

@@ -36,13 +36,12 @@ class AlphaPopulation:
         self.crossoverRate = crossoverRate
         self.mutationRate = mutationRate
 
-    def initializePopulation(self, initialAlphaRange: list) -> None:
+    def initializePopulation(self, initialAlphas: list) -> None:
         """Initializes the population with alpha values, solves each individual, and ranks"""
         # Initialize population
         for i in range(self.populationSize):
             thisIndividual = AlphaIndividual(self.FCFN)
-            thisIndividual.initializeAlphaValuesRandomly(lowerBound=initialAlphaRange[0],
-                                                         upperBound=initialAlphaRange[1])
+            thisIndividual.initializeAlphaValuesRandomly(lowerBound=initialAlphas[0], upperBound=initialAlphas[1])
             self.population.append(thisIndividual)
             self.solvePopulation()
             self.rankPopulation()
@@ -72,7 +71,7 @@ class AlphaPopulation:
                 self.randomOnePointCrossoverWithParentReplacement(0, 1, "fromLeft")
 
             # MUTATION
-            for individual in range(self.populationSize):
+            for individual in range(len(self.population)):
                 if random.random() < self.mutationRate:
                     self.randomSingleMutation(individual)
 
@@ -89,7 +88,7 @@ class AlphaPopulation:
         """Returns a random subset of individuals in the population (w/o replacement)"""
         random.seed()
         populationIDs = []
-        for i in range(self.populationSize):
+        for i in range(len(self.population)):
             populationIDs.append(i)
         randomIndividualsIDs = random.sample(populationIDs, selectionSize)
         return randomIndividualsIDs
@@ -104,18 +103,35 @@ class AlphaPopulation:
             # topIndividuals.append(self.population[i])
         return topIndividualIDs
 
-    def rouletteWheelSelection(self) -> list:
+    def rouletteWheelSelection(self, selectionSize: int) -> list:
         """Selects individuals probabilistically by their normalized fitness"""
+        random.seed()
         self.rankPopulation()
-
-        pass
+        fitnessFromCost = []
+        for individual in range(len(self.population)):
+            fitnessFromCost.append(1 / self.population[individual].trueCost)
+        cumulativeFitness = 0
+        for individual in range(len(self.population)):
+            cumulativeFitness += fitnessFromCost[individual]
+        cumulativeProbabilities = [fitnessFromCost[0] / cumulativeFitness]
+        for i in range(1, len(self.population)):
+            cumulativeProbabilities.append((fitnessFromCost[i] / cumulativeFitness) + cumulativeProbabilities[i - 1])
+        selectionSet = set()
+        while len(selectionSet) < selectionSize:
+            rng = random.random()
+            print(rng)
+            for p in range(len(self.population)):
+                if rng < cumulativeProbabilities[p]:
+                    selectionSet.add(p)
+                    break
+        return list(selectionSet)
 
     def tournamentSelection(self, tournamentSize: int, selectionSize: int) -> list:
         """Selects the best two individuals out of a randomly chosen subset of size n"""
         random.seed()
         # Select subset of population
         populationIDs = []
-        for i in range(self.populationSize):
+        for i in range(len(self.population)):
             populationIDs.append(i)
         subset = random.sample(populationIDs, tournamentSize)
         # Sort by cost
@@ -235,7 +251,7 @@ class AlphaPopulation:
         self.population[individualNum] = mutatedIndividual
 
     def mostDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
-        """Mutates an individual's entire path that has the highest cost/flow density"""
+        """Mutates the entire path of an individual's highest flow/cost density path"""
         parentIndividual = self.population[individualNum]
         # If the paths have not been computed for the individual, do so
         if len(parentIndividual.paths) == 0:
@@ -244,8 +260,8 @@ class AlphaPopulation:
         maxDensity = 0
         mutatedPath = None
         for path in parentIndividual.paths:
-            if path.totalCostPerFlow > maxDensity:
-                maxDensity = path.totalCostPerFlow
+            if path.flowPerCostDensity > maxDensity:
+                maxDensity = path.flowPerCostDensity
                 mutatedPath = path
         mutatedIndividual = AlphaIndividual(self.FCFN)
         mutatedIndividual.alphaValues = parentIndividual.alphaValues
@@ -255,7 +271,7 @@ class AlphaPopulation:
         self.population[individualNum] = mutatedIndividual
 
     def leastDensePathMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
-        """Mutates an individual's entire path that has the lowest cost/flow density"""
+        """Mutates the entire path of an individual's lowest flow/cost density path"""
         parentIndividual = self.population[individualNum]
         # If the paths have not been computed for the individual, do so
         if len(parentIndividual.paths) == 0:
@@ -264,8 +280,8 @@ class AlphaPopulation:
         minDensity = sys.maxsize
         mutatedPath = None
         for path in parentIndividual.paths:
-            if path.totalCostPerFlow < minDensity:
-                minDensity = path.totalCostPerFlow
+            if path.flowPerCostDensity < minDensity:
+                minDensity = path.flowPerCostDensity
                 mutatedPath = path
         mutatedIndividual = AlphaIndividual(self.FCFN)
         mutatedIndividual.alphaValues = parentIndividual.alphaValues
@@ -297,7 +313,14 @@ class AlphaPopulation:
         self.visualizeIndividual(str(generation), 0)  # Second param = 0 --> Top individual
 
     def visualizeIndividual(self, generation: str, individualRank: int) -> None:
-        """Draws the .html file for the top individual"""
+        """Draws the .html file for an individual"""
         self.rankPopulation()
         self.population[individualRank].visualizeAlphaNetwork(endCatName=generation)
         time.sleep(0.25)
+
+    def printAllCosts(self) -> None:
+        """Prints an ordered list of the individual's cost"""
+        costList = []
+        for i in range(len(self.population)):
+            costList.append(round(self.population[i].trueCost))
+        print(costList)
