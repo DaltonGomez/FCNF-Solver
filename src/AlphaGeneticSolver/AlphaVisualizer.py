@@ -24,33 +24,35 @@ class AlphaVisualizer:
         allEdgesSet = set(self.individual.FCFN.edgesDict)
         openedEdgesSet = set(self.individual.openedEdgesDict)
         unopenedEdgesSet = allEdgesSet.difference(openedEdgesSet)
-        # Add opened nodes to NX instance
-        for node in openedNodesSet:
-            nodeValues = self.individual.openedNodesDict[node]
+        # Add nodes to NX instance
+        for node in self.individual.FCFN.nodesDict.keys():
             if node[0] == "s":
-                self.nx.add_node(node, value=nodeValues[0], color="blue", label=str(round(nodeValues[1])))
+                if node in openedNodesSet:
+                    nodeValues = self.individual.openedNodesDict[node]
+                    self.nx.add_node(node, value=nodeValues[0], color="blue", label=str(round(nodeValues[1])))
+                elif node in unopenedNodesSet:
+                    self.nx.add_node(node, value=0, color="blue")
             elif node[0] == "t":
-                self.nx.add_node(node, value=nodeValues[0], color="red", label=str(round(nodeValues[1])))
+                if node in openedNodesSet:
+                    nodeValues = self.individual.openedNodesDict[node]
+                    self.nx.add_node(node, value=nodeValues[0], color="red", label=str(round(nodeValues[1])))
+                elif node in unopenedNodesSet:
+                    self.nx.add_node(node, value=0, color="red")
             elif node[0] == "n":
-                self.nx.add_node(node, value=nodeValues[0], color="black", label=str(round(nodeValues[1])))
-        # Add unopened nodes to NX instance
-        for node in unopenedNodesSet:
-            if node[0] == "s":
-                self.nx.add_node(node, value=0, color="blue")
-            elif node[0] == "t":
-                self.nx.add_node(node, value=0, color="red")
-            elif node[0] == "n":
-                self.nx.add_node(node, value=0, color="grey")
-        # Add opened edges to NX instance
-        for edge in openedEdgesSet:
-            edgeValues = self.individual.openedEdgesDict[edge]
+                if node in openedNodesSet:
+                    nodeValues = self.individual.openedNodesDict[node]
+                    self.nx.add_node(node, value=nodeValues[0], color="black", label=str(round(nodeValues[1])))
+                elif node in unopenedNodesSet:
+                    self.nx.add_node(node, value=0, color="grey")
+        # Add edges to NX instance
+        for edge in self.individual.FCFN.edgesDict.keys():
             edgeObj = self.individual.FCFN.edgesDict[edge]
-            self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeValues[0], color="black",
-                             label=str(round(edgeValues[1])))
-        # Add opened edges to NX instance
-        for edge in unopenedEdgesSet:
-            edgeObj = self.individual.FCFN.edgesDict[edge]
-            self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=0.0, color="grey")
+            if edge in openedEdgesSet:
+                edgeValues = self.individual.openedEdgesDict[edge]
+                self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeValues[0], color="black",
+                                 label=str(round(edgeValues[1])))
+            elif edge in unopenedEdgesSet:
+                self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=0.0, color="grey")
 
     def populateSolutionGraphOnly(self) -> None:
         """Populates a NetworkX instance with only the solution data of the AlphaIndividual"""
@@ -76,100 +78,100 @@ class AlphaVisualizer:
         visual = netVis("800px", "1000px", directed=True)
         visual.from_nx(self.nx)
         # Sets visualization options using a JSON format (see vis.js documentation)
-        # TODO - Random Seed is not drawing consistent graphs. Needs debugging!
+        # NOTE: The order in which nodes and edges are added to the NX instance affects the consistency of the layout
         visual.set_options("""
-                    var options = {
-                        "autoResize": true,
-                        "width": "1000px",
-                        "height": "800px",
-                        "layout": { 
-                            "randomSeed":""" + str(self.individual.FCFN.visSeed) + "," +
+                            var options = {
+                                "autoResize": true,
+                                "width": "1000px",
+                                "height": "800px",
+                                "layout": { 
+                                    "randomSeed":""" + str(self.individual.visSeed) + "," +
                            """
-                            "improvedLayout": true
-                        },
-                        "configure": {
-                            "enabled": false
-                        },
-                        "nodes": {
-                            "physics": true,
-                            "size": 6,
-                            "borderWidth": 3,
-                            "color": {
-                                "inherit": true
-                            },
-                            "font": {
-                                "size": 0,
-                                "color": "rgba(0,0,0,1)",
-                                "strokeWidth": 0,
-                                "strokeColor": "rgba(0,0,0,1)"
-                            },
-                            "scaling": {
-                                "min": 10,
-                                "max": 60
-                            },
-                            "shadow": {
-                                "enabled": true,
-                                "size": 15,
-                                "color": "rgba(0,0,0,0.5)"
-                            }
-                        },
-                        "edges": {
-                            "physics": true,
-                            "color": {
-                                "inherit": true
-                            },
-                            "font": {
-                                "size": 0,
-                                "color": "rgba(0,0,0,1)",
-                                "strokeWidth": 0,
-                                "strokeColor": "rgba(0,0,0,1)"
-                            },
-                            "arrowStrikethrough": false,
-                            "arrows": {
-                                "to": {
-                                    "scaleFactor": 2
-                                }
-                            },
-                            "scaling": {
-                                "min": 1,
-                                "max": 25
-                            },
-                            "smooth": {
-                                "enabled": false
-                            },
-                            "shadow": {
-                                "enabled": true,
-                                "size": 15,
-                                "color": "rgba(0,0,0,0.5)"
-                            }
-                        },
-                        "interaction": {
-                            "dragView": true,
-                            "zoomView": true,
-                            "dragNodes": false,
-                            "selectable": true,
-                            "selectConnectedEdges": false,
-                            "hoverConnectedEdges": false,
-                            "hideEdgesOnDrag": false,
-                            "hideNodesOnDrag": false
-                        },
-                        "physics": {
-                            "enabled": true,
-                            "stabilization": {
-                                "enabled": true,
-                                "fit": true
-                            },
-                            "barnesHut": {
-                                "avoidOverlap": 1,
-                                "centralGravity": 0.2,
-                                "damping": 0.90,
-                                "gravitationalConstant": -100000,
-                                "springConstant": 0.001,
-                                "springLength": 500
-                            }
-                        }
-                    }
-                    """)
+                           "improvedLayout": true
+                           },
+                           "configure": {
+                               "enabled": false
+                           },
+                           "nodes": {
+                               "physics": true,
+                               "size": 6,
+                               "borderWidth": 3,
+                               "color": {
+                                   "inherit": true
+                               },
+                               "font": {
+                                   "size": 0,
+                                   "color": "rgba(0,0,0,1)",
+                                   "strokeWidth": 0,
+                                   "strokeColor": "rgba(0,0,0,1)"
+                               },
+                               "scaling": {
+                                   "min": 10,
+                                   "max": 60
+                               },
+                               "shadow": {
+                                   "enabled": true,
+                                   "size": 15,
+                                   "color": "rgba(0,0,0,0.5)"
+                               }
+                           },
+                           "edges": {
+                               "physics": true,
+                               "color": {
+                                   "inherit": true
+                               },
+                               "font": {
+                                   "size": 0,
+                                   "color": "rgba(0,0,0,1)",
+                                   "strokeWidth": 0,
+                                   "strokeColor": "rgba(0,0,0,1)"
+                               },
+                               "arrowStrikethrough": false,
+                               "arrows": {
+                                   "to": {
+                                       "scaleFactor": 2
+                                   }
+                               },
+                               "scaling": {
+                                   "min": 1,
+                                   "max": 25
+                               },
+                               "smooth": {
+                                   "enabled": false
+                               },
+                               "shadow": {
+                                   "enabled": true,
+                                   "size": 15,
+                                   "color": "rgba(0,0,0,0.5)"
+                               }
+                           },
+                           "interaction": {
+                               "dragView": true,
+                               "zoomView": true,
+                               "dragNodes": false,
+                               "selectable": false,
+                               "selectConnectedEdges": false,
+                               "hoverConnectedEdges": false,
+                               "hideEdgesOnDrag": false,
+                               "hideNodesOnDrag": false
+                           },
+                           "physics": {
+                               "enabled": true,
+                               "stabilization": {
+                                   "enabled": true,
+                                   "fit": true
+                               },
+                               "barnesHut": {
+                                   "avoidOverlap": 1,
+                                   "centralGravity": 0.2,
+                                   "damping": 0.90,
+                                   "gravitationalConstant": -100000,
+                                   "springConstant": 0.001,
+                                   "springLength": 500
+                               }
+                           }
+                       }
+                       """)
         visual.show(displayName)
 
     def drawGraphUiOptions(self, name: str) -> None:

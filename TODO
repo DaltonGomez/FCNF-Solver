@@ -2,9 +2,9 @@
 
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
-+ Reorganize AlphaIndividual so that each one does not hold an entire instance of the FCFN
-    + Do THIS^ by decoupling a FCFN instance from a FCFN solution instance
++ Reorganize so that the CPLEX solver can be reused just by re-writing the objective function
 + Implement hyper-operators that delegate to a specific method based on an input argument
+    + Have hyper operators evaluate if solutions are solved/have paths
 + Set up tuning experiment and find larger test beds
 
 

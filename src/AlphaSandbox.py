@@ -15,7 +15,9 @@ flowNetwork.loadFCFN("r100-3(10,10)")
 
 # TEST OF GENETIC ALGORITHM
 GA = AlphaPopulation(flowNetwork, 400, 5, 1)
-GA.evolvePopulation(drawing=True)
+GA.initializePopulation([0, 1])
+GA.visualizeIndividual(0, 0)
+GA.visualizeIndividual(0, 4)
 
 # TEST OF MILP
 flowNetwork.executeSolver(400)
