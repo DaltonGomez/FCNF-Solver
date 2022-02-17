@@ -95,8 +95,7 @@ class AlphaSolver:
 
     def updateObjectiveFunction(self, alphaValues: list):
         """Deletes any previous objective function and writes a new objective function using the input alpha values"""
-        if self.model.has_objective() or self.model.solution is not None:
-            print("TEST")
+        if self.model.has_objective() and self.model.solution is not None:
             self.resetSolver()
         # =================== OBJECTIVE FUNCTION ===================
         self.model.set_objective("min", sum(
@@ -168,9 +167,13 @@ class AlphaSolver:
         """Resets the solver to its initialized state (i.e. only variables and constraints)"""
         self.model.remove_objective()
         self.hasObjectiveFunction = False
+        self.isRun = False
         self.model.solution.clear()
         self.hasSolution = False
-        self.isRun = False
+
+    def destroySolver(self):
+        """Kills off the enter solver model, including variables and constraints (for switching FCFN during runtime)"""
+        self.model = None
 
     def printCurrentSolverDetails(self) -> None:
         """Prints the most important and concise details of the solver, model and solution"""
