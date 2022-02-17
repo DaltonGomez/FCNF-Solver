@@ -16,13 +16,14 @@ print("Start Time =", current_time)
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r2000-5(50,50)")
-# flowNetwork.loadFCFN("r100-3(10,10)")
+# flowNetwork.loadFCFN("r2000-5(50,50)")
+flowNetwork.loadFCFN("r100-3(10,10)")
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 2500, 1, 1)
+GA = AlphaPopulation(flowNetwork, 700, 2, 1)
 GA.initializePopulation([0, 1.0])
 GA.visualizeIndividual(0, 0)
+GA.visualizeIndividual(0, 1)
 
 # TEST OF MILP
 # flowNetwork.executeSolver(400)
