@@ -16,18 +16,56 @@ print("Start Time =", current_time)
 
 # INITIALIZATIONS
 flowNetwork = FixedChargeFlowNetwork()
+# flowNetwork.loadFCFN("small")
+flowNetwork.loadFCFN("r100-3(10,10)")
+# flowNetwork.loadFCFN("r2000-4(50,50)")
+
+# Solve individual initially and print data
+GA = AlphaPopulation(flowNetwork, 999, 1, 1)
+GA.initializePopulation([0.0, 1.0])
+GA.visualizeIndividual(0, 0, )
+
+# TEST OF MILP
+# flowNetwork.executeSolver(35)
+# flowNetwork.visualizeNetwork(catName="-OPT")
+
+
+"""
+# TEST OF EXPLICITLY MANIPULATING ALPHA VALUES
+
+# INITIALIZATIONS
+flowNetwork = FixedChargeFlowNetwork()
 flowNetwork.loadFCFN("small")
 # flowNetwork.loadFCFN("r100-3(10,10)")
 # flowNetwork.loadFCFN("r2000-4(50,50)")
 
-GA = AlphaPopulation(flowNetwork, 21, 1, 1)
+# Solve individual initially and print data
+GA = AlphaPopulation(flowNetwork, 35, 1, 1)
 GA.initializePopulation([0.0, 1.0])
+individual = GA.population[0]
+print(individual.alphaValues)
+individual.allUsedPaths()
+individual.printAllPathData()
 GA.visualizeIndividual(0, 0, graphType="withLabels")
 
-# TEST OF MILP
-# flowNetwork.executeSolver(20)
-# flowNetwork.visualizeNetwork(catName="-OPT")
+# Solve a second mutate individual
+mutatedIndividual = AlphaIndividual(flowNetwork)
+mutatedIndividual.alphaValues = individual.alphaValues
+for path in individual.paths:
+    for edge in path.edges:
+        edgeID = int(edge.lstrip("e"))
+        mutatedIndividual.alphaValues[edgeID] = 100
+print(mutatedIndividual.alphaValues)
+GA.solveIndividual(mutatedIndividual)
+mutatedIndividual.allUsedPaths()
+mutatedIndividual.printAllPathData()
+GA.population.append(mutatedIndividual)
+GA.visualizeIndividual(0, 1, graphType="withLabels")
 
+# TEST OF MILP
+flowNetwork.executeSolver(35)
+flowNetwork.visualizeNetwork(catName="-OPT")
+"""
 
 """
 # TEST OF LARGE INSTANCE SIZE (TWICE SOLVED W/ TIMESTAMPS)

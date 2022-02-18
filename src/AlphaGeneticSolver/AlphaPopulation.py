@@ -23,13 +23,32 @@ class AlphaPopulation:
             unsolvedFCFN.loadFCFN(FCFN.name)
             self.FCFN = unsolvedFCFN
         # Population & Solver Instances
+        self.population = []
         self.minTargetFlow = minTargetFlow
         self.alphaSolver = AlphaSolver(self.FCFN, minTargetFlow)
-        self.population = []
-        # Evolution Hyperparameters- Tune with setHyperparameters() method
+
+        # GA HYPERPARAMETERS
+        # -----------------------
+        # Globals HPs
         self.populationSize = populationSize
         self.numGenerations = numGenerations
+        self.alphaBounds = [0.0, 1.0]
+        # Individual Selection HPs
+        self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "top", "random"
+        self.selectionSize = 2
+        self.tournamentSize = 2
+        # Path Selection HPs
+        self.pathSelectionMethod = "roulette"  # :param : "tournament", "roulette", "top", "random"
+        self.pathRankingMethod = ""  # TODO - Implement to allow for different pathSelectionRankings
+        self.pathSelectionSize = 2
+        self.pathTournamentSize = 2
+        # Crossover HPs
+        self.crossoverMethod = "pathBased"  # :param : "onePoint", "twoPoint", "pathBased"
         self.crossoverRate = 0.90
+        self.crossoverAttemptsPerGeneration = 1
+        self.replacementStrategy = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents"
+        # Mutation HPs
+        self.mutationMethod = "pathBased"  # :param : "randomSingle", "randomTotal", "pathBased"
         self.mutationRate = 0.03
 
     def setHyperparameters(self, crossoverRate: float, mutationRate: float) -> None:
@@ -43,7 +62,7 @@ class AlphaPopulation:
         # Initialize population
         for i in range(self.populationSize):
             thisIndividual = AlphaIndividual(self.FCFN)
-            thisIndividual.initializeAlphaValuesRandomly(lowerBound=initialAlphas[0], upperBound=initialAlphas[1])
+            thisIndividual.initializeAlphaValuesRandomly(lowerBound=self.alphaBounds[0], upperBound=self.alphaBounds[1])
             self.population.append(thisIndividual)
         self.solvePopulation()
         self.rankPopulation()
@@ -410,22 +429,22 @@ class AlphaPopulation:
     # =================================================
     # ============== MUTATION OPERATORS ==============
     # =================================================
-    def randomSingleMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
+    def randomSingleMutation(self, individualNum: int) -> None:
         """Mutates an individual at only one random gene in the chromosome"""
         random.seed()
         mutatePoint = random.randint(0, self.FCFN.numEdges - 1)
         mutatedIndividual = AlphaIndividual(self.FCFN)
         mutatedIndividual.alphaValues = self.population[individualNum].alphaValues
-        mutatedIndividual.alphaValues[mutatePoint] = random.uniform(lowerBound, upperBound)
+        mutatedIndividual.alphaValues[mutatePoint] = random.uniform(self.alphaBounds[0], self.alphaBounds[1])
         self.population[individualNum] = mutatedIndividual
 
-    def randomTotalMutation(self, individualNum: int, lowerBound=0.0, upperBound=1.0) -> None:
+    def randomTotalMutation(self, individualNum: int) -> None:
         """Mutates the entire chromosome of an individual"""
         mutatedIndividual = AlphaIndividual(self.FCFN)
-        mutatedIndividual.initializeAlphaValuesRandomly(lowerBound=lowerBound, upperBound=upperBound)
+        mutatedIndividual.initializeAlphaValuesRandomly(lowerBound=self.alphaBounds[0], upperBound=self.alphaBounds[1])
         self.population[individualNum] = mutatedIndividual
 
-    def selectedPathsMutation(self, individualNum: int, selectedPaths: list, lowerBound=0.0, upperBound=1.0) -> None:
+    def selectedPathsMutation(self, individualNum: int, selectedPaths: list) -> None:
         """Mutates all the edges in the selected paths of an individual"""
         random.seed()
         parentIndividual = self.population[individualNum]
@@ -434,7 +453,7 @@ class AlphaPopulation:
         for path in selectedPaths:
             for edge in path.edges:
                 edgeNum = int(edge.lstrip("e"))
-                mutatedIndividual.alphaValues[edgeNum] = random.uniform(lowerBound, upperBound)
+                mutatedIndividual.alphaValues[edgeNum] = random.uniform(self.alphaBounds[0], self.alphaBounds[1])
         self.population[individualNum] = mutatedIndividual
 
     # ===================================================

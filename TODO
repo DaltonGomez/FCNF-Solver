@@ -6,6 +6,8 @@ HIGH-PRIORITY CHANGES & BUGS:
 + Implement hyper-operators that delegate to a specific method based on an input argument
     + Have hyper operators evaluate if solutions are solved/have paths
 + Set up tuning experiment and find larger test beds
++ Implement an annealing schedule for the alpha bounds???
++ Implement other probability functions for randomly determining alpha values???
 
 
 
