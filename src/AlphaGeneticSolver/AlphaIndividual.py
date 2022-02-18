@@ -179,7 +179,10 @@ class AlphaIndividual:
         """Draws the Fixed Charge Flow Network instance using the PyVis package and a NetworkX conversion"""
         if self.visualizer is None:
             self.visualizer = AlphaVisualizer(self, graphType)
-            self.visualizer.drawGraph(frontCatName + self.name + endCatName)
+        if graphType == "withLabels":
+            self.visualizer.drawGraphWithLabels(frontCatName + self.name + endCatName)
+        elif graphType == "uiControls":
+            self.visualizer.drawGraphUiOptions(frontCatName + self.name + endCatName)
         else:
             self.visualizer.drawGraph(frontCatName + self.name + endCatName)
 

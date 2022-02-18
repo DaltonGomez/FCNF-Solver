@@ -440,10 +440,10 @@ class AlphaPopulation:
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
-    def visualizeIndividual(self, generation: int, individualRank: int) -> None:
+    def visualizeIndividual(self, generation: int, individualRank: int, graphType="fullGraph") -> None:
         """Draws the .html file for an individual"""
         # Visualization w/ timeout to ensure the correct rendering order
-        self.population[individualRank].visualizeAlphaNetwork(endCatName=str(generation))
+        self.population[individualRank].visualizeAlphaNetwork(endCatName=str(generation), graphType=graphType)
         time.sleep(0.25)
 
     def printAllCosts(self, generation: int) -> None:

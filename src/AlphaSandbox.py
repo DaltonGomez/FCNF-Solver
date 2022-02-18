@@ -22,7 +22,7 @@ flowNetwork.loadFCFN("small")
 
 GA = AlphaPopulation(flowNetwork, 21, 1, 1)
 GA.initializePopulation([0.0, 1.0])
-GA.visualizeIndividual(0, 0)
+GA.visualizeIndividual(0, 0, graphType="withLabels")
 
 # TEST OF MILP
 # flowNetwork.executeSolver(20)
