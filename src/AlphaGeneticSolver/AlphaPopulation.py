@@ -51,11 +51,56 @@ class AlphaPopulation:
         self.mutationMethod = "pathBased"  # :param : "randomSingle", "randomTotal", "pathBased"
         self.mutationRate = 0.03
 
-    def setHyperparameters(self, crossoverRate: float, mutationRate: float) -> None:
-        """Sets the hyperparameters dictating how the population evolves"""
+    # ==================================================================
+    # ============== HYPERPARAMETER SETTERS & INITIALIZER ==============
+    # ==================================================================
+    def setAlphaBounds(self, lowerBound: float, upperBound: float) -> None:
+        """Sets the GA class field that dictates the range when randomly initializing/updating alpha values"""
+        self.alphaBounds = [lowerBound, upperBound]
+
+    def setIndividualSelectionHyperparams(self, selectionMethod: str, selectionSize: int, tournamentSize: int) -> None:
+        """Sets the GA class fields that dictate how the selection of individuals is carried out \n
+        :param str selectionMethod: One of following: {"tournament", "roulette", "top", "random"}
+        :param int selectionSize: Number of individuals returned
+        :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
+        """
+        self.selectionMethod = selectionMethod
+        self.selectionSize = selectionSize
+        self.tournamentSize = tournamentSize
+
+    def setPathSelectionHyperparams(self, selectionMethod: str, pathRankingMethod: str, selectionSize: int,
+                                    tournamentSize: int) -> None:
+        """Sets the GA class fields that dictate how the selection of paths is carried out \n
+        :param str selectionMethod: One of following: {"tournament", "roulette", "top", "random"}
+        :param str pathRankingMethod: One of following: {***TBD***}
+        :param int selectionSize: Number of individuals returned
+        :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
+        """
+        self.pathSelectionMethod = selectionMethod
+        self.pathRankingMethod = pathRankingMethod
+        self.pathSelectionSize = selectionSize
+        self.pathTournamentSize = tournamentSize
+
+    def setCrossoverHyperparams(self, crossoverMethod: str, replacementStrategy: str, crossoverRate: float,
+                                crossoverAttemptsPerGeneration: int) -> None:
+        """Sets the GA class fields that dictate how the crossover of individuals is carried out \n
+        :param str crossoverMethod: One of following: {"onePoint", "twoPoint", "pathBased"}
+        :param int replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents"}
+        :param str crossoverRate: Probability in [0,1] that a crossover occurs
+        :param int crossoverAttemptsPerGeneration: Number of attempted crossovers per generation
+        """
+        self.crossoverMethod = crossoverMethod
         self.crossoverRate = crossoverRate
+        self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
+        self.replacementStrategy = replacementStrategy
+
+    def setMutationHyperparams(self, mutationMethod: str, mutationRate: float) -> None:
+        """Sets the GA class fields that dictate how the mutation of individuals is carried out \n
+        :param str mutationMethod: One of following: {"randomSingle", "randomTotal", "pathBased"}
+        :param str mutationRate: Probability in [0,1] that a mutation occurs
+        """
+        self.mutationMethod = mutationMethod  # :param : "randomSingle", "randomTotal", "pathBased"
         self.mutationRate = mutationRate
-        # TODO - Add in additional hyperparameters and build tuning experiment
 
     def initializePopulation(self, initialAlphas: list) -> None:
         """Initializes the population with alpha values, solves each individual, and ranks"""
@@ -78,22 +123,24 @@ class AlphaPopulation:
         if len(self.population) == 0:
             self.initializePopulation([0.0, 1.0])
         # MAIN EVOLUTION LOOP
-        crossoverAttemptsPerGeneration = 1
         for generation in range(self.numGenerations):
-            for crossover in range(crossoverAttemptsPerGeneration):
+            # ATTEMPT CROSSOVER
+            for crossoverAttempt in range(self.crossoverAttemptsPerGeneration):
                 if random.random() < self.crossoverRate:
-                    # SELECTION
-                    individuals = self.tournamentSelection(2, 2)
-                    individualZeroPaths = self.rouletteWheelPathSelection(individuals[0], 1, "mostDense")
-                    individualOnePaths = self.rouletteWheelPathSelection(individuals[1], 1, "mostDense")
+                    # SELECT INDIVIDUALS
+                    selectedIndividuals = self.selectIndividuals()
+                    # TODO - Crossover always takes two parents- Delete the selectionSize hyperparameter?
+                    parentOnePaths = self.selectPaths(selectedIndividuals[0])
+                    parentTwoPaths = self.selectPaths(selectedIndividuals[1])
                     # CROSSOVER
-                    self.pathBasedCrossover(individuals[0], individuals[1], individualZeroPaths, individualOnePaths,
-                                            "replaceWeakestTwo")
+                    self.crossover(selectedIndividuals[0], selectedIndividuals[1], parentOnePaths, parentTwoPaths)
+
             # MUTATION
             for individual in range(len(self.population)):
                 if random.random() < self.mutationRate:
-                    selectedPaths = self.rouletteWheelPathSelection(individual, 1, "mostDense")
-                    self.selectedPathsMutation(individual, selectedPaths)
+                    selectedPaths = self.selectPaths(individual)
+                    self.mutate(individual, selectedPaths)
+
             # EVALUATE
             self.solvePopulation()
             self.rankPopulation()
@@ -126,6 +173,19 @@ class AlphaPopulation:
     # ============================================================
     # ============== INDIVIDUAL SELECTION OPERATORS ==============
     # ============================================================
+    def selectIndividuals(self) -> list:
+        """Hyper-selection operator that calls specific selection method based on hyperparameters"""
+        selectedIndividualIDs = []
+        if self.selectionMethod == "tournament":
+            selectedIndividualIDs = self.tournamentSelection(self.selectionSize, self.tournamentSize)
+        elif self.selectionMethod == "roulette":
+            selectedIndividualIDs = self.rouletteWheelSelection(self.selectionSize)
+        elif self.selectionMethod == "top":
+            selectedIndividualIDs = self.topSelection(self.selectionSize)
+        elif self.selectionMethod == "random":
+            selectedIndividualIDs = self.randomSelection(self.selectionSize)
+        return selectedIndividualIDs
+
     def randomSelection(self, selectionSize: int) -> list:
         """Returns a random subset of individuals in the population (w/o replacement)"""
         random.seed()
@@ -190,6 +250,21 @@ class AlphaPopulation:
     # ============================================================
     # ============== PATH SELECTION OPERATORS ====================
     # ============================================================
+    def selectPaths(self, individualID: int) -> list:
+        """Hyper-selection operator that calls specific path selection method based on hyperparameters"""
+        # TODO - Implement a way to change how paths are ranked and selected
+        selectedPaths = []
+        if self.selectionMethod == "tournament":
+            selectedPaths = self.tournamentPathSelection(individualID, self.pathSelectionSize, self.pathTournamentSize,
+                                                         "mostDense")
+        elif self.selectionMethod == "roulette":
+            selectedPaths = self.rouletteWheelPathSelection(individualID, self.pathSelectionSize, "mostDense")
+        elif self.selectionMethod == "top":
+            selectedPaths = self.densityBasedPathSelection(individualID, self.pathSelectionSize, "mostDense")
+        elif self.selectionMethod == "random":
+            selectedPaths = self.randomPathSelection(individualID, self.pathSelectionSize)
+        return selectedPaths
+
     def randomPathSelection(self, individualID: int, selectionSize: int) -> list:
         """Returns a random subset of paths in an individual (w/o replacement)"""
         random.seed()
@@ -307,6 +382,24 @@ class AlphaPopulation:
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
+    def crossover(self, parentOneID: int, parentTwoID: int, parentOnePaths=None, parentTwoPaths=None) -> None:
+        """Hyper-selection operator that calls specific crossover method based on hyperparameters"""
+        random.seed()
+        if parentTwoPaths is None:
+            parentTwoPaths = []
+        if parentOnePaths is None:
+            parentOnePaths = []
+        if self.selectionMethod == "pathBased":
+            self.pathBasedCrossover(parentOneID, parentTwoID, parentOnePaths, parentTwoPaths, self.replacementStrategy)
+        elif self.selectionMethod == "twoPoint":
+            self.randomTwoPointCrossover(parentOneID, parentTwoID, self.replacementStrategy)
+        elif self.selectionMethod == "onePoint":
+            rng = random.random()
+            if rng < 0.50:
+                self.randomOnePointCrossover(parentOneID, parentTwoID, "fromLeft", self.replacementStrategy)
+            else:
+                self.randomOnePointCrossover(parentOneID, parentTwoID, "fromRight", self.replacementStrategy)
+
     def pathBasedCrossover(self, parentOneID: int, parentTwoID: int, parentOnePaths: list,
                            parentTwoPaths: list, replacementStrategy: str) -> None:
         """Crossover based on the flow per cost density of paths of the parents\n
@@ -429,6 +522,18 @@ class AlphaPopulation:
     # =================================================
     # ============== MUTATION OPERATORS ==============
     # =================================================
+    def mutate(self, individualID: int, selectedPaths=None) -> None:
+        """Hyper-selection operator that calls specific mutation method based on hyperparameters"""
+        random.seed()
+        if selectedPaths is None:
+            selectedPaths = []
+        if self.mutationMethod == "randomSingle":
+            self.randomSingleMutation(individualID)
+        elif self.mutationMethod == "randomTotal":
+            self.randomTotalMutation(individualID)
+        elif self.mutationMethod == "pathBased":
+            self.selectedPathsMutation(individualID, selectedPaths)
+
     def randomSingleMutation(self, individualNum: int) -> None:
         """Mutates an individual at only one random gene in the chromosome"""
         random.seed()
