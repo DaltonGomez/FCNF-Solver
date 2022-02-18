@@ -13,21 +13,26 @@ class ExactSolver:
         # Solver model
         self.model = Model(name="FCFN-MILP-ExactSolver", log_output=False, cts_by_name=True)
         self.isRun = False
+        # Decision variables
+        self.sourceFlowVars = None
+        self.sinkFlowVars = None
+        self.edgeOpenedVars = None
+        self.edgeFlowVars = None
 
     def buildModel(self) -> None:
         """Builds the decision variables, constraints, and object function of the MILP model from the FCFN instance"""
         # =================== DECISION VARIABLES ===================
         # Source and sink decision variables
-        self.model.sourceFlowVars = self.model.continuous_var_list(self.FCFN.numSources, name="s")
-        self.model.sinkFlowVars = self.model.continuous_var_list(self.FCFN.numSinks, name="t")
+        self.sourceFlowVars = self.model.continuous_var_dict(self.FCFN.numSources, name="s")
+        self.sinkFlowVars = self.model.continuous_var_dict(self.FCFN.numSinks, name="t")
         # Edge decision variables - Built as a list indexed on [edge] and with a lower bound of 0
-        self.model.edgeOpenedVars = self.model.binary_var_list(self.FCFN.numEdges, name="y")
-        self.model.edgeFlowVars = self.model.continuous_var_list(self.FCFN.numEdges, name="e", lb=0)
+        self.edgeOpenedVars = self.model.binary_var_dict(self.FCFN.numEdges, name="y")
+        self.edgeFlowVars = self.model.continuous_var_dict(self.FCFN.numEdges, name="e", lb=0)
 
         # =================== CONSTRAINTS ===================
         # Minimum flow constraint (Constructed as the sum of all sinks in-flows)
         self.model.add_constraint(
-            sum(self.model.sinkFlowVars[i] for i in range(self.FCFN.numSinks)) >= self.minTargetFlow,
+            sum(self.sinkFlowVars[i] for i in range(self.FCFN.numSinks)) >= self.minTargetFlow,
             ctname="minFlow")
 
         # Edge opening/capacity constraints
@@ -35,20 +40,20 @@ class ExactSolver:
             ctName = "e" + str(i) + "CapAndOpen"
             edgeCapacity = self.FCFN.edgesDict["e" + str(i)].capacity
             self.model.add_constraint(
-                self.model.edgeFlowVars[i] <= self.model.edgeOpenedVars[i] * edgeCapacity,
+                self.edgeFlowVars[i] <= self.edgeOpenedVars[i] * edgeCapacity,
                 ctname=ctName)
 
         # Capacity constraints of sources
         for i in range(self.FCFN.numSources):
             ctName = "s" + str(i) + "Cap"
             srcCapacity = self.FCFN.nodesDict["s" + str(i)].capacity
-            self.model.add_constraint(self.model.sourceFlowVars[i] <= srcCapacity, ctname=ctName)
+            self.model.add_constraint(self.sourceFlowVars[i] <= srcCapacity, ctname=ctName)
 
         # Capacity constraints of sinks
         for i in range(self.FCFN.numSinks):
             ctName = "t" + str(i) + "Cap"
             sinkCapacity = self.FCFN.nodesDict["t" + str(i)].capacity
-            self.model.add_constraint(self.model.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
+            self.model.add_constraint(self.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
 
         # Conservation of flow constraints
         for node in self.FCFN.nodesDict:
@@ -65,32 +70,32 @@ class ExactSolver:
             # Source flow conservation
             if nodeType == "s":
                 ctName = "s" + str(nodeID) + "Conserv"
-                self.model.add_constraint(self.model.sourceFlowVars[int(nodeID)] ==
-                                          sum(self.model.edgeFlowVars[i] for i in outgoingIDs),
+                self.model.add_constraint(self.sourceFlowVars[int(nodeID)] ==
+                                          sum(self.edgeFlowVars[i] for i in outgoingIDs),
                                           ctname=ctName)
             # Sink flow conservation
             elif nodeType == "t":
                 ctName = "t" + str(nodeID) + "Conserv"
-                self.model.add_constraint(self.model.sinkFlowVars[int(nodeID)] ==
-                                          sum(self.model.edgeFlowVars[i] for i in incomingIDs),
+                self.model.add_constraint(self.sinkFlowVars[int(nodeID)] ==
+                                          sum(self.edgeFlowVars[i] for i in incomingIDs),
                                           ctname=ctName)
             # Intermediate flow conservation
             elif nodeType == "n":
                 ctName = "n" + str(nodeID) + "Conserv"
                 self.model.add_constraint(sum(
-                    self.model.edgeFlowVars[i] for i in incomingIDs) - sum(
-                    self.model.edgeFlowVars[j] for j in outgoingIDs) == 0,
+                    self.edgeFlowVars[i] for i in incomingIDs) - sum(
+                    self.edgeFlowVars[j] for j in outgoingIDs) == 0,
                                           ctname=ctName)
         # =================== OBJECTIVE FUNCTION ===================
         self.model.set_objective("min",
-                                 sum(self.model.sourceFlowVars[i] * self.FCFN.nodesDict["s" + str(i)].variableCost for i
+                                 sum(self.sourceFlowVars[i] * self.FCFN.nodesDict["s" + str(i)].variableCost for i
                                      in range(self.FCFN.numSources))
-                                 + sum(self.model.sinkFlowVars[j] * self.FCFN.nodesDict["t" + str(j)].variableCost for j
+                                 + sum(self.sinkFlowVars[j] * self.FCFN.nodesDict["t" + str(j)].variableCost for j
                                        in range(self.FCFN.numSinks)) + sum(
-                                     self.model.edgeFlowVars[n] * self.FCFN.edgesDict["e" + str(n)].variableCost
+                                     self.edgeFlowVars[n] * self.FCFN.edgesDict["e" + str(n)].variableCost
                                      for n
                                      in range(self.FCFN.numEdges)) + sum(
-                                     self.model.edgeOpenedVars[m] * self.FCFN.edgesDict["e" + str(m)].fixedCost for
+                                     self.edgeOpenedVars[m] * self.FCFN.edgesDict["e" + str(m)].fixedCost for
                                      m in
                                      range(self.FCFN.numEdges)))
 
@@ -108,9 +113,9 @@ class ExactSolver:
             self.FCFN.isSolved = True
             self.FCFN.minTargetFlow = self.minTargetFlow
             self.FCFN.totalCost = self.model.solution.get_objective_value()
-            self.FCFN.totalFlow = sum(self.model.solution.get_value_list(self.model.sinkFlowVars))
+            self.FCFN.totalFlow = sum(self.model.solution.get_value_dict(self.sinkFlowVars))
             # Disperse solution results back to sources
-            sourceValues = self.model.solution.get_value_list(self.model.sourceFlowVars)
+            sourceValues = self.model.solution.get_value_dict(self.sourceFlowVars)
             for i in range(self.FCFN.numSources):
                 thisSource = self.FCFN.nodesDict["s" + str(i)]
                 if sourceValues[i] > 0:
@@ -118,7 +123,7 @@ class ExactSolver:
                     thisSource.flow = sourceValues[i]
                     thisSource.totalCost = thisSource.flow * thisSource.variableCost
             # Disperse solution results back to sinks
-            sinkValues = self.model.solution.get_value_list(self.model.sinkFlowVars)
+            sinkValues = self.model.solution.get_value_dict(self.sinkFlowVars)
             for i in range(self.FCFN.numSinks):
                 thisSink = self.FCFN.nodesDict["t" + str(i)]
                 if sinkValues[i] > 0:
@@ -126,7 +131,7 @@ class ExactSolver:
                     thisSink.flow = sinkValues[i]
                     thisSink.totalCost = thisSink.flow * thisSink.variableCost
             # Disperse solution results back to edges
-            edgeValues = self.model.solution.get_value_list(self.model.edgeFlowVars)
+            edgeValues = self.model.solution.get_value_dict(self.edgeFlowVars)
             for i in range(self.FCFN.numEdges):
                 thisEdge = self.FCFN.edgesDict["e" + str(i)]
                 if edgeValues[i] > 0:

@@ -11,23 +11,66 @@ current_time = now.strftime("%H:%M:%S")
 print("Start Time =", current_time)
 
 # TEST OF RANDOM GRAPH GENERATOR
-# graphGen = GraphGenerator("r2000-5(50,50)", 2000, 0.05, 50, 50, [200, 2000], [500, 500], [20, 200], [1, 30], [100, 100], 3)
+# graphGen = GraphGenerator("r2000-4(50,50)", 2000, 0.04, 50, 50, [200, 2000], [500, 500], [20, 200], [1, 30], [100, 100], 3)
 # graphGen.saveFCFN()
+
+# INITIALIZATIONS
+flowNetwork = FixedChargeFlowNetwork()
+flowNetwork.loadFCFN("small")
+# flowNetwork.loadFCFN("r100-3(10,10)")
+# flowNetwork.loadFCFN("r2000-4(50,50)")
+
+GA = AlphaPopulation(flowNetwork, 21, 1, 1)
+GA.initializePopulation([0.0, 1.0])
+GA.visualizeIndividual(0, 0)
+
+# TEST OF MILP
+# flowNetwork.executeSolver(20)
+# flowNetwork.visualizeNetwork(catName="-OPT")
+
+
+"""
+# TEST OF LARGE INSTANCE SIZE (TWICE SOLVED W/ TIMESTAMPS)
+# WALL CLOCK TIME STAMP
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Start Time =", current_time)
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-# flowNetwork.loadFCFN("r2000-5(50,50)")
-flowNetwork.loadFCFN("r100-3(10,10)")
+flowNetwork.loadFCFN("r2000-5(50,50)")
+
+# TODO- Delete Timestamp
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Network Loaded =", current_time)
+# TODO- Delete Timestamp
 
 # TEST OF GENETIC ALGORITHM
-GA = AlphaPopulation(flowNetwork, 700, 2, 1)
+GA = AlphaPopulation(flowNetwork, 2500, 2, 1)
+# TODO- Delete Timestamp
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Population/Solver Initialized =", current_time)
+# TODO- Delete Timestamp
+
 GA.initializePopulation([0, 1.0])
+
+# TODO- Delete Timestamp
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Two Instances Solved =", current_time)
+# TODO- Delete Timestamp
+
 GA.visualizeIndividual(0, 0)
 GA.visualizeIndividual(0, 1)
 
-# TEST OF MILP
-# flowNetwork.executeSolver(400)
-# flowNetwork.visualizeNetwork(catName="_OPT")
+# TODO- Delete Timestamp
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Stop Time =", current_time)
+# TODO- Delete Timestamp
+"""
 
 """
 # Test of Path-Based Crossover

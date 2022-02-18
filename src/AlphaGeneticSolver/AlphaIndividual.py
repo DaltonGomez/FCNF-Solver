@@ -15,6 +15,8 @@ class AlphaIndividual:
         # Input Attributes
         self.name = FCFNinstance.name + "-Alpha"
         self.FCFN = FCFNinstance  # NOTE: Solution data should not get pushed back to the FCFN instance
+
+        # Alpha values (a.k.a. the chromosome of the individual)
         self.alphaValues = []
         self.initializeAlphaValuesRandomly()
 
@@ -161,6 +163,14 @@ class AlphaIndividual:
         for i in range(self.FCFN.numEdges):
             theseAlphaValues.append(random.uniform(lowerBound, upperBound))
         self.alphaValues = theseAlphaValues
+
+    def computeRelaxedCoefficients(self) -> dict:
+        """Computes the coefficient, alpha * fixedCost + variableCost, dict for faster access by the solver"""
+        relaxedCoefficients = {}
+        for e in range(self.FCFN.numEdges):
+            relaxedCoefficients[e] = self.alphaValues[e] * self.FCFN.edgesDict["e" + str(e)].fixedCost + \
+                                     self.FCFN.edgesDict["e" + str(e)].variableCost
+        return relaxedCoefficients
 
     # =========================================================
     # ============== VISUALIZATION/PRINT METHODS ==============

@@ -2,7 +2,7 @@
 
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
-+ Reorganize so that the CPLEX solver can be reused just by re-writing the objective function
++ Implement other ranking schema for path-based selection (i.e. most edges, total flow, total cost, etc.)
 + Implement hyper-operators that delegate to a specific method based on an input argument
     + Have hyper operators evaluate if solutions are solved/have paths
 + Set up tuning experiment and find larger test beds

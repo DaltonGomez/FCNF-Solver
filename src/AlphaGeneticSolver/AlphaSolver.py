@@ -1,3 +1,4 @@
+
 from docplex.mp.model import Model
 
 from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
@@ -21,44 +22,59 @@ class AlphaSolver:
         self.isRun = False
         self.hasSolution = False
 
-        # Construct the decision variables and constraints for the model once at initialization (NOTE: Time Consuming!)
+        # Construct the decision variables, constraints, and source/sink objective terms once at initialization
+        self.sourceFlowVars = None
+        self.sinkFlowVars = None
+        self.edgeFlowVars = None
         self.initializeDecisionVariables()
         self.initializeConstraints()
+        self.sourceObjTerm = None
+        self.sinkObjTerm = None
+        self.buildSourceSinkObjectiveTerms()
 
     def initializeDecisionVariables(self):
         """Constructs the decision variables for the LP model"""
         # =================== DECISION VARIABLES ===================
         # Source, sink, and edge decision variables
-        self.model.sourceFlowVars = self.model.continuous_var_list(self.FCFN.numSources, name="s")
-        self.model.sinkFlowVars = self.model.continuous_var_list(self.FCFN.numSinks, name="t")
-        self.model.edgeFlowVars = self.model.continuous_var_list(self.FCFN.numEdges, name="e", lb=0)
+        self.sourceFlowVars = self.model.continuous_var_dict(self.FCFN.numSources, name="s")
+        self.sinkFlowVars = self.model.continuous_var_dict(self.FCFN.numSinks, name="t")
+        self.edgeFlowVars = self.model.continuous_var_dict(self.FCFN.numEdges, name="e", lb=0)
         self.hasDecisionVariables = True
+
+    def buildSourceSinkObjectiveTerms(self):
+        """Constructs the source and sink objective terms once on initialization"""
+        self.sourceObjTerm = self.model.linear_expr((sum(
+            self.sourceFlowVars[i] * self.FCFN.nodesDict["s" + str(i)].variableCost for i in
+            range(self.FCFN.numSources))))
+        self.sinkObjTerm = self.model.linear_expr((sum(
+            self.sinkFlowVars[j] * self.FCFN.nodesDict["t" + str(j)].variableCost for j in
+            range(self.FCFN.numSinks))))
 
     def initializeConstraints(self):
         """Constructs the constraints for the LP model"""
         # =================== CONSTRAINTS ===================
         # Minimum flow constraint (Constructed as the sum of all sinks in-flows)
         self.model.add_constraint(
-            sum(self.model.sinkFlowVars[i] for i in range(self.FCFN.numSinks)) >= self.minTargetFlow,
+            sum(self.sinkFlowVars[i] for i in range(self.FCFN.numSinks)) >= self.minTargetFlow,
             ctname="minFlow")
 
         # Edge opening/capacity constraints
         for i in range(self.FCFN.numEdges):
             ctName = "e" + str(i) + "Cap"
             edgeCapacity = self.FCFN.edgesDict["e" + str(i)].capacity
-            self.model.add_constraint(self.model.edgeFlowVars[i] <= edgeCapacity, ctname=ctName)
+            self.model.add_constraint(self.edgeFlowVars[i] <= edgeCapacity, ctname=ctName)
 
         # Capacity constraints of sources
         for i in range(self.FCFN.numSources):
             ctName = "s" + str(i) + "Cap"
             srcCapacity = self.FCFN.nodesDict["s" + str(i)].capacity
-            self.model.add_constraint(self.model.sourceFlowVars[i] <= srcCapacity, ctname=ctName)
+            self.model.add_constraint(self.sourceFlowVars[i] <= srcCapacity, ctname=ctName)
 
         # Capacity constraints of sinks
         for i in range(self.FCFN.numSinks):
             ctName = "t" + str(i) + "Cap"
             sinkCapacity = self.FCFN.nodesDict["t" + str(i)].capacity
-            self.model.add_constraint(self.model.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
+            self.model.add_constraint(self.sinkFlowVars[i] <= sinkCapacity, ctname=ctName)
 
         # Conservation of flow constraints
         for node in self.FCFN.nodesDict:
@@ -75,39 +91,32 @@ class AlphaSolver:
             # Source flow conservation
             if nodeType == "s":
                 ctName = "s" + str(nodeID) + "Conserv"
-                self.model.add_constraint(self.model.sourceFlowVars[int(nodeID)] ==
-                                          sum(self.model.edgeFlowVars[i] for i in outgoingIDs),
+                self.model.add_constraint(self.sourceFlowVars[int(nodeID)] ==
+                                          sum(self.edgeFlowVars[i] for i in outgoingIDs),
                                           ctname=ctName)
             # Sink flow conservation
             elif nodeType == "t":
                 ctName = "t" + str(nodeID) + "Conserv"
-                self.model.add_constraint(self.model.sinkFlowVars[int(nodeID)] ==
-                                          sum(self.model.edgeFlowVars[i] for i in incomingIDs),
+                self.model.add_constraint(self.sinkFlowVars[int(nodeID)] ==
+                                          sum(self.edgeFlowVars[i] for i in incomingIDs),
                                           ctname=ctName)
             # Intermediate node flow conservation
             elif nodeType == "n":
                 ctName = "n" + str(nodeID) + "Conserv"
                 self.model.add_constraint(sum(
-                    self.model.edgeFlowVars[i] for i in incomingIDs) - sum(
-                    self.model.edgeFlowVars[j] for j in outgoingIDs) == 0,
+                    self.edgeFlowVars[i] for i in incomingIDs) - sum(
+                    self.edgeFlowVars[j] for j in outgoingIDs) == 0,
                                           ctname=ctName)
             self.hasConstraints = True
 
-    def updateObjectiveFunction(self, alphaValues: list):
+    def updateObjectiveFunction(self, relaxedCoefficients: dict):
         """Deletes any previous objective function and writes a new objective function using the input alpha values"""
         if self.model.has_objective() and self.model.solution is not None:
             self.resetSolver()
         # =================== OBJECTIVE FUNCTION ===================
-        self.model.set_objective("min", sum(
-            self.model.sourceFlowVars[i] * self.FCFN.nodesDict["s" + str(i)].variableCost for i in
-            range(self.FCFN.numSources))
-                                 + sum(
-            self.model.sinkFlowVars[j] * self.FCFN.nodesDict["t" + str(j)].variableCost for j in
-            range(self.FCFN.numSinks))
-                                 + sum(self.model.edgeFlowVars[n] * (self.FCFN.edgesDict["e" + str(n)].variableCost
-                                                                     + alphaValues[n] * self.FCFN.edgesDict[
-                                                                         "e" + str(n)].fixedCost) for n in
-                                       range(self.FCFN.numEdges)))
+        edgeObjTerm = self.model.linear_expr(
+            sum(relaxedCoefficients[e] * self.edgeFlowVars[e] for e in range(self.FCFN.numEdges)))
+        self.model.set_objective("min", self.sourceObjTerm + self.sinkObjTerm + edgeObjTerm)
         self.hasObjectiveFunction = True
 
     def solveModel(self) -> None:
@@ -125,10 +134,10 @@ class AlphaSolver:
             individual.isSolved = True
             individual.minTargetFlow = self.minTargetFlow
             individual.fakeCost = self.model.solution.get_objective_value()
-            individual.totalFlow = sum(self.model.solution.get_value_list(self.model.sinkFlowVars))
+            individual.totalFlow = sum(self.model.solution.get_value_dict(self.sinkFlowVars))
             # CONSTRUCT OPENED NODES DICT
             # Extract source values
-            sourceValues = self.model.solution.get_value_list(self.model.sourceFlowVars)
+            sourceValues = self.model.solution.get_value_dict(self.sourceFlowVars)
             for i in range(individual.FCFN.numSources):
                 thisSource = individual.FCFN.nodesDict["s" + str(i)]
                 if sourceValues[i] > 0:
@@ -136,7 +145,7 @@ class AlphaSolver:
                     totalCost = flow * thisSource.variableCost
                     individual.openedNodesDict["s" + str(i)] = (flow, totalCost)
             # Extract sink values
-            sinkValues = self.model.solution.get_value_list(self.model.sinkFlowVars)
+            sinkValues = self.model.solution.get_value_dict(self.sinkFlowVars)
             for i in range(individual.FCFN.numSinks):
                 thisSink = individual.FCFN.nodesDict["t" + str(i)]
                 if sinkValues[i] > 0:
@@ -144,7 +153,7 @@ class AlphaSolver:
                     totalCost = flow * thisSink.variableCost
                     individual.openedNodesDict["t" + str(i)] = (flow, totalCost)
             # Extract edge values
-            edgeValues = self.model.solution.get_value_list(self.model.edgeFlowVars)
+            edgeValues = self.model.solution.get_value_dict(self.edgeFlowVars)
             for i in range(individual.FCFN.numEdges):
                 thisEdge = individual.FCFN.edgesDict["e" + str(i)]
                 if edgeValues[i] > 0:
