@@ -40,7 +40,7 @@ class AlphaPopulation:
         # Path Selection HPs
         self.pathSelectionMethod = "roulette"  # :param : "tournament", "roulette", "top", "random"
         self.pathRankingMethod = ""  # TODO - Implement to allow for different pathSelectionRankings
-        self.pathSelectionSize = 2
+        self.pathSelectionSize = 3
         self.pathTournamentSize = 2
         # Crossover HPs
         self.crossoverMethod = "pathBased"  # :param : "onePoint", "twoPoint", "pathBased"
@@ -49,7 +49,7 @@ class AlphaPopulation:
         self.replacementStrategy = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents"
         # Mutation HPs
         self.mutationMethod = "pathBased"  # :param : "randomSingle", "randomTotal", "pathBased"
-        self.mutationRate = 0.03
+        self.mutationRate = 0.50
 
     # ==================================================================
     # ============== HYPERPARAMETER SETTERS & INITIALIZER ==============

@@ -2,10 +2,10 @@
 
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
-+ Implement other ranking schema for path-based selection (i.e. most edges, total flow, total cost, etc.)
-+ Implement hyper-operators that delegate to a specific method based on an input argument
-    + Have hyper operators evaluate if solutions are solved/have paths
++ Test wall clock time on solving the MILP
 + Set up tuning experiment and find larger test beds
++ Implement other ranking schema for path-based selection (i.e. most edges, total flow, total cost, etc.)
++ Implement the Dynamic Slope Scaling Procedure from Kim-1999
 + Implement an annealing schedule for the alpha bounds???
 + Implement other probability functions for randomly determining alpha values???
 
@@ -22,4 +22,5 @@ POSSIBLE CHANGES & IDEAS:
 + Modify so that the FCNF instance is of edge values only (i.e. create a super-source/sink and push all source/sink cost onto the edges from the super-source/sink)
     - Not only would this drastically change the network, node, edge, and solver classes, it would also lead to hard to interpret visualization
 + Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
++ Incorporate parallel edges
 

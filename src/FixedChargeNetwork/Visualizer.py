@@ -161,7 +161,5 @@ class Visualizer:
         visual = netVis("800px", "800px", directed=True)
         visual.from_nx(self.nx)
         visual.barnes_hut()  # Starting Layouts
-        # visual.force_atlas_2based()
-        # visual.hrepulsion()
         visual.show_buttons()  # Display for UI option customization
         visual.show(displayName)

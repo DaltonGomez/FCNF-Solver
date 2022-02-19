@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
@@ -9,20 +11,27 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r100-3")
+flowNetwork.loadFCFN("r2000-5(50,50)")
+
+# WALL CLOCK TIME STAMP
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Start Time =", current_time)
 
 # TEST OF GA POPULATION
-population = AlphaPopulation(flowNetwork, 100, 50, 30)
-population.setHyperparameters(0.05, 0.75)
+population = AlphaPopulation(flowNetwork, 2500, 1, 1)
 population.evolvePopulation()
 
+# WALL CLOCK TIME STAMP
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("End GA/Start MILP Time =", current_time)
+
 # TEST OF MILP
-flowNetwork.executeSolver(100)
+flowNetwork.executeSolver(2500)
 flowNetwork.visualizeNetwork()
 
-# TEST OF ALPHA INDIVIDUAL
-# alphaFN = AlphaIndividual(flowNetwork)
-# alphaFN.initializeAlphaValuesRandomlyOnRange(0.10, 0.60)
-# alphaFN.executeAlphaSolver(1000)
-# alphaFN.visualizeAlphaNetwork(endCatName="1")
-# alphaFN.allUsedPaths()
+# WALL CLOCK TIME STAMP
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Finish Time =", current_time)
