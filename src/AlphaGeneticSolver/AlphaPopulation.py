@@ -39,9 +39,9 @@ class AlphaPopulation:
         self.tournamentSize = 2
         # Path Selection HPs
         self.pathSelectionMethod = "roulette"  # :param : "tournament", "roulette", "top", "random"
-        self.pathRankingMethod = ""  # TODO - Implement to allow for different pathSelectionRankings
-        self.pathSelectionSize = 3
-        self.pathTournamentSize = 2
+        self.pathRankingMethod = "leastDense"  # :param : "mostDense", "leastDense", "mostFlow", "leastFlow", "mostCost", "leastCost", "mostEdges", "leastEdges"
+        self.pathSelectionSize = 4
+        self.pathTournamentSize = 4
         # Crossover HPs
         self.crossoverMethod = "pathBased"  # :param : "onePoint", "twoPoint", "pathBased"
         self.crossoverRate = 0.90
@@ -61,18 +61,19 @@ class AlphaPopulation:
     def setIndividualSelectionHyperparams(self, selectionMethod: str, selectionSize: int, tournamentSize: int) -> None:
         """Sets the GA class fields that dictate how the selection of individuals is carried out \n
         :param str selectionMethod: One of following: {"tournament", "roulette", "top", "random"}
-        :param int selectionSize: Number of individuals returned
+        :param int selectionSize: Number of individuals returned (NOTE: Currently overridden to always be 2!)
         :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
         """
         self.selectionMethod = selectionMethod
-        self.selectionSize = selectionSize
+        self.selectionSize = 2  # NOTE: Individual selection is for crossover, which always takes only two individuals
+        # self.selectionSize = selectionSize
         self.tournamentSize = tournamentSize
 
     def setPathSelectionHyperparams(self, selectionMethod: str, pathRankingMethod: str, selectionSize: int,
                                     tournamentSize: int) -> None:
         """Sets the GA class fields that dictate how the selection of paths is carried out \n
         :param str selectionMethod: One of following: {"tournament", "roulette", "top", "random"}
-        :param str pathRankingMethod: One of following: {***TBD***}
+        :param str pathRankingMethod: One of following: {"mostDense", "leastDense", "mostFlow", "leastFlow", "mostCost", "leastCost", "mostEdges", "leastEdges"}
         :param int selectionSize: Number of individuals returned
         :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
         """
@@ -129,7 +130,6 @@ class AlphaPopulation:
                 if random.random() < self.crossoverRate:
                     # SELECT INDIVIDUALS
                     selectedIndividuals = self.selectIndividuals()
-                    # TODO - Crossover always takes two parents- Delete the selectionSize hyperparameter?
                     parentOnePaths = self.selectPaths(selectedIndividuals[0])
                     parentTwoPaths = self.selectPaths(selectedIndividuals[1])
                     # CROSSOVER
@@ -251,18 +251,64 @@ class AlphaPopulation:
     # ============== PATH SELECTION OPERATORS ====================
     # ============================================================
     def selectPaths(self, individualID: int) -> list:
-        """Hyper-selection operator that calls specific path selection method based on hyperparameters"""
-        # TODO - Implement a way to change how paths are ranked and selected
+        """Hyper-selection operator that calls specific path selection method based on hyperparameters \n"""
         selectedPaths = []
-        if self.selectionMethod == "tournament":
-            selectedPaths = self.tournamentPathSelection(individualID, self.pathSelectionSize, self.pathTournamentSize,
-                                                         "mostDense")
-        elif self.selectionMethod == "roulette":
-            selectedPaths = self.rouletteWheelPathSelection(individualID, self.pathSelectionSize, "mostDense")
-        elif self.selectionMethod == "top":
-            selectedPaths = self.densityBasedPathSelection(individualID, self.pathSelectionSize, "mostDense")
-        elif self.selectionMethod == "random":
+        # If paths are selected randomly, skip the ranking process
+        if self.pathSelectionMethod == "random":
             selectedPaths = self.randomPathSelection(individualID, self.pathSelectionSize)
+        # Else rank paths as a set of tuples based on self.pathRankingMethod
+        else:
+            individual = self.population[individualID]
+            rankedPaths = []
+            # Compute paths and resize return selection length if necessary
+            if len(individual.paths) == 0:
+                individual.allUsedPaths()
+                # If the number of paths is still zero, return an empty list
+                if len(individual.paths) == 0:
+                    return []
+            thisSelectionSize = self.pathSelectionSize
+            if self.pathSelectionSize > len(individual.paths):
+                thisSelectionSize = len(individual.paths)
+            # Rank paths based on self.pathRankingMethod hyperparameter
+            if self.pathRankingMethod == "mostDense":
+                for path in individual.paths:
+                    rankedPaths.append((path, path.flowPerCostDensity))
+                rankedPaths.sort(key=lambda p: p[1], reverse=True)
+            elif self.pathRankingMethod == "leastDense":
+                for path in individual.paths:
+                    rankedPaths.append((path, path.flowPerCostDensity))
+                rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            elif self.pathRankingMethod == "mostFlow":
+                for path in individual.paths:
+                    rankedPaths.append((path, path.flow))
+                rankedPaths.sort(key=lambda p: p[1], reverse=True)
+            elif self.pathRankingMethod == "leastFlow":
+                for path in individual.paths:
+                    rankedPaths.append((path, path.flow))
+                rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            elif self.pathRankingMethod == "mostCost":
+                for path in individual.paths:
+                    rankedPaths.append((path, path.routingCost))
+                rankedPaths.sort(key=lambda p: p[1], reverse=True)
+            elif self.pathRankingMethod == "leastCost":
+                for path in individual.paths:
+                    rankedPaths.append((path, path.routingCost))
+                rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            elif self.pathRankingMethod == "mostEdges":
+                for path in individual.paths:
+                    rankedPaths.append((path, len(path.edges)))
+                rankedPaths.sort(key=lambda p: p[1], reverse=True)
+            elif self.pathRankingMethod == "leastEdges":
+                for path in individual.paths:
+                    rankedPaths.append((path, len(path.edges)))
+                rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            # Generate selected paths with method call based on pathSelectionMethod
+            if self.pathSelectionMethod == "top":
+                selectedPaths = self.topPathSelection(rankedPaths, thisSelectionSize)
+            elif self.pathSelectionMethod == "roulette":
+                selectedPaths = self.rouletteWheelPathSelection(rankedPaths, thisSelectionSize)
+            elif self.pathSelectionMethod == "tournament":
+                selectedPaths = self.tournamentPathSelection(rankedPaths, thisSelectionSize, self.pathTournamentSize)
         return selectedPaths
 
     def randomPathSelection(self, individualID: int, selectionSize: int) -> list:
@@ -275,108 +321,62 @@ class AlphaPopulation:
             # If the number of paths is still zero, return an empty list
             if len(individual.paths) == 0:
                 return []
-        if selectionSize > len(individual.paths):
-            selectionSize = len(individual.paths)
+        thisSelectionSize = self.pathSelectionSize
+        if self.pathSelectionSize > len(individual.paths):
+            thisSelectionSize = len(individual.paths)
         # Randomly sample the paths list
-        selectedPaths = random.sample(individual.paths, selectionSize)
+        selectedPaths = random.sample(individual.paths, thisSelectionSize)
         return selectedPaths
 
-    def densityBasedPathSelection(self, individualID: int, selectionSize: int, selectionOrder: str) -> list:
-        """Returns the n most dense (flow/cost ratio) paths for the individual\n
-        :param int individualID: Index of individual in population
-        :param int selectionSize: Number of paths returned
-        :param str selectionOrder: "mostDense" selects with highest flow per cost density; "leastDense" with lowest"""
-        individual = self.population[individualID]
-        # Compute paths and resize return selection length if necessary
-        if len(individual.paths) == 0:
-            individual.allUsedPaths()
-            # If the number of paths is still zero, return an empty list
-            if len(individual.paths) == 0:
-                return []
-        if selectionSize > len(individual.paths):
-            selectionSize = len(individual.paths)
-        # Sort based on selectionOrder
-        if selectionOrder == "mostDense":
-            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=True)
-        elif selectionOrder == "leastDense":
-            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=False)
+    @staticmethod
+    def topPathSelection(rankedPaths: list, selectionSize: int) -> list:
+        """Returns the n top paths for the individual based on the path ranking method"""
         # Select paths subset from beginning of full path list
         selectedPaths = []
-        for p in range(selectionSize):
-            selectedPaths.append(individual.paths[p])
+        for path in range(selectionSize):
+            selectedPaths.append(rankedPaths[path][0])
         return selectedPaths
 
-    def rouletteWheelPathSelection(self, individualID: int, selectionSize: int, selectionOrder: str) -> list:
-        """Selects paths from an individual probabilistically by their normalized fitness (i.e. flow per cost density)\n
-        :param int individualID: Index of individual in population
-        :param int selectionSize: Number of paths returned
-        :param str selectionOrder: "mostDense" selects with highest flow per cost density; "leastDense" with lowest"""
-        random.seed()
-        individual = self.population[individualID]
-        # Compute paths and resize return selection length if necessary
-        if len(individual.paths) == 0:
-            individual.allUsedPaths()
-            # If the number of paths is still zero, return an empty list
-            if len(individual.paths) == 0:
-                return []
-        if selectionSize > len(individual.paths):
-            selectionSize = len(individual.paths)
-        # Sort based on selectionOrder
-        if selectionOrder == "mostDense":
-            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=True)
-        elif selectionOrder == "leastDense":
-            individual.paths.sort(key=lambda x: x.flowPerCostDensity, reverse=False)
+    @staticmethod
+    def rouletteWheelPathSelection(rankedPaths: list, selectionSize: int) -> list:
+        """Selects paths from an individual probabilistically by their normalized fitness (based on path ranking method)"""
         # Build cumulative probability function
         cumulativeFitness = 0
-        for p in range(len(individual.paths)):
-            cumulativeFitness += individual.paths[p].flowPerCostDensity
-        cumulativeProbabilities = [individual.paths[0].flowPerCostDensity / cumulativeFitness]
-        for i in range(1, len(individual.paths)):
+        for p in range(len(rankedPaths)):
+            cumulativeFitness += rankedPaths[p][1]
+        cumulativeProbabilities = [rankedPaths[0][1] / cumulativeFitness]
+        for i in range(1, len(rankedPaths)):
             cumulativeProbabilities.append(
-                (individual.paths[i].flowPerCostDensity / cumulativeFitness) + cumulativeProbabilities[i - 1])
+                (rankedPaths[i][1] / cumulativeFitness) + cumulativeProbabilities[i - 1])
         # Build selected paths set
         selectedPaths = []
         duplicateCheckingSet = set()
         while len(selectedPaths) < selectionSize:
             rng = random.random()
-            for p in range(len(individual.paths)):
+            for p in range(len(rankedPaths)):
                 if rng < cumulativeProbabilities[p]:
                     # Utilize a hashable combo of the path's source and sink to prevent duplication
-                    hashableID = individual.paths[p].start + individual.paths[p].end
+                    hashableID = rankedPaths[p][0].start + rankedPaths[p][0].end
                     if hashableID not in duplicateCheckingSet:
-                        selectedPaths.append(individual.paths[p])
+                        selectedPaths.append(rankedPaths[p][0])
                         duplicateCheckingSet.add(hashableID)
                         break
         return selectedPaths
 
-    def tournamentPathSelection(self, individualID: int, selectionSize: int, tournamentSize: int,
-                                selectionOrder: str) -> list:
-        """Selects the best k paths out of a randomly chosen subset of size n\n
-        :param int individualID: Index of individual in population
-        :param int selectionSize: Number of paths returned
-        :param int tournamentSize: Size of tournament used to generate selection
-        :param str selectionOrder: "mostDense" selects with highest flow per cost density; "leastDense" with lowest"""
-        random.seed()
-        individual = self.population[individualID]
-        # Compute paths and resize return selection length if necessary
-        if len(individual.paths) == 0:
-            individual.allUsedPaths()
-            # If the number of paths is still zero, return an empty list
-            if len(individual.paths) == 0:
-                return []
-        if selectionSize > len(individual.paths):
-            selectionSize = len(individual.paths)
+    def tournamentPathSelection(self, rankedPaths: list, selectionSize: int, tournamentSize: int) -> list:
+        """Selects the best k paths out of a randomly chosen subset of size n"""
         # Select random subset of paths
-        tournament = random.sample(individual.paths, tournamentSize)
-        # Sort based on selectionOrder
-        if selectionOrder == "mostDense":
-            tournament.sort(key=lambda p: p.flowPerCostDensity, reverse=True)
-        elif selectionOrder == "leastDense":
-            tournament.sort(key=lambda p: p.flowPerCostDensity, reverse=False)
-        # Select and return
+        tournament = random.sample(rankedPaths, tournamentSize)
+        # Sort the tournament based on most or least direction
+        if self.pathRankingMethod[0] == "m":
+            tournament.sort(key=lambda p: p[1], reverse=True)
+        elif self.pathRankingMethod[0] == "l":
+            rankedPaths.sort(key=lambda p: p[1], reverse=False)
+        # Select top and return
         selection = []
         for i in range(selectionSize):
-            selection.append(tournament.pop(0))
+            pathTuple = tournament.pop(0)
+            selection.append(pathTuple[0])
         return selection
 
     # =================================================

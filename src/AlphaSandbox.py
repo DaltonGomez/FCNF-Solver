@@ -21,14 +21,24 @@ flowNetwork.loadFCFN("r100-3(10,10)")
 # flowNetwork.loadFCFN("r2000-4(50,50)")
 
 # Solve individual initially and print data
-GA = AlphaPopulation(flowNetwork, 999, 1, 1)
+GA = AlphaPopulation(flowNetwork, 999, 2, 1)
 GA.initializePopulation([0.0, 1.0])
-GA.visualizeIndividual(0, 0, )
+GA.evolvePopulation(drawing=False)
+# GA.visualizeIndividual(0, 0, graphType="fullGraph")
 
 # TEST OF MILP
 # flowNetwork.executeSolver(35)
 # flowNetwork.visualizeNetwork(catName="-OPT")
 
+"""
+# TEST OF PATH RANKING METHODS
+# Solve individual initially and print data
+GA = AlphaPopulation(flowNetwork, 999, 2, 1)
+GA.initializePopulation([0.0, 1.0])
+GA.setPathSelectionHyperparams("top", "leastFlow", 2, 4)
+GA.evolvePopulation(drawing=False)
+# GA.visualizeIndividual(0, 0, graphType="fullGraph")
+"""
 
 """
 # TEST OF EXPLICITLY MANIPULATING ALPHA VALUES
