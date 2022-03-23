@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """DRIVER PY FILE"""
@@ -11,7 +10,7 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("r2000-5(50,50)")
+flowNetwork.loadFCFN("small")
 
 # WALL CLOCK TIME STAMP
 now = datetime.now()
@@ -19,8 +18,8 @@ current_time = now.strftime("%H:%M:%S")
 print("Start Time =", current_time)
 
 # TEST OF GA POPULATION
-population = AlphaPopulation(flowNetwork, 2500, 1, 1)
-population.evolvePopulation()
+# population = AlphaPopulation(flowNetwork, 35, 1, 1)
+# population.evolvePopulation()
 
 # WALL CLOCK TIME STAMP
 now = datetime.now()
@@ -28,7 +27,7 @@ current_time = now.strftime("%H:%M:%S")
 print("End GA/Start MILP Time =", current_time)
 
 # TEST OF MILP
-flowNetwork.executeSolver(2500)
+flowNetwork.executeSolver(35)
 flowNetwork.visualizeNetwork()
 
 # WALL CLOCK TIME STAMP

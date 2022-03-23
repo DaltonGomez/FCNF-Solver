@@ -5,6 +5,7 @@ def LinearProgrammingExample():
     """Linear programming sample."""
     # Instantiate a Glop solver, naming it LinearExample.
     solver = pywraplp.Solver.CreateSolver('GLOP')
+    # solver = pywraplp.Solver.CreateSolver('PDLP')
 
     # Create the two variables and let them take on any non-negative value.
     x = solver.NumVar(0, solver.infinity(), 'x')
