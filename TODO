@@ -5,6 +5,15 @@ HIGH-PRIORITY CHANGES & BUGS:
 + Test wall clock time on solving the MILP
 + Set up tuning experiment and find larger test beds
 + Implement the Dynamic Slope Scaling Procedure from Kim-1999
++ Implement a Graph Generator where nodes are embedded in the plane and edges are built from Delaunay triangulations
+    - Make costs of edges proportional to the distance between points (and yet with a little randomness)
++ Reincorporate parallel edges
+    - Don't worry about the single capacity per edge constraint
++ Change pathing to be all-pairs (i.e. source/sink pairs) shortest paths
+    - Part of a bigger question of how to manipulate that which isn't in an individual's solution
++ Change pathing to be only pathlets
++ Have CPLEX write a .cplex file and then open external to Python to solve (Hopefully this will be faster???)
+
 
 
 
@@ -19,7 +28,6 @@ POSSIBLE CHANGES & IDEAS:
 + Modify so that the FCNF instance is of edge values only (i.e. create a super-source/sink and push all source/sink cost onto the edges from the super-source/sink)
     - Not only would this drastically change the network, node, edge, and solver classes, it would also lead to hard to interpret visualization
 + Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
-+ Incorporate parallel edges
 + Implement an annealing schedule for the alpha bounds???
 + Implement other probability functions for randomly determining alpha values???
 
