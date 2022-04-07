@@ -15,7 +15,7 @@ class AlphaVisualizer:
         elif graphType == "solutionOnly":
             self.populateSolutionGraphOnly()
         elif graphType == "withLabels":
-            self.populateLabeledGraph()
+            self.populateGraphWithEdgesLabelsOnly()
 
     def populateFullGraph(self) -> None:
         """Populates a NetworkX instance with the full graph data of the AlphaIndividual"""
@@ -280,6 +280,46 @@ class AlphaVisualizer:
                        """)
         visual.show(displayName)
 
+    def populateGraphWithEdgesLabelsOnly(self) -> None:
+        """Populates a NetworkX instance with the full graph data of the AlphaIndividual"""
+        # Create sets of opened and unopened nodes and edges
+        allNodesSet = set(self.individual.FCFN.nodesDict)
+        openedNodesSet = set(self.individual.openedNodesDict)
+        unopenedNodesSet = allNodesSet.difference(openedNodesSet)
+        allEdgesSet = set(self.individual.FCFN.edgesDict)
+        openedEdgesSet = set(self.individual.openedEdgesDict)
+        unopenedEdgesSet = allEdgesSet.difference(openedEdgesSet)
+        # Add nodes to NX instance
+        for node in self.individual.FCFN.nodesDict.keys():
+            if node[0] == "s":
+                if node in openedNodesSet:
+                    nodeValues = self.individual.openedNodesDict[node]
+                    self.nx.add_node(node, value=nodeValues[0], color="blue")
+                elif node in unopenedNodesSet:
+                    self.nx.add_node(node, value=0, color="blue")
+            elif node[0] == "t":
+                if node in openedNodesSet:
+                    nodeValues = self.individual.openedNodesDict[node]
+                    self.nx.add_node(node, value=nodeValues[0], color="red")
+                elif node in unopenedNodesSet:
+                    self.nx.add_node(node, value=0, color="red")
+            elif node[0] == "n":
+                if node in openedNodesSet:
+                    nodeValues = self.individual.openedNodesDict[node]
+                    self.nx.add_node(node, value=nodeValues[0], color="black")
+                elif node in unopenedNodesSet:
+                    self.nx.add_node(node, value=0, color="grey")
+        # Add edges to NX instance
+        for edge in self.individual.FCFN.edgesDict.keys():
+            edgeObj = self.individual.FCFN.edgesDict[edge]
+            if edge in openedEdgesSet:
+                edgeValues = self.individual.openedEdgesDict[edge]
+                self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=edgeValues[0], color="black",
+                                 label=edge + ":\n(F= " + str(round(edgeValues[0])) + ",\nC= " + str(
+                                     int(edgeValues[1])) + ")")
+            elif edge in unopenedEdgesSet:
+                self.nx.add_edge(edgeObj.fromNode, edgeObj.toNode, value=0.0, color="grey", label=edge)
+
     def populateLabeledGraph(self) -> None:
         """Populates a NetworkX instance with the full graph data of the AlphaIndividual"""
         # Create sets of opened and unopened nodes and edges
@@ -355,7 +395,7 @@ class AlphaVisualizer:
                                    "inherit": true
                                },
                                "font": {
-                                   "size": 100,
+                                   "size": 0,
                                    "color": "rgba(255,0,0,1)",
                                    "strokeWidth": 3,
                                    "strokeColor": "rgba(255,255,0,1)"
@@ -379,10 +419,10 @@ class AlphaVisualizer:
                                    "inherit": true
                                },
                                "font": {
-                                   "size": 100,
-                                   "color": "rgba(50,150,200,1)",
+                                   "size": 75,
+                                   "color": "rgba(255,0,0,1)",
                                    "strokeWidth": 3,
-                                   "strokeColor": "rgba(0,0,0,1)"
+                                   "strokeColor": "rgba(255,255,0,1)"
                                },
                                "arrowStrikethrough": false,
                                "arrows": {

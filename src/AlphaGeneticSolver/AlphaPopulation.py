@@ -146,7 +146,22 @@ class AlphaPopulation:
             self.rankPopulation()
             self.printAllCosts(generation)
             if drawing is True:
-                self.visualizeIndividual(generation, 0)
+                self.visualizeIndividual(generation, 0, graphType="withLabels")
+
+                # TODO - Delete prints to console; needed screenshots for presentation
+                bestIndividual = self.population[0]
+                print("Best Alpha Values:")
+                print(bestIndividual.alphaValues)
+                flowVector = []
+                for edge in bestIndividual.FCFN.edgesDict:
+                    if edge in bestIndividual.openedEdgesDict:
+                        flowVector.append(bestIndividual.openedEdgesDict[edge][0])
+                    else:
+                        flowVector.append(0)
+                    # print(edge)
+                print("Best Flow Values:")
+                print(flowVector)
+                # TODO - Delete prints to console; needed screenshots for presentation
         return self.population[0]
 
     # ======================================================

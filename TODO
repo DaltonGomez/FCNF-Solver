@@ -15,6 +15,7 @@ HIGH-PRIORITY CHANGES & BUGS:
 + Have CPLEX write a .cplex file and then open external to Python to solve (Hopefully this will be faster???)
 + Implement Google's PDLP as the solver for the alpha relaxed LP
 + Experiment with finding optimal alpha values from an exact MILP solution
++ Remove node costs
 
 
 
