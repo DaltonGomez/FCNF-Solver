@@ -175,8 +175,8 @@ class AlphaPopulation:
 
     def solveIndividual(self, individual: AlphaIndividual) -> None:
         """Solves a single individual by calling AlphaSolver and returns the solution to the individual"""
-        relaxedCoefficients = individual.computeRelaxedCoefficients()
-        self.alphaSolver.updateObjectiveFunction(relaxedCoefficients)
+        relaxedCoefficients = individual.computeRelaxedCoefficientsAsNpArray()
+        self.alphaSolver.updateObjectiveFunctionWithNpArray(relaxedCoefficients)
         self.alphaSolver.solveModel()
         self.alphaSolver.writeSolution(individual)
         individual.calculateTrueCost()

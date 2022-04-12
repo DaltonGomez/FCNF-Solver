@@ -1,5 +1,5 @@
 from ortools.linear_solver import pywraplp
-
+# SOURCE: https://developers.google.com/optimization/mip/mip_example
 
 def main():
     # Create the mip solver with the SCIP backend.

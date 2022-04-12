@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 from src.AlphaGeneticSolver.AlphaPath import AlphaPath
 from src.AlphaGeneticSolver.AlphaVisualizer import AlphaVisualizer
 
@@ -167,6 +169,14 @@ class AlphaIndividual:
     def computeRelaxedCoefficients(self) -> dict:
         """Computes the coefficient, alpha * fixedCost + variableCost, dict for faster access by the solver"""
         relaxedCoefficients = {}
+        for e in range(self.FCFN.numEdges):
+            relaxedCoefficients[e] = self.alphaValues[e] * self.FCFN.edgesDict["e" + str(e)].fixedCost + \
+                                     self.FCFN.edgesDict["e" + str(e)].variableCost
+        return relaxedCoefficients
+
+    def computeRelaxedCoefficientsAsNpArray(self) -> np.ndarray:
+        """Computes the coefficient, alpha * fixedCost + variableCost, dict for faster access by the solver"""
+        relaxedCoefficients = np.empty(self.FCFN.numEdges)
         for e in range(self.FCFN.numEdges):
             relaxedCoefficients[e] = self.alphaValues[e] * self.FCFN.edgesDict["e" + str(e)].fixedCost + \
                                      self.FCFN.edgesDict["e" + str(e)].variableCost

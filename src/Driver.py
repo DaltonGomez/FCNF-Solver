@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
 from src.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
 from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
@@ -11,16 +12,25 @@ from src.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 # TEST OF FCFN
 flowNetwork = FixedChargeFlowNetwork()
-flowNetwork.loadFCFN("small")
+flowNetwork.loadFCFN("r2000-5(50,50)")
 
 # WALL CLOCK TIME STAMP
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
 print("Start Time =", current_time)
 
+# TEST OF ALPHA SOLVER
+ga = AlphaPopulation(flowNetwork, 2500, 2, 1)
+ai = AlphaIndividual(flowNetwork)
+ai.initializeAlphaValuesRandomly(0.0, 1.0)
+ga.population.append(ai)
+ga.solveIndividual(ga.population[0])
+
+"""
 # TEST OF GA POPULATION
-population = AlphaPopulation(flowNetwork, 35, 2, 25)
+population = AlphaPopulation(flowNetwork, 2500, 2, 1)
 population.evolvePopulation()
+"""
 
 # WALL CLOCK TIME STAMP
 now = datetime.now()
