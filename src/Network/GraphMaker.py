@@ -145,6 +145,7 @@ class GraphMaker:
     def buildArcsDictAndMatrix(self) -> None:
         """Builds the dictionary of arcs"""
         tempArcs = []
+        numID = 0
         for edge in range(self.newNetwork.numEdges):
             fromNode = self.newNetwork.edgesArray[edge][0]
             toNode = self.newNetwork.edgesArray[edge][1]
@@ -152,22 +153,23 @@ class GraphMaker:
             for cap in self.newNetwork.possibleArcCaps:
                 fixedCost = self.calculateArcFixedCost(distance, cap)
                 variableCost = self.calculateArcVariableCost(distance, cap)
-                self.newNetwork.addArcToDict((fromNode, toNode, cap), distance, fixedCost, variableCost)
-                thisArc = [fromNode, toNode, cap, distance, fixedCost, variableCost]
+                self.newNetwork.addArcToDict(numID, (fromNode, toNode, cap), distance, fixedCost, variableCost)
+                thisArc = [numID, fromNode, toNode, cap, distance, fixedCost, variableCost]
                 tempArcs.append(thisArc)
+                numID += 1
         self.newNetwork.arcsMatrix = np.array(tempArcs)
         self.newNetwork.numArcs = len(self.newNetwork.arcsMatrix)
 
     def calculateArcFixedCost(self, distance: float, capacity: int) -> float:
         """Calculates the fixed cost of the arc in a pseudorandom manner"""
         fixedCost = (self.distFixCostScale * distance + self.capFixCostScale * capacity) * random.uniform(
-            self.fixCostRandomScalar[0], self.fixCostRandomScalar[0])
+            self.fixCostRandomScalar[0], self.fixCostRandomScalar[1])
         return fixedCost
 
     def calculateArcVariableCost(self, distance: float, capacity: int) -> float:
         """Calculates the variable cost of the arc in a pseudorandom manner"""
         variableCost = (self.distVariableCostScale * distance + self.capVariableCostScale * capacity) * random.uniform(
-            self.variableCostRandomScalar[0], self.variableCostRandomScalar[0])
+            self.variableCostRandomScalar[0], self.variableCostRandomScalar[1])
         return variableCost
 
     def assignSourceSinkCapAndCharge(self) -> None:

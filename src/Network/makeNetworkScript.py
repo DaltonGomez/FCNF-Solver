@@ -1,9 +1,9 @@
 from src.Network.GraphMaker import GraphMaker
 
-name = "test-6-1-1"
-numNodes = 6
-numSources = 1
-numSinks = 1
+name = "test-50-3-3"
+numNodes = 50
+numSources = 3
+numSinks = 3
 
 graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
 # Uncomment to tune how the network generates costs and to turn on generalizations

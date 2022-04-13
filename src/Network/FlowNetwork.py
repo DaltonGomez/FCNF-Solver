@@ -106,9 +106,9 @@ class FlowNetwork:
         thisNode = Node(nodeID, xPos, yPos)
         self.nodesDict[nodeID] = thisNode
 
-    def addArcToDict(self, arcID: tuple, distance: float, FC: float, VC: float) -> None:
+    def addArcToDict(self, numID: int, arcID: tuple, distance: float, FC: float, VC: float) -> None:
         """Adds a new arc to a Network instance"""
-        thisArc = Arc((arcID[0], arcID[1]), arcID[2], distance, FC, VC)
+        thisArc = Arc(numID, (arcID[0], arcID[1]), arcID[2], distance, FC, VC)
         self.arcsDict[arcID] = thisArc
 
     # ===================================================================

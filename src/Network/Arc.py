@@ -1,9 +1,11 @@
 class Arc:
     """Class that defines an arc in a Network object"""
 
-    def __init__(self, edgeID: tuple, capacity: int, distance: float, fixedCost: float, variableCost: float):
+    def __init__(self, numID: int, edgeID: tuple, capacity: int, distance: float, fixedCost: float,
+                 variableCost: float):
         """Constructor of an edge instance"""
         # Input network attributes
+        self.numID = numID
         self.edgeID = edgeID
         self.capacity = capacity
         self.distance = distance
@@ -12,6 +14,10 @@ class Arc:
 
     def getArcID(self) -> tuple:
         """Returns the ID of an arc as the tuple (fromNode, toNode, capacity)"""
+        return self.edgeID[0], self.edgeID[1], self.capacity
+
+    def getNumID(self) -> tuple:
+        """Returns the number ID (row in matrix) of an arc"""
         return self.edgeID[0], self.edgeID[1], self.capacity
 
     def getEdgeID(self) -> tuple:
