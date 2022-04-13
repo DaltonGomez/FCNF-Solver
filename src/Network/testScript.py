@@ -8,3 +8,5 @@ flowNetwork.drawNetworkTriangulation()
 
 visualizer = NetworkVisualizer(flowNetwork)
 visualizer.drawGraph()
+
+flowNetwork.printAllNodeData()

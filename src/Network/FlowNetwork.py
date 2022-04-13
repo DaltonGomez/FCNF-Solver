@@ -226,14 +226,12 @@ class FlowNetwork:
     def addIncomingEdgeToNode(self, nodeID: int, incomingEdge: tuple) -> None:
         """Adds the edge to the node's incoming edge list"""
         thisNode = self.nodesDict[nodeID]
-        npIncomingEdge = np.array(incomingEdge)
-        thisNode.addIncomingEdge(npIncomingEdge)
+        thisNode.addIncomingEdge(incomingEdge)
 
     def addOutgoingEdgeToNode(self, nodeID: int, outgoingEdge: tuple) -> None:
         """Adds the edge to the node's outgoing edge list"""
         thisNode = self.nodesDict[nodeID]
-        npOutgoingEdge = np.array(outgoingEdge)
-        thisNode.addIncomingEdge(npOutgoingEdge)
+        thisNode.addOutgoingEdge(outgoingEdge)
 
     # ===========================================
     # ============== PRINT METHODS ==============

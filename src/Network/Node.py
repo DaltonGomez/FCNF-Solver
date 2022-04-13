@@ -1,7 +1,3 @@
-import numpy as np
-from numpy import ndarray
-
-
 class Node:
     """Class that defines a node in a Network object"""
 
@@ -11,8 +7,8 @@ class Node:
         self.nodeType = 2
         self.xPos = xPos
         self.yPos = yPos
-        self.incomingEdges = None
-        self.outgoingEdges = None
+        self.incomingEdges = []
+        self.outgoingEdges = []
 
     def getNodeID(self) -> int:
         """Returns the node ID of the node object"""
@@ -34,35 +30,29 @@ class Node:
         """Returns the y-position of the node"""
         return self.yPos
 
-    def getIncomingEdges(self) -> ndarray:
+    def getIncomingEdges(self) -> list:
         """Returns the incoming edges of the node object"""
         return self.incomingEdges
 
-    def setIncomingEdges(self, incomingEdges: ndarray) -> None:
+    def setIncomingEdges(self, incomingEdges: list) -> None:
         """Reassigns the incoming edges of the node object"""
         self.incomingEdges = incomingEdges
 
-    def addIncomingEdge(self, edgeToAdd: ndarray) -> None:
+    def addIncomingEdge(self, edgeToAdd: tuple) -> None:
         """Concatenates the new edge onto the current incoming edges"""
-        if self.incomingEdges is None:
-            self.incomingEdges = edgeToAdd
-        else:
-            self.incomingEdges = np.concatenate((self.incomingEdges, edgeToAdd))
+        self.incomingEdges.append(edgeToAdd)
 
-    def getOutgoingEdges(self) -> ndarray:
+    def getOutgoingEdges(self) -> list:
         """Returns the outgoing edges of the node object"""
         return self.outgoingEdges
 
-    def setOutgoingEdges(self, outgoingEdges: ndarray) -> None:
+    def setOutgoingEdges(self, outgoingEdges: list) -> None:
         """Reassigns the incoming edges of the node object"""
         self.outgoingEdges = outgoingEdges
 
-    def addOutgoingEdge(self, edgeToAdd: ndarray) -> None:
+    def addOutgoingEdge(self, edgeToAdd: tuple) -> None:
         """Concatenates the new edge onto the current outgoing edges"""
-        if self.outgoingEdges is None:
-            self.outgoingEdges = edgeToAdd
-        else:
-            self.outgoingEdges = np.concatenate((self.outgoingEdges, edgeToAdd))
+        self.outgoingEdges.append(edgeToAdd)
 
     def printNodeData(self) -> None:
         """Prints all relevant data for a node"""
