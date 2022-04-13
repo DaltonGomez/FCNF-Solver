@@ -52,7 +52,7 @@ class NetworkVisualizer:
                                 "y": true
                             },
                             "font": {
-                                "size": 20,
+                                "size": 0,
                                 "color": "rgba(0,0,0,1)",
                                 "strokeWidth": 0,
                                 "strokeColor": "rgba(0,0,0,1)"
