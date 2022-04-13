@@ -32,9 +32,10 @@ class FlowNetwork:
         # Edge/Arc Attributes
         self.numEdges = 0
         self.edgesArray = None
+        self.edgesDict = {}
         self.distancesArray = None
         self.numArcCaps = 0
-        self.possibleArcCaps = None
+        self.possibleArcCapsArray = None
         self.numArcs = 0
         self.arcsDict = {}
         self.arcsMatrix = None
@@ -106,6 +107,10 @@ class FlowNetwork:
         thisNode = Node(nodeID, xPos, yPos)
         self.nodesDict[nodeID] = thisNode
 
+    def addEdgeToDict(self, edgeID: tuple, index: int) -> None:
+        """Adds a new edge to the dict with the value of its index in the edges array"""
+        self.edgesDict[edgeID] = index
+
     def addArcToDict(self, numID: int, arcID: tuple, distance: float, FC: float, VC: float) -> None:
         """Adds a new arc to a Network instance"""
         thisArc = Arc(numID, (arcID[0], arcID[1]), arcID[2], distance, FC, VC)
@@ -132,7 +137,7 @@ class FlowNetwork:
 
     def getPossibleArcCaps(self) -> ndarray:
         """Returns the possible arc capacities for the network"""
-        return self.possibleArcCaps
+        return self.possibleArcCapsArray
 
     def getArcObject(self, arcID: tuple) -> Arc:
         """Returns the arc object with the given ID"""

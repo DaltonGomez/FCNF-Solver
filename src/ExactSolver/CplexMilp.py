@@ -24,11 +24,12 @@ class ExactSolver:
         """Builds the decision variables, constraints, and object function of the MILP model from the FCFN instance"""
         # =================== DECISION VARIABLES ===================
         # Source and sink decision variables and determines flow from/to each node - Indexed on src/sink matrix
-        self.sourceFlowVars = self.model.continuous_var_dict(self.network.numSources, name="s")
-        self.sinkFlowVars = self.model.continuous_var_dict(self.network.numSinks, name="t")
+        self.sourceFlowVars = self.model.continuous_var_list(self.network.numSources, name="s")
+        self.sinkFlowVars = self.model.continuous_var_list(self.network.numSinks, name="t")
         # Arc decision variables - Indexed on the arc matrix and determines flow on each arc
-        self.arcOpenedVars = self.model.binary_var_dict(self.network.numArcs, name="y")
-        self.arcFlowVars = self.model.continuous_var_dict(self.network.numArcs, name="a", lb=0)
+        self.arcOpenedVars = self.model.binary_var_matrix(self.network.numEdges, self.network.numArcCaps, name="y")
+        self.arcFlowVars = self.model.continuous_var_matrix(self.network.numEdges, self.network.numArcCaps, name="a",
+                                                            lb=0)
 
         # =================== CONSTRAINTS ===================
         # Minimum flow constraint (Constructed as the sum of all sinks in-flows)
@@ -36,11 +37,12 @@ class ExactSolver:
                                   ctname="minFlow")
 
         # Edge opening/capacity constraints
-        for i in range(self.network.numArcs):
-            arc = self.network.arcsMatrix[i]
-            arcID = (arc[0], arc[1], arc[2])
-            ctName = "a_" + str(arcID) + "_CapAndOpen"
-            self.model.add_constraint(self.arcFlowVars[i] <= self.arcOpenedVars[i] * arc[2], ctname=ctName)
+        for i in range(self.network.numEdges):
+            for j in range(self.network.numArcCaps):
+                capacity = self.network.possibleArcCapsArray[j]
+                arcID = (self.network.edgesArray[i][0], self.network.edgesArray[i][1], capacity)
+                ctName = "a_" + str(arcID) + "_CapAndOpen"
+                self.model.add_constraint(self.arcFlowVars[i][j] <= self.arcOpenedVars[i][j] * capacity, ctname=ctName)
 
         # Capacity constraints of sources
         if self.network.isSourceSinkCapacitated is True:
@@ -55,54 +57,66 @@ class ExactSolver:
                 self.model.add_constraint(self.sinkFlowVars[i] <= self.network.sinkCapsArray[i], ctname=ctName)
 
         # Conservation of flow constraints
-        # TODO - REWORK FROM HERE DOWN
         # Source flow conservation
-        for source in self.network.sourcesArray:
-            srcObj = self.network.nodesDict[source]
-            incomingEdges = srcObj.incomingEdges
+        for s in range(self.network.numSources):
+            source = self.network.sourcesArray[s]
+            sourceObj = self.network.nodesDict[source]
+            outgoingIndexes = []
+            for edge in sourceObj.outgoingEdges:
+                outgoingIndexes.append(self.network.edgesDict[edge])
+            ctName = "s_" + str(source) + "_Conserv"
+            self.model.add_constraint(self.sourceFlowVars[s] ==
+                                      sum(self.arcFlowVars[m][n] for m in outgoingIndexes
+                                          for n in self.network.possibleArcCapsArray), ctName)
+        # Sink flow conservation
+        for t in range(self.network.numSources):
+            source = self.network.sourcesArray[t]
+            sourceObj = self.network.nodesDict[source]
+            incomingIndexes = []
+            for edge in sourceObj.incomingEdges:
+                incomingIndexes.append(self.network.edgesDict[edge])
+            ctName = "t_" + str(source) + "_Conserv"
+            self.model.add_constraint(self.sinkFlowVars[t] ==
+                                      sum(self.arcFlowVars[m][n] for m in incomingIndexes
+                                          for n in self.network.possibleArcCapsArray), ctName)
+        # Intermediate node flow conservation
+        for n in range(self.network.numInterNodes):
+            interNode = self.network.interNodesArray[n]
+            nodeObj = self.network.nodesDict[interNode]
+            incomingIndexes = []
+            for edge in nodeObj.incomingEdges:
+                incomingIndexes.append(self.network.edgesDict[edge])
+            outgoingIndexes = []
+            for edge in nodeObj.outgoingEdges:
+                outgoingIndexes.append(self.network.edgesDict[edge])
+            ctName = "n_" + str(interNode) + "_Conserv"
+            self.model.add_constraint(sum(self.arcFlowVars[i][j] for i in incomingIndexes
+                                          for j in self.network.possibleArcCapsArray) - sum(
+                self.arcFlowVars[m][n] for m in outgoingIndexes
+                for n in self.network.possibleArcCapsArray) == 0,
+                                      ctname=ctName)
 
-        for node in self.FCFN.nodesDict:
-            nodeObj = self.FCFN.nodesDict[node]
-            nodeType = node.strip("0123456789")
-            nodeID = node.strip("stn")
-            # Get outgoing and incoming edge number ids
-            outgoingIDs = []
-            for outgoingEdge in nodeObj.outgoingEdges:
-                outgoingIDs.append(int(outgoingEdge.strip("e")))
-            incomingIDs = []
-            for incomingEdge in nodeObj.incomingEdges:
-                incomingIDs.append(int(incomingEdge.strip("e")))
-            # Source flow conservation
-            if nodeType == "s":
-                ctName = "s" + str(nodeID) + "Conserv"
-                self.model.add_constraint(self.sourceFlowVars[int(nodeID)] ==
-                                          sum(self.edgeFlowVars[i] for i in outgoingIDs),
-                                          ctname=ctName)
-            # Sink flow conservation
-            elif nodeType == "t":
-                ctName = "t" + str(nodeID) + "Conserv"
-                self.model.add_constraint(self.sinkFlowVars[int(nodeID)] ==
-                                          sum(self.edgeFlowVars[i] for i in incomingIDs),
-                                          ctname=ctName)
-            # Intermediate flow conservation
-            elif nodeType == "n":
-                ctName = "n" + str(nodeID) + "Conserv"
-                self.model.add_constraint(sum(
-                    self.edgeFlowVars[i] for i in incomingIDs) - sum(
-                    self.edgeFlowVars[j] for j in outgoingIDs) == 0,
-                                          ctname=ctName)
         # =================== OBJECTIVE FUNCTION ===================
-        self.model.set_objective("min",
-                                 sum(self.sourceFlowVars[i] * self.FCFN.nodesDict["s" + str(i)].variableCost for i
-                                     in range(self.FCFN.numSources))
-                                 + sum(self.sinkFlowVars[j] * self.FCFN.nodesDict["t" + str(j)].variableCost for j
-                                       in range(self.FCFN.numSinks)) + sum(
-                                     self.edgeFlowVars[n] * self.FCFN.edgesDict["e" + str(n)].variableCost
-                                     for n
-                                     in range(self.FCFN.numEdges)) + sum(
-                                     self.edgeOpenedVars[m] * self.FCFN.edgesDict["e" + str(m)].fixedCost for
-                                     m in
-                                     range(self.FCFN.numEdges)))
+        if self.network.isSourceSinkCharged is True:
+            # TODO - Implement
+            pass
+        elif self.network.isSourceSinkCharged is False:
+            self.model.set_objective("min", sum(self.arcFlowVars[i][j]
+                                                * self.network.arcsMatrix[self.network.arcsDict[(
+            self.network.edgesArray[i][0], self.network.edgesArray[i][1], self.network.possibleArcCapsArray[j])].numID][
+                                                    5]
+                                                for i in range(self.network.numEdges) for j in
+                                                range(self.network.numArcCaps)) + sum(self.arcFlowVars[m][n]
+                                                                                      * self.network.arcsMatrix[
+                                                                                          self.network.arcsDict[(
+                                                                                          self.network.edgesArray[m][0],
+                                                                                          self.network.edgesArray[m][1],
+                                                                                          self.network.possibleArcCapsArray[
+                                                                                              n])].numID][6]
+                                                                                      for m in
+                                                                                      range(self.network.numEdges) for n
+                                                                                      in
+                                                                                      range(self.network.numArcCaps)))
 
     def solveModel(self) -> None:
         """Solves the MILP model in CPLEX"""
@@ -111,6 +125,7 @@ class ExactSolver:
         self.isRun = True
         print("Solver execution complete...\n")
 
+    # TODO - Fix-up from here down
     def writeSolution(self) -> None:
         """Writes the solution to the FCFN instance by updating output attributes across the FCFN, nodes, and edges"""
         if self.model.solution is not None:

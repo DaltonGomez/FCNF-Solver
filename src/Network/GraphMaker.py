@@ -119,6 +119,11 @@ class GraphMaker:
                     edgeSet.add(backwardEdge)
         self.newNetwork.edgesArray = np.array(list(edgeSet))
         self.newNetwork.numEdges = len(self.newNetwork.edgesArray)
+        # Build edge dict
+        for i in range(self.newNetwork.numEdges):
+            fromNode = self.newNetwork.edgesArray[0]
+            toNode = self.newNetwork.edgesArray[1]
+            self.newNetwork.addEdgeToDict((fromNode, toNode), i)
 
     def computeEdgeDistances(self) -> None:
         """Calculates the Euclidean distance of each edge"""
@@ -139,8 +144,8 @@ class GraphMaker:
 
     def setPossibleArcCapacities(self, possibleArcCapacities: List[int]) -> None:
         """Sets the possible arc capacities for the parallel edges"""
-        self.newNetwork.possibleArcCaps = np.array(possibleArcCapacities)
-        self.newNetwork.numArcCaps = len(self.newNetwork.possibleArcCaps)
+        self.newNetwork.possibleArcCapsArray = np.array(possibleArcCapacities)
+        self.newNetwork.numArcCaps = len(self.newNetwork.possibleArcCapsArray)
 
     def buildArcsDictAndMatrix(self) -> None:
         """Builds the dictionary of arcs"""
@@ -150,7 +155,7 @@ class GraphMaker:
             fromNode = self.newNetwork.edgesArray[edge][0]
             toNode = self.newNetwork.edgesArray[edge][1]
             distance = self.newNetwork.distancesArray[edge]
-            for cap in self.newNetwork.possibleArcCaps:
+            for cap in self.newNetwork.possibleArcCapsArray:
                 fixedCost = self.calculateArcFixedCost(distance, cap)
                 variableCost = self.calculateArcVariableCost(distance, cap)
                 self.newNetwork.addArcToDict(numID, (fromNode, toNode, cap), distance, fixedCost, variableCost)
