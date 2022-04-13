@@ -18,14 +18,14 @@ class GraphMaker:
         self.possibleArcCaps = [10, 50, 100]
         self.distFixCostScale = 10
         self.capFixCostScale = 10
-        self.fixCostRandomScalar = [0.50, 1.50]
+        self.fixCostRandomScalar = [0.80, 1.20]
         self.distVariableCostScale = 3
         self.capVariableCostScale = 3
         self.variableCostRandomScalar = [0.80, 1.20]
-        self.isSourceSinkCapacitated = False
+        self.isSourceSinkCapacitated = True
         self.sourceSinkCapacityRange = [100, 300]
-        self.isSourceSinkCharged = False
-        self.sourceSinkChargeRange = [50, 100]
+        self.isSourceSinkCharged = True
+        self.sourceSinkChargeRange = [200, 300]
 
         # Output Network To Be Built
         self.newNetwork = FlowNetwork()
@@ -167,14 +167,20 @@ class GraphMaker:
 
     def calculateArcFixedCost(self, distance: float, capacity: int) -> float:
         """Calculates the fixed cost of the arc in a pseudorandom manner"""
-        fixedCost = (self.distFixCostScale * distance + self.capFixCostScale * capacity) * random.uniform(
-            self.fixCostRandomScalar[0], self.fixCostRandomScalar[1])
+        # Pseudorandom component proportional to the distance the edge spans
+        randomDistanceComponent = (self.distFixCostScale * distance * random.uniform(
+            self.fixCostRandomScalar[0], self.fixCostRandomScalar[1]))
+        # Cap^(3/4) is intended to discount bigger pipelines (i.e. economies of scale)
+        fixedCost = (randomDistanceComponent + self.capFixCostScale * capacity ** 0.75)
         return fixedCost
 
     def calculateArcVariableCost(self, distance: float, capacity: int) -> float:
         """Calculates the variable cost of the arc in a pseudorandom manner"""
-        variableCost = (self.distVariableCostScale * distance + self.capVariableCostScale * capacity) * random.uniform(
-            self.variableCostRandomScalar[0], self.variableCostRandomScalar[1])
+        # Pseudorandom component proportional to the distance the edge spans
+        randomDistanceComponent = (self.distVariableCostScale * distance * random.uniform(
+            self.variableCostRandomScalar[0], self.variableCostRandomScalar[1]))
+        # Cap^(3/4) is intended to discount bigger pipelines (i.e. economies of scale)
+        variableCost = (randomDistanceComponent + self.capVariableCostScale * capacity ** 0.75)
         return variableCost
 
     def assignSourceSinkCapAndCharge(self) -> None:

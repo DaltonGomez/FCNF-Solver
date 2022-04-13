@@ -6,11 +6,12 @@ from src.Network.FlowNetwork import FlowNetwork
 class MILPsolverCPLEX:
     """Class that solves a FCFN instance exactly via a MILP model within CPLEX"""
 
-    def __init__(self, network: FlowNetwork, minTargetFlow: int):
+    def __init__(self, network: FlowNetwork, minTargetFlow: int, isOneArcPerEdge=False):
         """Constructor of a MILP-Solver instance"""
         # Input attributes
         self.network = network
         self.minTargetFlow = minTargetFlow
+        self.isOneArcPerEdge = isOneArcPerEdge
         # Solver model
         self.model = Model(name="FCFN-MILP-ExactSolver", log_output=False, cts_by_name=True)
         self.isRun = False
@@ -43,6 +44,13 @@ class MILPsolverCPLEX:
                 arcID = (self.network.edgesArray[i][0], self.network.edgesArray[i][1], capacity)
                 ctName = "a_" + str(arcID) + "_CapAndOpen"
                 self.model.add_constraint(self.arcFlowVars[(i, j)] <= self.arcOpenedVars[(i, j)] * capacity,
+                                          ctname=ctName)
+
+        # Only one arc per edge can be opened constraint (NOTE: Can be turned on/off as an optional param of this class)
+        if self.isOneArcPerEdge is True:
+            for i in range(self.network.numEdges):
+                ctName = "e_" + str(i) + "_OneArcPerEdge"
+                self.model.add_constraint(sum(self.arcOpenedVars[(i, j)] for j in range(self.network.numArcCaps)) <= 1,
                                           ctname=ctName)
 
         # Capacity constraints of sources
@@ -110,27 +118,39 @@ class MILPsolverCPLEX:
                                       ctname=ctName)
 
         # =================== OBJECTIVE FUNCTION ===================
+        # NOTE: Borderline unreadable but verified correct
         if self.network.isSourceSinkCharged is True:
-            # TODO - Implement
-            pass
-        elif self.network.isSourceSinkCharged is False:
             self.model.set_objective("min", sum(self.arcFlowVars[(i, j)]
                                                 * self.network.arcsMatrix[self.network.arcsDict[(
                 self.network.edgesArray[i][0], self.network.edgesArray[i][1],
-                self.network.possibleArcCapsArray[j])].numID][5] for i in range(self.network.numEdges) for j in
-                                                range(self.network.numArcCaps)) + sum(self.arcFlowVars[(m, n)] *
-                                                                                      self.network.arcsMatrix[
-                                                                                          self.network.arcsDict[(
-                                                                                              self.network.edgesArray[
-                                                                                                  m][0],
-                                                                                              self.network.edgesArray[
-                                                                                                  m][1],
-                                                                                              self.network.possibleArcCapsArray[
-                                                                                                  n])].numID][6]
-                                                                                      for m in
-                                                                                      range(self.network.numEdges) for n
-                                                                                      in
-                                                                                      range(self.network.numArcCaps)))
+                self.network.possibleArcCapsArray[j])].numID][6] for i in range(self.network.numEdges) for j in
+                                                range(self.network.numArcCaps)) + sum(
+                self.arcOpenedVars[(m, n)] *
+                self.network.arcsMatrix[self.network.arcsDict[(self.network.edgesArray[m][0],
+                                                               self.network.edgesArray[m][1],
+                                                               self.network.possibleArcCapsArray[
+                                                                   n])].numID][5] for m in
+                range(self.network.numEdges) for n in
+                range(self.network.numArcCaps)) + sum(
+                self.sourceFlowVars[s] * self.network.sourceVariableCostsArray[s] for s in
+                range(self.network.numSources)) +
+                                     sum(self.sinkFlowVars[t] * self.network.sinkVariableCostsArray[t] for t in
+                                         range(self.network.numSinks)))
+        elif self.network.isSourceSinkCharged is False:
+            self.model.set_objective("min",
+                                     sum(self.arcFlowVars[(i, j)] * self.network.arcsMatrix[self.network.arcsDict[(
+                                         self.network.edgesArray[i][0], self.network.edgesArray[i][1],
+                                         self.network.possibleArcCapsArray[j])].numID][6] for i in
+                                         range(self.network.numEdges) for j in
+                                         range(self.network.numArcCaps)) + sum(self.arcOpenedVars[(m, n)] *
+                                                                               self.network.arcsMatrix[
+                                                                                   self.network.arcsDict[
+                                                                                       (self.network.edgesArray[m][0],
+                                                                                        self.network.edgesArray[m][1],
+                                                                                        self.network.possibleArcCapsArray[
+                                                                                            n])].numID][5] for m in
+                                                                               range(self.network.numEdges) for n
+                                                                               in range(self.network.numArcCaps)))
 
     def solveModel(self) -> None:
         """Solves the MILP model in CPLEX"""
