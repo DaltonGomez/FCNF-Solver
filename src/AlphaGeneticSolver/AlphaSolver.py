@@ -1,4 +1,4 @@
-
+import numpy as np
 from docplex.mp.model import Model
 
 from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
@@ -111,6 +111,16 @@ class AlphaSolver:
 
     def updateObjectiveFunction(self, relaxedCoefficients: dict):
         """Deletes any previous objective function and writes a new objective function using the input alpha values"""
+        if self.model.has_objective() and self.model.solution is not None:
+            self.resetSolver()
+        # =================== OBJECTIVE FUNCTION ===================
+        edgeObjTerm = self.model.linear_expr(
+            sum(relaxedCoefficients[e] * self.edgeFlowVars[e] for e in range(self.FCFN.numEdges)))
+        self.model.set_objective("min", self.sourceObjTerm + self.sinkObjTerm + edgeObjTerm)
+        self.hasObjectiveFunction = True
+
+    def updateObjectiveFunctionWithNpArray(self, relaxedCoefficients: np.ndarray):
+        """Overwrites the objective function using the precomputed coefficients stored in a np array"""
         if self.model.has_objective() and self.model.solution is not None:
             self.resetSolver()
         # =================== OBJECTIVE FUNCTION ===================

@@ -1,6 +1,5 @@
-"""From Bradley, Hax and Maganti, 'Applied Mathematical Programming', figure 8.1."""
 from ortools.graph import pywrapgraph
-
+# SOURCE: https://developers.google.com/optimization/flow/mincostflow
 
 def main():
     """MinCostFlow simple interface example."""

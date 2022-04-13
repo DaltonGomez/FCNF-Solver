@@ -1,10 +1,15 @@
 from ortools.linear_solver import pywraplp
 
 
+# SOURCE: https://developers.google.com/optimization/lp/lp_example
+# GLOP vs. PDLP: https://developers.google.com/optimization/lp/lp_advanced
+# PDLP Background: https://developers.google.com/optimization/lp/pdlp_math
+
 def LinearProgrammingExample():
     """Linear programming sample."""
     # Instantiate a Glop solver, naming it LinearExample.
     solver = pywraplp.Solver.CreateSolver('GLOP')
+    # TODO - Uncomment to run the solver using 1st order gradient descent method instead of simplex
     # solver = pywraplp.Solver.CreateSolver('PDLP')
 
     # Create the two variables and let them take on any non-negative value.
