@@ -3,7 +3,7 @@ from docplex.mp.model import Model
 from src.Network.FlowNetwork import FlowNetwork
 
 
-class ExactSolver:
+class MILPsolverCPLEX:
     """Class that solves a FCFN instance exactly via a MILP model within CPLEX"""
 
     def __init__(self, network: FlowNetwork, minTargetFlow: int):
@@ -42,7 +42,8 @@ class ExactSolver:
                 capacity = self.network.possibleArcCapsArray[j]
                 arcID = (self.network.edgesArray[i][0], self.network.edgesArray[i][1], capacity)
                 ctName = "a_" + str(arcID) + "_CapAndOpen"
-                self.model.add_constraint(self.arcFlowVars[i][j] <= self.arcOpenedVars[i][j] * capacity, ctname=ctName)
+                self.model.add_constraint(self.arcFlowVars[(i, j)] <= self.arcOpenedVars[(i, j)] * capacity,
+                                          ctname=ctName)
 
         # Capacity constraints of sources
         if self.network.isSourceSinkCapacitated is True:
@@ -64,21 +65,33 @@ class ExactSolver:
             outgoingIndexes = []
             for edge in sourceObj.outgoingEdges:
                 outgoingIndexes.append(self.network.edgesDict[edge])
-            ctName = "s_" + str(source) + "_Conserv"
-            self.model.add_constraint(self.sourceFlowVars[s] ==
-                                      sum(self.arcFlowVars[m][n] for m in outgoingIndexes
-                                          for n in self.network.possibleArcCapsArray), ctName)
-        # Sink flow conservation
-        for t in range(self.network.numSources):
-            source = self.network.sourcesArray[t]
-            sourceObj = self.network.nodesDict[source]
             incomingIndexes = []
             for edge in sourceObj.incomingEdges:
                 incomingIndexes.append(self.network.edgesDict[edge])
-            ctName = "t_" + str(source) + "_Conserv"
+            ctName = "s_" + str(source) + "_Conserv"
+            self.model.add_constraint(self.sourceFlowVars[s] ==
+                                      sum(self.arcFlowVars[(m, n)] for m in outgoingIndexes
+                                          for n in range(self.network.numArcCaps)) - sum(self.arcFlowVars[(i, j)]
+                                                                                         for i in incomingIndexes
+                                                                                         for j in range(
+                self.network.numArcCaps)), ctName)
+        # Sink flow conservation
+        for t in range(self.network.numSinks):
+            sink = self.network.sinksArray[t]
+            sinkObj = self.network.nodesDict[sink]
+            incomingIndexes = []
+            for edge in sinkObj.incomingEdges:
+                incomingIndexes.append(self.network.edgesDict[edge])
+            outgoingIndexes = []
+            for edge in sinkObj.outgoingEdges:
+                outgoingIndexes.append(self.network.edgesDict[edge])
+            ctName = "t_" + str(sink) + "_Conserv"
             self.model.add_constraint(self.sinkFlowVars[t] ==
-                                      sum(self.arcFlowVars[m][n] for m in incomingIndexes
-                                          for n in self.network.possibleArcCapsArray), ctName)
+                                      sum(self.arcFlowVars[(m, n)] for m in incomingIndexes
+                                          for n in range(self.network.numArcCaps)) - sum(self.arcFlowVars[(i, j)]
+                                                                                         for i in outgoingIndexes
+                                                                                         for j in range(
+                self.network.numArcCaps)), ctName)
         # Intermediate node flow conservation
         for n in range(self.network.numInterNodes):
             interNode = self.network.interNodesArray[n]
@@ -90,10 +103,10 @@ class ExactSolver:
             for edge in nodeObj.outgoingEdges:
                 outgoingIndexes.append(self.network.edgesDict[edge])
             ctName = "n_" + str(interNode) + "_Conserv"
-            self.model.add_constraint(sum(self.arcFlowVars[i][j] for i in incomingIndexes
-                                          for j in self.network.possibleArcCapsArray) - sum(
-                self.arcFlowVars[m][n] for m in outgoingIndexes
-                for n in self.network.possibleArcCapsArray) == 0,
+            self.model.add_constraint(sum(self.arcFlowVars[(i, j)] for i in incomingIndexes
+                                          for j in range(self.network.numArcCaps)) - sum(
+                self.arcFlowVars[(m, n)] for m in outgoingIndexes
+                for n in range(self.network.numArcCaps)) == 0,
                                       ctname=ctName)
 
         # =================== OBJECTIVE FUNCTION ===================
@@ -101,11 +114,11 @@ class ExactSolver:
             # TODO - Implement
             pass
         elif self.network.isSourceSinkCharged is False:
-            self.model.set_objective("min", sum(self.arcFlowVars[i][j]
+            self.model.set_objective("min", sum(self.arcFlowVars[(i, j)]
                                                 * self.network.arcsMatrix[self.network.arcsDict[(
                 self.network.edgesArray[i][0], self.network.edgesArray[i][1],
                 self.network.possibleArcCapsArray[j])].numID][5] for i in range(self.network.numEdges) for j in
-                                                range(self.network.numArcCaps)) + sum(self.arcFlowVars[m][n] *
+                                                range(self.network.numArcCaps)) + sum(self.arcFlowVars[(m, n)] *
                                                                                       self.network.arcsMatrix[
                                                                                           self.network.arcsDict[(
                                                                                               self.network.edgesArray[
@@ -129,10 +142,16 @@ class ExactSolver:
     def writeSolution(self) -> None:
         """Writes the solution to the FCFN instance by updating output attributes across the FCFN, nodes, and edges"""
         if self.model.solution is not None:
-            # TODO - Built solution class and instantiate from here
+            # TODO - Build solution class and instantiate from here
             print("Solution found!")
         else:
             print("No feasible solution exists!")
+
+    def printAllSolverData(self) -> None:
+        """Prints all the data store within the solver class"""
+        self.printSolverOverview()
+        self.printModel()
+        self.printSolution()
 
     def printSolverOverview(self) -> None:
         """Prints the most important and concise details of the solver, model and solution"""

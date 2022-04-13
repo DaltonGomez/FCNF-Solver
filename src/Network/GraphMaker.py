@@ -121,8 +121,8 @@ class GraphMaker:
         self.newNetwork.numEdges = len(self.newNetwork.edgesArray)
         # Build edge dict
         for i in range(self.newNetwork.numEdges):
-            fromNode = self.newNetwork.edgesArray[0]
-            toNode = self.newNetwork.edgesArray[1]
+            fromNode = self.newNetwork.edgesArray[i][0]
+            toNode = self.newNetwork.edgesArray[i][1]
             self.newNetwork.addEdgeToDict((fromNode, toNode), i)
 
     def computeEdgeDistances(self) -> None:
