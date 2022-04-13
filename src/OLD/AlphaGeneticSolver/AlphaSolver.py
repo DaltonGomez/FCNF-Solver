@@ -1,7 +1,7 @@
 import numpy as np
 from docplex.mp.model import Model
 
-from src.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
+from src.OLD.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
 
 
 class AlphaSolver:
