@@ -103,16 +103,17 @@ class ExactSolver:
         elif self.network.isSourceSinkCharged is False:
             self.model.set_objective("min", sum(self.arcFlowVars[i][j]
                                                 * self.network.arcsMatrix[self.network.arcsDict[(
-            self.network.edgesArray[i][0], self.network.edgesArray[i][1], self.network.possibleArcCapsArray[j])].numID][
-                                                    5]
-                                                for i in range(self.network.numEdges) for j in
-                                                range(self.network.numArcCaps)) + sum(self.arcFlowVars[m][n]
-                                                                                      * self.network.arcsMatrix[
+                self.network.edgesArray[i][0], self.network.edgesArray[i][1],
+                self.network.possibleArcCapsArray[j])].numID][5] for i in range(self.network.numEdges) for j in
+                                                range(self.network.numArcCaps)) + sum(self.arcFlowVars[m][n] *
+                                                                                      self.network.arcsMatrix[
                                                                                           self.network.arcsDict[(
-                                                                                          self.network.edgesArray[m][0],
-                                                                                          self.network.edgesArray[m][1],
-                                                                                          self.network.possibleArcCapsArray[
-                                                                                              n])].numID][6]
+                                                                                              self.network.edgesArray[
+                                                                                                  m][0],
+                                                                                              self.network.edgesArray[
+                                                                                                  m][1],
+                                                                                              self.network.possibleArcCapsArray[
+                                                                                                  n])].numID][6]
                                                                                       for m in
                                                                                       range(self.network.numEdges) for n
                                                                                       in
@@ -125,46 +126,11 @@ class ExactSolver:
         self.isRun = True
         print("Solver execution complete...\n")
 
-    # TODO - Fix-up from here down
     def writeSolution(self) -> None:
         """Writes the solution to the FCFN instance by updating output attributes across the FCFN, nodes, and edges"""
         if self.model.solution is not None:
-            # Disperse solution results back to FCFN
-            self.FCFN.isSolved = True
-            self.FCFN.minTargetFlow = self.minTargetFlow
-            self.FCFN.totalCost = self.model.solution.get_objective_value()
-            self.FCFN.totalFlow = sum(self.model.solution.get_value_dict(self.sinkFlowVars))
-            # Disperse solution results back to sources
-            sourceValues = self.model.solution.get_value_dict(self.sourceFlowVars)
-            for i in range(self.FCFN.numSources):
-                thisSource = self.FCFN.nodesDict["s" + str(i)]
-                if sourceValues[i] > 0:
-                    thisSource.opened = True
-                    thisSource.flow = sourceValues[i]
-                    thisSource.totalCost = thisSource.flow * thisSource.variableCost
-            # Disperse solution results back to sinks
-            sinkValues = self.model.solution.get_value_dict(self.sinkFlowVars)
-            for i in range(self.FCFN.numSinks):
-                thisSink = self.FCFN.nodesDict["t" + str(i)]
-                if sinkValues[i] > 0:
-                    thisSink.opened = True
-                    thisSink.flow = sinkValues[i]
-                    thisSink.totalCost = thisSink.flow * thisSink.variableCost
-            # Disperse solution results back to edges
-            edgeValues = self.model.solution.get_value_dict(self.edgeFlowVars)
-            for i in range(self.FCFN.numEdges):
-                thisEdge = self.FCFN.edgesDict["e" + str(i)]
-                if edgeValues[i] > 0:
-                    thisEdge.opened = True
-                    thisEdge.flow = edgeValues[i]
-                    thisEdge.totalCost = thisEdge.flow * thisEdge.variableCost + thisEdge.fixedCost
-            # Disperse solution results back to intermediate nodes
-            for i in range(self.FCFN.numIntermediateNodes):
-                thisNode = self.FCFN.nodesDict["n" + str(i)]
-                for edge in thisNode.incomingEdges:
-                    thisNode.flow += self.FCFN.edgesDict[edge].flow
-                if thisNode.flow > 0:
-                    thisNode.opened = True
+            # TODO - Built solution class and instantiate from here
+            print("Solution found!")
         else:
             print("No feasible solution exists!")
 
@@ -175,8 +141,6 @@ class ExactSolver:
             print(self.model.get_solve_details())
             print("Solved by= " + self.model.solution.solved_by + "\n")
             self.model.print_solution()
-            print("Total Cost: " + str(self.FCFN.totalCost))
-            print("Total Flow: " + str(self.FCFN.totalFlow))
 
     def printModel(self) -> None:
         """Prints all constraints of the MILP model for the FCFN instance (FOR DEBUGGING- DON'T CALL ON LARGE INPUTS)"""
@@ -186,29 +150,27 @@ class ExactSolver:
         print(self.model.get_objective_expr())
         print("=============== CONSTRAINTS ========================")
         print(self.model.get_constraint_by_name("minFlow"))
-        for i in range(self.FCFN.numSources):
-            print(self.model.get_constraint_by_name("s" + str(i) + "Conserv"))
-            print(self.model.get_constraint_by_name("s" + str(i) + "Cap"))
-        for i in range(self.FCFN.numSinks):
-            print(self.model.get_constraint_by_name("t" + str(i) + "Conserv"))
-            print(self.model.get_constraint_by_name("t" + str(i) + "Cap"))
-        for i in range(self.FCFN.numSinks):
-            print(self.model.get_constraint_by_name("t" + str(i) + "Conserv"))
-            print(self.model.get_constraint_by_name("t" + str(i) + "Cap"))
-        for i in range(self.FCFN.numNodes - (self.FCFN.numSources + self.FCFN.numSinks)):
-            print(self.model.get_constraint_by_name("n" + str(i) + "Conserv"))
-        for i in range(self.FCFN.numEdges):
-            print(self.model.get_constraint_by_name("e" + str(i) + "CapAndOpen"))
+        for s in self.network.sourcesArray:
+            print(self.model.get_constraint_by_name("s_" + str(s) + "_Conserv"))
+            print(self.model.get_constraint_by_name("s_" + str(s) + "_Cap"))
+        for t in self.network.sinksArray:
+            print(self.model.get_constraint_by_name("t_" + str(t) + "_Conserv"))
+            print(self.model.get_constraint_by_name("t_" + str(t) + "_Cap"))
+        for n in self.network.interNodesArray:
+            print(self.model.get_constraint_by_name("n_" + str(n) + "_Conserv"))
+        for i in range(self.network.numEdges):
+            for j in range(self.network.numArcCaps):
+                capacity = self.network.possibleArcCapsArray[j]
+                arcID = (self.network.edgesArray[i][0], self.network.edgesArray[i][1], capacity)
+                print(self.model.get_constraint_by_name("a_" + str(arcID) + "_CapAndOpen"))
 
     def printSolution(self) -> None:
         """Prints the solution data of the FCFN instance solved by the MILP model"""
         print("=============== SOLUTION DETAILS ========================")
         print(self.model.get_solve_details())
-        if self.FCFN.isSolved is True:
+        if self.isRun is True:
             print("Solved by= " + self.model.solution.solved_by + "\n")
             print("=============== SOLUTION VALUES ========================")
             self.model.print_solution()
-            print("Total Cost: " + str(self.FCFN.totalCost))
-            print("Total Flow: " + str(self.FCFN.totalFlow))
         else:
             print("No feasible solution exists!")
