@@ -15,12 +15,12 @@ class GraphMaker:
         """Constructor of a GraphGenerator instance"""
         # Hyperparameters For Network Generation/Computing Pseudo-Random Costs
         self.embeddingSize = 100
-        self.arcCapacitiesToMakeGraph = [10, 50, 100]
-        self.distanceFixCostScalar = 10
-        self.capacityFixCostScalar = 10
+        self.possibleArcCaps = [10, 50, 100]
+        self.distFixCostScale = 10
+        self.capFixCostScale = 10
         self.fixCostRandomScalar = [0.50, 1.50]
-        self.distanceVariableCostScalar = 3
-        self.capacityVariableCostScalar = 3
+        self.distVariableCostScale = 3
+        self.capVariableCostScale = 3
         self.variableCostRandomScalar = [0.80, 1.20]
         self.isSourceSinkCapacitated = False
         self.sourceSinkCapacityRange = [100, 300]
@@ -35,24 +35,46 @@ class GraphMaker:
         self.newNetwork.numSinks = numSinks
 
     def generateNetwork(self) -> FlowNetwork:
-        """Constructs a pseudo-random flow network"""
-        self.embedRandomPoints(self.embeddingSize)
+        """Constructs a pseudo-random flow network embedded in a 2D plane"""
+        self.embedRandomPoints()
         self.assignRandomSourceSinks()
         self.buildEdgesFromTriangulation()
         self.computeEdgeDistances()
         self.assignInOutEdgesToNodes()
-        self.setPossibleArcCapacities(self.arcCapacitiesToMakeGraph)
+        self.setPossibleArcCapacities(self.possibleArcCaps)
         self.buildArcsDictAndMatrix()
         self.assignSourceSinkCapAndCharge()
         return self.newNetwork
 
-    def embedRandomPoints(self, planeSize: float) -> None:
+    def setCostDeterminingHyperparameters(self, embeddingSize: float, possibleArcCaps: List[int],
+                                          distFixCostScale: float, capFixCostScale: float, fixCostRandomScalar: list,
+                                          distVariableCostScale: float, capVariableCostScale: float,
+                                          variableCostRandomScalar: list) -> None:
+        """Allows the hyperparameters that calculate the pseudorandom cost to be tuned"""
+        self.embeddingSize = embeddingSize
+        self.possibleArcCaps = possibleArcCaps
+        self.distFixCostScale = distFixCostScale
+        self.capFixCostScale = capFixCostScale
+        self.fixCostRandomScalar = fixCostRandomScalar
+        self.distVariableCostScale = distVariableCostScale
+        self.capVariableCostScale = capVariableCostScale
+        self.variableCostRandomScalar = variableCostRandomScalar
+
+    def setSourceSinkGeneralizations(self, isCapacitated: bool, capacityRange: list, isCharged: bool,
+                                     chargeRange: list) -> None:
+        """Allows the capacitated/charged source sink generalizes to be turned on and tuned"""
+        self.isSourceSinkCapacitated = isCapacitated
+        self.sourceSinkCapacityRange = capacityRange
+        self.isSourceSinkCharged = isCharged
+        self.sourceSinkChargeRange = chargeRange
+
+    def embedRandomPoints(self) -> None:
         """Randomly embeds n points in a 2D plane"""
         random.seed()
         tempPoints = []
         for n in range(self.newNetwork.numTotalNodes):
-            xPos = random.random() * planeSize
-            yPos = random.random() * planeSize
+            xPos = random.random() * self.embeddingSize
+            yPos = random.random() * self.embeddingSize
             tempPoints.append((xPos, yPos))
             self.newNetwork.addNodeToDict(n, xPos, yPos)
         self.newNetwork.points = np.array(tempPoints)
@@ -68,8 +90,8 @@ class GraphMaker:
         for source in self.newNetwork.sourcesArray:
             self.newNetwork.setNodeType(source, 0)
         self.newNetwork.sinksArray = np.array(list(tempSinks))
-        for source in self.newNetwork.sourcesArray:
-            self.newNetwork.setNodeType(source, 1)
+        for sink in self.newNetwork.sinksArray:
+            self.newNetwork.setNodeType(sink, 1)
         self.newNetwork.interNodesArray = np.array(list(tempInterNodes))
         self.newNetwork.numInterNodes = len(self.newNetwork.interNodesArray)
 
@@ -138,14 +160,13 @@ class GraphMaker:
 
     def calculateArcFixedCost(self, distance: float, capacity: int) -> float:
         """Calculates the fixed cost of the arc in a pseudorandom manner"""
-        fixedCost = (self.distanceFixCostScalar * distance + self.capacityFixCostScalar * capacity) * random.uniform(
+        fixedCost = (self.distFixCostScale * distance + self.capFixCostScale * capacity) * random.uniform(
             self.fixCostRandomScalar[0], self.fixCostRandomScalar[0])
         return fixedCost
 
     def calculateArcVariableCost(self, distance: float, capacity: int) -> float:
         """Calculates the variable cost of the arc in a pseudorandom manner"""
-        variableCost = (
-                                   self.distanceVariableCostScalar * distance + self.capacityVariableCostScalar * capacity) * random.uniform(
+        variableCost = (self.distVariableCostScale * distance + self.capVariableCostScale * capacity) * random.uniform(
             self.variableCostRandomScalar[0], self.variableCostRandomScalar[0])
         return variableCost
 
@@ -175,8 +196,3 @@ class GraphMaker:
                 thisSinkCost = random.uniform(self.sourceSinkChargeRange[0], self.sourceSinkChargeRange[1])
                 tempSinkCosts.append(thisSinkCost)
             self.newNetwork.sinkVariableCostsArray = np.array(tempSinkCosts)
-
-
-gm = GraphMaker("test", 50, 10, 10)
-fn = gm.generateNetwork()
-fn.drawNetworkTriangulation()

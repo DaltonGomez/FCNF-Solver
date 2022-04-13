@@ -1,3 +1,4 @@
+import os
 import pickle
 
 import numpy as np
@@ -46,6 +47,60 @@ class FlowNetwork:
         self.sourceVariableCostsArray = None
         self.sinkVariableCostsArray = None
 
+    # ===================================================
+    # ============== VISUALIZATION METHODS ==============
+    # ===================================================
+    def drawNetworkTriangulation(self):
+        """Draws the Delaunay triangulation of the network with MatPlotLib for quick judgement of topology"""
+        triangulation = Delaunay(self.points)
+        plt.triplot(self.points[:, 0], self.points[:, 1], triangulation.simplices)
+        plt.plot(self.points[:, 0], self.points[:, 1], 'ko')
+        sourceList = []
+        for source in self.sourcesArray:
+            thisPoint = self.getNodeCoordinates(source)
+            sourceList.append(thisPoint)
+        sourcePoints = np.array(sourceList)
+        plt.plot(sourcePoints[:, 0], sourcePoints[:, 1], 'yD')
+        sinkList = []
+        for sink in self.sinksArray:
+            thisPoint = self.getNodeCoordinates(sink)
+            sinkList.append(thisPoint)
+        sinkPoints = np.array(sinkList)
+        plt.plot(sinkPoints[:, 0], sinkPoints[:, 1], 'rs')
+        # Save figure and display
+        currDir = os.getcwd()
+        networkFile = self.name + ".png"
+        catPath = os.path.join(currDir, "FCNFinstances", networkFile)
+        plt.savefig(catPath)
+        plt.show()
+
+    # =================================================
+    # ============== DATA IN/OUT METHODS ==============
+    # =================================================
+    def saveNetwork(self) -> None:
+        """Saves the network to disc via a pickle dump"""
+        # Path management
+        currDir = os.getcwd()
+        networkFile = self.name + ".p"
+        catPath = os.path.join(currDir, "FCNFinstances", networkFile)
+        print("Saving " + networkFile + " to: " + catPath)
+        # Pickle dump
+        pickle.dump(self, open(catPath, "wb"))
+
+    @staticmethod
+    def loadNetwork(networkFile: str):
+        """Loads a FCFN from a text file encoding"""
+        # Path management
+        currDir = os.getcwd()
+        catPath = os.path.join(currDir, "FCNFinstances", networkFile)
+        print("Saving " + networkFile + " to: " + catPath)
+        # Pickle load
+        flowNetwork = pickle.load(open(catPath, "rb"))
+        return flowNetwork
+
+    # =====================================================
+    # ============== NETWORK BUILDER METHODS ==============
+    # =====================================================
     def addNodeToDict(self, nodeID: int, xPos: float, yPos: float) -> None:
         """Adds a new node to a Network instance"""
         thisNode = Node(nodeID, xPos, yPos)
@@ -179,41 +234,6 @@ class FlowNetwork:
         thisNode = self.nodesDict[nodeID]
         npOutgoingEdge = np.array(outgoingEdge)
         thisNode.addIncomingEdge(npOutgoingEdge)
-
-    # ===================================================
-    # ============== VISUALIZATION METHODS ==============
-    # ===================================================
-    def drawNetworkTriangulation(self):
-        """Draws the Delaunay triangulation of the network with MatPlotLib for quick judgement of topology"""
-        triangulation = Delaunay(self.points)
-        plt.triplot(self.points[:, 0], self.points[:, 1], triangulation.simplices)
-        plt.plot(self.points[:, 0], self.points[:, 1], 'ko')
-        sourceList = []
-        for source in self.sourcesArray:
-            thisPoint = self.getNodeCoordinates(source)
-            sourceList.append(thisPoint)
-        sourcePoints = np.array(sourceList)
-        plt.plot(sourcePoints[:, 0], sourcePoints[:, 1], 'bD')
-        sinkList = []
-        for sink in self.sinksArray:
-            thisPoint = self.getNodeCoordinates(sink)
-            sinkList.append(thisPoint)
-        sinkPoints = np.array(sinkList)
-        plt.plot(sinkPoints[:, 0], sinkPoints[:, 1], 'rs')
-        plt.show()
-
-    # =================================================
-    # ============== DATA IN/OUT METHODS ==============
-    # =================================================
-    def saveNetwork(self) -> None:
-        """Saves the network to disc via a pickle dump"""
-        pickle.dump(self, open(self.name + ".p", "wb"))
-
-    @staticmethod
-    def loadNetwork(name: str):
-        """Loads a FCFN from a text file encoding"""
-        flowNetwork = pickle.load(open(name + ".p", "rb"))
-        return flowNetwork
 
     # ===========================================
     # ============== PRINT METHODS ==============
