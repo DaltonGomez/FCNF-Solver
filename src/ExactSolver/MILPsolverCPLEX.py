@@ -1,17 +1,21 @@
 from docplex.mp.model import Model
 
 from src.Network.FlowNetwork import FlowNetwork
+from src.Network.Solution import Solution
 
 
 class MILPsolverCPLEX:
     """Class that solves a FCFN instance exactly via a MILP model within CPLEX"""
 
-    def __init__(self, network: FlowNetwork, minTargetFlow: int, isOneArcPerEdge=False):
+    def __init__(self, network: FlowNetwork, minTargetFlow: int, isOneArcPerEdge=True, isSrcSinkConstrained=True,
+                 isSrcSinkCharged=True):
         """Constructor of a MILP-Solver instance"""
         # Input attributes
         self.network = network
         self.minTargetFlow = minTargetFlow
         self.isOneArcPerEdge = isOneArcPerEdge
+        self.isSrcSinkConstrained = isSrcSinkConstrained
+        self.isSrcSinkCharged = isSrcSinkCharged
         # Solver model
         self.model = Model(name="FCFN-MILP-ExactSolver", log_output=False, cts_by_name=True)
         self.isRun = False
@@ -159,11 +163,21 @@ class MILPsolverCPLEX:
         self.isRun = True
         print("Solver execution complete...\n")
 
-    def writeSolution(self) -> None:
-        """Writes the solution to the FCFN instance by updating output attributes across the FCFN, nodes, and edges"""
-        if self.model.solution is not None:
-            # TODO - Build solution class and instantiate from here
-            print("Solution found!")
+    def writeSolution(self) -> Solution:
+        """Saves the solution instance """
+        if self.isRun is False:
+            print("You must run the solver before building a solution!")
+        elif self.model.solution is not None:
+            print("Building solution...")
+            objValue = self.model.solution.get_objective_value()
+            srcFlows = self.model.solution.get_value_list(self.sourceFlowVars)
+            sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
+            arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
+            arcsOpen = self.model.solution.get_value_dict(self.arcOpenedVars)
+            thisSolution = Solution(self.network, self.minTargetFlow, objValue, srcFlows, sinkFlows, arcFlows,
+                                    arcsOpen, "cplex_milp", self.isOneArcPerEdge, self.isSrcSinkConstrained,
+                                    self.isSrcSinkCharged, optionalDescription=str(self.model.get_solve_details()))
+            return thisSolution
         else:
             print("No feasible solution exists!")
 

@@ -71,7 +71,7 @@ class FlowNetwork:
         # Save figure and display
         currDir = os.getcwd()
         networkFile = self.name + ".png"
-        catPath = os.path.join(currDir, "FCNFinstances", networkFile)
+        catPath = os.path.join(currDir, "networkInstances", networkFile)
         plt.savefig(catPath)
         plt.show()
 
@@ -79,22 +79,22 @@ class FlowNetwork:
     # ============== DATA IN/OUT METHODS ==============
     # =================================================
     def saveNetwork(self) -> None:
-        """Saves the network to disc via a pickle dump"""
+        """Saves the network instance to disc via a pickle dump"""
         # Path management
         currDir = os.getcwd()
         networkFile = self.name + ".p"
-        catPath = os.path.join(currDir, "FCNFinstances", networkFile)
+        catPath = os.path.join(currDir, "networkInstances", networkFile)
         print("Saving " + networkFile + " to: " + catPath)
         # Pickle dump
         pickle.dump(self, open(catPath, "wb"))
 
     @staticmethod
     def loadNetwork(networkFile: str):
-        """Loads a FCFN from a text file encoding"""
+        """Loads a network instance via a pickle load"""
         # Path management
         currDir = os.getcwd()
-        catPath = os.path.join(currDir, "FCNFinstances", networkFile)
-        print("Saving " + networkFile + " to: " + catPath)
+        catPath = os.path.join(currDir, "networkInstances", networkFile)
+        print("Loading " + networkFile + " from: " + catPath)
         # Pickle load
         flowNetwork = pickle.load(open(catPath, "rb"))
         return flowNetwork
