@@ -2,6 +2,10 @@
 
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
++ Add to solution visualization a way to capture relative edge costs in color
+
+
+
 + Test wall clock time on solving the MILP
 + Set up tuning experiment and find larger test beds
 + Implement the Dynamic Slope Scaling Procedure from Kim-1999

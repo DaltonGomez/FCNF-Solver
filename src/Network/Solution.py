@@ -21,6 +21,7 @@ class Solution:
         self.arcFlows = arcFlows
         self.arcsOpened = arcsOpened
         # Metadata/Conditions/Generalizations
+        self.name = "Soln-" + self.network.name + "_" + str(self.minTargetFlow) + "_" + solvedBy
         self.solvedBy = solvedBy
         self.isOneArcPerEdge = isOneArcPerEdge
         self.isSrcSinkConstrained = isSrcSinkConstrained
@@ -34,7 +35,7 @@ class Solution:
         """Saves the solution instance to disc via a pickle dump"""
         # Path management
         currDir = os.getcwd()
-        solutionFile = "Soln_" + self.network.name + "_" + self.solvedBy + ".p"
+        solutionFile = self.name + ".p"
         catPath = os.path.join(currDir, "solutionInstances", solutionFile)
         print("Saving " + solutionFile + " to: " + catPath)
         # Pickle dump
