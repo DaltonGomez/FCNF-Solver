@@ -125,34 +125,28 @@ class MILPsolverCPLEX:
         # NOTE: Borderline unreadable but verified correct
         if self.network.isSourceSinkCharged is True:
             self.model.set_objective("min", sum(self.arcFlowVars[(i, j)]
-                                                * self.network.arcsMatrix[self.network.arcsDict[(
-                self.network.edgesArray[i][0], self.network.edgesArray[i][1],
-                self.network.possibleArcCapsArray[j])].numID][6] for i in range(self.network.numEdges) for j in
-                                                range(self.network.numArcCaps)) + sum(
-                self.arcOpenedVars[(m, n)] *
-                self.network.arcsMatrix[self.network.arcsDict[(self.network.edgesArray[m][0],
-                                                               self.network.edgesArray[m][1],
-                                                               self.network.possibleArcCapsArray[
-                                                                   n])].numID][5] for m in
-                range(self.network.numEdges) for n in
-                range(self.network.numArcCaps)) + sum(
+                                                * self.network.getArcVariableCostFromEdgeCapIndices(i, j)
+                                                for i in range(self.network.numEdges) for j in
+                                                range(self.network.numArcCaps)) + sum(self.arcOpenedVars[(m, n)] *
+                                                                                      self.network.getArcFixedCostFromEdgeCapIndices(
+                                                                                          m, n) for m in
+                                                                                      range(self.network.numEdges) for n
+                                                                                      in
+                                                                                      range(
+                                                                                          self.network.numArcCaps)) + sum(
                 self.sourceFlowVars[s] * self.network.sourceVariableCostsArray[s] for s in
                 range(self.network.numSources)) +
                                      sum(self.sinkFlowVars[t] * self.network.sinkVariableCostsArray[t] for t in
                                          range(self.network.numSinks)))
         elif self.network.isSourceSinkCharged is False:
             self.model.set_objective("min",
-                                     sum(self.arcFlowVars[(i, j)] * self.network.arcsMatrix[self.network.arcsDict[(
-                                         self.network.edgesArray[i][0], self.network.edgesArray[i][1],
-                                         self.network.possibleArcCapsArray[j])].numID][6] for i in
+                                     sum(self.arcFlowVars[(i, j)] * self.network.getArcVariableCostFromEdgeCapIndices(i,
+                                                                                                                      j)
+                                         for i in
                                          range(self.network.numEdges) for j in
                                          range(self.network.numArcCaps)) + sum(self.arcOpenedVars[(m, n)] *
-                                                                               self.network.arcsMatrix[
-                                                                                   self.network.arcsDict[
-                                                                                       (self.network.edgesArray[m][0],
-                                                                                        self.network.edgesArray[m][1],
-                                                                                        self.network.possibleArcCapsArray[
-                                                                                            n])].numID][5] for m in
+                                                                               self.network.getArcFixedCostFromEdgeCapIndices(
+                                                                                   m, n) for m in
                                                                                range(self.network.numEdges) for n
                                                                                in range(self.network.numArcCaps)))
 
@@ -174,7 +168,7 @@ class MILPsolverCPLEX:
             sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
             arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
             arcsOpen = self.model.solution.get_value_dict(self.arcOpenedVars)
-            thisSolution = Solution(self.network, self.minTargetFlow, objValue, srcFlows, sinkFlows, arcFlows,
+            thisSolution = Solution(self.network, self.minTargetFlow, objValue, objValue, srcFlows, sinkFlows, arcFlows,
                                     arcsOpen, "cplex_milp", self.isOneArcPerEdge, self.isSrcSinkConstrained,
                                     self.isSrcSinkCharged, optionalDescription=str(self.model.get_solve_details()))
             print("Solution built!")

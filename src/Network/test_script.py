@@ -15,7 +15,7 @@ visualizer = NetworkVisualizer(flowNetwork, directed=True)
 # visualizer.drawBidirectionalGraphWithSmoothedLabeledEdges()
 
 # Solver Test
-solver = MILPsolverCPLEX(flowNetwork, 95, isOneArcPerEdge=True)
+solver = MILPsolverCPLEX(flowNetwork, 82, isOneArcPerEdge=True)
 solver.buildModel()
 solver.solveModel()
 solver.printAllSolverData()

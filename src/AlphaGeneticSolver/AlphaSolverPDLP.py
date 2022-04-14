@@ -19,6 +19,7 @@ class AlphaSolverPDLP:
         self.solver = pywraplp.Solver.CreateSolver("PDLP")
         self.status = None
         self.isRun = False
+        self.trueCost = 0.0
         # Pre-build Model
         self.prebuildVariablesAndConstraints()
 
@@ -120,20 +121,15 @@ class AlphaSolverPDLP:
 
     def updateObjectiveFunction(self, alphaValues: ndarray) -> None:
         """Updates the objective function based on the input alpha values"""
-        objectiveFunc = self.solver.Objective()
-        objectiveFunc.Clear()  # Clear any existing objective before overwriting
+        # Clear any existing objective function
+        self.solver.Objective().Clear()
+        # Write new objective function
         if self.network.isSourceSinkCharged is True:
             self.solver.Minimize(
                 sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) * (
-                        self.network.arcsMatrix[self.network.arcsDict[(self.network.edgesArray[i][0],
-                                                                       self.network.edgesArray[i][1],
-                                                                       self.network.possibleArcCapsArray[
-                                                                           j])].numID][6] +
-                        self.network.arcsMatrix[self.network.arcsDict[(self.network.edgesArray[i][0],
-                                                                       self.network.edgesArray[i][1],
-                                                                       self.network.possibleArcCapsArray[
-                                                                           j])].numID][5] * alphaValues[i][j]) for i
-                    in range(self.network.numEdges)
+                        self.network.getArcVariableCostFromEdgeCapIndices(i, j) +
+                        self.network.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j]) for i in
+                    range(self.network.numEdges)
                     for j in range(self.network.numArcCaps)) + sum(
                     self.solver.LookupVariable("s_" + str(s)) * self.network.sourceVariableCostsArray[s]
                     for s in range(self.network.numSources)) + sum(
@@ -142,14 +138,8 @@ class AlphaSolverPDLP:
         elif self.network.isSourceSinkCharged is False:
             self.solver.Minimize(
                 sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) * (
-                        self.network.arcsMatrix[self.network.arcsDict[(self.network.edgesArray[i][0],
-                                                                       self.network.edgesArray[i][1],
-                                                                       self.network.possibleArcCapsArray[
-                                                                           j])].numID][6] +
-                        self.network.arcsMatrix[self.network.arcsDict[(self.network.edgesArray[i][0],
-                                                                       self.network.edgesArray[i][1],
-                                                                       self.network.possibleArcCapsArray[
-                                                                           j])].numID][5] * alphaValues[i][j]) for i
+                        self.network.getArcVariableCostFromEdgeCapIndices(i, j) +
+                        self.network.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j]) for i
                     in range(self.network.numEdges)
                     for j in range(self.network.numArcCaps)))
 
@@ -167,35 +157,76 @@ class AlphaSolverPDLP:
         elif self.status == pywraplp.Solver.OPTIMAL:
             print("Building solution...")
             objValue = self.solver.Objective().Value()
-            srcFlows = []
-            for s in range(self.network.numSources):
-                srcFlows.append(self.solver.LookupVariable("s_" + str(s)).SolutionValue())
-            sinkFlows = []
-            for t in range(self.network.numSinks):
-                sinkFlows.append(self.solver.LookupVariable("t_" + str(t)).SolutionValue())
-            arcFlows = {}
-            arcsOpen = {}
-            for edge in range(self.network.numEdges):
-                for cap in range(self.network.numArcCaps):
-                    thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
-                    arcFlows[(edge, cap)] = thisFlow
-                    if thisFlow > 0:
-                        arcsOpen[(edge, cap)] = 1
-                    else:
-                        arcsOpen[(edge, cap)] = 0
-            thisSolution = Solution(self.network, self.minTargetFlow, objValue, srcFlows, sinkFlows, arcFlows,
+            srcFlows = self.getSrcFlowsList()
+            sinkFlows = self.getSinkFlowsList()
+            arcFlows = self.getArcFlowsDict()
+            arcsOpen = self.getArcsOpenDict()
+            self.trueCost = self.calculateTrueCost(srcFlows, sinkFlows, arcFlows, arcsOpen)
+            thisSolution = Solution(self.network, self.minTargetFlow, objValue, self.trueCost, srcFlows, sinkFlows,
+                                    arcFlows,
                                     arcsOpen, "gor_PDLP", False, self.isSrcSinkConstrained, self.isSrcSinkCharged)
             print("Solution built!")
             return thisSolution
         else:
             print("No feasible solution exists!")
 
+    def calculateTrueCost(self, srcFlows: list, sinkFlows: list, arcFlows: dict, arcsOpen: dict) -> float:
+        """Calculates the true cost of the alpha-relaxed LP's output with the true discrete FCNF objective function"""
+        trueCost = 0.0
+        if self.isSrcSinkCharged is True:
+            for s in range(self.network.numSources):
+                trueCost += self.network.sourceVariableCostsArray * srcFlows[s]
+            for t in range(self.network.numSinks):
+                trueCost += self.network.sinkVariableCostsArray * sinkFlows[t]
+        for edge in range(self.network.numEdges):
+            for cap in range(self.network.numArcCaps):
+                if arcsOpen[(edge, cap)] == 1:
+                    arcVariableCost = self.network.getArcVariableCostFromEdgeCapIndices(edge, cap)
+                    arcFixedCost = self.network.getArcFixedCostFromEdgeCapIndices(edge, cap)
+                    trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
+        return float(trueCost)  # Cast to float because return type was nd-array for some reason
+
+    def getArcFlowsDict(self) -> dict:
+        """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""
+        arcFlows = {}
+        for edge in range(self.network.numEdges):
+            for cap in range(self.network.numArcCaps):
+                thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
+                arcFlows[(edge, cap)] = thisFlow
+        return arcFlows
+
+    def getArcsOpenDict(self) -> dict:
+        """Returns the dictionary of arcs opened with key (edgeIndex, capIndex)"""
+        arcsOpen = {}
+        for edge in range(self.network.numEdges):
+            for cap in range(self.network.numArcCaps):
+                thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
+                if thisFlow > 0:
+                    arcsOpen[(edge, cap)] = 1
+                else:
+                    arcsOpen[(edge, cap)] = 0
+        return arcsOpen
+
+    def getSrcFlowsList(self) -> list:
+        """Returns the list of source flows"""
+        srcFlows = []
+        for s in range(self.network.numSources):
+            srcFlows.append(self.solver.LookupVariable("s_" + str(s)).SolutionValue())
+        return srcFlows
+
+    def getSinkFlowsList(self) -> list:
+        """Returns the list of sink flows"""
+        sinkFlows = []
+        for t in range(self.network.numSinks):
+            sinkFlows.append(self.solver.LookupVariable("t_" + str(t)).SolutionValue())
+        return sinkFlows
+
     def printSolverOverview(self) -> None:
         """Prints the most important and concise details of the solver, model and solution"""
         if self.status == pywraplp.Solver.OPTIMAL:
             print("Solution:")
-            print("Number of Variables = ", self.solver.NumVariables())
-            print("Number of Constraints = ", self.solver.NumConstraints())
-            print("Objective value = ", self.solver.Objective().Value())
-            # TODO - KEEP IN MIND THAT THIS IS THE ALPHA FAKE COST!
-            print("Solved by= Google OR's PDLP Gradient Descent Solver\n")
+            print("Number of Variables = " + str(self.solver.NumVariables()))
+            print("Number of Constraints = " + str(self.solver.NumConstraints()))
+            print("Objective Value of Relaxed LP (i.e. Fake Cost) = " + str(round(self.solver.Objective().Value(), 1)))
+            print("Objective Value  if FCNF (i.e. True Cost) = " + str(round(self.trueCost, 1)))
+            print("Solved by: Google OR's PDLP Gradient Descent Solver\n")

@@ -17,7 +17,7 @@ class FlowNetwork:
     # ============== CONSTRUCTOR ==============
     # =========================================
     def __init__(self):
-        """Constructor of a FCNF instance"""
+        """Constructor of a Flow Network instance"""
         self.name = ""
         # Node Attributes
         self.numTotalNodes = 0
@@ -167,6 +167,18 @@ class FlowNetwork:
         """Returns the arc's variable cost"""
         arc = self.arcsDict[arcID]
         return arc.variableCost
+
+    def getArcFixedCostFromEdgeCapIndices(self, edgeIndex: int, capIndex: int) -> float:
+        """Gets the arc fixed cost from the edge index and the capacity index"""
+        arcFixedCost = self.arcsMatrix[self.arcsDict[(self.edgesArray[edgeIndex][0], self.edgesArray[edgeIndex][1],
+                                                      self.possibleArcCapsArray[capIndex])].numID][5]
+        return arcFixedCost
+
+    def getArcVariableCostFromEdgeCapIndices(self, edgeIndex: int, capIndex: int) -> float:
+        """Gets the arc variable cost from the edge index and the capacity index"""
+        arcVariableCost = self.arcsMatrix[self.arcsDict[(self.edgesArray[edgeIndex][0], self.edgesArray[edgeIndex][1],
+                                                         self.possibleArcCapsArray[capIndex])].numID][6]
+        return arcVariableCost
 
     # ===============================================================
     # ============== NODE GETTER/SETTER/HELPER METHODS ==============

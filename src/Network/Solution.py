@@ -7,21 +7,23 @@ from src.Network.FlowNetwork import FlowNetwork
 class Solution:
     """Class that stores the solution to an FCFN instance"""
 
-    def __init__(self, network: FlowNetwork, minTargetFlow: int, objectiveValue: float, sourceFlows: list,
-                 sinkFlows: list, arcFlows: dict, arcsOpened: dict, solvedBy: str, isOneArcPerEdge: bool,
-                 isSrcSinkConstrained: bool, isSrcSinkCharged: bool, optionalDescription=""):
+    def __init__(self, network: FlowNetwork, minTargetFlow: int, objectiveValue: float, trueCost: float,
+                 sourceFlows: list, sinkFlows: list, arcFlows: dict, arcsOpened: dict, solvedBy: str,
+                 isOneArcPerEdge: bool, isSrcSinkConstrained: bool, isSrcSinkCharged: bool, optionalDescription=""):
         """Constructor of a MILP-Solver instance"""
         # Input attributes
         self.network = network
         self.minTargetFlow = minTargetFlow
         # Solution Attributes
         self.objectiveValue = objectiveValue
+        self.trueCost = trueCost
         self.sourceFlows = sourceFlows
         self.sinkFlows = sinkFlows
         self.arcFlows = arcFlows
         self.arcsOpened = arcsOpened
         # Metadata/Conditions/Generalizations
-        self.name = "Soln-" + self.network.name + "_" + str(self.minTargetFlow) + "_" + solvedBy
+        self.name = "sol-" + self.network.name + "_" + str(self.minTargetFlow) + "_" + str(
+            int(self.trueCost)) + solvedBy
         self.solvedBy = solvedBy
         self.isOneArcPerEdge = isOneArcPerEdge
         self.isSrcSinkConstrained = isSrcSinkConstrained

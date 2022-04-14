@@ -11,7 +11,7 @@ network = FlowNetwork()
 network = network.loadNetwork("test-6-1-1.p")
 netVis = NetworkVisualizer(network, directed=True)
 netVis.drawBidirectionalGraphWithSmoothedLabeledEdges()
-solver = AlphaSolverPDLP(network, 86)
+solver = AlphaSolverPDLP(network, 5)
 random.seed()
 alphaList = []
 for e in range(network.numEdges):
@@ -22,7 +22,7 @@ for e in range(network.numEdges):
 alphas = np.array(alphaList)
 solver.updateObjectiveFunction(alphas)
 solver.solveModel()
-solver.printSolverOverview()
 solution = solver.writeSolution()
+solver.printSolverOverview()
 solVis = SolutionVisualizer(solution)
 solVis.drawGraphWithLabels()
