@@ -8,7 +8,7 @@ from src.Network.Solution import Solution
 class AlphaSolverPDLP:
     """Class that solves an alpha-relaxed instance approximately via a PDLP gradient descent solver from Google"""
 
-    def __init__(self, network: FlowNetwork, minTargetFlow: int, isSrcSinkConstrained=True, isSrcSinkCharged=True):
+    def __init__(self, network: FlowNetwork, minTargetFlow: float, isSrcSinkConstrained=True, isSrcSinkCharged=True):
         """Constructor of a AlphaSolverPDLP instance"""
         # Input attributes
         self.network = network
@@ -52,9 +52,9 @@ class AlphaSolverPDLP:
         """
         if self.isOneArcPerEdge is True:
             for i in range(self.network.numEdges):
-                ctName = "e_" + str(i) + "_OneArcPerEdge"
+                name = "e_" + str(i) + "_OneArcPerEdge"
                 self.model.add_constraint(sum(self.arcOpenedVars[(i, j)] for j in range(self.network.numArcCaps)) <= 1,
-                                          ctname=ctName)
+                                          name)
         """
 
         # Capacity constraints of sources
@@ -161,7 +161,7 @@ class AlphaSolverPDLP:
             sinkFlows = self.getSinkFlowsList()
             arcFlows = self.getArcFlowsDict()
             arcsOpen = self.getArcsOpenDict()
-            self.trueCost = self.calculateTrueCost(srcFlows, sinkFlows, arcFlows, arcsOpen)
+            self.trueCost = self.calculateTrueCost()
             thisSolution = Solution(self.network, self.minTargetFlow, objValue, self.trueCost, srcFlows, sinkFlows,
                                     arcFlows,
                                     arcsOpen, "gor_PDLP", False, self.isSrcSinkConstrained, self.isSrcSinkCharged)
@@ -170,21 +170,35 @@ class AlphaSolverPDLP:
         else:
             print("No feasible solution exists!")
 
-    def calculateTrueCost(self, srcFlows: list, sinkFlows: list, arcFlows: dict, arcsOpen: dict) -> float:
+    def resetSolver(self) -> None:
+        """Resets all the output data structures of the solver (but model variables and constraints remain)"""
+        self.status = None
+        self.isRun = False
+        self.trueCost = 0.0
+
+    def calculateTrueCost(self) -> float:
         """Calculates the true cost of the alpha-relaxed LP's output with the true discrete FCNF objective function"""
+        srcFlows = self.getSrcFlowsList()
+        sinkFlows = self.getSinkFlowsList()
+        arcFlows = self.getArcFlowsDict()
+        arcsOpen = self.getArcsOpenDict()
         trueCost = 0.0
         if self.isSrcSinkCharged is True:
             for s in range(self.network.numSources):
-                trueCost += self.network.sourceVariableCostsArray * srcFlows[s]
+                trueCost += self.network.sourceVariableCostsArray[s] * srcFlows[s]
             for t in range(self.network.numSinks):
-                trueCost += self.network.sinkVariableCostsArray * sinkFlows[t]
+                trueCost += self.network.sinkVariableCostsArray[t] * sinkFlows[t]
         for edge in range(self.network.numEdges):
             for cap in range(self.network.numArcCaps):
                 if arcsOpen[(edge, cap)] == 1:
                     arcVariableCost = self.network.getArcVariableCostFromEdgeCapIndices(edge, cap)
                     arcFixedCost = self.network.getArcFixedCostFromEdgeCapIndices(edge, cap)
                     trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
-        return float(trueCost)  # Cast to float because return type was nd-array for some reason
+        return trueCost
+
+    def getObjectiveValue(self) -> float:
+        """Returns the objective value (i.e. fake cost) of the alpha-relaxed LP solver"""
+        return self.solver.Objective().Value()
 
     def getArcFlowsDict(self) -> dict:
         """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""

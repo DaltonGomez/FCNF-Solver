@@ -2,7 +2,6 @@ import os
 import random
 
 import networkx as nx
-
 from src.OLD.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 

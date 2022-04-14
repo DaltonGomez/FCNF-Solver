@@ -66,9 +66,9 @@ class SolutionVisualizer:
                 self.netVis.add_edge(int(edge[0]), int(edge[1]), color="rgba(155, 155, 155, 0.35)", value=flow)
                 self.netVis.add_edge(int(edge[1]), int(edge[0]), color="rgba(155, 155, 155, 0.35)", value=backFlow)
 
-    def drawGraphWithLabels(self) -> None:
+    def drawGraphWithLabels(self, leadingText="") -> None:
         """Displays the Solution using PyVis and a set of hardcoded options"""
-        displayName = self.solution.name + ".html"
+        displayName = leadingText + self.solution.name + ".html"
         print("Drawing " + displayName + "...")
         # Sets visualization options using a JSON format (see vis.js documentation)
         self.netVis.set_options("""
@@ -165,7 +165,7 @@ class SolutionVisualizer:
                     """)
         self.netVis.show(displayName)
 
-    def drawUnlabeledGraph(self) -> None:
+    def drawUnlabeledGraph(self, leadingText="") -> None:
         """Displays the Solution using PyVis and a set of hardcoded options"""
         displayName = self.solution.name + ".html"
         print("Drawing " + displayName + "...")

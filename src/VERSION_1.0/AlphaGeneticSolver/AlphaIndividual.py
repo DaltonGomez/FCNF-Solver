@@ -1,7 +1,6 @@
 import random
 
 import numpy as np
-
 from src.OLD.AlphaGeneticSolver.AlphaPath import AlphaPath
 from src.OLD.AlphaGeneticSolver.AlphaVisualizer import AlphaVisualizer
 

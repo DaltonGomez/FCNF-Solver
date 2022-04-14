@@ -7,7 +7,7 @@ from src.Network.FlowNetwork import FlowNetwork
 class Solution:
     """Class that stores the solution to an FCFN instance"""
 
-    def __init__(self, network: FlowNetwork, minTargetFlow: int, objectiveValue: float, trueCost: float,
+    def __init__(self, network: FlowNetwork, minTargetFlow: float, objectiveValue: float, trueCost: float,
                  sourceFlows: list, sinkFlows: list, arcFlows: dict, arcsOpened: dict, solvedBy: str,
                  isOneArcPerEdge: bool, isSrcSinkConstrained: bool, isSrcSinkCharged: bool, optionalDescription=""):
         """Constructor of a MILP-Solver instance"""
@@ -22,7 +22,7 @@ class Solution:
         self.arcFlows = arcFlows
         self.arcsOpened = arcsOpened
         # Metadata/Conditions/Generalizations
-        self.name = "sol-" + self.network.name + "_" + str(self.minTargetFlow) + "_" + str(
+        self.name = "sol-" + self.network.name + "_" + str(int(self.minTargetFlow)) + "_" + str(
             int(self.trueCost)) + solvedBy
         self.solvedBy = solvedBy
         self.isOneArcPerEdge = isOneArcPerEdge
