@@ -14,18 +14,18 @@ class GraphMaker:
     def __init__(self, name: str, numNodes: int, numSources: int, numSinks: int):
         """Constructor of a GraphGenerator instance"""
         # Hyperparameters For Network Generation/Computing Pseudo-Random Costs
-        self.embeddingSize = 100
+        self.embeddingSize = 100.0
         self.possibleArcCaps = [10, 50, 100]
-        self.distFixCostScale = 10
-        self.capFixCostScale = 10
+        self.distFixCostScale = 10.0
+        self.capFixCostScale = 10.0
         self.fixCostRandomScalar = [0.80, 1.20]
-        self.distVariableCostScale = 3
-        self.capVariableCostScale = 3
+        self.distVariableCostScale = 3.0
+        self.capVariableCostScale = 3.0
         self.variableCostRandomScalar = [0.80, 1.20]
         self.isSourceSinkCapacitated = True
-        self.sourceSinkCapacityRange = [100, 300]
+        self.sourceSinkCapacityRange = [100.0, 300.0]
         self.isSourceSinkCharged = True
-        self.sourceSinkChargeRange = [200, 300]
+        self.sourceSinkChargeRange = [200.0, 300.0]
 
         # Output Network To Be Built
         self.newNetwork = FlowNetwork()
@@ -46,10 +46,10 @@ class GraphMaker:
         self.assignSourceSinkCapAndCharge()
         return self.newNetwork
 
-    def setCostDeterminingHyperparameters(self, embeddingSize: float, possibleArcCaps: List[int],
-                                          distFixCostScale: float, capFixCostScale: float, fixCostRandomScalar: list,
-                                          distVariableCostScale: float, capVariableCostScale: float,
-                                          variableCostRandomScalar: list) -> None:
+    def setCostDeterminingHyperparameters(self, embeddingSize=100.0, possibleArcCaps=(10, 50, 100),
+                                          distFixCostScale=10.0, capFixCostScale=10.0, fixCostRandomScalar=(0.80, 1.20),
+                                          distVariableCostScale=3.0, capVariableCostScale=3.0,
+                                          variableCostRandomScalar=(0.80, 1.20)) -> None:
         """Allows the hyperparameters that calculate the pseudorandom cost to be tuned"""
         self.embeddingSize = embeddingSize
         self.possibleArcCaps = possibleArcCaps
@@ -60,8 +60,8 @@ class GraphMaker:
         self.capVariableCostScale = capVariableCostScale
         self.variableCostRandomScalar = variableCostRandomScalar
 
-    def setSourceSinkGeneralizations(self, isCapacitated: bool, capacityRange: list, isCharged: bool,
-                                     chargeRange: list) -> None:
+    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(100.0, 300.0),
+                                     chargeRange=(200.0, 300.0)) -> None:
         """Allows the capacitated/charged source sink generalizes to be turned on and tuned"""
         self.isSourceSinkCapacitated = isCapacitated
         self.sourceSinkCapacityRange = capacityRange

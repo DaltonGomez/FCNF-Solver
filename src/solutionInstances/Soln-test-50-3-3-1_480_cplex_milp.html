@@ -1,0 +1,1972 @@
+<html>
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js" type="text/javascript"></script>
+    <center>
+        <h1></h1>
+    </center>
+
+    <!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+    <script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+    <style type="text/css">
+
+        #mynetwork {
+            width: 500px;
+            height: 500px;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+<div id="mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network;
+    var container;
+    var options, data;
+
+
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{
+            "color": "blue",
+            "id": 25,
+            "label": 25,
+            "shape": "dot",
+            "value": 20.527666485478562,
+            "x": 232,
+            "y": 85
+        }, {
+            "color": "blue",
+            "id": 10,
+            "label": 10,
+            "shape": "dot",
+            "value": 282.6336918173249,
+            "x": 20,
+            "y": 713
+        }, {
+            "color": "blue",
+            "id": 4,
+            "label": 4,
+            "shape": "dot",
+            "value": 176.8386416971965,
+            "x": 572,
+            "y": 436
+        }, {"color": "red", "id": 12, "label": 12, "shape": "dot", "value": 100.0, "x": 735, "y": 153}, {
+            "color": "red",
+            "id": 16,
+            "label": 16,
+            "shape": "dot",
+            "value": 136.86812190082102,
+            "x": 255,
+            "y": 502
+        }, {
+            "color": "red",
+            "id": 49,
+            "label": 49,
+            "shape": "dot",
+            "value": 243.13187809917895,
+            "x": 326,
+            "y": 713
+        }, {"color": "grey", "id": 0, "label": 0, "shape": "dot", "value": 0, "x": 128, "y": 36}, {
+            "color": "grey",
+            "id": 1,
+            "label": 1,
+            "shape": "dot",
+            "value": 0,
+            "x": 351,
+            "y": 402
+        }, {"color": "grey", "id": 2, "label": 2, "shape": "dot", "value": 0, "x": 2, "y": 69}, {
+            "color": "grey",
+            "id": 3,
+            "label": 3,
+            "shape": "dot",
+            "value": 0,
+            "x": 340,
+            "y": 146
+        }, {"color": "grey", "id": 5, "label": 5, "shape": "dot", "value": 0, "x": 595, "y": 544}, {
+            "color": "grey",
+            "id": 6,
+            "label": 6,
+            "shape": "dot",
+            "value": 0,
+            "x": 756,
+            "y": 603
+        }, {"color": "grey", "id": 7, "label": 7, "shape": "dot", "value": 0, "x": 277, "y": 41}, {
+            "color": "black",
+            "id": 8,
+            "label": 8,
+            "shape": "dot",
+            "value": 43.13187809917895,
+            "x": 533,
+            "y": 541
+        }, {"color": "grey", "id": 9, "label": 9, "shape": "dot", "value": 0, "x": 765, "y": 457}, {
+            "color": "grey",
+            "id": 11,
+            "label": 11,
+            "shape": "dot",
+            "value": 0,
+            "x": 509,
+            "y": 52
+        }, {
+            "color": "black",
+            "id": 13,
+            "label": 13,
+            "shape": "dot",
+            "value": 20.527666485478562,
+            "x": 233,
+            "y": 218
+        }, {
+            "color": "black",
+            "id": 14,
+            "label": 14,
+            "shape": "dot",
+            "value": 100.0,
+            "x": 216,
+            "y": 799
+        }, {"color": "grey", "id": 15, "label": 15, "shape": "dot", "value": 0, "x": 587, "y": 196}, {
+            "color": "grey",
+            "id": 17,
+            "label": 17,
+            "shape": "dot",
+            "value": 0,
+            "x": 503,
+            "y": 326
+        }, {"color": "grey", "id": 18, "label": 18, "shape": "dot", "value": 0, "x": 533, "y": 744}, {
+            "color": "grey",
+            "id": 19,
+            "label": 19,
+            "shape": "dot",
+            "value": 0,
+            "x": 549,
+            "y": 557
+        }, {
+            "color": "black",
+            "id": 20,
+            "label": 20,
+            "shape": "dot",
+            "value": 82.63369181732492,
+            "x": 137,
+            "y": 523
+        }, {
+            "color": "black",
+            "id": 21,
+            "label": 21,
+            "shape": "dot",
+            "value": 43.13187809917895,
+            "x": 429,
+            "y": 590
+        }, {"color": "grey", "id": 22, "label": 22, "shape": "dot", "value": 0, "x": 760, "y": 772}, {
+            "color": "grey",
+            "id": 23,
+            "label": 23,
+            "shape": "dot",
+            "value": 0,
+            "x": 371,
+            "y": 769
+        }, {
+            "color": "black",
+            "id": 24,
+            "label": 24,
+            "shape": "dot",
+            "value": 20.527666485478562,
+            "x": 206,
+            "y": 173
+        }, {"color": "grey", "id": 26, "label": 26, "shape": "dot", "value": 0, "x": 681, "y": 529}, {
+            "color": "grey",
+            "id": 27,
+            "label": 27,
+            "shape": "dot",
+            "value": 0,
+            "x": 557,
+            "y": 556
+        }, {"color": "grey", "id": 28, "label": 28, "shape": "dot", "value": 0, "x": 773, "y": 509}, {
+            "color": "grey",
+            "id": 29,
+            "label": 29,
+            "shape": "dot",
+            "value": 0,
+            "x": 480,
+            "y": 279
+        }, {"color": "grey", "id": 30, "label": 30, "shape": "dot", "value": 0, "x": 509, "y": 188}, {
+            "color": "grey",
+            "id": 31,
+            "label": 31,
+            "shape": "dot",
+            "value": 0,
+            "x": 222,
+            "y": 578
+        }, {"color": "grey", "id": 32, "label": 32, "shape": "dot", "value": 0, "x": 603, "y": 100}, {
+            "color": "grey",
+            "id": 33,
+            "label": 33,
+            "shape": "dot",
+            "value": 0,
+            "x": 641,
+            "y": 583
+        }, {"color": "grey", "id": 34, "label": 34, "shape": "dot", "value": 0, "x": 169, "y": 396}, {
+            "color": "black",
+            "id": 35,
+            "label": 35,
+            "shape": "dot",
+            "value": 100.0,
+            "x": 740,
+            "y": 263
+        }, {"color": "grey", "id": 36, "label": 36, "shape": "dot", "value": 0, "x": 462, "y": 335}, {
+            "color": "grey",
+            "id": 37,
+            "label": 37,
+            "shape": "dot",
+            "value": 0,
+            "x": 455,
+            "y": 45
+        }, {"color": "grey", "id": 38, "label": 38, "shape": "dot", "value": 0, "x": 123, "y": 209}, {
+            "color": "black",
+            "id": 39,
+            "label": 39,
+            "shape": "dot",
+            "value": 33.706763598017545,
+            "x": 412,
+            "y": 459
+        }, {
+            "color": "black",
+            "id": 40,
+            "label": 40,
+            "shape": "dot",
+            "value": 100.0,
+            "x": 158,
+            "y": 641
+        }, {
+            "color": "black",
+            "id": 41,
+            "label": 41,
+            "shape": "dot",
+            "value": 20.527666485478562,
+            "x": 240,
+            "y": 375
+        }, {"color": "grey", "id": 42, "label": 42, "shape": "dot", "value": 0, "x": 277, "y": 376}, {
+            "color": "black",
+            "id": 43,
+            "label": 43,
+            "shape": "dot",
+            "value": 82.63369181732492,
+            "x": 72,
+            "y": 513
+        }, {"color": "grey", "id": 44, "label": 44, "shape": "dot", "value": 0, "x": 354, "y": 394}, {
+            "color": "black",
+            "id": 45,
+            "label": 45,
+            "shape": "dot",
+            "value": 100.0,
+            "x": 579,
+            "y": 407
+        }, {"color": "grey", "id": 46, "label": 46, "shape": "dot", "value": 0, "x": 497, "y": 233}, {
+            "color": "grey",
+            "id": 47,
+            "label": 47,
+            "shape": "dot",
+            "value": 0,
+            "x": 202,
+            "y": 197
+        }, {"color": "black", "id": 48, "label": 48, "shape": "dot", "value": 33.706763598017545, "x": 357, "y": 466}]);
+        edges = new vis.DataSet([{"arrows": "to", "color": "grey", "from": 49, "to": 23, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 23,
+            "to": 49,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 20,
+            "label": 82.63369181732492,
+            "to": 16,
+            "value": 82.63369181732492
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 36, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 36,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 16, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 16,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 15, "to": 30, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 30,
+            "to": 15,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 48, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 48,
+            "to": 42,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 10,
+            "label": 82.63369181732492,
+            "to": 43,
+            "value": 82.63369181732492
+        }, {"arrows": "to", "color": "grey", "from": 13, "to": 42, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 42,
+            "to": 13,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 46, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 46,
+            "to": 30,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 3, "to": 13, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 13,
+            "to": 3,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 28, "to": 12, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 12,
+            "to": 28,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 14, "to": 22, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 22,
+            "to": 14,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 19, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 19,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 32, "to": 12, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 12,
+            "to": 32,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 9, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 9,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 14, "to": 40, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 40,
+            "to": 14,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 26, "to": 5, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 5,
+            "to": 26,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 4,
+            "label": 33.706763598017545,
+            "to": 39,
+            "value": 33.706763598017545
+        }, {"arrows": "to", "color": "grey", "from": 9, "to": 35, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 35,
+            "to": 9,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 14, "label": 100.0, "to": 49, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 32,
+            "to": 30,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 32, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 44,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 44, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 41,
+            "to": 42,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 41, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 42,
+            "to": 41,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 41, "to": 42, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 19,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 19, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 8,
+            "to": 39,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 39, "to": 8, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 15,
+            "to": 32,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 32, "to": 15, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 16,
+            "to": 31,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 31, "to": 16, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 13,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 13, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 1,
+            "to": 42,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 1, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 7,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 7, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 20,
+            "to": 31,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 31, "to": 20, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 22,
+            "to": 28,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 28, "to": 22, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 39,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 39, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 30,
+            "to": 11,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 11, "to": 30, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 40,
+            "to": 43,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 43, "to": 40, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 31,
+            "to": 40,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 40, "to": 31, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 7,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 7, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 21,
+            "to": 39,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 39, "to": 21, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 24,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 24, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 48,
+            "to": 1,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 1, "to": 48, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 38,
+            "to": 0,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 0, "to": 38, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 31,
+            "to": 49,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 49, "to": 31, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 21,
+            "to": 48,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 48, "to": 21, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 44,
+            "to": 13,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 13, "to": 44, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 20,
+            "to": 40,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 40, "to": 20, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 9,
+            "to": 28,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 28, "to": 9, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 22,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 22, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 7,
+            "to": 3,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 3, "to": 7, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 11,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 11, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 1,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 1, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 2,
+            "to": 43,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 43, "to": 2, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 16,
+            "to": 42,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 16, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 27,
+            "to": 8,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 8, "to": 27, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 4,
+            "label": 43.13187809917895,
+            "to": 8,
+            "value": 43.13187809917895
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 36, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 36,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 9, "to": 12, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 12,
+            "to": 9,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 15, "to": 46, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 46,
+            "to": 15,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 33, "to": 6, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 6,
+            "to": 33,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 13, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 13,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 2, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 2,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 24, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 24,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 36, "to": 4, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 4,
+            "to": 36,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 3, "to": 44, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 44,
+            "to": 3,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 26, "to": 9, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 9,
+            "to": 26,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 35, "label": 100.0, "to": 12, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 43,
+            "to": 34,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 34, "to": 43, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 46,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 46, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 10,
+            "label": 100.0,
+            "to": 40,
+            "value": 100.0
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 42, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 42,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 39, "to": 21, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 21,
+            "to": 39,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 18, "to": 23, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 23,
+            "to": 18,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 40, "to": 20, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 20,
+            "to": 40,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 34, "to": 16, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 16,
+            "to": 34,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 22, "to": 14, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 14,
+            "to": 22,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 47, "to": 13, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 13,
+            "to": 47,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 10, "label": 100.0, "to": 14, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 28,
+            "to": 9,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 9, "to": 28, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 48,
+            "to": 42,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 48, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 22,
+            "to": 23,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 23, "to": 22, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 23,
+            "to": 22,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 22, "to": 23, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 2,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 2, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 37,
+            "to": 30,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 37, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 4,
+            "to": 36,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 36, "to": 4, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 23,
+            "to": 49,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 49, "to": 23, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 4,
+            "label": 100.0,
+            "to": 45,
+            "value": 100.0
+        }, {"arrows": "to", "color": "grey", "from": 8, "to": 27, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 27,
+            "to": 8,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 33, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 33,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 19, "to": 27, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 27,
+            "to": 19,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 11, "to": 32, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 32,
+            "to": 11,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 46, "to": 29, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 29,
+            "to": 46,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 1, "to": 39, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 39,
+            "to": 1,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 45, "to": 9, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 9,
+            "to": 45,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 2, "to": 38, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 38,
+            "to": 2,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 34, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 34,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 40, "to": 31, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 31,
+            "to": 40,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 12, "to": 15, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 15,
+            "to": 12,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 43, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 43,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 43, "to": 2, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 2,
+            "to": 43,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 1, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 1,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 40, "label": 100.0, "to": 49, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 30,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 32,
+            "to": 11,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 11, "to": 32, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 42,
+            "to": 13,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 13, "to": 42, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 4,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 4, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 43,
+            "label": 82.63369181732492,
+            "to": 20,
+            "value": 82.63369181732492
+        }, {"arrows": "to", "color": "grey", "from": 7, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 7,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 27, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 27,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 25,
+            "label": 20.527666485478562,
+            "to": 24,
+            "value": 20.527666485478562
+        }, {"arrows": "to", "color": "grey", "from": 0, "to": 25, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 25,
+            "to": 0,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 25,
+            "label": 20.527666485478562,
+            "to": 24,
+            "value": 20.527666485478562
+        }, {"arrows": "to", "color": "grey", "from": 16, "to": 21, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 21,
+            "to": 16,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 35, "to": 15, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 15,
+            "to": 35,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 6, "to": 22, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 22,
+            "to": 6,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 31, "to": 21, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 21,
+            "to": 31,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 22, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 22,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 7, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 7,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 17, "to": 4, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 4,
+            "to": 17,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 15, "to": 12, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 12,
+            "to": 15,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 14, "to": 23, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 23,
+            "to": 14,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 24, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 24,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 41,
+            "label": 20.527666485478562,
+            "to": 16,
+            "value": 20.527666485478562
+        }, {"arrows": "to", "color": "black", "from": 35, "label": 100.0, "to": 12, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 36,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 36, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 35,
+            "to": 9,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 9, "to": 35, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 6,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 6, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 34,
+            "to": 41,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 41, "to": 34, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 47,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 47, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 46,
+            "to": 15,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 15, "to": 46, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 48,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 48, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 4,
+            "label": 100.0,
+            "to": 45,
+            "value": 100.0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 3, "to": 7, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 7,
+            "to": 3,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 5, "to": 4, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 4,
+            "to": 5,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 39,
+            "label": 33.706763598017545,
+            "to": 48,
+            "value": 33.706763598017545
+        }, {"arrows": "to", "color": "grey", "from": 6, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 6,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 31, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 31,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 47, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 47,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 3, "to": 25, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 25,
+            "to": 3,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 26, "to": 45, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 45,
+            "to": 26,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 12, "to": 28, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 28,
+            "to": 12,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 44, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 44,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 33, "to": 5, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 5,
+            "to": 33,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 27, "to": 19, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 19,
+            "to": 27,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 15, "to": 45, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 45,
+            "to": 15,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 21,
+            "label": 43.13187809917895,
+            "to": 49,
+            "value": 43.13187809917895
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 39,
+            "label": 33.706763598017545,
+            "to": 48,
+            "value": 33.706763598017545
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 15, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 15,
+            "to": 30,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 34, "to": 43, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 43,
+            "to": 34,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 17, "to": 36, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 36,
+            "to": 17,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 46, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 46,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 3, "to": 46, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 46,
+            "to": 3,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 13, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 13,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 10, "label": 100.0, "to": 40, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 45,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 45, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 31,
+            "to": 16,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 16, "to": 31, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 20,
+            "label": 82.63369181732492,
+            "to": 16,
+            "value": 82.63369181732492
+        }, {"arrows": "to", "color": "grey", "from": 49, "to": 31, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 31,
+            "to": 49,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 6, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 6,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 37, "to": 11, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 11,
+            "to": 37,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 7, "to": 25, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 25,
+            "to": 7,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 13,
+            "label": 20.527666485478562,
+            "to": 41,
+            "value": 20.527666485478562
+        }, {"arrows": "to", "color": "black", "from": 40, "label": 100.0, "to": 49, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 23,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 23, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 4,
+            "label": 43.13187809917895,
+            "to": 8,
+            "value": 43.13187809917895
+        }, {"arrows": "to", "color": "grey", "from": 4, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 4,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 1, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 1,
+            "to": 42,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 1, "to": 48, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 48,
+            "to": 1,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 4, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 4,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 19, "to": 8, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 8,
+            "to": 19,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 47, "to": 24, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 24,
+            "to": 47,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 25, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 25,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 10, "label": 100.0, "to": 14, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 2,
+            "to": 10,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 10, "to": 2, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 5,
+            "to": 27,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 27, "to": 5, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 4,
+            "label": 33.706763598017545,
+            "to": 39,
+            "value": 33.706763598017545
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 29,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 48,
+            "label": 33.706763598017545,
+            "to": 16,
+            "value": 33.706763598017545
+        }, {"arrows": "to", "color": "grey", "from": 22, "to": 6, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 6,
+            "to": 22,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 8,
+            "label": 43.13187809917895,
+            "to": 21,
+            "value": 43.13187809917895
+        }, {"arrows": "to", "color": "grey", "from": 38, "to": 24, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 24,
+            "to": 38,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 43, "to": 38, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 38,
+            "to": 43,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 13, "to": 34, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 34,
+            "to": 13,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 23, "to": 14, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 14,
+            "to": 23,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 6, "to": 28, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 28,
+            "to": 6,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 18, "to": 27, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 27,
+            "to": 18,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 27, "to": 5, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 5,
+            "to": 27,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 34, "to": 20, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 20,
+            "to": 34,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 36, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 36,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 13,
+            "label": 20.527666485478562,
+            "to": 41,
+            "value": 20.527666485478562
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 48,
+            "label": 33.706763598017545,
+            "to": 16,
+            "value": 33.706763598017545
+        }, {"arrows": "to", "color": "grey", "from": 28, "to": 22, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 22,
+            "to": 28,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 8, "to": 19, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 19,
+            "to": 8,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 33, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 33,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 34, "to": 38, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 38,
+            "to": 34,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 46, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 46,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 36, "to": 44, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 44,
+            "to": 36,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 0, "to": 24, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 24,
+            "to": 0,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 37, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 37,
+            "to": 30,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 41, "to": 34, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 34,
+            "to": 41,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 40, "to": 14, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 14,
+            "to": 40,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 46, "to": 30, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 30,
+            "to": 46,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 9, "to": 45, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 45,
+            "to": 9,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 43, "to": 40, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 40,
+            "to": 43,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 31, "to": 20, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 20,
+            "to": 31,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 44, "to": 39, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 39,
+            "to": 44,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 19, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 19,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 26, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 26,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 34, "to": 13, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 13,
+            "to": 34,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 45, "label": 100.0, "to": 35, "value": 100.0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 41,
+            "label": 20.527666485478562,
+            "to": 16,
+            "value": 20.527666485478562
+        }, {"arrows": "to", "color": "grey", "from": 28, "to": 6, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 6,
+            "to": 28,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 30,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 39, "to": 36, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 36,
+            "to": 39,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 17, "to": 15, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 15,
+            "to": 17,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 25, "to": 7, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 7,
+            "to": 25,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 8,
+            "label": 43.13187809917895,
+            "to": 21,
+            "value": 43.13187809917895
+        }, {"arrows": "to", "color": "grey", "from": 19, "to": 21, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 21,
+            "to": 19,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 32, "to": 15, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 15,
+            "to": 32,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 39, "to": 8, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 8,
+            "to": 39,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 15, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 15,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 12, "to": 9, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 9,
+            "to": 12,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 44, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 44,
+            "to": 42,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 18, "to": 22, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 22,
+            "to": 18,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 24, "to": 38, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 38,
+            "to": 24,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 13, "to": 38, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 38,
+            "to": 13,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 23, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 23,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 16, "to": 34, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 34,
+            "to": 16,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 4, "to": 5, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 5,
+            "to": 4,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 13, "to": 47, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 47,
+            "to": 13,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 24, "to": 47, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 47,
+            "to": 24,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 45, "to": 15, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 15,
+            "to": 45,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 15, "to": 35, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 35,
+            "to": 15,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 8, "to": 5, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 5,
+            "to": 8,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 10, "to": 2, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 2,
+            "to": 10,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 27, "to": 18, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 18,
+            "to": 27,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 25, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 25,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 42, "to": 16, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 16,
+            "to": 42,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 20, "to": 34, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 34,
+            "to": 20,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 46, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 46,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 28, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 28,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 43,
+            "label": 82.63369181732492,
+            "to": 20,
+            "value": 82.63369181732492
+        }, {"arrows": "to", "color": "grey", "from": 36, "to": 39, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 39,
+            "to": 36,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 39, "to": 1, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 1,
+            "to": 39,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 5, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 5,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 30, "to": 32, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 32,
+            "to": 30,
+            "value": 0
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 24,
+            "label": 20.527666485478562,
+            "to": 13,
+            "value": 20.527666485478562
+        }, {
+            "arrows": "to",
+            "color": "black",
+            "from": 21,
+            "label": 43.13187809917895,
+            "to": 49,
+            "value": 43.13187809917895
+        }, {"arrows": "to", "color": "grey", "from": 26, "to": 28, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 28,
+            "to": 26,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 12, "to": 11, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 11,
+            "to": 12,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 21, "to": 23, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 23,
+            "to": 21,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 18, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 18,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 45, "to": 17, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 17,
+            "to": 45,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 5, "to": 8, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 8,
+            "to": 5,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 45, "to": 26, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 26,
+            "to": 45,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 2, "to": 0, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 0,
+            "to": 2,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 22, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 22,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 45, "label": 100.0, "to": 35, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 12,
+            "to": 32,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 32, "to": 12, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 3,
+            "to": 29,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 29, "to": 3, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 5,
+            "to": 26,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 26, "to": 5, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 10,
+            "label": 82.63369181732492,
+            "to": 43,
+            "value": 82.63369181732492
+        }, {"arrows": "to", "color": "grey", "from": 11, "to": 12, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 12,
+            "to": 11,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 11, "to": 30, "value": 0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 30,
+            "to": 11,
+            "value": 0
+        }, {"arrows": "to", "color": "black", "from": 14, "label": 100.0, "to": 49, "value": 100.0}, {
+            "arrows": "to",
+            "color": "grey",
+            "from": 33,
+            "to": 27,
+            "value": 0
+        }, {"arrows": "to", "color": "grey", "from": 27, "to": 33, "value": 0}, {
+            "arrows": "to",
+            "color": "black",
+            "from": 24,
+            "label": 20.527666485478562,
+            "to": 13,
+            "value": 20.527666485478562
+        }]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+            "autoResize": true,
+            "width": "100%",
+            "height": "100%",
+            "configure": {"enabled": false},
+            "nodes": {
+                "size": 10,
+                "borderWidth": 3,
+                "color": {"inherit": true},
+                "fixed": {"x": true, "y": true},
+                "font": {"size": 0, "color": "rgba(0,0,200,0)", "strokeWidth": 2, "strokeColor": "rgba(0,200,0,0)"},
+                "scaling": {"min": 5, "max": 20},
+                "shadow": {"enabled": true, "size": 15, "color": "rgba(0,0,0,0.25)"}
+            },
+            "edges": {
+                "color": {"inherit": true},
+                "font": {"size": 0, "color": "rgba(235,190,0,0)", "strokeWidth": 3, "strokeColor": "rgba(255,0,0,0)"},
+                "arrowStrikethrough": false,
+                "arrows": {"to": {"scaleFactor": 1}},
+                "scaling": {"min": 2, "max": 16},
+                "smooth": {"enabled": false, "type": "curvedCW", "roundness": 0.1},
+                "shadow": {"enabled": true, "size": 15, "color": "rgba(0,0,0,0.25)"}
+            },
+            "interaction": {
+                "dragView": true,
+                "zoomView": true,
+                "dragNodes": false,
+                "selectable": false,
+                "selectConnectedEdges": false,
+                "hoverConnectedEdges": false,
+                "hideEdgesOnDrag": false,
+                "hideNodesOnDrag": false
+            },
+            "physics": {
+                "enabled": false,
+                "stabilization": {"enabled": true, "fit": true},
+                "barnesHut": {
+                    "avoidOverlap": 1,
+                    "centralGravity": 0.2,
+                    "damping": 0.9,
+                    "gravitationalConstant": -100000,
+                    "springConstant": 0.001,
+                    "springLength": 500
+                }
+            }
+        };
+
+
+        network = new vis.Network(container, data, options);
+
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>

@@ -1,14 +1,14 @@
 from src.Network.GraphMaker import GraphMaker
 
-name = "test-20-2-2"
-numNodes = 20
-numSources = 2
-numSinks = 2
+name = "test-50-3-3-1"
+numNodes = 50
+numSources = 3
+numSinks = 3
 
 graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
 # Uncomment to tune how the network generates costs and to turn on generalizations
-# graphMaker.setCostDeterminingHyperparameters()
-graphMaker.setSourceSinkGeneralizations(True, [100, 300], True, [200, 300])
+graphMaker.setCostDeterminingHyperparameters(possibleArcCaps=[100])
+graphMaker.setSourceSinkGeneralizations(True, True)
 
 generatedNetwork = graphMaker.generateNetwork()
 generatedNetwork.drawNetworkTriangulation()

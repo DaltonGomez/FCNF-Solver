@@ -45,7 +45,8 @@ class SolutionVisualizer:
                                      x=int(nodeObj.xPos * self.positionScalar),
                                      y=int(nodeObj.yPos * self.positionScalar))
             else:
-                self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="grey", value=flow,
+                self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="rgba(155, 155, 155, 0.35)",
+                                     value=flow,
                                      x=int(nodeObj.xPos * self.positionScalar),
                                      y=int(nodeObj.yPos * self.positionScalar))
         # Add edges
@@ -58,12 +59,12 @@ class SolutionVisualizer:
                 flow += self.solution.arcFlows[(e, arc)]
                 backFlow += self.solution.arcFlows[(backEdge, arc)]
             if flow > 0:
-                self.netVis.add_edge(int(edge[0]), int(edge[1]), label=flow, color="black", value=flow)
+                self.netVis.add_edge(int(edge[0]), int(edge[1]), label=round(flow), color="black", value=flow)
             elif backFlow > 0:
-                self.netVis.add_edge(int(edge[1]), int(edge[0]), label=backFlow, color="black", value=backFlow)
+                self.netVis.add_edge(int(edge[1]), int(edge[0]), label=round(backFlow), color="black", value=backFlow)
             elif flow == 0 and backFlow == 0:
-                self.netVis.add_edge(int(edge[0]), int(edge[1]), color="grey", value=flow)
-                self.netVis.add_edge(int(edge[1]), int(edge[0]), color="grey", value=backFlow)
+                self.netVis.add_edge(int(edge[0]), int(edge[1]), color="rgba(155, 155, 155, 0.35)", value=flow)
+                self.netVis.add_edge(int(edge[1]), int(edge[0]), color="rgba(155, 155, 155, 0.35)", value=backFlow)
 
     def drawGraphWithLabels(self) -> None:
         """Displays the Solution using PyVis and a set of hardcoded options"""

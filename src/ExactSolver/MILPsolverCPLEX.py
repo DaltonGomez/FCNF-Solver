@@ -164,7 +164,7 @@ class MILPsolverCPLEX:
         print("Solver execution complete...\n")
 
     def writeSolution(self) -> Solution:
-        """Saves the solution instance """
+        """Saves the solution instance"""
         if self.isRun is False:
             print("You must run the solver before building a solution!")
         elif self.model.solution is not None:
@@ -177,6 +177,7 @@ class MILPsolverCPLEX:
             thisSolution = Solution(self.network, self.minTargetFlow, objValue, srcFlows, sinkFlows, arcFlows,
                                     arcsOpen, "cplex_milp", self.isOneArcPerEdge, self.isSrcSinkConstrained,
                                     self.isSrcSinkCharged, optionalDescription=str(self.model.get_solve_details()))
+            print("Solution built!")
             return thisSolution
         else:
             print("No feasible solution exists!")
