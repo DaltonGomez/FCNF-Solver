@@ -22,6 +22,9 @@ class Individual:
         self.sinkFlows = []
         self.paths = []  # Data structure for topology-based operators
 
+    # =========================================
+    # ============== METHODS ==============
+    # =========================================
     def setAlphaValues(self, alphaValues: ndarray) -> None:
         """Resets the alpha values to a new array"""
         self.alphaValues = alphaValues

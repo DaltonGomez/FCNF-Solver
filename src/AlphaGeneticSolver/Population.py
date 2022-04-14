@@ -31,20 +31,28 @@ class Population:
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self, numGenerations) -> None:
+    def evolvePopulation(self, numGenerations, drawing=False) -> None:
         """Evolves the population for a specified number of generations"""
         self.numGenerations = numGenerations
         for generation in range(numGenerations):
             # TODO - SELECTION & CROSSOVER
             # TODO - SELECTION & MUTATION
-            # Solve and visualize (DUMMY HYPER-MUTATION CURRENTLY AS POC)
-            self.hypermutatePopulation()
+            # Solve and visualize (NAIVE HILL CLIMB CURRENTLY AS POC)
+            self.naiveHillClimb()
             self.solvePopulation()
-            self.visualizeAllIndividuals(labels=False, leadingText=str(generation))
+            if drawing is True:
+                self.visualizeBestIndividual(labels=False, leadingText=str(generation))
+            print("Generation = " + str(generation) + "\tBest Individual = " + str(self.population[0].trueCost))
 
     # ==============================================
     # ============== MUTATION METHODS ==============
     # ==============================================
+    def naiveHillClimb(self) -> None:
+        """Sorts the population by rank and hypermutates the worst individual only at each generation"""
+        self.population = self.rankPopulation()
+        for i in range(1, self.populationSize):
+            self.hypermutateIndividual(self.population[i])
+
     def hypermutatePopulation(self) -> None:
         """Reinitializes the entire population (i.e. an extinction event with a brand new population spawned)"""
         for individual in self.population:
@@ -89,15 +97,15 @@ class Population:
     # ============================================
     # ============== HELPER METHODS ==============
     # ============================================
+    def rankPopulation(self) -> list:
+        """Ranks the population in ascending order of true cost (i.e. Lower cost -> More fit) and returns"""
+        sortedPopulation = sorted(self.population, key=lambda x: x.trueCost)
+        return sortedPopulation
+
     def getMostFitIndividual(self) -> Individual:
         """Returns the most fit individual in the population"""
-        negBestFitness = 0.0
-        bestIndividual = None
-        for individual in self.population:
-            if -individual.trueCost < negBestFitness:
-                negBestFitness = -individual.trueCost
-                bestIndividual = individual
-        return bestIndividual
+        sortedPop = self.rankPopulation()
+        return sortedPop[0]
 
     # ============================================
     # ============== SOLVER METHODS ==============

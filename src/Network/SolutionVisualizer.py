@@ -69,7 +69,7 @@ class SolutionVisualizer:
     def drawGraphWithLabels(self, leadingText="") -> None:
         """Displays the Solution using PyVis and a set of hardcoded options"""
         displayName = leadingText + self.solution.name + ".html"
-        print("Drawing " + displayName + "...")
+        # print("Drawing " + displayName + "...")
         # Sets visualization options using a JSON format (see vis.js documentation)
         self.netVis.set_options("""
                     var options = {
@@ -168,7 +168,7 @@ class SolutionVisualizer:
     def drawUnlabeledGraph(self, leadingText="") -> None:
         """Displays the Solution using PyVis and a set of hardcoded options"""
         displayName = self.solution.name + ".html"
-        print("Drawing " + displayName + "...")
+        # print("Drawing " + displayName + "...")
         # Sets visualization options using a JSON format (see vis.js documentation)
         self.netVis.set_options("""
                     var options = {

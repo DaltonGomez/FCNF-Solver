@@ -145,10 +145,10 @@ class AlphaSolverPDLP:
 
     def solveModel(self) -> None:
         """Solves the alpha-relaxed LP model with PDLP"""
-        print("\nAttempting to solve model...")
+        # print("\nAttempting to solve model...")
         self.status = self.solver.Solve()
         self.isRun = True
-        print("Solver execution complete...\n")
+        # print("Solver execution complete...\n")
 
     def writeSolution(self) -> Solution:
         """Saves the solution instance"""
