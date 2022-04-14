@@ -3,6 +3,7 @@
 HIGH-PRIORITY CHANGES & BUGS:
 =============================
 + Add to solution visualization a way to capture relative edge costs in color
++ Remove the arrow heads on the non-opened edges in the solution visualization
 
 
 
