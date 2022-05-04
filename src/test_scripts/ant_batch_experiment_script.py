@@ -1,6 +1,7 @@
 import math
 import random
 
+from src.AntExperiments.AntResultsExperiment import AntResultsExperiment
 from src.Network.GraphMaker import GraphMaker
 
 numGraphs = 50
@@ -31,5 +32,5 @@ for n in range(numGraphs):
 # Solve all networks
 numAnts = 50
 numEpisodes = 15
-experiment = ACOResultsExperiment(networkList, numAnts, numEpisodes)
+experiment = AntResultsExperiment(networkList, numAnts, numEpisodes)
 experiment.runExperiment()

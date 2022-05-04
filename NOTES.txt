@@ -8,6 +8,7 @@ HIGH-PRIORITY CHANGES & BUGS:
 + Implement a (Gaussian?) nudge mutation
 + Experiment with finding optimal alpha values from an exact MILP solution
 + Implement other probability functions for randomly determining alpha values
++ Implement a termination criteria based on convergence, not just number of episodes/generations
 
 
 LOW PRIORITY CHANGES & QUALITY OF LIFE:

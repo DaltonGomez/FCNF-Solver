@@ -4,16 +4,16 @@ from src.Network.NetworkVisualizer import NetworkVisualizer
 from src.Network.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
-name = "demoForPaper2.p"
+name = "25-1-1.p"
 flowNetwork = FlowNetwork()
 flowNetwork = flowNetwork.loadNetwork(name)
 
 # Network Visualization Test
-visualizer = NetworkVisualizer(flowNetwork, directed=True, supers=True)
+visualizer = NetworkVisualizer(flowNetwork, directed=True, supers=False)
 visualizer.drawBidirectionalGraph()
 
 # Solver Test
-solver = MILPsolverCPLEX(flowNetwork, 200, isOneArcPerEdge=False)
+solver = MILPsolverCPLEX(flowNetwork, 100, isOneArcPerEdge=False)
 solver.buildModel()
 solver.solveModel()
 solver.printAllSolverData()

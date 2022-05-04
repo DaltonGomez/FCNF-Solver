@@ -1,27 +1,12 @@
+from src.AntExperiments.AntResultsExperiment import AntResultsExperiment
+
 numAnts = 50
 numEpisodes = 15
 networkList = [
-    "25-1-1-3",
-    "25-1-5-3",
-    "25-1-10-3",
-    "50-1-1-3",
-    "50-1-5-3",
-    "50-1-10-3",
-    "100-1-1-3",
-    "100-1-5-3",
-    "100-1-10-3",
-    "200-1-1-3",
-    "200-1-5-3",
-    "200-1-10-3",
-    "300-1-1-3",
-    "300-1-5-3",
-    "300-1-10-3",
-    "400-1-1-3",
-    "400-1-5-3",
-    "400-1-10-3"
+    "25-1-1",
 ]
 
-experiment = ACOResultsExperiment(networkList, numAnts, numEpisodes)
+experiment = AntResultsExperiment(networkList, numAnts, numEpisodes)
 experiment.runExperiment()
 
 """
