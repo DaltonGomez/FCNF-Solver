@@ -53,7 +53,7 @@ class FixedChargeFlowNetwork:
     def executeSolver(self, minTargetFlow: int) -> None:
         """Solves the FCFN exactly with a MILP model in CPLEX"""
         if self.solver is None:
-            self.solver = ExactSolver(self, minTargetFlow)  # FYI- ExactSolver constructor does not have FCFN type hint
+            self.solver = ExactSolver(self, minTargetFlow)  # FYI- Solvers constructor does not have FCFN type hint
             self.solver.buildModel()
             self.solver.solveModel()
             self.solver.writeSolution()

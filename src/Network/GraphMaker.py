@@ -23,7 +23,7 @@ class GraphMaker:
         self.capVariableCostScale = 3.0
         self.variableCostRandomScalar = [0.80, 1.20]
         self.isSourceSinkCapacitated = True
-        self.sourceSinkCapacityRange = [100.0, 300.0]
+        self.sourceSinkCapacityRange = [100, 300]
         self.isSourceSinkCharged = True
         self.sourceSinkChargeRange = [200.0, 300.0]
 
@@ -60,7 +60,7 @@ class GraphMaker:
         self.capVariableCostScale = capVariableCostScale
         self.variableCostRandomScalar = variableCostRandomScalar
 
-    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(100.0, 300.0),
+    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(100, 300),
                                      chargeRange=(200.0, 300.0)) -> None:
         """Allows the capacitated/charged source sink generalizes to be turned on and tuned"""
         self.isSourceSinkCapacitated = isCapacitated
@@ -167,6 +167,7 @@ class GraphMaker:
 
     def calculateArcFixedCost(self, distance: float, capacity: int) -> float:
         """Calculates the fixed cost of the arc in a pseudorandom manner"""
+        # TODO - Apply the pipeline cost function: c(f) = (m*cap + b) * edge_specific_penalty (which is based on distance)
         # Pseudorandom component proportional to the distance the edge spans
         randomDistanceComponent = (self.distFixCostScale * distance * random.uniform(
             self.fixCostRandomScalar[0], self.fixCostRandomScalar[1]))
@@ -189,12 +190,12 @@ class GraphMaker:
             self.newNetwork.isSourceSinkCapacitated = True
             tempSrcCaps = []
             for source in range(self.newNetwork.numSources):
-                thisSrcCap = random.uniform(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
+                thisSrcCap = random.randint(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
                 tempSrcCaps.append(thisSrcCap)
             self.newNetwork.sourceCapsArray = np.array(tempSrcCaps)
             tempSinkCaps = []
             for sink in range(self.newNetwork.numSinks):
-                thisSinkCap = random.uniform(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
+                thisSinkCap = random.randint(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
                 tempSinkCaps.append(thisSinkCap)
             self.newNetwork.sinkCapsArray = np.array(tempSinkCaps)
         if self.isSourceSinkCharged is True:

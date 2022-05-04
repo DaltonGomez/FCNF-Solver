@@ -1,1 +1,49 @@
 NOTES:
+
+HIGH-PRIORITY CHANGES & BUGS:
+=============================
++ Add to solution visualization a way to capture relative edge costs in color
++ Change pathing to be only pathlets and/or all paths
++ Test the speed of relaxed-LP solvers on large instances
++ Implement a (Gaussian?) nudge mutation
++ Experiment with finding optimal alpha values from an exact MILP solution
++ Implement other probability functions for randomly determining alpha values
+
+
+LOW PRIORITY CHANGES & QUALITY OF LIFE:
+=======================================
++ Measure population diversity at genotypic and phenotypic levels
++ Do sensitivity/perturbation analysis on alpha values
+
+
+POSSIBLE CHANGES & IDEAS:
+=========================
++ Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
+
+
+
+=======================================================================================================================
+=======================================================================================================================
+FROM ACO PROJECT:
+# TODOs:
+# TODO - Setup experiment class/scripts
+# TODO - Tune all hyperparameters
+# TODO - Determine the most realistic function/method for creating arc costs
+# TODO - Determine the best pheromone deposition equation (e.g. proportional to the amount of flow on the arc, not just if it was opened)
+Deposit pheromone based on remaining capacity
+# TODO - Determine the best "goodness" of arc calculation
+Consider using the G(e) = 1/(cap/(FC + VC))
+# TODO - Determine if source/sink arcs should have special pheromone deposition and/or "goodness" of arc calculations
+# TODO - Determine the best probability distribution function for edge selection
+# TODO - Adapt to account for parallel arcs (i.e. more than one possible edge capacity)
+# TODO - Implement some post-processing to cancel opposing flows
+
+# FUTURE WORK IDEAS:
+* Use the dynamic nature of ACO for optimal sink location within a feasible geologic region (i.e. polygon)
+* Use the dynamic nature of ACO for sink capacity uncertainty
+* Integrate with a local search technique, such as the alpha-relaxed GA approach
+
+# FUTURE INTEGRATION W/ GA:
+--> We maintain a set of alpha values in the ACO and use them to calculate the "goodness" of an edge. We then use the ACO
+    > to return discovered paths to the GA, which modifies the alpha values. The GA then returns new alpha values to the ACO.
+    > The process is repeated in parallel until convergence.

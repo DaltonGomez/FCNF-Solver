@@ -90,7 +90,7 @@ class SolutionVisualizer:
                                 "y": true
                             },
                             "font": {
-                                "size": 25,
+                                "size": 0,
                                 "color": "rgba(0, 0, 200, 1)",
                                 "strokeWidth": 2,
                                 "strokeColor": "rgba(0, 200, 0, 1)"
@@ -123,7 +123,7 @@ class SolutionVisualizer:
                             },
                             "scaling": {
                                 "min": 2,
-                                "max": 16
+                                "max": 10
                             },
                             "smooth": {
                                 "enabled": false,
@@ -167,7 +167,7 @@ class SolutionVisualizer:
 
     def drawUnlabeledGraph(self, leadingText="") -> None:
         """Displays the Solution using PyVis and a set of hardcoded options"""
-        displayName = self.solution.name + ".html"
+        displayName = leadingText + "_" + self.solution.name + ".html"
         # print("Drawing " + displayName + "...")
         # Sets visualization options using a JSON format (see vis.js documentation)
         self.netVis.set_options("""
@@ -222,7 +222,7 @@ class SolutionVisualizer:
                             },
                             "scaling": {
                                 "min": 2,
-                                "max": 16
+                                "max": 10
                             },
                             "smooth": {
                                 "enabled": false,
@@ -262,4 +262,103 @@ class SolutionVisualizer:
                         }
                     }
                     """)
+        self.netVis.show(displayName)
+
+    def drawBidirectionalGraphWithSmoothedLabeledEdges(self) -> None:
+        """Displays the Network using PyVis and a set of hardcoded options"""
+        displayName = self.solution.name + ".html"
+        print("Drawing " + displayName + "...")
+        # Sets visualization options using a JSON format (see vis.js documentation)
+        self.netVis.set_options("""
+                            var options = {
+                                "autoResize": true,
+                                "width": "100%",
+                                "height": "100%",
+                                "configure": {
+                                    "enabled": false
+                                },
+                                "nodes": {
+                                    "size": 10,
+                                    "borderWidth": 3,
+                                    "color": {
+                                        "inherit": true
+                                    },
+                                    "fixed":{
+                                        "x": true,
+                                        "y": true
+                                    },
+                                    "font": {
+                                        "size": 25,
+                                        "color": "rgba(0, 0, 200, 1)",
+                                        "strokeWidth": 2,
+                                        "strokeColor": "rgba(0, 200, 0, 1)"
+                                    },
+                                    "scaling": {
+                                        "min": 5,
+                                        "max": 20
+                                    },
+                                    "shadow": {
+                                        "enabled": true,
+                                        "size": 15,
+                                        "color": "rgba(0, 0, 0, 0.25)"
+                                    }
+                                },
+                                "edges": {
+                                    "color": {
+                                        "inherit": true
+                                    },
+                                    "font": {
+                                        "size": 20,
+                                        "color": "rgba(235, 190, 0, 1)",
+                                        "strokeWidth": 3,
+                                        "strokeColor": "rgba(255, 0, 0, 1)"
+                                    },
+                                    "arrowStrikethrough": false,
+                                    "arrows": {
+                                        "to": {
+                                            "scaleFactor": 1
+                                        }
+                                    },
+                                    "scaling": {
+                                        "min": 2,
+                                        "max": 16
+                                    },
+                                    "smooth": {
+                                        "enabled": true,
+                                        "type": "curvedCW",
+                                        "roundness": 0.10
+                                    },
+                                    "shadow": {
+                                        "enabled": true,
+                                        "size": 15,
+                                        "color": "rgba(0, 0, 0, 0.25)"
+                                    }
+                                },
+                                "interaction": {
+                                    "dragView": true,
+                                    "zoomView": true,
+                                    "dragNodes": false,
+                                    "selectable": false,
+                                    "selectConnectedEdges": false,
+                                    "hoverConnectedEdges": false,
+                                    "hideEdgesOnDrag": false,
+                                    "hideNodesOnDrag": false
+                                },
+                                "physics": {
+                                    "enabled": false,
+                                    "stabilization": {
+                                        "enabled": true,
+                                        "fit": true
+                                    },
+                                    "barnesHut": {
+                                        "avoidOverlap": 1,
+                                        "centralGravity": 0.2,
+                                        "damping": 0.90,
+                                        "gravitationalConstant": -100000,
+                                        "springConstant": 0.001,
+                                        "springLength": 500
+                                    }
+                                }
+                            }
+                            """)
         self.netVis.show(displayName)

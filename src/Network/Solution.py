@@ -22,7 +22,7 @@ class Solution:
         self.arcFlows = arcFlows
         self.arcsOpened = arcsOpened
         # Metadata/Conditions/Generalizations
-        self.name = "sol-" + self.network.name + "_" + str(int(self.minTargetFlow)) + "_" + str(
+        self.name = "soln-" + self.network.name + "_" + str(int(self.minTargetFlow)) + "_" + str(
             int(self.trueCost)) + solvedBy
         self.solvedBy = solvedBy
         self.isOneArcPerEdge = isOneArcPerEdge

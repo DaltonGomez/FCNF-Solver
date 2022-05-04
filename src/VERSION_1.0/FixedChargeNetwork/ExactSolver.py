@@ -11,7 +11,7 @@ class ExactSolver:
         self.FCFN = FCFNinstance
         self.minTargetFlow = minTargetFlow
         # Solver model
-        self.model = Model(name="FCFN-MILP-ExactSolver", log_output=False, cts_by_name=True)
+        self.model = Model(name="FCFN-MILP-Solvers", log_output=False, cts_by_name=True)
         self.isRun = False
         # Decision variables
         self.sourceFlowVars = None
