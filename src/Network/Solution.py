@@ -37,8 +37,9 @@ class Solution:
         """Saves the solution instance to disc via a pickle dump"""
         # Path management
         currDir = os.getcwd()
+        parentDir = os.path.abspath(os.path.join(currDir, os.pardir))
         solutionFile = self.name + ".p"
-        catPath = os.path.join(currDir, "../solution_instances", solutionFile)
+        catPath = os.path.join(parentDir, "data/solution_instances", solutionFile)
         print("Saving " + solutionFile + " to: " + catPath)
         # Pickle dump
         pickle.dump(self, open(catPath, "wb"))
@@ -48,7 +49,8 @@ class Solution:
         """Loads a solution instance via a pickle load"""
         # Path management
         currDir = os.getcwd()
-        catPath = os.path.join(currDir, "../solution_instances", solutionFile)
+        parentDir = os.path.abspath(os.path.join(currDir, os.pardir))
+        catPath = os.path.join(parentDir, "data/solution_instances", solutionFile)
         print("Loading " + solutionFile + " from: " + catPath)
         # Pickle load
         solvedNetwork = pickle.load(open(catPath, "rb"))

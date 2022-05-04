@@ -1,8 +1,9 @@
 import random
 
 import numpy as np
-from src.OLD.AlphaGeneticSolver.AlphaPath import AlphaPath
-from src.OLD.AlphaGeneticSolver.AlphaVisualizer import AlphaVisualizer
+
+from src.VERSION_1.AlphaGeneticSolver.AlphaPath import AlphaPath
+from src.VERSION_1.AlphaGeneticSolver.AlphaVisualizer import AlphaVisualizer
 
 
 class AlphaIndividual:

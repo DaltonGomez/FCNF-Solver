@@ -2,7 +2,8 @@ import os
 import random
 
 import networkx as nx
-from src.OLD.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+
+from src.VERSION_1.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class GraphGenerator:

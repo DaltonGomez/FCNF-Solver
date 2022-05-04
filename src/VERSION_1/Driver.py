@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from src.OLD.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
-from src.OLD.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+from src.VERSION_1.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
+from src.VERSION_1.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """DRIVER PY FILE"""
 

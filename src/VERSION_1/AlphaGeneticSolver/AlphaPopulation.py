@@ -2,9 +2,9 @@ import copy
 import random
 import time
 
-from src.OLD.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
-from src.OLD.AlphaGeneticSolver.AlphaSolver import AlphaSolver
-from src.OLD.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
+from src.VERSION_1.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
+from src.VERSION_1.AlphaGeneticSolver.AlphaSolver import AlphaSolver
+from src.VERSION_1.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
 class AlphaPopulation:

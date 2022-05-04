@@ -1,9 +1,9 @@
 import os
 
-from src.OLD.FixedChargeNetwork.Edge import Edge
-from src.OLD.FixedChargeNetwork.ExactSolver import ExactSolver
-from src.OLD.FixedChargeNetwork.Node import Node
-from src.OLD.FixedChargeNetwork.Visualizer import Visualizer
+from src.VERSION_1.FixedChargeNetwork.Edge import Edge
+from src.VERSION_1.FixedChargeNetwork.ExactSolver import ExactSolver
+from src.VERSION_1.FixedChargeNetwork.Node import Node
+from src.VERSION_1.FixedChargeNetwork.Visualizer import Visualizer
 
 
 class FixedChargeFlowNetwork:
