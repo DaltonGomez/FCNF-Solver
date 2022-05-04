@@ -48,15 +48,6 @@ class AlphaSolverPDLP:
                 varName = "a_" + str(e) + "_" + str(cap)
                 self.solver.Add(self.solver.LookupVariable(varName) <= capacity, varName + "_Cap")
 
-        # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
-        """
-        if self.isOneArcPerEdge is True:
-            for i in range(self.network.numEdges):
-                name = "e_" + str(i) + "_OneArcPerEdge"
-                self.model.add_constraint(sum(self.arcOpenedVars[(i, j)] for j in range(self.network.numArcCaps)) <= 1,
-                                          name)
-        """
-
         # Capacity constraints of sources
         if self.network.isSourceSinkCapacitated is True:
             for s in range(self.network.numSources):

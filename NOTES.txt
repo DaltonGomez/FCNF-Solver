@@ -8,7 +8,8 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Fix bug where solvers sometimes don't return a flow value to the solution object, causing a key error in the visualizer
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Revise method for assigning arc costs to better resemble SimCCS
-% Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
+# TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
+>> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
 
 
 ALPHA GENETIC ALGORITHM APPROACH:

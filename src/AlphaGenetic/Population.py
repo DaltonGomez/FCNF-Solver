@@ -44,26 +44,6 @@ class Population:
                 self.visualizeBestIndividual(labels=False, leadingText=str(generation))
             print("Generation = " + str(generation) + "\tBest Individual = " + str(self.population[0].trueCost))
 
-    # ==============================================
-    # ============== MUTATION METHODS ==============
-    # ==============================================
-    def naiveHillClimb(self) -> None:
-        """Sorts the population by rank and hypermutates the worst individual only at each generation"""
-        self.population = self.rankPopulation()
-        for i in range(1, self.populationSize):
-            self.hypermutateIndividual(self.population[i])
-
-    def hypermutatePopulation(self) -> None:
-        """Reinitializes the entire population (i.e. an extinction event with a brand new population spawned)"""
-        for individual in self.population:
-            self.hypermutateIndividual(individual)
-
-    def hypermutateIndividual(self, individual: Individual) -> None:
-        """Reinitializes the individual's entire alpha values (i.e. kills them off and spawns a new individual)"""
-        newAlphas = self.getInitialAlphaValues()
-        individual.setAlphaValues(newAlphas)
-        individual.resetOutputNetwork()
-
     # ====================================================
     # ============== INITIALIZATION METHODS ==============
     # ====================================================
@@ -93,6 +73,26 @@ class Population:
         random.seed()
         randomGene = random.random()
         return randomGene
+
+    # ==============================================
+    # ============== MUTATION METHODS ==============
+    # ==============================================
+    def naiveHillClimb(self) -> None:
+        """Sorts the population by rank and hypermutates the worst individual only at each generation"""
+        self.population = self.rankPopulation()
+        for i in range(1, self.populationSize):
+            self.hypermutateIndividual(self.population[i])
+
+    def hypermutatePopulation(self) -> None:
+        """Reinitializes the entire population (i.e. an extinction event with a brand new population spawned)"""
+        for individual in self.population:
+            self.hypermutateIndividual(individual)
+
+    def hypermutateIndividual(self, individual: Individual) -> None:
+        """Reinitializes the individual's entire alpha values (i.e. kills them off and spawns a new individual)"""
+        newAlphas = self.getInitialAlphaValues()
+        individual.setAlphaValues(newAlphas)
+        individual.resetOutputNetwork()
 
     # ============================================
     # ============== HELPER METHODS ==============

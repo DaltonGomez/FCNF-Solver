@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.VERSION_1.AlphaGeneticSolver.AlphaPopulation import AlphaPopulation
+from src.VERSION_1.AlphaGeneticSolver.OLDAlphaPopulation import AlphaPopulation
 from src.VERSION_1.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 """USED FOR EXPERIMENTATION"""

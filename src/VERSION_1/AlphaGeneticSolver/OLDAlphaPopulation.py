@@ -2,8 +2,8 @@ import copy
 import random
 import time
 
-from src.VERSION_1.AlphaGeneticSolver.AlphaIndividual import AlphaIndividual
 from src.VERSION_1.AlphaGeneticSolver.AlphaSolver import AlphaSolver
+from src.VERSION_1.AlphaGeneticSolver.OLDAlphaIndividual import AlphaIndividual
 from src.VERSION_1.FixedChargeNetwork.FixedChargeFlowNetwork import FixedChargeFlowNetwork
 
 
