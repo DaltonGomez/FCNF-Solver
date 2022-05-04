@@ -3,6 +3,9 @@ NOTES & TODOS:
 GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Delete VERSION_1 directory after implementing GA package
+# TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
+>> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
+# TODO - Fix bug where solvers sometimes don't return a flow value to the solution object, causing a key error in the visualizer
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Revise method for assigning arc costs to better resemble SimCCS
 % Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
@@ -19,7 +22,6 @@ ALPHA GENETIC ALGORITHM APPROACH:
 
 ALPHA GENETIC ALGORITHM EXPERIMENTS:
 =====================================
-# TODO - Experiment with finding optimal alpha values from an exact MILP solution (i.e. reverse engineering)
 # TODO - Build out accuracy and efficiency experiments
 # TODO - Measure population diversity at genotypic and phenotypic levels
 # TODO - Do sensitivity/perturbation analysis on alpha values

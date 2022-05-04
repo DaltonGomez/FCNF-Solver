@@ -7,10 +7,10 @@ py -3.8 test_network_maker.py
 """
 
 if __name__ == "__main__":
-    name = "test"
-    numNodes = 3
-    numSources = 1
-    numSinks = 1
+    name = "1000-1-10"
+    numNodes = 1000
+    numSources = 10
+    numSinks = 10
 
     graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
     # Uncomment to tune how the network generates costs and to turn on generalizations

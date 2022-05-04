@@ -25,6 +25,15 @@ class MILPsolverCPLEX:
         self.arcOpenedVars = None
         self.arcFlowVars = None
 
+    def findSolution(self, printDetails=False) -> Solution:
+        """Builds the model, executes the solver, and returns the solution object with one method call"""
+        self.buildModel()
+        self.solveModel()
+        if printDetails is True:
+            self.printAllSolverData()
+        solution = self.writeSolution()
+        return solution
+
     def buildModel(self) -> None:
         """Builds the decision variables, constraints, and object function of the MILP model from the FCFN instance"""
         # =================== DECISION VARIABLES ===================
