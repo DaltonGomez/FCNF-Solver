@@ -70,9 +70,8 @@ class FlowNetwork:
         plt.plot(sinkPoints[:, 0], sinkPoints[:, 1], 'rs')
         # Save figure and display
         currDir = os.getcwd()
-        parentDir = os.path.abspath(os.path.join(currDir, os.pardir))
         networkFile = self.name + ".png"
-        catPath = os.path.join(parentDir, "data/network_instances/delaunay", networkFile)
+        catPath = os.path.join(currDir, "data/network_instances/delaunay", networkFile)
         plt.savefig(catPath)
         plt.show()
 
@@ -83,9 +82,8 @@ class FlowNetwork:
         """Saves the network instance to disc via a pickle dump"""
         # Path management
         currDir = os.getcwd()
-        parentDir = os.path.abspath(os.path.join(currDir, os.pardir))
         networkFile = self.name + ".p"
-        catPath = os.path.join(parentDir, "data/network_instances", networkFile)
+        catPath = os.path.join(currDir, "data/network_instances", networkFile)
         print("Saving " + networkFile + " to: " + catPath)
         # Pickle dump
         pickle.dump(self, open(catPath, "wb"))
@@ -95,8 +93,7 @@ class FlowNetwork:
         """Loads a network instance via a pickle load"""
         # Path management
         currDir = os.getcwd()
-        parentDir = os.path.abspath(os.path.join(currDir, os.pardir))
-        catPath = os.path.join(parentDir, "data/network_instances", networkFile)
+        catPath = os.path.join(currDir, "data/network_instances", networkFile)
         print("Loading " + networkFile + " from: " + catPath)
         # Pickle load
         flowNetwork = pickle.load(open(catPath, "rb"))

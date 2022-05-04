@@ -1,13 +1,20 @@
 from src.AntExperiments.AntResultsExperiment import AntResultsExperiment
 
-numAnts = 50
-numEpisodes = 15
-networkList = [
-    "25-1-1",
-]
+"""
+RUN COMMAND:
+cd PycharmProjects/FCNF-Solver
+py -3.8 run_ant_result.py
+"""
 
-experiment = AntResultsExperiment(networkList, numAnts, numEpisodes)
-experiment.runExperiment()
+if __name__ == "__main__":
+    numAnts = 50
+    numEpisodes = 15
+    networkList = [
+        "25-1-1",
+    ]
+
+    experiment = AntResultsExperiment(networkList, numAnts, numEpisodes)
+    experiment.runExperiment()
 
 """
 # ORIGINAL NETWORK LIST:

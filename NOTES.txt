@@ -1,50 +1,53 @@
-NOTES:
+NOTES & TODOS:
 
-HIGH-PRIORITY CHANGES & BUGS:
-=============================
-+ Add to solution visualization a way to capture relative edge costs in color
-+ Change pathing to be only pathlets and/or all paths
-+ Test the speed of relaxed-LP solvers on large instances
-+ Implement a (Gaussian?) nudge mutation
-+ Experiment with finding optimal alpha values from an exact MILP solution
-+ Implement other probability functions for randomly determining alpha values
-+ Implement a termination criteria based on convergence, not just number of episodes/generations
+GENERAL/NETWORK/SOLVERS:
+=====================================
+# TODO - Delete VERSION_1 directory after implementing GA package
+# TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
+# TODO - Revise method for assigning arc costs to better resemble SimCCS
+% Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
 
 
-LOW PRIORITY CHANGES & QUALITY OF LIFE:
-=======================================
-+ Measure population diversity at genotypic and phenotypic levels
-+ Do sensitivity/perturbation analysis on alpha values
+ALPHA GENETIC ALGORITHM APPROACH:
+=====================================
+# TODO - Finish building out code base to match the level of VERSION_1
+# TODO - Implement other probability functions for randomly initializing alpha values
+# TODO - Change pathing to be only pathlets and/or all paths
+# TODO - Implement a nudge mutation, possibly Gaussian
+# TODO - Implement a termination criteria based on convergence, not just number of episodes/generations
 
 
-POSSIBLE CHANGES & IDEAS:
-=========================
-+ Do not worry about the single capacity per edge constraint- it is implied if the capacity vs. cost function is convex
+ALPHA GENETIC ALGORITHM EXPERIMENTS:
+=====================================
+# TODO - Experiment with finding optimal alpha values from an exact MILP solution (i.e. reverse engineering)
+# TODO - Build out accuracy and efficiency experiments
+# TODO - Measure population diversity at genotypic and phenotypic levels
+# TODO - Do sensitivity/perturbation analysis on alpha values
+# TODO - Build a tuning experiment
 
 
-
-=======================================================================================================================
-=======================================================================================================================
-FROM ACO PROJECT:
-# TODOs:
-# TODO - Setup experiment class/scripts
-# TODO - Tune all hyperparameters
-# TODO - Determine the most realistic function/method for creating arc costs
-# TODO - Determine the best pheromone deposition equation (e.g. proportional to the amount of flow on the arc, not just if it was opened)
-Deposit pheromone based on remaining capacity
-# TODO - Determine the best "goodness" of arc calculation
-Consider using the G(e) = 1/(cap/(FC + VC))
+ANT COLONY OPTIMIZATION APPROACH:
+=====================================
+# TODO - Revise ant behavior to avoid previously visited nodes altogether, rather than popping from the trip stack
+# TODO - Revisit and test pheromone deposition and arc "goodness equations"
 # TODO - Determine if source/sink arcs should have special pheromone deposition and/or "goodness" of arc calculations
-# TODO - Determine the best probability distribution function for edge selection
-# TODO - Adapt to account for parallel arcs (i.e. more than one possible edge capacity)
-# TODO - Implement some post-processing to cancel opposing flows
+# TODO - Update behavior to preferentially select arcs with opposing flows as those are cost saving (in the post-processing)
+# TODO - Revise the post-processing to cancel opposing flows so that it handles parallel arcs
+# TODO - Adapt to account for parallel arcs (i.e. more than one possible edge capacity) and test on parallel edges
 
-# FUTURE WORK IDEAS:
-* Use the dynamic nature of ACO for optimal sink location within a feasible geologic region (i.e. polygon)
-* Use the dynamic nature of ACO for sink capacity uncertainty
-* Integrate with a local search technique, such as the alpha-relaxed GA approach
 
-# FUTURE INTEGRATION W/ GA:
---> We maintain a set of alpha values in the ACO and use them to calculate the "goodness" of an edge. We then use the ACO
-    > to return discovered paths to the GA, which modifies the alpha values. The GA then returns new alpha values to the ACO.
-    > The process is repeated in parallel until convergence.
+ANT COLONY OPTIMIZATION EXPERIMENTS:
+=====================================
+# TODO - Improve the hyperparameter tuning method and increase the search space
+# TODO - Clean up the way data is exported in the ant experiments
+
+
+GA/ACO INTEGRATION:
+=====================================
+% Use the ants to determine paths/trim input graph and then use the GA to refine, potentially as an iterative process until convergence.
+
+
+OTHER FUTURE IDEAS:
+=====================================
+% Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
+% Use the dynamic nature of ACO for the sink capacity uncertainty
