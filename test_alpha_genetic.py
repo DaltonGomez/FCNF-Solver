@@ -11,11 +11,11 @@ py -3.8 test_alpha_genetic.py
 
 if __name__ == "__main__":
     network = FlowNetwork()
-    network = network.loadNetwork("25-1-1.p")
-    minTargetFlow = 100
+    network = network.loadNetwork("1000-1-10.p")
+    minTargetFlow = 1000
 
-    pop = Population(network, minTargetFlow, 10)
-    pop.evolvePopulation(2, drawing=False)
+    pop = Population(network, minTargetFlow)
+    pop.evolvePopulation(drawing=True, drawLabels=True)
 
     cplex = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
     cplex.buildModel()
@@ -23,4 +23,4 @@ if __name__ == "__main__":
     opt = cplex.writeSolution()
 
     vis = SolutionVisualizer(opt)
-    # vis.drawUnlabeledGraph(leadingText="OPT")
+    vis.drawGraphWithLabels(leadingText="OPT")

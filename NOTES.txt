@@ -5,6 +5,7 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Delete VERSION_1 directory after implementing GA package
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
+>> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
 # TODO - Fix bug where solvers sometimes don't return a flow value to the solution object, causing a key error in the visualizer
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Revise method for assigning arc costs to better resemble SimCCS
@@ -14,8 +15,9 @@ GENERAL/NETWORK/SOLVERS:
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
-# TODO - Finish building out code base to match the level of VERSION_1
+# TODO - Double check the Individual and Population class in Alpha-GA, as they were adapted from the older version with little care
 # TODO - Implement other probability functions for randomly initializing alpha values
+% Don't even bother with roulette wheel selection as the pressure is too high, according to Sheppard
 # TODO - Change pathing to be only pathlets and/or all paths
 # TODO - Implement a nudge mutation, possibly Gaussian
 # TODO - Implement a termination criteria based on convergence, not just number of episodes/generations

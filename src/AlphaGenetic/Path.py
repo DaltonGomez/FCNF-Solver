@@ -7,9 +7,11 @@ class Path:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, arcFlows: dict, network: FlowNetwork):
+    def __init__(self, network: FlowNetwork, visitedNodes: list, visitedEdges: list):
         """Constructor of a Path instance"""
-        self.arcFlows = arcFlows  # Dictionary keyed on all opened arcs in the path, with value of flow amount
+        self.network = network  # TODO - Decide if this is a needed attribute
+        self.nodes = visitedNodes
+        self.arcs = visitedEdges
 
         # TODO - Determine the additional metrics after deciding how paths are computed
         # Compute the total routing cost and routing cost per unit flow metric

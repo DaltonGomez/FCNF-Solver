@@ -1,1 +1,1 @@
-print("Importing Ant classes...")
+print("Importing Ant package...")

@@ -1,1 +1,1 @@
-print("Importing AntExperiments classes...")
+print("Importing AntExperiments package...")

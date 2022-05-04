@@ -1,1 +1,1 @@
-print("Importing AlphaGenetic classes...")
+print("Importing AlphaGenetic package...")
