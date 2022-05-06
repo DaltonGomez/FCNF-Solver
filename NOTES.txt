@@ -3,6 +3,7 @@ NOTES & TODOS:
 GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Delete VERSION_1 directory after implementing GA package
+# TODO - Revise network generator to implement the cost methods developed with Sean
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
 >> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
@@ -34,7 +35,8 @@ ALPHA GENETIC ALGORITHM EXPERIMENTS:
 ANT COLONY OPTIMIZATION APPROACH:
 =====================================
 # TODO - Revise ant behavior to avoid previously visited nodes altogether, rather than popping from the trip stack
-# TODO - Revisit and test pheromone deposition and arc "goodness equations"
+# TODO - Revisit and test pheromone deposition and arc "goodness" equations
+>> Should "goodness" equation be, G(e) = cap(e) / (FC(e) + VC(e) * cap(e)), as this would be flow/$ if the pipeline was at capacity.
 # TODO - Determine if source/sink arcs should have special pheromone deposition and/or "goodness" of arc calculations
 # TODO - Update behavior to preferentially select arcs with opposing flows as those are cost saving (in the post-processing)
 # TODO - Revise the post-processing to cancel opposing flows so that it handles parallel arcs

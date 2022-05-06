@@ -32,12 +32,13 @@ class NetworkVisualizer:
             self.netVis.add_edge(int(edge[0]), int(edge[1]), label=self.network.edgesDict[(int(edge[0]), int(edge[1]))],
                                  color="black")
         if supers is True:
-            self.netVis.add_node(-1, label="Super-Source", color="green", x=0, y=0)
+            self.netVis.add_node(-1, label="Super-Source", color="green", x=100 * self.positionScalar,
+                                 y=100 * self.positionScalar)
             for source in self.network.sourcesArray:
                 self.netVis.add_edge(-1, int(source), color="black")
                 self.netVis.add_edge(int(source), -1, color="black")
             self.netVis.add_node(-2, label="Super-Sink", color="yellow",
-                                 x=100 * self.positionScalar, y=100 * self.positionScalar)
+                                 x=0, y=0)
             for sink in self.network.sinksArray:
                 self.netVis.add_edge(int(sink), -2, color="black")
 
@@ -400,7 +401,7 @@ class NetworkVisualizer:
                                             "smooth": {
                                                 "enabled": true,
                                                 "type": "curvedCW",
-                                                "roundness": 0.05
+                                                "roundness": 0.10
                                             },
                                             "shadow": {
                                                 "enabled": true,

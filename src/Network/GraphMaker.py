@@ -27,6 +27,9 @@ class GraphMaker:
         self.isSourceSinkCharged = True
         self.sourceSinkChargeRange = [200.0, 300.0]
 
+        # Cost Scalar Lookup Tables
+        self.costScalarLookupTable = self.initializeCostLookupTable()
+
         # Output Network To Be Built
         self.newNetwork = FlowNetwork()
         self.newNetwork.name = name
@@ -45,6 +48,11 @@ class GraphMaker:
         self.buildArcsDictAndMatrix()
         self.assignSourceSinkCapAndCharge()
         return self.newNetwork
+
+    def initializeCostLookupTable(self) -> dict:
+        """Initializes the cost scalar lookup table (loosely based on the SimCCS model formulation)"""
+        pass
+        # TODO - Implement the new cost function discussed with Sean
 
     def setCostDeterminingHyperparameters(self, embeddingSize=100.0, possibleArcCaps=(10, 50, 100),
                                           distFixCostScale=10.0, capFixCostScale=10.0, fixCostRandomScalar=(0.80, 1.20),

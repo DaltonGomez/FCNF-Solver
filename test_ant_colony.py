@@ -14,13 +14,13 @@ py -3.8 test_ant_colony.py
 
 if __name__ == "__main__":
     # Load Network
-    networkFile = "25-1-1.p"
+    networkFile = "presEx1.p"
     network = FlowNetwork()
     network = network.loadNetwork(networkFile)
-    targetFlow = 100
+    targetFlow = 300
 
     # Test Colony
-    antColony = Colony(network, targetFlow, 50, 15)
+    antColony = Colony(network, targetFlow, 10, 15)
     antSoln = antColony.solveNetwork(drawing=True)
     antSoln.saveSolution()
     antVisualizer = SolutionVisualizer(antSoln)

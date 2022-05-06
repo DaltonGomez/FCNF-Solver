@@ -145,6 +145,7 @@ class Colony:
             for cap in self.network.possibleArcCapsArray:
                 arcObj = self.network.arcsDict[(edge[0], edge[1], cap)]
                 # OLD: arcGoodness = arcGoodnessScalar / (arcObj.fixedCost + arcObj.variableCost)
+                # PROPOSED: arcGoodness = (arcGoodnessScalar * cap) / (arcObj.fixedCost + arcObj.variableCost * cap)
                 arcGoodness = (arcGoodnessScalar * cap) / (arcObj.fixedCost + arcObj.variableCost)
                 arcGoodnessDict[(edge[0], edge[1], cap)] = arcGoodness
         # For all supersource -> source and visa versa, initialize with zero

@@ -23,4 +23,4 @@ if __name__ == "__main__":
     opt = cplex.writeSolution()
 
     vis = SolutionVisualizer(opt)
-    vis.drawGraphWithLabels(leadingText="OPT")
+    vis.drawGraphWithLabels(leadingText="OPT_")
