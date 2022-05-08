@@ -10,13 +10,13 @@ py -3.8 test_network_solver.py
 """
 
 if __name__ == "__main__":
-    name = "presEx1.p"
+    name = "presEx3.p"
     flowNetwork = FlowNetwork()
     flowNetwork = flowNetwork.loadNetwork(name)
 
     # Network Visualization Test
-    visualizer = NetworkVisualizer(flowNetwork, directed=True, supers=True)
-    visualizer.drawBidirectionalGraph()
+    visualizer = NetworkVisualizer(flowNetwork, directed=False, supers=False)
+    visualizer.drawUnlabeledGraph()
 
     # Solver Test
     solver = MILPsolverCPLEX(flowNetwork, 300, isOneArcPerEdge=False)

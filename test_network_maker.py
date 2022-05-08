@@ -7,10 +7,10 @@ py -3.8 test_network_maker.py
 """
 
 if __name__ == "__main__":
-    name = ""
-    numNodes = 10
-    numSources = 2
-    numSinks = 2
+    name = "PresEx6"
+    numNodes = 36
+    numSources = 3
+    numSinks = 3
 
     graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
     # Uncomment to tune how the network generates costs and to turn on generalizations

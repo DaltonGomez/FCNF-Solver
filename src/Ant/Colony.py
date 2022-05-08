@@ -36,7 +36,7 @@ class Colony:
         self.convergenceData = []  # Stores the best known cost after each episode of the colony
         self.visual = None  # Object used to view the best solutions of the episode over time
 
-    def solveNetwork(self, drawing=True) -> Solution:
+    def solveNetwork(self, drawing=True, labels=True) -> Solution:
         """Main loop that solves the Flow Network instance with the Ant"""
         # EPISODE LOOP
         for episode in range(self.numEpisodes):
@@ -55,7 +55,10 @@ class Colony:
             self.resetAllAnts()  # Clears the tour/solution attributes of every ant in the population for the next episode
             if drawing is True:
                 self.visual = SolutionVisualizer(self.bestKnownSolution)  # Instantiate a visualizer
-                self.visual.drawGraphWithLabels(leadingText="Ep." + str(episode) + "_")  # Draw graph
+                if labels is True:
+                    self.visual.drawGraphWithLabels(leadingText="Ep." + str(episode) + "_")  # Draw graph w/ labels
+                else:
+                    self.visual.drawUnlabeledGraph(leadingText="Ep." + str(episode) + "_")  # Draw graph w/o labels
         return self.bestKnownSolution  # Should return the best solution found at the end
 
     def updateBestSolution(self) -> None:

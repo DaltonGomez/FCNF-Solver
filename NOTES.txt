@@ -3,15 +3,15 @@ NOTES & TODOS:
 GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Delete VERSION_1 directory after implementing GA package
-# TODO - Revise network generator to implement the cost methods developed with Sean
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
 >> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
 # TODO - Fix bug where solvers sometimes don't return a flow value to the solution object, causing a key error in the visualizer
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
-# TODO - Revise method for assigning arc costs to better resemble SimCCS
+# TODO - Revise network generator to implement the cost methods developed with Sean
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
 >> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
+# TODO - Implement a Data-In class to read in an input graph from a csv (for example, SimCCS data)
 
 
 ALPHA GENETIC ALGORITHM APPROACH:
@@ -35,12 +35,18 @@ ALPHA GENETIC ALGORITHM EXPERIMENTS:
 ANT COLONY OPTIMIZATION APPROACH:
 =====================================
 # TODO - Revise ant behavior to avoid previously visited nodes altogether, rather than popping from the trip stack
+>> Not actually a good idea as this will allow ants to get deadlocked at nodes surrounded by full capacity edges and previously visited nodes
 # TODO - Revisit and test pheromone deposition and arc "goodness" equations
 >> Should "goodness" equation be, G(e) = cap(e) / (FC(e) + VC(e) * cap(e)), as this would be flow/$ if the pipeline was at capacity.
 # TODO - Determine if source/sink arcs should have special pheromone deposition and/or "goodness" of arc calculations
 # TODO - Update behavior to preferentially select arcs with opposing flows as those are cost saving (in the post-processing)
 # TODO - Revise the post-processing to cancel opposing flows so that it handles parallel arcs
 # TODO - Adapt to account for parallel arcs (i.e. more than one possible edge capacity) and test on parallel edges
+# TODO - Implement a termination criteria based on convergence, not just number of episodes/generations
+# TODO - Run the ants in parallel
+# TODO - Construct feasibility proof of the solution returned by an ant
+# TODO - Attempt to prove the convergence of the colony's solution in the limit
+# TODO - Consider adding some annealing schedules to hyperparameters to reset the amount of exploration
 
 
 ANT COLONY OPTIMIZATION EXPERIMENTS:
