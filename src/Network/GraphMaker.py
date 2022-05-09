@@ -18,9 +18,9 @@ class GraphMaker:
         self.edgePenaltyRange = [0.95, 1.50]
         self.randomEdgePenalties = None
         self.isSourceSinkCapacitated = True
-        self.sourceSinkCapacityRange = [10, 100]  # TODO - Update how the src/sinks are capacitated
+        self.sourceSinkCapacityRange = [0.01, 2]  # TODO - Update how the src/sinks are capacitated
         self.isSourceSinkCharged = True
-        self.sourceSinkChargeRange = [10, 100]  # TODO - Update how the src/sinks are charged from 10000*[0.001, 0.01]
+        self.sourceSinkChargeRange = [0.01, 2]  # TODO - Update how the src/sinks are charged
 
         # Output Network To Be Built
         self.newNetwork = FlowNetwork()
@@ -213,8 +213,8 @@ class GraphMaker:
         self.edgePenaltyRange = edgePenaltyRange
         self.arcCostLookupTable = arcCostLookupTable
 
-    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(10, 100),
-                                     chargeRange=(10, 100)) -> None:
+    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(0.01, 2),
+                                     chargeRange=(0.01, 2)) -> None:
         """Allows the capacitated/charged source sink generalizes to be turned on and tuned"""
         self.isSourceSinkCapacitated = isCapacitated
         self.sourceSinkCapacityRange = capacityRange

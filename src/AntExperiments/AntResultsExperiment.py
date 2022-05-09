@@ -90,7 +90,7 @@ class AntResultsExperiment:
         self.outputBlock.append(["EXPERIMENTAL RESULTS OUTPUT", timestamp])
         self.outputBlock.append(
             ["Num. Nodes", "Num. Parallel Edges", "Num. Src/Sinks", "Min. Target Flow", "Optimal MILP Value",
-             "Relaxed LP Value", "Ant AntDemo", "Ant 2", "Ant 3", "Ant 4", "Ant 5", "Ant 6", "Ant 7", "Ant 8", "Ant 9",
+             "Relaxed LP Value", "Ant 1", "Ant 2", "Ant 3", "Ant 4", "Ant 5", "Ant 6", "Ant 7", "Ant 8", "Ant 9",
              "Ant 10", "Avg. Ant Value", "Optimality Gap"])
 
     def writeOutputBlock(self) -> None:

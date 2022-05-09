@@ -94,7 +94,7 @@ class NetworkVisualizer:
                                     "arrowStrikethrough": false,
                                     "arrows": {
                                         "to": {
-                                            "scaleFactor": AntDemo
+                                            "scaleFactor": 1
                                         }
                                     },
                                     "scaling": {
@@ -129,7 +129,7 @@ class NetworkVisualizer:
                                         "fit": true
                                     },
                                     "barnesHut": {
-                                        "avoidOverlap": AntDemo,
+                                        "avoidOverlap": 1,
                                         "centralGravity": 0.2,
                                         "damping": 0.90,
                                         "gravitationalConstant": -100000,
@@ -166,9 +166,9 @@ class NetworkVisualizer:
                                     },
                                     "font": {
                                         "size": 25,
-                                        "color": "rgba(0, 0, 200, AntDemo)",
+                                        "color": "rgba(0, 0, 200, 1)",
                                         "strokeWidth": 2,
-                                        "strokeColor": "rgba(0, 200, 0, AntDemo)"
+                                        "strokeColor": "rgba(0, 200, 0, 1)"
                                     },
                                     "scaling": {
                                         "min": 5,
@@ -186,14 +186,14 @@ class NetworkVisualizer:
                                     },
                                     "font": {
                                         "size": 30,
-                                        "color": "rgba(235, 190, 0, AntDemo)",
+                                        "color": "rgba(235, 190, 0, 1)",
                                         "strokeWidth": 3,
-                                        "strokeColor": "rgba(255, 0, 0, AntDemo)"
+                                        "strokeColor": "rgba(255, 0, 0, 1)"
                                     },
                                     "arrowStrikethrough": false,
                                     "arrows": {
                                         "to": {
-                                            "scaleFactor": AntDemo
+                                            "scaleFactor": 1
                                         }
                                     },
                                     "scaling": {
@@ -228,7 +228,7 @@ class NetworkVisualizer:
                                         "fit": true
                                     },
                                     "barnesHut": {
-                                        "avoidOverlap": AntDemo,
+                                        "avoidOverlap": 1,
                                         "centralGravity": 0.2,
                                         "damping": 0.90,
                                         "gravitationalConstant": -100000,
@@ -265,9 +265,9 @@ class NetworkVisualizer:
                                     },
                                     "font": {
                                         "size": 25,
-                                        "color": "rgba(0, 0, 200, AntDemo)",
+                                        "color": "rgba(0, 0, 200, 1)",
                                         "strokeWidth": 2,
-                                        "strokeColor": "rgba(0, 200, 0, AntDemo)"
+                                        "strokeColor": "rgba(0, 200, 0, 1)"
                                     },
                                     "scaling": {
                                         "min": 5,
@@ -285,14 +285,14 @@ class NetworkVisualizer:
                                     },
                                     "font": {
                                         "size": 20,
-                                        "color": "rgba(235, 190, 0, AntDemo)",
+                                        "color": "rgba(235, 190, 0, 1)",
                                         "strokeWidth": 3,
-                                        "strokeColor": "rgba(255, 0, 0, AntDemo)"
+                                        "strokeColor": "rgba(255, 0, 0, 1)"
                                     },
                                     "arrowStrikethrough": false,
                                     "arrows": {
                                         "to": {
-                                            "scaleFactor": AntDemo
+                                            "scaleFactor": 1
                                         }
                                     },
                                     "scaling": {
@@ -327,7 +327,7 @@ class NetworkVisualizer:
                                         "fit": true
                                     },
                                     "barnesHut": {
-                                        "avoidOverlap": AntDemo,
+                                        "avoidOverlap": 1,
                                         "centralGravity": 0.2,
                                         "damping": 0.90,
                                         "gravitationalConstant": -100000,
@@ -364,9 +364,9 @@ class NetworkVisualizer:
                                             },
                                             "font": {
                                                 "size": 0,
-                                                "color": "rgba(0, 0, 200, AntDemo)",
+                                                "color": "rgba(0, 0, 200, 1)",
                                                 "strokeWidth": 2,
-                                                "strokeColor": "rgba(0, 200, 0, AntDemo)"
+                                                "strokeColor": "rgba(0, 200, 0, 1)"
                                             },
                                             "scaling": {
                                                 "min": 5,
@@ -384,14 +384,14 @@ class NetworkVisualizer:
                                             },
                                             "font": {
                                                 "size": 0,
-                                                "color": "rgba(235, 190, 0, AntDemo)",
+                                                "color": "rgba(235, 190, 0, 1)",
                                                 "strokeWidth": 3,
-                                                "strokeColor": "rgba(255, 0, 0, AntDemo)"
+                                                "strokeColor": "rgba(255, 0, 0, 1)"
                                             },
                                             "arrowStrikethrough": false,
                                             "arrows": {
                                                 "to": {
-                                                    "scaleFactor": AntDemo
+                                                    "scaleFactor": 1
                                                 }
                                             },
                                             "scaling": {
@@ -426,7 +426,7 @@ class NetworkVisualizer:
                                                 "fit": true
                                             },
                                             "barnesHut": {
-                                                "avoidOverlap": AntDemo,
+                                                "avoidOverlap": 1,
                                                 "centralGravity": 0.2,
                                                 "damping": 0.90,
                                                 "gravitationalConstant": -100000,

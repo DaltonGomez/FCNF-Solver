@@ -6,7 +6,7 @@ im = Model(name='ip_telephone_production')
 desk = im.integer_var(name='desk')
 cell = im.integer_var(name='cell')
 # write constraints
-# constraint #AntDemo: desk production is greater than 100
+# constraint #1: desk production is greater than 100
 im.add_constraint(desk >= 100)
 
 # constraint #2: cell production is greater than 100

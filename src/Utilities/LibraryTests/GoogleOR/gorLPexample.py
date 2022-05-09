@@ -21,7 +21,7 @@ def LinearProgrammingExample():
     # Constraint 0: x + 2y <= 14.
     solver.Add(x + 2 * y <= 14.0)
 
-    # Constraint AntDemo: 3x - y >= 0.
+    # Constraint 1: 3x - y >= 0.
     solver.Add(3 * x - y >= 0.0)
 
     # Constraint 2: x - y <= 2.

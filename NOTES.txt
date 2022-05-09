@@ -2,13 +2,11 @@ NOTES & TODOS:
 
 GENERAL/NETWORK/SOLVERS:
 =====================================
-# TODO - Delete VERSION_1 directory after implementing GA package
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
 >> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
 # TODO - Fix bug where solvers sometimes don't return a flow value to the solution object, causing a key error in the visualizer
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
-# TODO - Revise network generator to implement the cost methods developed with Sean
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
 >> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
 # TODO - Implement a Data-In class to read in an input graph from a csv (for example, SimCCS data)
@@ -16,7 +14,7 @@ GENERAL/NETWORK/SOLVERS:
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
-# TODO - Double check the Individual and Population class in Alpha-GA, as they were adapted from the older version with little care
+# TODO - Double-check the Individual and Population class in Alpha-GA, as they were adapted from the older version with little care
 # TODO - Implement other probability functions for randomly initializing alpha values
 % Don't even bother with roulette wheel selection as the pressure is too high, according to Sheppard
 # TODO - Change pathing to be only pathlets and/or all paths
@@ -53,6 +51,7 @@ ANT COLONY OPTIMIZATION EXPERIMENTS:
 =====================================
 # TODO - Improve the hyperparameter tuning method and increase the search space
 # TODO - Clean up the way data is exported in the ant experiments
+# TODO - Analyze time constraints
 
 
 GA/ACO INTEGRATION:

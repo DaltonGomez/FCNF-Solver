@@ -10,7 +10,7 @@ py -3.8 run_ant_tuning.py
 """
 
 if __name__ == "__main__":
-    networkFile = "25-AntDemo-AntDemo.p"
+    networkFile = "25-1-1.p"
     network = FlowNetwork()
     network = network.loadNetwork(networkFile)
     targetFlow = 100

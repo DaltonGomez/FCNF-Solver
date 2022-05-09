@@ -14,7 +14,7 @@ py -3.8 run_opt_alphas.py
 if __name__ == "__main__":
     # Get inputs
     minTargetFlow = 1000
-    networkName = "1000-AntDemo-10.p"
+    networkName = "1000-1-10.p"
     network = FlowNetwork()
     network = network.loadNetwork(networkName)
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     for e in range(network.numEdges):
         for c in range(network.numArcCaps):
             flow = exact.arcFlows[(e, c)]
-            # If there is a flow, set alpha = AntDemo/flow
+            # If there is a flow, set alpha = 1/flow
             if flow > 0:
                 alphaValues[e][c] = 1 / flow
             # Else if there's no flow, set alpha = infinity

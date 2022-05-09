@@ -10,7 +10,7 @@ desk = m.continuous_var(name='desk')
 cell = m.continuous_var(name='cell')
 
 # write constraints
-# constraint #AntDemo: desk production is greater than 100
+# constraint #1: desk production is greater than 100
 m.add_constraint(desk >= 100)
 
 # constraint #2: cell production is greater than 100

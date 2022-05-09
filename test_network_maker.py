@@ -7,11 +7,11 @@ py -3.8 test_network_maker.py
 """
 
 """
-# COMPLETE ARC COST LOOKUP TABLE
+# ORIGINAL COST DETERMINING DATA FROM SIMCCS
 arcCostLookupTable = [
         [0.19, 0.01238148, 0.010685656],
         [0.54, 0.0140994, 0.004500589],
-        [AntDemo.13, 0.016216406, 0.002747502],
+        [1.13, 0.016216406, 0.002747502],
         [3.25, 0.02169529, 0.00170086],
         [6.86, 0.030974863, 0.001407282],
         [12.26, 0.041795733, 0.001290869],
@@ -21,21 +21,31 @@ arcCostLookupTable = [
         [83.95, 0.136751956, 0.001164578],
         [119.16, 0.172747686, 0.001098788]
     ]
+
+    srcSinkCapacityRange = [0.01, 2]
+    srcSinkChargeRange = [0.01, 2]
 """
 
 if __name__ == "__main__":
+    # Input parameters
     name = "test"
     numNodes = 10
     numSources = 1
     numSinks = 1
-
-    graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
+    # Format: cap, fixed cost, variable cost
     arcCostLookupTable = [
-        [50, 10, 1]
+        [50, 5, 1],
+        [100, 10, 2]
     ]
-    graphMaker.setArcCostLookupTable(arcCostLookupTable=arcCostLookupTable)
-    graphMaker.setSourceSinkGeneralizations(True, True)
+    # Source/sink cap and cost ranges
+    srcSinkCapacityRange = [100, 200]
+    srcSinkChargeRange = [10, 25]
 
+    # Make graph
+    graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
+    graphMaker.setArcCostLookupTable(arcCostLookupTable=arcCostLookupTable)
+    graphMaker.setSourceSinkGeneralizations(True, True, capacityRange=srcSinkCapacityRange,
+                                            chargeRange=srcSinkChargeRange)
     generatedNetwork = graphMaker.generateNetwork()
     generatedNetwork.drawNetworkTriangulation()
     generatedNetwork.saveNetwork()

@@ -8,7 +8,7 @@ def main():
 
     # Define four parallel arrays: sources, destinations, capacities,
     # and unit costs between each pair. For instance, the arc from node 0
-    # to node AntDemo has a capacity of 15.
+    # to node 1 has a capacity of 15.
     start_nodes = [0, 0, 1, 1, 1, 2, 2, 3, 4]
     end_nodes = [1, 2, 2, 3, 4, 3, 4, 4, 2]
     capacities = [15, 8, 20, 4, 10, 15, 4, 20, 5]

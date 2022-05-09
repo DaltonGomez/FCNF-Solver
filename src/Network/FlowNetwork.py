@@ -197,7 +197,7 @@ class FlowNetwork:
         return node.xPos, node.yPos
 
     def getNodeType(self, nodeID: int) -> int:
-        """Returns the type of the node (NOTE: nodeType = {0: source, AntDemo: sink, 2: intermediate})"""
+        """Returns the type of the node (NOTE: nodeType = {0: source, 1: sink, 2: intermediate})"""
         node = self.nodesDict[nodeID]
         return node.nodeType
 
@@ -236,7 +236,7 @@ class FlowNetwork:
         return self.sinksArray
 
     def setNodeType(self, nodeID: int, nodeType: int) -> None:
-        """Sets a node to a type (NOTE: nodeType = {0: source, AntDemo: sink, 2: intermediate})"""
+        """Sets a node to a type (NOTE: nodeType = {0: source, 1: sink, 2: intermediate})"""
         thisNode = self.nodesDict[nodeID]
         thisNode.nodeType = nodeType
 
