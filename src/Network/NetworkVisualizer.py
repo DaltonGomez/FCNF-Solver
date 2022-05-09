@@ -302,7 +302,7 @@ class NetworkVisualizer:
                                     "smooth": {
                                         "enabled": true,
                                         "type": "curvedCW",
-                                        "roundness": 0.10
+                                        "roundness": 0.05
                                     },
                                     "shadow": {
                                         "enabled": true,

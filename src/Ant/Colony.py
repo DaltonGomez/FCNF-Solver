@@ -56,9 +56,9 @@ class Colony:
             if drawing is True:
                 self.visual = SolutionVisualizer(self.bestKnownSolution)  # Instantiate a visualizer
                 if labels is True:
-                    self.visual.drawGraphWithLabels(leadingText="Ep." + str(episode) + "_")  # Draw graph w/ labels
+                    self.visual.drawGraphWithLabels(leadingText="Ep" + str(episode) + "_")  # Draw graph w/ labels
                 else:
-                    self.visual.drawUnlabeledGraph(leadingText="Ep." + str(episode) + "_")  # Draw graph w/o labels
+                    self.visual.drawUnlabeledGraph(leadingText="Ep" + str(episode) + "_")  # Draw graph w/o labels
         return self.bestKnownSolution  # Should return the best solution found at the end
 
     def updateBestSolution(self) -> None:

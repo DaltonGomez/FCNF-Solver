@@ -55,6 +55,7 @@ class GraphMaker:
 
     def assignRandomSourceSinks(self) -> None:
         """Randomly assigns source and sink IDs to nodes"""
+        random.seed()
         tempNodes = set(range(self.newNetwork.numTotalNodes))
         tempSrcSinks = set(random.sample(tempNodes, self.newNetwork.numSources + self.newNetwork.numSinks))
         tempInterNodes = tempNodes.symmetric_difference(tempSrcSinks)
@@ -116,6 +117,18 @@ class GraphMaker:
             self.newNetwork.addOutgoingEdgeToNode(edge[0], thisEdge)
             self.newNetwork.addIncomingEdgeToNode(edge[1], thisEdge)
 
+    def initializeRandomEdgePenalties(self) -> dict:
+        """Initializes a random penalties for each opposing edge pair to mimic spatial variability in costs (i.e. the cost raster)"""
+        random.seed()
+        edgePenalties = {}
+        for edge in self.newNetwork.edgesArray:
+            thisEdge = (edge[0], edge[1])
+            backEdge = (edge[1], edge[0])
+            thisPenalty = random.uniform(self.edgePenaltyRange[0], self.edgePenaltyRange[1])
+            edgePenalties[thisEdge] = thisPenalty
+            edgePenalties[backEdge] = thisPenalty
+        return edgePenalties
+
     def setPossibleArcCapacities(self) -> None:
         """Sets the possible arc capacities for the parallel edges"""
         tempArcCaps = []
@@ -146,7 +159,8 @@ class GraphMaker:
     def calculateArcFixedCost(self, edgeID: int, capID: int) -> float:
         """Calculates the fixed cost of the arc in a pseudorandom manner"""
         distance = self.newNetwork.distancesArray[edgeID]
-        penalty = self.randomEdgePenalties[edgeID]
+        thisEdge = self.newNetwork.edgesArray[edgeID]
+        penalty = self.randomEdgePenalties[(thisEdge[0], thisEdge[1])]
         fixedCostScalar = self.arcCostLookupTable[capID][1]
         fixedCost = distance * penalty * fixedCostScalar
         return fixedCost
@@ -154,13 +168,15 @@ class GraphMaker:
     def calculateArcVariableCost(self, edgeID: int, capID: int) -> float:
         """Calculates the variable cost of the arc in a pseudorandom manner"""
         distance = self.newNetwork.distancesArray[edgeID]
-        penalty = self.randomEdgePenalties[edgeID]
+        thisEdge = self.newNetwork.edgesArray[edgeID]
+        penalty = self.randomEdgePenalties[(thisEdge[0], thisEdge[1])]
         variableCostScalar = self.arcCostLookupTable[capID][2]
         variableCost = distance * penalty * variableCostScalar
         return variableCost
 
     def assignSourceSinkCapAndCharge(self) -> None:
         """Assigns source/sink capacities and/or charges if requested"""
+        random.seed()
         if self.isSourceSinkCapacitated is True:
             self.newNetwork.isSourceSinkCapacitated = True
             tempSrcCaps = []
@@ -185,14 +201,6 @@ class GraphMaker:
                 thisSinkCost = random.uniform(self.sourceSinkChargeRange[0], self.sourceSinkChargeRange[1])
                 tempSinkCosts.append(thisSinkCost)
             self.newNetwork.sinkVariableCostsArray = np.array(tempSinkCosts)
-
-    def initializeRandomEdgePenalties(self) -> list:
-        """Initializes random penalties for all edges to mimic spatial variability in costs (i.e. the cost raster)"""
-        edgePenalties = []
-        for e in range(self.newNetwork.numEdges):
-            thisPenalty = random.uniform(self.edgePenaltyRange[0], self.edgePenaltyRange[1])
-            edgePenalties.append(thisPenalty)
-        return edgePenalties
 
     def setArcCostLookupTable(self, embeddingSize=100.0, edgePenaltyRange=(0.95, 1.50),
                               arcCostLookupTable=(

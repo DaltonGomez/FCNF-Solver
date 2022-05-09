@@ -7,7 +7,7 @@ py -3.8 test_network_maker.py
 """
 
 """
-# ORIGINAL COST DETERMINING DATA FROM SIMCCS
+# ORIGINAL COST DETERMINING TABLE ADAPTED FROM SIMCCS MODEL (see data/SimCCS_models/Pipeline Cost Model.xlsm)
 arcCostLookupTable = [
         [0.19, 0.01238148, 0.010685656],
         [0.54, 0.0140994, 0.004500589],
@@ -28,14 +28,14 @@ arcCostLookupTable = [
 
 if __name__ == "__main__":
     # Input parameters
-    name = "test"
-    numNodes = 10
-    numSources = 1
-    numSinks = 1
+    name = "test2"
+    numNodes = 8
+    numSources = 2
+    numSinks = 2
+    # Arc Cost Determining Table
     # Format: cap, fixed cost, variable cost
     arcCostLookupTable = [
-        [50, 5, 1],
-        [100, 10, 2]
+        [100, 10, 1]
     ]
     # Source/sink cap and cost ranges
     srcSinkCapacityRange = [100, 200]

@@ -32,8 +32,9 @@ class Population:
         # Globals & Initialization HPs
         self.populationSize = populationSize
         self.numGenerations = numGenerations
-        self.alphaBounds = [0.0, 1.0]
         self.initializationDistribution = "uniform"  # :param : "uniform", "gaussian"
+        self.initializationParams = [0.0,
+                                     1.0]  # :param: Lower and upper bounds if uniform distribution, or mu and sigma if Gaussian
         # Individual Selection HPs (For Crossover Exclusively)
         self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "top", "random"
         self.tournamentSize = 2
@@ -57,17 +58,18 @@ class Population:
     # ==================================================================
     # ============== HYPERPARAMETER SETTERS & INITIALIZER ==============
     # ==================================================================
-    def setGlobalHyperparams(self, populationSize: int, numGenerations: int, alphaBounds: list,
-                             initializationDistribution: str) -> None:
+    def setGlobalHyperparams(self, populationSize: int, numGenerations: int, initializationDistribution: str,
+                             initializationParams: list) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
         :param int numGenerations: Number of iterations the population evolves for
-        :param list alphaBounds: Upper and lower bound that alpha values can be initialized to, given as [lb, ub]
-        :param str initializationDistribution: One of following: {"uniform", "gaussian"}"""
+        :param str initializationDistribution: One of following: {"uniform", "gaussian"}
+        :param list initializationParams: Lower and upper bounds if uniform distribution, or mu and sigma if Gaussian
+        """
         self.populationSize = populationSize
         self.numGenerations = numGenerations
         self.initializationDistribution = initializationDistribution
-        self.alphaBounds = alphaBounds
+        self.initializationParams = initializationParams
 
     def setIndividualSelectionHyperparams(self, selectionMethod: str, tournamentSize: int) -> None:
         """Sets the GA class fields that dictate how the selection of individuals is carried out \n
@@ -117,68 +119,27 @@ class Population:
     def evolvePopulation(self, drawing=False, drawLabels=False) -> None:
         """Evolves the population for a specified number of generations"""
         for generation in range(self.numGenerations):
-            # TODO - SELECTION & CROSSOVER
-            # TODO - SELECTION & MUTATION
-            # Solve and visualize (NAIVE HILL CLIMB CURRENTLY AS POC)
-            self.naiveHillClimb()
+            # TODO - IMPLEMENT SELECTION & CROSSOVER
+            # TODO - IMPLEMENT SELECTION & MUTATION
             self.solvePopulation()
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
             print("Generation = " + str(generation) + "\tBest Individual = " + str(self.population[0].trueCost))
 
-    """
-    def oldEvolvePopulation(self, drawing=True) -> AlphaIndividual:
-        random.seed()
-        # INITIALIZATION
-        if len(self.population) == 0:
-            self.initializePopulation([0.0, 1.0])
-        # MAIN EVOLUTION LOOP
+    def solveWithNaiveHillClimb(self, drawing=False, drawLabels=False) -> None:
+        """Evolves the population for a specified number of generations"""
         for generation in range(self.numGenerations):
-            # ATTEMPT CROSSOVER
-            for crossoverAttempt in range(self.crossoverAttemptsPerGeneration):
-                if random.random() < self.crossoverRate:
-                    # SELECT INDIVIDUALS
-                    selectedIndividuals = self.selectIndividuals()
-                    parentOnePaths = self.selectPaths(selectedIndividuals[0])
-                    parentTwoPaths = self.selectPaths(selectedIndividuals[1])
-                    # CROSSOVER
-                    self.crossover(selectedIndividuals[0], selectedIndividuals[1], parentOnePaths,
-                                   parentTwoPaths)
-
-            # MUTATION
-            for individual in range(len(self.population)):
-                if random.random() < self.mutationRate:
-                    selectedPaths = self.selectPaths(individual)
-                    self.mutate(individual, selectedPaths)
-
-            # EVALUATE
+            # Solve and visualize
+            self.naiveHillClimb()
             self.solvePopulation()
-            self.rankPopulation()
-            self.printAllCosts(generation)
             if drawing is True:
-                self.visualizeIndividual(generation, 0, graphType="withLabels")
-
-                # TODO - Delete prints to console; needed screenshots for presentation
-                bestIndividual = self.population[0]
-                print("Best Alpha Values:")
-                print(bestIndividual.alphaValues)
-                flowVector = []
-                for edge in bestIndividual.FCFN.edgesDict:
-                    if edge in bestIndividual.openedEdgesDict:
-                        flowVector.append(bestIndividual.openedEdgesDict[edge][0])
-                    else:
-                        flowVector.append(0)
-                    # print(edge)
-                print("Best Flow Values:")
-                print(flowVector)
-                # TODO - Delete prints to console; needed screenshots for presentation
-        return self.population[0]
-        """
+                self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
+            self.printBestIndividualsPaths()
+            print("Generation = " + str(generation) + "\tBest Individual = " + str(self.population[0].trueCost))
 
     # ====================================================
     # ============== INITIALIZATION METHODS ==============
     # ====================================================
-    # TODO - Incorporate the initialization hyperparameters/distributions
     def initializePopulation(self) -> None:
         """Initializes the GA population with random alpha values"""
         for individual in range(self.populationSize):
@@ -198,14 +159,119 @@ class Population:
         initialGenotype = np.array(tempAlphaValues)
         return initialGenotype
 
-    @staticmethod
-    def getAlphaValue() -> float:
+    def getAlphaValue(self) -> float:
         """Returns a single alpha value for population initialization"""
-        # TODO - Incorporate the initialization hyperparameters/distributions
         random.seed()
-        randomGene = random.random()
+        randomGene = 1.0
+        if self.initializationDistribution == "uniform":
+            randomGene = random.uniform(self.initializationParams[0], self.initializationParams[1])
+        elif self.initializationDistribution == "gaussian":
+            randomGene = random.gauss(self.initializationParams[0], self.initializationParams[1])
         return randomGene
 
+    # =========================================================
+    # ============== MUTATION/HILL CLIMB METHODS ==============
+    # =========================================================
+    def randomSingleMutation(self, individualNum: int) -> None:
+        """Mutates an individual at only one random gene in the chromosome"""
+        random.seed()
+        mutatedEdge = random.randint(0, self.network.numEdges - 1)
+        mutatedCap = random.randint(0, self.network.numArcCaps - 1)
+        individual = self.population[individualNum]
+        individual.alphaValues[mutatedEdge][mutatedCap] = self.getAlphaValue()
+        individual.resetOutputNetwork()
+
+    def hypermutateIndividual(self, individualNum: int) -> None:
+        """Reinitializes the individual's entire alpha values (i.e. kills them off and spawns a new individual)"""
+        individual = self.population[individualNum]
+        newAlphas = self.getInitialAlphaValues()
+        individual.setAlphaValues(newAlphas)
+        individual.resetOutputNetwork()
+
+    def hypermutatePopulation(self) -> None:
+        """Reinitializes the entire population (i.e. an extinction event with a brand new population spawned)"""
+        for individual in self.population:
+            self.hypermutateIndividual(individual)
+
+    def naiveHillClimb(self) -> None:
+        """Sorts the population by rank and hypermutates the non-best individuals only at each generation"""
+        self.population = self.rankPopulation()
+        for i in range(1, self.populationSize):
+            self.hypermutateIndividual(i)
+
+    # ============================================
+    # ============== HELPER METHODS ==============
+    # ============================================
+    def rankPopulation(self) -> list:
+        """Ranks the population in ascending order of true cost (i.e. Lower cost -> More fit) and returns"""
+        sortedPopulation = sorted(self.population, key=lambda x: x.trueCost)
+        return sortedPopulation
+
+    def getMostFitIndividual(self) -> Individual:
+        """Returns the most fit individual in the population"""
+        sortedPop = self.rankPopulation()
+        return sortedPop[0]
+
+    # ============================================
+    # ============== SOLVER METHODS ==============
+    # ============================================
+    def solvePopulation(self) -> None:
+        """Solves all unsolved instances in the entire population"""
+        for individual in self.population:
+            if individual.isSolved is False:
+                self.solveIndividual(individual)
+
+    def solveIndividual(self, individual: Individual) -> None:
+        """Solves a single individual and writes the expressed network to the individual"""
+        # Overwrite new objective function with new alpha values and solve
+        self.solver.updateObjectiveFunction(individual.alphaValues)
+        self.solver.solveModel()
+        # Write expressed network output data to individual
+        individual.isSolved = True
+        individual.arcFlows = self.solver.getArcFlowsDict()
+        individual.arcsOpened = self.solver.getArcsOpenDict()
+        individual.srcFlows = self.solver.getSrcFlowsList()
+        individual.sinkFlows = self.solver.getSinkFlowsList()
+        individual.trueCost = self.solver.calculateTrueCost()
+        individual.fakeCost = self.solver.getObjectiveValue()
+        # Reset solver
+        self.solver.resetSolver()
+
+    # ===================================================
+    # ============== VISUALIZATION METHODS ==============
+    # ===================================================
+    def visualizeBestIndividual(self, labels=False, leadingText="") -> None:
+        """Renders the visualization for the most fit individual in the population at any time"""
+        bestIndividual = self.getMostFitIndividual()
+        self.visualizeIndividual(bestIndividual, labels=labels, leadingText=leadingText)
+
+    def visualizeAllIndividuals(self, labels=False, leadingText="") -> None:
+        """Renders the visualization for all individuals in the population at any time"""
+        i = 0
+        for individual in self.population:
+            self.visualizeIndividual(individual, labels=labels, leadingText=leadingText + "_" + str(i))
+            i += 1
+
+    def visualizeIndividual(self, individual: Individual, labels=False, leadingText="") -> None:
+        """Renders the visualization for a specified individual"""
+        solution = Solution(self.network, self.minTargetFlow, individual.fakeCost, individual.trueCost,
+                            individual.srcFlows, individual.sinkFlows, individual.arcFlows, individual.arcsOpened,
+                            "alphaGA", False, self.network.isSourceSinkCapacitated, self.network.isSourceSinkCharged)
+        visualizer = SolutionVisualizer(solution)
+        if labels is True:
+            visualizer.drawGraphWithLabels(leadingText=leadingText)
+        else:
+            visualizer.drawUnlabeledGraph(leadingText=leadingText)
+
+    def printBestIndividualsPaths(self) -> None:
+        """Prints the path data of the best individual"""
+        bestIndividual = self.getMostFitIndividual()
+        bestIndividual.computeAllUsedPaths()
+        bestIndividual.printAllPaths()
+
+    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # TODO - REVISE HERE DOWN (ALL OLD METHODS)
+    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # ============================================================
     # ============== INDIVIDUAL SELECTION OPERATORS ==============
     # ============================================================
@@ -376,6 +442,7 @@ class Population:
     @staticmethod
     def rouletteWheelPathSelection(rankedPaths: list, selectionSize: int) -> list:
         """Selects paths from an individual probabilistically by their normalized fitness (based on path ranking method)"""
+        random.seed()
         # Build cumulative probability function
         cumulativeFitness = 0
         for p in range(len(rankedPaths)):
@@ -401,6 +468,7 @@ class Population:
 
     def tournamentPathSelection(self, rankedPaths: list, selectionSize: int, tournamentSize: int) -> list:
         """Selects the best k paths out of a randomly chosen subset of size n"""
+        random.seed()
         # Select random subset of paths
         tournament = random.sample(rankedPaths, tournamentSize)
         # Sort the tournament based on most or least direction
@@ -418,10 +486,8 @@ class Population:
     # ==============================================
     # ============== MUTATION METHODS ==============
     # ==============================================
-    # TODO - Old VERSION_1 from here down
     def mutate(self, individualID: int, selectedPaths=None) -> None:
         """Hyper-selection operator that calls specific mutation method based on hyperparameters"""
-        random.seed()
         if selectedPaths is None:
             selectedPaths = []
         if self.mutationMethod == "randomSingle":
@@ -431,45 +497,16 @@ class Population:
         elif self.mutationMethod == "pathBased":
             self.selectedPathsMutation(individualID, selectedPaths)
 
-    def randomSingleMutation(self, individualNum: int) -> None:
-        """Mutates an individual at only one random gene in the chromosome"""
-        random.seed()
-        mutatedEdge = random.randint(0, self.network.numEdges - 1)
-        mutatedCap = random.randint(0, self.network.numArcCaps - 1)
-        individual = self.population[individualNum]
-        individual.alphaValues[mutatedEdge][mutatedCap] = self.getAlphaValue()
-
-    def hypermutateIndividual(self, individualNum: int) -> None:
-        """Reinitializes the individual's entire alpha values (i.e. kills them off and spawns a new individual)"""
-        individual = self.population[individualNum]
-        newAlphas = self.getInitialAlphaValues()
-        individual.setAlphaValues(newAlphas)
-        individual.resetOutputNetwork()
-
     def selectedPathsMutation(self, individualNum: int, selectedPaths: list) -> None:
         """Mutates all the edges in the selected paths of an individual"""
-        random.seed()
         individual = self.population[individualNum]
-        # TODO - Implement
         for path in selectedPaths:
             for edge in path.edges:
                 pass
 
-    def hypermutatePopulation(self) -> None:
-        """Reinitializes the entire population (i.e. an extinction event with a brand new population spawned)"""
-        for individual in self.population:
-            self.hypermutateIndividual(individual)
-
-    def naiveHillClimb(self) -> None:
-        """Sorts the population by rank and hypermutates the non-best individuals only at each generation"""
-        self.population = self.rankPopulation()
-        for i in range(1, self.populationSize):
-            self.hypermutateIndividual(i)
-
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
-    # TODO - Revise as these are from VERSION_1
     def crossover(self, parentOneID: int, parentTwoID: int, parentOnePaths=None, parentTwoPaths=None) -> None:
         """Hyper-selection operator that calls specific crossover method based on hyperparameters"""
         random.seed()
@@ -497,7 +534,6 @@ class Population:
         :param list parentOnePaths: List of paths to be crossed-over from parent 1 to parent 2 (Can be any length)
         :param list parentTwoPaths: List of paths to be crossed-over from parent 2 to parent 1 (Can be any length)
         :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals"""
-        random.seed()
         # Create two offspring, each identical to one parent
         parentOne = self.population[parentOneID]
         parentTwo = self.population[parentTwoID]
@@ -608,66 +644,4 @@ class Population:
             self.population.append(offspringOne)
             self.population.append(offspringTwo)
 
-    # ============================================
-    # ============== HELPER METHODS ==============
-    # ============================================
-    def rankPopulation(self) -> list:
-        """Ranks the population in ascending order of true cost (i.e. Lower cost -> More fit) and returns"""
-        sortedPopulation = sorted(self.population, key=lambda x: x.trueCost)
-        return sortedPopulation
 
-    def getMostFitIndividual(self) -> Individual:
-        """Returns the most fit individual in the population"""
-        sortedPop = self.rankPopulation()
-        return sortedPop[0]
-
-    # ============================================
-    # ============== SOLVER METHODS ==============
-    # ============================================
-    def solvePopulation(self) -> None:
-        """Solves all unsolved instances in the entire population"""
-        for individual in self.population:
-            if individual.isSolved is False:
-                self.solveIndividual(individual)
-
-    def solveIndividual(self, individual: Individual) -> None:
-        """Solves a single individual and writes the expressed network to the individual"""
-        # Overwrite new objective function with new alpha values and solve
-        self.solver.updateObjectiveFunction(individual.alphaValues)
-        self.solver.solveModel()
-        # Write expressed network output data to individual
-        individual.isSolved = True
-        individual.arcFlows = self.solver.getArcFlowsDict()
-        individual.arcsOpened = self.solver.getArcsOpenDict()
-        individual.srcFlows = self.solver.getSrcFlowsList()
-        individual.sinkFlows = self.solver.getSinkFlowsList()
-        individual.trueCost = self.solver.calculateTrueCost()
-        individual.fakeCost = self.solver.getObjectiveValue()
-        # Reset solver
-        self.solver.resetSolver()
-
-    # ===================================================
-    # ============== VISUALIZATION METHODS ==============
-    # ===================================================
-    def visualizeBestIndividual(self, labels=False, leadingText="") -> None:
-        """Renders the visualization for the most fit individual in the population at any time"""
-        bestIndividual = self.getMostFitIndividual()
-        self.visualizeIndividual(bestIndividual, labels=labels, leadingText=leadingText)
-
-    def visualizeAllIndividuals(self, labels=False, leadingText="") -> None:
-        """Renders the visualization for all individuals in the population at any time"""
-        i = 0
-        for individual in self.population:
-            self.visualizeIndividual(individual, labels=labels, leadingText=leadingText + "_" + str(i))
-            i += 1
-
-    def visualizeIndividual(self, individual: Individual, labels=False, leadingText="") -> None:
-        """Renders the visualization for a specified individual"""
-        solution = Solution(self.network, self.minTargetFlow, individual.fakeCost, individual.trueCost,
-                            individual.srcFlows, individual.sinkFlows, individual.arcFlows, individual.arcsOpened,
-                            "alphaGA", False, self.network.isSourceSinkCapacitated, self.network.isSourceSinkCharged)
-        visualizer = SolutionVisualizer(solution)
-        if labels is True:
-            visualizer.drawGraphWithLabels(leadingText=leadingText)
-        else:
-            visualizer.drawUnlabeledGraph(leadingText=leadingText)

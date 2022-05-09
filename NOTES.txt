@@ -2,6 +2,7 @@ NOTES & TODOS:
 
 GENERAL/NETWORK/SOLVERS:
 =====================================
+# TODO - Update the edge penalty assignment method in network generation so that opposing edges get the same penalty
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
 >> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged

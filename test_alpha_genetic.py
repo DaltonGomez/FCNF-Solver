@@ -1,5 +1,6 @@
 from src.AlphaGenetic.Population import Population
 from src.Network.FlowNetwork import FlowNetwork
+from src.Network.NetworkVisualizer import NetworkVisualizer
 from src.Network.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
@@ -10,17 +11,20 @@ py -3.8 test_alpha_genetic.py
 """
 
 if __name__ == "__main__":
+    # Load in network
     network = FlowNetwork()
-    network = network.loadNetwork("1000-1-10.p")
-    minTargetFlow = 1000
+    network = network.loadNetwork("test2.p")
+    vis = NetworkVisualizer(network, directed=True, supers=False)
+    vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
+    minTargetFlow = 200
 
-    pop = Population(network, minTargetFlow)
-    pop.evolvePopulation(drawing=True, drawLabels=True)
+    # Solve with Alpha-GA
+    pop = Population(network, minTargetFlow, numGenerations=2)
+    pop.solveWithNaiveHillClimb(drawing=True, drawLabels=True)
 
+    # Solve optimally with CPLEX
     cplex = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
-    cplex.buildModel()
-    cplex.solveModel()
+    cplex.findSolution(printDetails=False)
     opt = cplex.writeSolution()
-
-    vis = SolutionVisualizer(opt)
-    vis.drawGraphWithLabels(leadingText="OPT_")
+    optVis = SolutionVisualizer(opt)
+    optVis.drawGraphWithLabels(leadingText="OPT_")

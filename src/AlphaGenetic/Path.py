@@ -1,5 +1,3 @@
-from Network.FlowNetwork import FlowNetwork
-
 
 class Path:
     """Class that stores opened paths/pathlets within an individual and computes path-based data"""
@@ -7,20 +5,31 @@ class Path:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, network: FlowNetwork, visitedNodes: list, visitedEdges: list):
+    def __init__(self, visitedNodes: list, visitedEdges: list, pathFlowAndCosts: tuple):
         """Constructor of a Path instance"""
-        self.network = network  # TODO - Decide if this is a needed attribute
+        # Path topology fields
         self.nodes = visitedNodes
-        self.arcs = visitedEdges
+        self.edges = visitedEdges
+        # Path flow and cost fields
+        self.pathFlow = pathFlowAndCosts[0]
+        self.pathFixedCost = pathFlowAndCosts[1]
+        self.pathVariableCost = pathFlowAndCosts[2]
+        self.pathRoutingCost = self.pathFixedCost + self.pathVariableCost
+        self.srcSinkCost = pathFlowAndCosts[3]
+        self.totalCost = self.pathRoutingCost + self.srcSinkCost
+        # Additional metrics
+        self.flowPerRoutingCost = self.pathFlow / self.pathRoutingCost
+        self.flowPerTotalCost = self.pathFlow / self.totalCost
 
-        # TODO - Determine the additional metrics after deciding how paths are computed
-        # Compute the total routing cost and routing cost per unit flow metric
-        self.routingCost = 0
-        """
-        for arc in self.arcFlows.keys():
-            edgeCost = network.openedEdgesDict[edge][1]
-            self.routingCost += edgeCost
-        self.flowPerCostDensity = self.flow / self.routingCost
-        self.totalCost = self.startCost + self.endCost + self.routingCost
-        self.totalFlowPerCostDensity = self.flow / self.totalCost
-        """
+    def printPathData(self) -> None:
+        """Prints the data of the path"""
+        print("========= PATH =========")
+        print("Nodes: " + str(self.nodes))
+        print("Edges: " + str(self.edges))
+        print("Path Flow: " + str(round(self.pathFlow, 1)))
+        print("Total Cost: " + str(round(self.totalCost, 1)))
+        print("Path Fixed Cost: " + str(round(self.pathFixedCost, 1)))
+        print("Path Variable Cost: " + str(round(self.pathVariableCost, 1)))
+        print("Source/Sink Cost: " + str(round(self.srcSinkCost, 1)))
+        print("Flow per Routing Cost: " + str(round(self.flowPerRoutingCost, 4)))
+        print("Flow per Total Cost: " + str(round(self.flowPerTotalCost, 4)))
