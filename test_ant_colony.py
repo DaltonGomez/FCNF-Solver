@@ -1,8 +1,10 @@
+import numpy as np
+
+from Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 from src.Ant.Colony import Colony
 from src.Network.FlowNetwork import FlowNetwork
 from src.Network.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
-
 
 """
 RUN COMMAND:
@@ -12,10 +14,10 @@ py -3.8 test_ant_colony.py
 
 if __name__ == "__main__":
     # Load Network
-    networkFile = "presEx6.p"
+    networkFile = "test.p"
     network = FlowNetwork()
     network = network.loadNetwork(networkFile)
-    targetFlow = 400
+    targetFlow = 50
 
     # Solve Exactly
     milpSolver = MILPsolverCPLEX(network, targetFlow, isOneArcPerEdge=False)
@@ -24,16 +26,14 @@ if __name__ == "__main__":
     milpSolver.printSolverOverview()
     exactSoln = milpSolver.writeSolution()
     exactVisualizer = SolutionVisualizer(exactSoln)
-    exactVisualizer.drawUnlabeledGraph()
+    exactVisualizer.drawGraphWithLabels()
 
     # Test Colony
-    antColony = Colony(network, targetFlow, 30, 15)
+    antColony = Colony(network, targetFlow, 10, 1)
     antSoln = antColony.solveNetwork(drawing=True, labels=False)
-    antSoln.saveSolution()
     antVisualizer = SolutionVisualizer(antSoln)
-    antVisualizer.drawUnlabeledGraph()
+    antVisualizer.drawGraphWithLabels()
 
-    """
     # Solve with Naive LP Relaxation
     lpSolver = RelaxedLPSolverPDLP(network, targetFlow)
     alphaValues = np.full((network.numEdges, network.numArcCaps), 1.0)
@@ -43,4 +43,3 @@ if __name__ == "__main__":
     relaxedSoln = lpSolver.writeSolution()
     relaxedVisualizer = SolutionVisualizer(relaxedSoln)
     relaxedVisualizer.drawGraphWithLabels()
-    """

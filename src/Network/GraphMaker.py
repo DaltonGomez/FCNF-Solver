@@ -1,6 +1,5 @@
 import math
 import random
-from typing import List
 
 import numpy as np
 from scipy.spatial import Delaunay
@@ -15,20 +14,13 @@ class GraphMaker:
         """Constructor of a GraphGenerator instance"""
         # Hyperparameters For Network Generation/Computing Pseudo-Random Costs
         self.embeddingSize = 100.0
-        self.possibleArcCaps = [10, 50, 100]
-        self.distFixCostScale = 10.0
-        self.capFixCostScale = 10.0
-        self.fixCostRandomScalar = [0.80, 1.20]
-        self.distVariableCostScale = 3.0
-        self.capVariableCostScale = 3.0
-        self.variableCostRandomScalar = [0.80, 1.20]
+        self.arcCostLookupTable = self.initializeArcCostLookupTable()
+        self.edgePenaltyRange = [0.95, 1.50]
+        self.randomEdgePenalties = None
         self.isSourceSinkCapacitated = True
-        self.sourceSinkCapacityRange = [100, 300]
+        self.sourceSinkCapacityRange = [10, 100]  # TODO - Update how the src/sinks are capacitated
         self.isSourceSinkCharged = True
-        self.sourceSinkChargeRange = [200.0, 300.0]
-
-        # Cost Scalar Lookup Tables
-        self.costScalarLookupTable = self.initializeCostLookupTable()
+        self.sourceSinkChargeRange = [10, 100]  # TODO - Update how the src/sinks are charged from 10000*[0.001, 0.01]
 
         # Output Network To Be Built
         self.newNetwork = FlowNetwork()
@@ -43,38 +35,12 @@ class GraphMaker:
         self.assignRandomSourceSinks()
         self.buildEdgesFromTriangulation()
         self.computeEdgeDistances()
+        self.randomEdgePenalties = self.initializeRandomEdgePenalties()
         self.assignInOutEdgesToNodes()
-        self.setPossibleArcCapacities(self.possibleArcCaps)
+        self.setPossibleArcCapacities()
         self.buildArcsDictAndMatrix()
         self.assignSourceSinkCapAndCharge()
         return self.newNetwork
-
-    def initializeCostLookupTable(self) -> dict:
-        """Initializes the cost scalar lookup table (loosely based on the SimCCS model formulation)"""
-        pass
-        # TODO - Implement the new cost function discussed with Sean
-
-    def setCostDeterminingHyperparameters(self, embeddingSize=100.0, possibleArcCaps=(10, 50, 100),
-                                          distFixCostScale=10.0, capFixCostScale=10.0, fixCostRandomScalar=(0.80, 1.20),
-                                          distVariableCostScale=3.0, capVariableCostScale=3.0,
-                                          variableCostRandomScalar=(0.80, 1.20)) -> None:
-        """Allows the hyperparameters that calculate the pseudorandom cost to be tuned"""
-        self.embeddingSize = embeddingSize
-        self.possibleArcCaps = possibleArcCaps
-        self.distFixCostScale = distFixCostScale
-        self.capFixCostScale = capFixCostScale
-        self.fixCostRandomScalar = fixCostRandomScalar
-        self.distVariableCostScale = distVariableCostScale
-        self.capVariableCostScale = capVariableCostScale
-        self.variableCostRandomScalar = variableCostRandomScalar
-
-    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(100, 300),
-                                     chargeRange=(200.0, 300.0)) -> None:
-        """Allows the capacitated/charged source sink generalizes to be turned on and tuned"""
-        self.isSourceSinkCapacitated = isCapacitated
-        self.sourceSinkCapacityRange = capacityRange
-        self.isSourceSinkCharged = isCharged
-        self.sourceSinkChargeRange = chargeRange
 
     def embedRandomPoints(self) -> None:
         """Randomly embeds n points in a 2D plane"""
@@ -150,22 +116,26 @@ class GraphMaker:
             self.newNetwork.addOutgoingEdgeToNode(edge[0], thisEdge)
             self.newNetwork.addIncomingEdgeToNode(edge[1], thisEdge)
 
-    def setPossibleArcCapacities(self, possibleArcCapacities: List[int]) -> None:
+    def setPossibleArcCapacities(self) -> None:
         """Sets the possible arc capacities for the parallel edges"""
-        self.newNetwork.possibleArcCapsArray = np.array(possibleArcCapacities)
+        tempArcCaps = []
+        for cap in self.arcCostLookupTable:
+            tempArcCaps.append(cap[0])
+        self.newNetwork.possibleArcCapsArray = np.array(tempArcCaps)
         self.newNetwork.numArcCaps = len(self.newNetwork.possibleArcCapsArray)
 
     def buildArcsDictAndMatrix(self) -> None:
         """Builds the dictionary of arcs"""
         tempArcs = []
         numID = 0
-        for edge in range(self.newNetwork.numEdges):
-            fromNode = self.newNetwork.edgesArray[edge][0]
-            toNode = self.newNetwork.edgesArray[edge][1]
-            distance = self.newNetwork.distancesArray[edge]
-            for cap in self.newNetwork.possibleArcCapsArray:
-                fixedCost = self.calculateArcFixedCost(distance, cap)
-                variableCost = self.calculateArcVariableCost(distance, cap)
+        for edgeID in range(self.newNetwork.numEdges):
+            fromNode = self.newNetwork.edgesArray[edgeID][0]
+            toNode = self.newNetwork.edgesArray[edgeID][1]
+            distance = self.newNetwork.distancesArray[edgeID]
+            for capID in range(self.newNetwork.numArcCaps):
+                cap = self.newNetwork.possibleArcCapsArray[capID]
+                fixedCost = self.calculateArcFixedCost(edgeID, capID)
+                variableCost = self.calculateArcVariableCost(edgeID, capID)
                 self.newNetwork.addArcToDict(numID, (fromNode, toNode, cap), distance, fixedCost, variableCost)
                 thisArc = [numID, fromNode, toNode, cap, distance, fixedCost, variableCost]
                 tempArcs.append(thisArc)
@@ -173,23 +143,20 @@ class GraphMaker:
         self.newNetwork.arcsMatrix = np.array(tempArcs)
         self.newNetwork.numArcs = len(self.newNetwork.arcsMatrix)
 
-    def calculateArcFixedCost(self, distance: float, capacity: int) -> float:
+    def calculateArcFixedCost(self, edgeID: int, capID: int) -> float:
         """Calculates the fixed cost of the arc in a pseudorandom manner"""
-        # TODO - Apply the pipeline cost function: c(f) = (m*cap + b) * edge_specific_penalty (which is based on distance)
-        # Pseudorandom component proportional to the distance the edge spans
-        randomDistanceComponent = (self.distFixCostScale * distance * random.uniform(
-            self.fixCostRandomScalar[0], self.fixCostRandomScalar[1]))
-        # Cap^(3/4) is intended to discount bigger pipelines (i.e. economies of scale)
-        fixedCost = (randomDistanceComponent + self.capFixCostScale * capacity ** 0.75)
+        distance = self.newNetwork.distancesArray[edgeID]
+        penalty = self.randomEdgePenalties[edgeID]
+        fixedCostScalar = self.arcCostLookupTable[capID][1]
+        fixedCost = distance * penalty * fixedCostScalar
         return fixedCost
 
-    def calculateArcVariableCost(self, distance: float, capacity: int) -> float:
+    def calculateArcVariableCost(self, edgeID: int, capID: int) -> float:
         """Calculates the variable cost of the arc in a pseudorandom manner"""
-        # Pseudorandom component proportional to the distance the edge spans
-        randomDistanceComponent = (self.distVariableCostScale * distance * random.uniform(
-            self.variableCostRandomScalar[0], self.variableCostRandomScalar[1]))
-        # Cap^(3/4) is intended to discount bigger pipelines (i.e. economies of scale)
-        variableCost = (randomDistanceComponent + self.capVariableCostScale * capacity ** 0.75)
+        distance = self.newNetwork.distancesArray[edgeID]
+        penalty = self.randomEdgePenalties[edgeID]
+        variableCostScalar = self.arcCostLookupTable[capID][2]
+        variableCost = distance * penalty * variableCostScalar
         return variableCost
 
     def assignSourceSinkCapAndCharge(self) -> None:
@@ -198,12 +165,12 @@ class GraphMaker:
             self.newNetwork.isSourceSinkCapacitated = True
             tempSrcCaps = []
             for source in range(self.newNetwork.numSources):
-                thisSrcCap = random.randint(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
+                thisSrcCap = random.uniform(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
                 tempSrcCaps.append(thisSrcCap)
             self.newNetwork.sourceCapsArray = np.array(tempSrcCaps)
             tempSinkCaps = []
             for sink in range(self.newNetwork.numSinks):
-                thisSinkCap = random.randint(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
+                thisSinkCap = random.uniform(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
                 tempSinkCaps.append(thisSinkCap)
             self.newNetwork.sinkCapsArray = np.array(tempSinkCaps)
         if self.isSourceSinkCharged is True:
@@ -218,3 +185,58 @@ class GraphMaker:
                 thisSinkCost = random.uniform(self.sourceSinkChargeRange[0], self.sourceSinkChargeRange[1])
                 tempSinkCosts.append(thisSinkCost)
             self.newNetwork.sinkVariableCostsArray = np.array(tempSinkCosts)
+
+    def initializeRandomEdgePenalties(self) -> list:
+        """Initializes random penalties for all edges to mimic spatial variability in costs (i.e. the cost raster)"""
+        edgePenalties = []
+        for e in range(self.newNetwork.numEdges):
+            thisPenalty = random.uniform(self.edgePenaltyRange[0], self.edgePenaltyRange[1])
+            edgePenalties.append(thisPenalty)
+        return edgePenalties
+
+    def setArcCostLookupTable(self, embeddingSize=100.0, edgePenaltyRange=(0.95, 1.50),
+                              arcCostLookupTable=(
+                                      [0.19, 0.01238148, 0.010685656],
+                                      [0.54, 0.0140994, 0.004500589],
+                                      [1.13, 0.016216406, 0.002747502],
+                                      [3.25, 0.02169529, 0.00170086],
+                                      [6.86, 0.030974863, 0.001407282],
+                                      [12.26, 0.041795733, 0.001290869],
+                                      [19.69, 0.055473249, 0.001235064],
+                                      [35.13, 0.077642542, 0.001194592],
+                                      [56.46, 0.104715966, 0.001175094],
+                                      [83.95, 0.136751956, 0.001164578],
+                                      [119.16, 0.172747686, 0.001098788]
+                              )) -> None:
+        """Allows the hyperparameters that calculate the pseudorandom cost to be tuned"""
+        self.embeddingSize = embeddingSize
+        self.edgePenaltyRange = edgePenaltyRange
+        self.arcCostLookupTable = arcCostLookupTable
+
+    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(10, 100),
+                                     chargeRange=(10, 100)) -> None:
+        """Allows the capacitated/charged source sink generalizes to be turned on and tuned"""
+        self.isSourceSinkCapacitated = isCapacitated
+        self.sourceSinkCapacityRange = capacityRange
+        self.isSourceSinkCharged = isCharged
+        self.sourceSinkChargeRange = chargeRange
+
+    @staticmethod
+    def initializeArcCostLookupTable() -> list:
+        """Initializes the cost scalar lookup table (loosely based on the SimCCS model formulation- See data dir)"""
+        # Columns: capacity, fixed cost, variable cost
+        # DIRECTLY FROM THE SIMCCS PIPELINE MODEL
+        costLookupTable = [
+            [0.19, 0.01238148, 0.010685656],
+            [0.54, 0.0140994, 0.004500589],
+            [1.13, 0.016216406, 0.002747502],
+            [3.25, 0.02169529, 0.00170086],
+            [6.86, 0.030974863, 0.001407282],
+            [12.26, 0.041795733, 0.001290869],
+            [19.69, 0.055473249, 0.001235064],
+            [35.13, 0.077642542, 0.001194592],
+            [56.46, 0.104715966, 0.001175094],
+            [83.95, 0.136751956, 0.001164578],
+            [119.16, 0.172747686, 0.001098788]
+        ]
+        return costLookupTable
