@@ -27,7 +27,7 @@ class Ant:
         # NOTE: A "tour" is a complete feasible solution that assigns all target flow across the network in a number of trips
         self.time = 0  # Incremented every time an arc is traveled (i.e. measure of the total search time for the ant to complete a tour)
         self.numTrips = 0  # Number of trips the ant has taken
-        self.currentPosition = -1  # Node ID of the ant's position- NOTE: -1 Represents the supersource and -2 represents the supersink
+        self.currentPosition = -1  # Node ID of the ant's position- NOTE: -AntDemo Represents the supersource and -2 represents the supersink
         self.remainingFlowToAssign = self.minTargetFlow  # "Mountain" of flow initially at the supersource that the ant has to move
         self.assignedFlowDict = self.initializeAssignedFlowDict()  # Dictionary indexed on key (fromNode, toNode, cap) with value (cumulative flow assigned)
         self.availableCapacityDict = self.initializeAvailableCapacityDict()  # Dictionary indexed on key (fromNode, toNode, cap) with value (available capacity until full)
@@ -57,12 +57,12 @@ class Ant:
             while self.currentPosition != -2:  # Explore until the supersink is found
                 options = self.getPossibleNextMoves()  # Get options for next move by checking non-full adjacent edges
                 arcChoice = self.decideArcToTraverse(options)  # Probabilistically choose a next arc
-                # self.printTimeStepData(arcChoice)  # PRINT OPTION
+                self.printTimeStepData(arcChoice)  # PRINT OPTION
                 self.travelArc(arcChoice)  # Move the ant across the arc and assign flow
             # POST-TRIP ACCOUNTING
             self.assignTripFlow()  # Assigns flow to all arcs traveled in the trip, where the amount is equal to the minimum available capacity seen
             self.numTrips += 1  # Increment trips
-            # self.printTripData()  # PRINT OPTION
+            self.printTripData()  # PRINT OPTION
             if self.time > 100000:  # Restart if timed out
                 print("Restarting ant!")
                 self.resetTourAndSolutionAttributes()

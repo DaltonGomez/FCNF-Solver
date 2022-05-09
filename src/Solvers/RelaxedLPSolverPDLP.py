@@ -53,7 +53,7 @@ class RelaxedLPSolverPDLP:
         if self.isOneArcPerEdge is True:
             for i in range(self.network.numEdges):
                 name = "e_" + str(i) + "_OneArcPerEdge"
-                self.model.add_constraint(sum(self.arcOpenedVars[(i, j)] for j in range(self.network.numArcCaps)) <= 1,
+                self.model.add_constraint(sum(self.arcOpenedVars[(i, j)] for j in range(self.network.numArcCaps)) <= AntDemo,
                                           name)
         """
 

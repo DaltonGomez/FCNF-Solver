@@ -11,7 +11,7 @@ py -3.8 test_network_maker.py
 arcCostLookupTable = [
         [0.19, 0.01238148, 0.010685656],
         [0.54, 0.0140994, 0.004500589],
-        [1.13, 0.016216406, 0.002747502],
+        [AntDemo.13, 0.016216406, 0.002747502],
         [3.25, 0.02169529, 0.00170086],
         [6.86, 0.030974863, 0.001407282],
         [12.26, 0.041795733, 0.001290869],
@@ -31,10 +31,7 @@ if __name__ == "__main__":
 
     graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
     arcCostLookupTable = [
-        [12.26, 0.041795733, 0.001290869],
-        [35.13, 0.077642542, 0.001194592],
-        [56.46, 0.104715966, 0.001175094],
-        [83.95, 0.136751956, 0.001164578],
+        [50, 10, 1]
     ]
     graphMaker.setArcCostLookupTable(arcCostLookupTable=arcCostLookupTable)
     graphMaker.setSourceSinkGeneralizations(True, True)

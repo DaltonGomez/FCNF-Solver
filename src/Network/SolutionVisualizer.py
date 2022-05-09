@@ -91,9 +91,9 @@ class SolutionVisualizer:
                             },
                             "font": {
                                 "size": 0,
-                                "color": "rgba(0, 0, 200, 1)",
+                                "color": "rgba(0, 0, 200, AntDemo)",
                                 "strokeWidth": 2,
-                                "strokeColor": "rgba(0, 200, 0, 1)"
+                                "strokeColor": "rgba(0, 200, 0, AntDemo)"
                             },
                             "scaling": {
                                 "min": 5,
@@ -111,14 +111,14 @@ class SolutionVisualizer:
                             },
                             "font": {
                                 "size": 30,
-                                "color": "rgba(235, 190, 0, 1)",
+                                "color": "rgba(235, 190, 0, AntDemo)",
                                 "strokeWidth": 3,
-                                "strokeColor": "rgba(255, 0, 0, 1)"
+                                "strokeColor": "rgba(255, 0, 0, AntDemo)"
                             },
                             "arrowStrikethrough": false,
                             "arrows": {
                                 "to": {
-                                    "scaleFactor": 1
+                                    "scaleFactor": AntDemo
                                 }
                             },
                             "scaling": {
@@ -153,7 +153,7 @@ class SolutionVisualizer:
                                 "fit": true
                             },
                             "barnesHut": {
-                                "avoidOverlap": 1,
+                                "avoidOverlap": AntDemo,
                                 "centralGravity": 0.2,
                                 "damping": 0.90,
                                 "gravitationalConstant": -100000,
@@ -217,7 +217,7 @@ class SolutionVisualizer:
                             "arrowStrikethrough": false,
                             "arrows": {
                                 "to": {
-                                    "scaleFactor": 1
+                                    "scaleFactor": AntDemo
                                 }
                             },
                             "scaling": {
@@ -252,7 +252,7 @@ class SolutionVisualizer:
                                 "fit": true
                             },
                             "barnesHut": {
-                                "avoidOverlap": 1,
+                                "avoidOverlap": AntDemo,
                                 "centralGravity": 0.2,
                                 "damping": 0.90,
                                 "gravitationalConstant": -100000,
@@ -289,9 +289,9 @@ class SolutionVisualizer:
                                     },
                                     "font": {
                                         "size": 25,
-                                        "color": "rgba(0, 0, 200, 1)",
+                                        "color": "rgba(0, 0, 200, AntDemo)",
                                         "strokeWidth": 2,
-                                        "strokeColor": "rgba(0, 200, 0, 1)"
+                                        "strokeColor": "rgba(0, 200, 0, AntDemo)"
                                     },
                                     "scaling": {
                                         "min": 5,
@@ -309,14 +309,14 @@ class SolutionVisualizer:
                                     },
                                     "font": {
                                         "size": 20,
-                                        "color": "rgba(235, 190, 0, 1)",
+                                        "color": "rgba(235, 190, 0, AntDemo)",
                                         "strokeWidth": 3,
-                                        "strokeColor": "rgba(255, 0, 0, 1)"
+                                        "strokeColor": "rgba(255, 0, 0, AntDemo)"
                                     },
                                     "arrowStrikethrough": false,
                                     "arrows": {
                                         "to": {
-                                            "scaleFactor": 1
+                                            "scaleFactor": AntDemo
                                         }
                                     },
                                     "scaling": {
@@ -351,7 +351,7 @@ class SolutionVisualizer:
                                         "fit": true
                                     },
                                     "barnesHut": {
-                                        "avoidOverlap": 1,
+                                        "avoidOverlap": AntDemo,
                                         "centralGravity": 0.2,
                                         "damping": 0.90,
                                         "gravitationalConstant": -100000,

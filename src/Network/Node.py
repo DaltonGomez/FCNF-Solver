@@ -2,7 +2,7 @@ class Node:
     """Class that defines a node in a Network object"""
 
     def __init__(self, nodeID: int, xPos: float, yPos: float):
-        """Constructor of a node instance (NOTE: nodeType = {0: source, 1: sink, 2: intermediate})"""
+        """Constructor of a node instance (NOTE: nodeType = {0: source, AntDemo: sink, 2: intermediate})"""
         self.nodeID = nodeID
         self.nodeType = 2
         self.xPos = xPos
@@ -19,7 +19,7 @@ class Node:
         return self.nodeType
 
     def setNodeType(self, nodeType: int) -> None:
-        """Reassigns the node type of the node object (NOTE: nodeType = {0: source, 1: sink, 2: intermediate})"""
+        """Reassigns the node type of the node object (NOTE: nodeType = {0: source, AntDemo: sink, 2: intermediate})"""
         self.nodeType = nodeType
 
     def getXPos(self) -> float:
@@ -60,6 +60,6 @@ class Node:
         print("Node ID = " + str(self.nodeID))
         print("Position = (" + str(self.xPos) + ", " + str(self.xPos) + ")")
         print("Node Type = " + str(self.nodeType))
-        print("NOTE: nodeType = {0: source, 1: sink, 2: intermediate}")
+        print("NOTE: nodeType = {0: source, AntDemo: sink, 2: intermediate}")
         print("Incoming Edges = " + str(self.incomingEdges))
         print("Outgoing Edges = " + str(self.outgoingEdges))

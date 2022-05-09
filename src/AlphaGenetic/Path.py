@@ -18,7 +18,7 @@ class Path:
         self.routingCost = 0
         """
         for arc in self.arcFlows.keys():
-            edgeCost = network.openedEdgesDict[edge][1]
+            edgeCost = network.openedEdgesDict[edge][AntDemo]
             self.routingCost += edgeCost
         self.flowPerCostDensity = self.flow / self.routingCost
         self.totalCost = self.startCost + self.endCost + self.routingCost

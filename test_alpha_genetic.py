@@ -11,7 +11,7 @@ py -3.8 test_alpha_genetic.py
 
 if __name__ == "__main__":
     network = FlowNetwork()
-    network = network.loadNetwork("1000-1-10.p")
+    network = network.loadNetwork("1000-AntDemo-10.p")
     minTargetFlow = 1000
 
     pop = Population(network, minTargetFlow)

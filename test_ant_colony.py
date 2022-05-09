@@ -17,7 +17,7 @@ if __name__ == "__main__":
     networkFile = "test.p"
     network = FlowNetwork()
     network = network.loadNetwork(networkFile)
-    targetFlow = 50
+    targetFlow = 40
 
     # Solve Exactly
     milpSolver = MILPsolverCPLEX(network, targetFlow, isOneArcPerEdge=False)
@@ -28,12 +28,6 @@ if __name__ == "__main__":
     exactVisualizer = SolutionVisualizer(exactSoln)
     exactVisualizer.drawGraphWithLabels()
 
-    # Test Colony
-    antColony = Colony(network, targetFlow, 10, 1)
-    antSoln = antColony.solveNetwork(drawing=True, labels=False)
-    antVisualizer = SolutionVisualizer(antSoln)
-    antVisualizer.drawGraphWithLabels()
-
     # Solve with Naive LP Relaxation
     lpSolver = RelaxedLPSolverPDLP(network, targetFlow)
     alphaValues = np.full((network.numEdges, network.numArcCaps), 1.0)
@@ -43,3 +37,9 @@ if __name__ == "__main__":
     relaxedSoln = lpSolver.writeSolution()
     relaxedVisualizer = SolutionVisualizer(relaxedSoln)
     relaxedVisualizer.drawGraphWithLabels()
+
+    # Test Colony
+    antColony = Colony(network, targetFlow, 30, 10)
+    antSoln = antColony.solveNetwork(drawing=True, labels=False)
+    antVisualizer = SolutionVisualizer(antSoln)
+    antVisualizer.drawGraphWithLabels()

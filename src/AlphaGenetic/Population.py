@@ -95,7 +95,7 @@ class Population:
         """Sets the GA class fields that dictate how the crossover of individuals is carried out \n
         :param str crossoverMethod: One of following: {"onePoint", "twoPoint", "pathBased"}
         :param int replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents"}
-        :param str crossoverRate: Probability in [0,1] that a crossover occurs
+        :param str crossoverRate: Probability in [0,AntDemo] that a crossover occurs
         :param int crossoverAttemptsPerGeneration: Number of attempted crossovers per generation
         """
         self.crossoverMethod = crossoverMethod
@@ -106,7 +106,7 @@ class Population:
     def setMutationHyperparams(self, mutationMethod: str, mutationRate: float) -> None:
         """Sets the GA class fields that dictate how the mutation of individuals is carried out \n
         :param str mutationMethod: One of following: {"randomSingle", "randomTotal", "pathBased"}
-        :param str mutationRate: Probability in [0,1] that a mutation occurs
+        :param str mutationRate: Probability in [0,AntDemo] that a mutation occurs
         """
         self.mutationMethod = mutationMethod  # :param : "randomSingle", "randomTotal", "pathBased"
         self.mutationRate = mutationRate
@@ -131,7 +131,7 @@ class Population:
         random.seed()
         # INITIALIZATION
         if len(self.population) == 0:
-            self.initializePopulation([0.0, 1.0])
+            self.initializePopulation([0.0, AntDemo.0])
         # MAIN EVOLUTION LOOP
         for generation in range(self.numGenerations):
             # ATTEMPT CROSSOVER
@@ -140,9 +140,9 @@ class Population:
                     # SELECT INDIVIDUALS
                     selectedIndividuals = self.selectIndividuals()
                     parentOnePaths = self.selectPaths(selectedIndividuals[0])
-                    parentTwoPaths = self.selectPaths(selectedIndividuals[1])
+                    parentTwoPaths = self.selectPaths(selectedIndividuals[AntDemo])
                     # CROSSOVER
-                    self.crossover(selectedIndividuals[0], selectedIndividuals[1], parentOnePaths,
+                    self.crossover(selectedIndividuals[0], selectedIndividuals[AntDemo], parentOnePaths,
                                    parentTwoPaths)
 
             # MUTATION
@@ -494,8 +494,8 @@ class Population:
         """Crossover based on the flow per cost density of paths of the parents\n
         :param int parentOneID: Index of first parent in population
         :param int parentTwoID: Index of second parent in population
-        :param list parentOnePaths: List of paths to be crossed-over from parent 1 to parent 2 (Can be any length)
-        :param list parentTwoPaths: List of paths to be crossed-over from parent 2 to parent 1 (Can be any length)
+        :param list parentOnePaths: List of paths to be crossed-over from parent AntDemo to parent 2 (Can be any length)
+        :param list parentTwoPaths: List of paths to be crossed-over from parent 2 to parent AntDemo (Can be any length)
         :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals"""
         random.seed()
         # Create two offspring, each identical to one parent

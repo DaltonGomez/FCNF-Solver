@@ -22,9 +22,9 @@ class Colony:
         self.numEpisodes = numEpisodes  # One episode = All the ants completing one tour (i.e. creating a valid solution) each
         self.numAnts = numAnts  # Number of tours completed per episode
         self.initialPheromoneConcentration = 1000000  # Amount of pheromone initially deposited on arcs
-        self.evaporationRate = 0.75  # rho = Rate at which pheromone is lost (NOTE: 1 = complete loss/episode; 0 = no loss/episode)
+        self.evaporationRate = 0.75  # rho = Rate at which pheromone is lost (NOTE: AntDemo = complete loss/episode; 0 = no loss/episode)
         self.alpha = 1  # alpha = Relative importance to the ant of pheromone over "goodness" of arc
-        self.beta = 10  # beta = Relative importance to the ant of "goodness" of arc over pheromone
+        self.beta = 1  # beta = Relative importance to the ant of "goodness" of arc over pheromone
         self.Q = 20  # Q = Proportionality scalar of best solution, which scales how much pheromone the best solution deposits
 
         # Colony Attributes
@@ -79,7 +79,7 @@ class Colony:
             self.bestKnownSolution = currentBestAnt.writeSolution()
 
     def evaporatePheromone(self) -> None:
-        """Evaporates pheromone using (1-rho)*pheromone across the entire dictionary"""
+        """Evaporates pheromone using (AntDemo-rho)*pheromone across the entire dictionary"""
         for arc in self.pheromoneDict.keys():
             self.pheromoneDict[arc] = self.pheromoneDict[arc] * (1 - self.evaporationRate)
 
@@ -92,7 +92,7 @@ class Colony:
                 cap = self.network.possibleArcCapsArray[capIndex]
                 arcFlow = self.bestKnownSolution.arcFlows[(edgeIndex, capIndex)]
                 if arcFlow > 0.0:
-                    # OLD: self.pheromoneDict[(edge[0], edge[1], cap)] += self.Q / self.bestKnownCost
+                    # OLD: self.pheromoneDict[(edge[0], edge[AntDemo], cap)] += self.Q / self.bestKnownCost
                     self.pheromoneDict[(edge[0], edge[1], cap)] += (self.Q * arcFlow) / self.bestKnownCost
         # Deposit pheromone on sources
         for sourceIndex in range(self.network.numSources):
@@ -140,7 +140,7 @@ class Colony:
         return pheromoneDict
 
     def initializeGoodnessOfArcDict(self) -> dict:
-        """Adds all possible arcs and supersource/sink as keys to the pheromone dictionary with a value of 1/(FixedCost + VariableCost)"""
+        """Adds all possible arcs and supersource/sink as keys to the pheromone dictionary with a value of AntDemo/(FixedCost + VariableCost)"""
         arcGoodnessScalar = 10  # Based off the magnitude of the arc costs (~10^2)
         arcGoodnessDict = {}
         # For all edge, cap pairs, initialize with one
