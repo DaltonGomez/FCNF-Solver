@@ -33,14 +33,14 @@ class Population:
         self.populationSize = populationSize
         self.numGenerations = numGenerations
         self.initializationDistribution = "uniform"  # :param : "uniform", "gaussian"
-        self.initializationParams = [0.0,
-                                     1.0]  # :param: Lower and upper bounds if uniform distribution, or mu and sigma if Gaussian
-        # Individual Selection HPs (For Crossover Exclusively)
-        self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "top", "random"
+        self.initializationParams = [0.0, 1.0]  # :param: range if uniform distribution, mu and sigma if Gaussian
+        # Individual Selection HPs
+        self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "random"
         self.tournamentSize = 2
         # Path Selection HPs
-        self.pathSelectionMethod = "roulette"  # :param : "tournament", "roulette", "top", "random"
-        self.pathRankingMethod = "leastDense"  # :param : "mostDense", "leastDense", "mostFlow", "leastFlow", "mostCost", "leastCost", "mostEdges", "leastEdges"
+        self.pathSelectionMethod = "roulette"  # :param : "tournament", "roulette", "random", "top"
+        self.pathRankingOrder = "most"  # :param : "most", "least"
+        self.pathRankingMethod = "leastDense"  # :param : "cost", "flow", "density", "length"
         self.pathSelectionSize = 2
         self.pathTournamentSize = 2
         # Crossover HPs
@@ -52,19 +52,16 @@ class Population:
         self.mutationMethod = "pathBased"  # :param : "randomSingle", "randomTotal", "pathBased"
         self.mutationRate = 0.50
 
-        # Initialize Population
-        self.initializePopulation()
-
     # ==================================================================
     # ============== HYPERPARAMETER SETTERS & INITIALIZER ==============
     # ==================================================================
-    def setGlobalHyperparams(self, populationSize: int, numGenerations: int, initializationDistribution: str,
-                             initializationParams: list) -> None:
+    def setPopulationHyperparams(self, populationSize: int, numGenerations: int, initializationDistribution: str,
+                                 initializationParams: list) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
         :param int numGenerations: Number of iterations the population evolves for
         :param str initializationDistribution: One of following: {"uniform", "gaussian"}
-        :param list initializationParams: Lower and upper bounds if uniform distribution, or mu and sigma if Gaussian
+        :param list initializationParams: Lower and upper bounds if uniform distribution, mu and sigma if Gaussian
         """
         self.populationSize = populationSize
         self.numGenerations = numGenerations
@@ -73,21 +70,24 @@ class Population:
 
     def setIndividualSelectionHyperparams(self, selectionMethod: str, tournamentSize: int) -> None:
         """Sets the GA class fields that dictate how the selection of individuals is carried out \n
-        :param str selectionMethod: One of following: {"tournament", "roulette", "top", "random"}
+        :param str selectionMethod: One of following: {"tournament", "roulette", "random"}
         :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
         """
         self.selectionMethod = selectionMethod
         self.tournamentSize = tournamentSize
 
-    def setPathSelectionHyperparams(self, selectionMethod: str, pathRankingMethod: str, selectionSize: int,
+    def setPathSelectionHyperparams(self, selectionMethod: str, pathRankingOrder: str, pathRankingMethod: str,
+                                    selectionSize: int,
                                     tournamentSize: int) -> None:
         """Sets the GA class fields that dictate how the selection of paths is carried out \n
-        :param str selectionMethod: One of following: {"tournament", "roulette", "top", "random"}
-        :param str pathRankingMethod: One of following: {"mostDense", "leastDense", "mostFlow", "leastFlow", "mostCost", "leastCost", "mostEdges", "leastEdges"}
+        :param str selectionMethod: One of following: {"tournament", "roulette", "random", "top"}
+        :param str pathRankingOrder: One of following: {"most", "least"}
+        :param str pathRankingMethod: One of following: {"cost", "flow", "density", "length"}
         :param int selectionSize: Number of individuals returned
         :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
         """
         self.pathSelectionMethod = selectionMethod
+        self.pathRankingOrder = pathRankingOrder
         self.pathRankingMethod = pathRankingMethod
         self.pathSelectionSize = selectionSize
         self.pathTournamentSize = tournamentSize
@@ -118,24 +118,45 @@ class Population:
     # ============================================
     def evolvePopulation(self, drawing=False, drawLabels=False) -> None:
         """Evolves the population for a specified number of generations"""
+        # Initialize Population and Solve
+        self.initializePopulation()
+        self.solvePopulation()
+        # Evolve Population
         for generation in range(self.numGenerations):
             # TODO - IMPLEMENT SELECTION & CROSSOVER
             # TODO - IMPLEMENT SELECTION & MUTATION
+
+            selection = self.selectIndividuals()
+            print(selection)
+
+            self.naiveHillClimb()
             self.solvePopulation()
+
+            # Visualize
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
-            print("Generation = " + str(generation) + "\tBest Individual = " + str(self.population[0].trueCost))
+            # Print Best Individual
+            bestIndividual = self.getMostFitIndividual()
+            print("Generation = " + str(generation) + "\tBest Individual = " + str(
+                bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
 
     def solveWithNaiveHillClimb(self, drawing=False, drawLabels=False) -> None:
         """Evolves the population for a specified number of generations"""
+        # Initialize Population and Solve
+        self.initializePopulation()
+        self.solvePopulation()
+        # Execute Hill Climb
         for generation in range(self.numGenerations):
-            # Solve and visualize
+            # Solve
             self.naiveHillClimb()
             self.solvePopulation()
+            # Visualize
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
-            self.printBestIndividualsPaths()
-            print("Generation = " + str(generation) + "\tBest Individual = " + str(self.population[0].trueCost))
+            # Print Best Individual
+            bestIndividual = self.getMostFitIndividual()
+            print("Generation = " + str(generation) + "\tBest Individual = " + str(
+                bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost)))
 
     # ====================================================
     # ============== INITIALIZATION METHODS ==============
@@ -144,7 +165,7 @@ class Population:
         """Initializes the GA population with random alpha values"""
         for individual in range(self.populationSize):
             thisGenotype = self.getInitialAlphaValues()
-            thisIndividual = Individual(self.network, thisGenotype)
+            thisIndividual = Individual(individual, self.network, thisGenotype)
             self.population.append(thisIndividual)
 
     def getInitialAlphaValues(self) -> ndarray:
@@ -169,18 +190,9 @@ class Population:
             randomGene = random.gauss(self.initializationParams[0], self.initializationParams[1])
         return randomGene
 
-    # =========================================================
-    # ============== MUTATION/HILL CLIMB METHODS ==============
-    # =========================================================
-    def randomSingleMutation(self, individualNum: int) -> None:
-        """Mutates an individual at only one random gene in the chromosome"""
-        random.seed()
-        mutatedEdge = random.randint(0, self.network.numEdges - 1)
-        mutatedCap = random.randint(0, self.network.numArcCaps - 1)
-        individual = self.population[individualNum]
-        individual.alphaValues[mutatedEdge][mutatedCap] = self.getAlphaValue()
-        individual.resetOutputNetwork()
-
+    # ===============================================================
+    # ============== HYPER-MUTATION/HILL CLIMB METHODS ==============
+    # ===============================================================
     def hypermutateIndividual(self, individualNum: int) -> None:
         """Reinitializes the individual's entire alpha values (i.e. kills them off and spawns a new individual)"""
         individual = self.population[individualNum]
@@ -199,11 +211,12 @@ class Population:
         for i in range(1, self.populationSize):
             self.hypermutateIndividual(i)
 
-    # ============================================
-    # ============== HELPER METHODS ==============
-    # ============================================
+    # =============================================
+    # ============== RANKING METHODS ==============
+    # =============================================
     def rankPopulation(self) -> list:
-        """Ranks the population in ascending order of true cost (i.e. Lower cost -> More fit) and returns"""
+        """Ranks the population not in place in ascending order of cost (i.e. Lower cost -> More fit) and returns"""
+        # NOTE: The population should never be sorted in-place as this will cause bugs in the execution of operators
         sortedPopulation = sorted(self.population, key=lambda x: x.trueCost)
         return sortedPopulation
 
@@ -269,9 +282,6 @@ class Population:
         bestIndividual.computeAllUsedPaths()
         bestIndividual.printAllPaths()
 
-    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # TODO - REVISE HERE DOWN (ALL OLD METHODS)
-    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # ============================================================
     # ============== INDIVIDUAL SELECTION OPERATORS ==============
     # ============================================================
@@ -279,11 +289,9 @@ class Population:
         """Hyper-selection operator that calls specific selection method based on hyperparameters"""
         selectedIndividualIDs = []
         if self.selectionMethod == "tournament":
-            selectedIndividualIDs = self.tournamentSelection(self.tournamentSize)
+            selectedIndividualIDs = self.tournamentSelection()
         elif self.selectionMethod == "roulette":
             selectedIndividualIDs = self.rouletteWheelSelection()
-        elif self.selectionMethod == "top":
-            selectedIndividualIDs = self.topSelection()
         elif self.selectionMethod == "random":
             selectedIndividualIDs = self.randomSelection()
         return selectedIndividualIDs
@@ -291,51 +299,40 @@ class Population:
     def randomSelection(self) -> list:
         """Returns a random subset of individuals in the population (w/o replacement)"""
         random.seed()
-        populationIDs = []
-        for i in range(len(self.population)):
-            populationIDs.append(i)
-        randomIndividualsIDs = random.sample(populationIDs, 2)
+        randomIndividualsIDs = random.sample(range(len(self.population)), 2)
         return randomIndividualsIDs
-
-    def topSelection(self) -> list:
-        """Returns the top n individuals in the population"""
-        self.rankPopulation()
-        topIndividualIDs = []
-        for i in range(2):
-            topIndividualIDs.append(i)
-        return topIndividualIDs
 
     def rouletteWheelSelection(self) -> list:
         """Selects individuals probabilistically by their normalized fitness"""
         random.seed()
-        self.rankPopulation()
+        sortedPopulation = self.rankPopulation()
         fitnessFromCost = []
-        for individual in range(len(self.population)):
-            fitnessFromCost.append(1 / self.population[individual].trueCost)
+        for individual in range(len(sortedPopulation)):
+            fitnessFromCost.append(1 / sortedPopulation[individual].trueCost)
         cumulativeFitness = 0
-        for individual in range(len(self.population)):
+        for individual in range(len(sortedPopulation)):
             cumulativeFitness += fitnessFromCost[individual]
         cumulativeProbabilities = [fitnessFromCost[0] / cumulativeFitness]
-        for i in range(1, len(self.population)):
+        for i in range(1, len(sortedPopulation)):
             cumulativeProbabilities.append(
                 (fitnessFromCost[i] / cumulativeFitness) + cumulativeProbabilities[i - 1])
         selectionSet = set()
         while len(selectionSet) < 2:
             rng = random.random()
-            for individual in range(len(self.population)):
+            for individual in range(len(sortedPopulation)):
                 if rng < cumulativeProbabilities[individual]:
                     selectionSet.add(individual)
                     break
-        return list(selectionSet)
+        individualIDs = []
+        for individual in selectionSet:
+            individualIDs.append(sortedPopulation[individual].id)
+        return individualIDs
 
-    def tournamentSelection(self, tournamentSize: int) -> list:
+    def tournamentSelection(self) -> list:
         """Selects the best k individuals out of a randomly chosen subset of size n"""
         random.seed()
-        # Select subset of population
-        populationIDs = []
-        for i in range(len(self.population)):
-            populationIDs.append(i)
-        subset = random.sample(populationIDs, tournamentSize)
+        # Select a random subset of population
+        subset = random.sample(range(len(self.population)), self.tournamentSize)
         # Sort by cost
         tournament = []
         for individual in subset:
@@ -348,6 +345,9 @@ class Population:
             selection.append(topPick[0])
         return selection
 
+    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # TODO - REVISE HERE DOWN (ALL OLD METHODS)
+    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # ============================================================
     # ============== PATH SELECTION OPERATORS ====================
     # ============================================================
@@ -497,6 +497,15 @@ class Population:
         elif self.mutationMethod == "pathBased":
             self.selectedPathsMutation(individualID, selectedPaths)
 
+    def randomSingleMutation(self, individualNum: int) -> None:
+        """Mutates an individual at only one random gene in the chromosome"""
+        random.seed()
+        mutatedEdge = random.randint(0, self.network.numEdges - 1)
+        mutatedCap = random.randint(0, self.network.numArcCaps - 1)
+        individual = self.population[individualNum]
+        individual.alphaValues[mutatedEdge][mutatedCap] = self.getAlphaValue()
+        individual.resetOutputNetwork()
+
     def selectedPathsMutation(self, individualNum: int, selectedPaths: list) -> None:
         """Mutates all the edges in the selected paths of an individual"""
         individual = self.population[individualNum]
@@ -643,5 +652,3 @@ class Population:
             self.population.pop(-1)
             self.population.append(offspringOne)
             self.population.append(offspringTwo)
-
-

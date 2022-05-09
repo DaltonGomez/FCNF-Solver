@@ -10,6 +10,7 @@ class Path:
         # Path topology fields
         self.nodes = visitedNodes
         self.edges = visitedEdges
+        self.length = len(self.edges)
         # Path flow and cost fields
         self.pathFlow = pathFlowAndCosts[0]
         self.pathFixedCost = pathFlowAndCosts[1]

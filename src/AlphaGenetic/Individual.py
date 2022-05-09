@@ -12,9 +12,10 @@ class Individual:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, network: FlowNetwork, initialAlphaValues: ndarray):
+    def __init__(self, ID: int, network: FlowNetwork, initialAlphaValues: ndarray):
         """Constructor of an Individual instance"""
-        # Input Network
+        # Input Network and ID in the Population
+        self.id = ID
         self.network = network
         # Alpha Values (a.k.a. the genotype of the individual)
         self.alphaValues = initialAlphaValues
