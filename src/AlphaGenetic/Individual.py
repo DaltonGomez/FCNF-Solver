@@ -58,93 +58,99 @@ class Individual:
     # =============================================
     # ============== PATHING METHODS ==============
     # =============================================
-    # TODO - Revise pathing methods to handle branching better (i.e. all pathlets, full trees, etc.)
     def computeAllUsedPaths(self) -> None:
-        """Computes all the source-sink paths that have a positive flow"""
+        """Computes all the pathlets that have a positive flow"""
         if self.isSolved is False:
             print("Cannot compute paths on an unsolved instance!")
         else:
             # For all sources with an assigned flow
             for srcIndex in range(self.network.numSources):
                 if self.srcFlows[srcIndex] > 0:
-                    # Do a depth first search from the source and use the visited nodes to construct paths
                     src = self.network.sourcesArray[srcIndex]
-                    visited = self.doDepthFirstSearch(src)
-                    self.constructPaths(visited)
+                    srcObj = self.network.nodesDict[src]
+                    # For all outgoing edges with flow, build pathlets
+                    for outgoingEdge in srcObj.outgoingEdges:
+                        if self.getEdgeFlow(outgoingEdge) > 0:
+                            self.buildPathlet(src, outgoingEdge)
 
-    def doDepthFirstSearch(self, startNode: int, incomingEdge=None) -> tuple:
-        """DFS implementation used in computing all used paths"""
-        stack = []
-        visitedNodes = []
-        visitedEdges = []
-        # The incomingEdge arg is only used when a complete source/sink path is recursively split due to branching
-        if incomingEdge is not None:
-            visitedEdges.append(incomingEdge)  # Add edge as (fromNode, toNode) to visited edges
-            visitedNodes.append(incomingEdge[0])  # Add fromNode to visited nodes
-        # Push starting node onto stack and repeat until stack is empty
-        stack.insert(0, startNode)
-        while len(stack) > 0:
-            node = stack.pop(0)
-            # If next node hasn't been visited, visit node
-            if node not in visitedNodes:
-                visitedNodes.append(node)
-                nodeObj = self.network.nodesDict[node]
-                # Check all outgoing edges of the node and traverse them to the next node if edge was opened
-                for outgoingEdge in nodeObj.outgoingEdges:
-                    if self.getEdgeFlow(outgoingEdge) > 0:
-                        # Mark the visited edge and add the next node onto the stack
-                        visitedEdges.append(outgoingEdge)
-                        nextNode = outgoingEdge[1]
-                        stack.insert(0, nextNode)
-        return visitedNodes, visitedEdges
-
-    def constructPaths(self, visited: tuple) -> None:
-        """Constructs all positive flow paths originating from a single source"""
-        visitedNodes = visited[0]
-        visitedEdges = visited[1]
-        # Count number of branch points to determine number of paths
-        branchPoints = []
-        # Check for branching
-        for node in visitedNodes:
-            nodeObj = self.network.nodesDict[node]
-            if self.numCommonEdges(visitedEdges, nodeObj.outgoingEdges) >= 2:
-                branchPoints.append(nodeObj.nodeID)
-        # Source has single path
-        if len(branchPoints) == 0:
+    def buildPathlet(self, startingNode: int, startingEdge: tuple) -> None:
+        """Builds a pathlet from a starting node in a particular direction"""
+        visitedNodes = [startingNode]
+        visitedEdges = [startingEdge]
+        toNode = startingEdge[1]
+        toNodeObj = self.network.nodesDict[toNode]
+        # While the pathlet hasn't been interrupted, travel it
+        while self.isEndOfPathlet(toNode) is not True:
+            for edge in toNodeObj.outgoingEdges:
+                if self.getEdgeFlow(edge) > 0:
+                    visitedNodes.append(toNode)
+                    visitedEdges.append(edge)
+                    toNode = edge[1]
+                    toNodeObj = self.network.nodesDict[toNode]
+        # When the pathlet is interrupted, construct a Path object
+        visitedNodes.append(toNode)
+        if self.isDuplicatePathlet(visitedNodes) is not True:
             pathFlowAndCosts = self.calculatePathCostAndFlow(visitedNodes, visitedEdges)
-            thisPath = Path(visitedNodes, visitedEdges, pathFlowAndCosts)
-            self.paths.append(thisPath)
-        # Source has multiple paths/branching (i.e. is a tree) and should be recursively split into arc segments
+            thisPathlet = Path(visitedNodes, visitedEdges, pathFlowAndCosts)
+            self.paths.append(thisPathlet)
+        # Recurse on buildPathlet() if the termination of the last pathlet should initiate a new pathlet
+        # If the toNode is a branch point
+        outgoingFlows = 0
+        for edge in toNodeObj.outgoingEdges:
+            if self.getEdgeFlow(edge) > 0:
+                outgoingFlows += 1
+        if outgoingFlows > 1:
+            for edge in toNodeObj.outgoingEdges:
+                if self.getEdgeFlow(edge) > 0:
+                    self.buildPathlet(toNode, edge)
+        # If the toNode is a confluence point
+        incomingFlows = 0
+        for edge in toNodeObj.incomingEdges:
+            if self.getEdgeFlow(edge) > 0:
+                incomingFlows += 1
+        if incomingFlows > 1:
+            for edge in toNodeObj.outgoingEdges:
+                if self.getEdgeFlow(edge) > 0:
+                    self.buildPathlet(toNode, edge)
+        # If the toNode is a sink that has positive outgoing flow
+        if toNodeObj.nodeType == 1:
+            for edge in toNodeObj.outgoingEdges:
+                if self.getEdgeFlow(edge) > 0:
+                    self.buildPathlet(toNode, edge)
+
+    def isEndOfPathlet(self, toNode: int) -> bool:
+        """Checks if the pathlet should end"""
+        toNodeObj = self.network.nodesDict[toNode]
+        # Check if toNode is a sink
+        if toNodeObj.nodeType == 1:
+            return True
+        # Check if toNode has multiple outgoing flow
+        outgoingFlows = 0
+        for edge in toNodeObj.outgoingEdges:
+            if self.getEdgeFlow(edge) > 0:
+                outgoingFlows += 1
+        if outgoingFlows > 1:
+            return True
+        # Check if toNode has other incoming flow
+        incomingFlows = 0
+        for edge in toNodeObj.incomingEdges:
+            if self.getEdgeFlow(edge) > 0:
+                incomingFlows += 1
+        if incomingFlows > 1:
+            return True
+        return False
+
+    def isDuplicatePathlet(self, visitedNodes: list) -> bool:
+        """Checks if a constructed pathlet is already present in the individual's path list"""
+        thisNodeTuple = tuple(visitedNodes)
+        existingPathSet = set()
+        for path in self.paths:
+            existingNodeTuple = tuple(path.nodes)
+            existingPathSet.add(existingNodeTuple)
+        if thisNodeTuple in existingPathSet:
+            return True
         else:
-            # Branching at the source (i.e. multiple paths leaving from a single source)
-            firstBranchID = branchPoints[0]
-            firstBranchObj = self.network.nodesDict[firstBranchID]
-            if firstBranchObj.nodeType == 0:
-                for outgoingEdge in firstBranchObj.outgoingEdges:
-                    if self.getEdgeFlow(outgoingEdge) > 0:
-                        # For all edges leaving the source with flow, recurse on DFS/Construct Paths
-                        recursiveVisited = self.doDepthFirstSearch(outgoingEdge[1], outgoingEdge)
-                        self.constructPaths(recursiveVisited)
-            # Branching at an intermediate node (i.e. path splits into tree at arbitrary point away from source)
-            elif firstBranchObj.nodeType == 2:
-                # Create path for everything before intermediate branch
-                currentNode = visitedNodes[0]
-                nodesBeforeBranch = []
-                edgesBeforeBranch = []
-                # Pop nodes and edges up to branch
-                while currentNode != branchPoints[0]:
-                    nodesBeforeBranch.append(visitedNodes.pop(0))
-                    edgesBeforeBranch.append(visitedEdges.pop(0))
-                    currentNode = visitedNodes[0]
-                # Package as an arc segment
-                pathFlowAndCosts = self.calculatePathCostAndFlow(visitedNodes, visitedEdges)
-                pathBefore = Path(visitedNodes, visitedEdges, pathFlowAndCosts)
-                self.paths.append(pathBefore)
-                # Recurse on DFS/Construct Paths for remaining arc segments
-                for outgoingEdge in self.network.nodesDict[branchPoints[0]].outgoingEdges:
-                    if self.getEdgeFlow(outgoingEdge) > 0:
-                        recursiveVisited = self.doDepthFirstSearch(outgoingEdge[1], outgoingEdge)
-                        self.constructPaths(recursiveVisited)
+            return False
 
     def getEdgeFlow(self, edge: tuple) -> float:
         """Calculates the combined flow of the edge by considering all parallel arcs"""
@@ -189,15 +195,6 @@ class Individual:
                         variableCost = self.network.sinkVariableCostsArray[sinkIndex]
                         sinkSrcCost += variableCost * pathFlow
         return pathFlow, pathFixedCost, pathVariableCost, sinkSrcCost
-
-    @staticmethod
-    def numCommonEdges(visitedEdges: list, nextPossibleEdges: list) -> int:
-        """Counts the number of common edges between two list"""
-        common = 0
-        for edge in visitedEdges:
-            if edge in nextPossibleEdges:
-                common += 1
-        return common
 
     def printAllPaths(self) -> None:
         """Prints the data for all paths constructed"""

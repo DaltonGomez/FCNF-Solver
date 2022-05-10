@@ -30,12 +30,12 @@ if __name__ == "__main__":
     # Input parameters
     name = ""
     numNodes = 10
-    numSources = 2
+    numSources = 1
     numSinks = 2
     # Arc Cost Determining Table
     # Format: cap, fixed cost, variable cost
     arcCostLookupTable = [
-        [100, 10, 1]
+        [10, 10, 1]
     ]
     # Source/sink cap and cost ranges
     srcSinkCapacityRange = [100, 200]
