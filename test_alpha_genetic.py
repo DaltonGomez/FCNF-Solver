@@ -15,13 +15,12 @@ if __name__ == "__main__":
     network = FlowNetwork()
     network = network.loadNetwork("test2.p")
     vis = NetworkVisualizer(network, directed=True, supers=False)
-    vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
+    # vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
     minTargetFlow = 200
 
     # Solve with Alpha-GA
-    pop = Population(network, minTargetFlow, populationSize=10, numGenerations=4)
-    pop.setIndividualSelectionHyperparams("tournament", 3)
-    pop.evolvePopulation(drawing=True, drawLabels=True)
+    pop = Population(network, minTargetFlow, populationSize=10, numGenerations=1)
+    pop.evolvePopulation(drawing=False, drawLabels=True)
 
     # Solve with Naive Hill Climb
     # pop.solveWithNaiveHillClimb(drawing=True, drawLabels=True)
@@ -31,4 +30,4 @@ if __name__ == "__main__":
     cplex.findSolution(printDetails=False)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
-    optVis.drawGraphWithLabels(leadingText="OPT_")
+    # optVis.drawGraphWithLabels(leadingText="OPT_")

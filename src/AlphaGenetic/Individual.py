@@ -201,5 +201,7 @@ class Individual:
 
     def printAllPaths(self) -> None:
         """Prints the data for all paths constructed"""
+        if len(self.paths) == 0:
+            self.computeAllUsedPaths()
         for path in self.paths:
             path.printPathData()

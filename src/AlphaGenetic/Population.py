@@ -39,8 +39,8 @@ class Population:
         self.tournamentSize = 2
         # Path Selection HPs
         self.pathSelectionMethod = "roulette"  # :param : "tournament", "roulette", "random", "top"
-        self.pathRankingOrder = "most"  # :param : "most", "least"
-        self.pathRankingMethod = "leastDense"  # :param : "cost", "flow", "density", "length"
+        self.pathRankingOrder = "least"  # :param : "most", "least"
+        self.pathRankingMethod = "density"  # :param : "cost", "flow", "density", "length"
         self.pathSelectionSize = 2
         self.pathTournamentSize = 2
         # Crossover HPs
@@ -49,7 +49,7 @@ class Population:
         self.crossoverAttemptsPerGeneration = 1
         self.replacementStrategy = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents"
         # Mutation HPs
-        self.mutationMethod = "pathBased"  # :param : "randomSingle", "randomTotal", "pathBased"
+        self.mutationMethod = "pathBased"  # :param : "randomSingleArc", "randomSingleEdge", "randomTotal", "pathBased"
         self.mutationRate = 0.50
 
     # ==================================================================
@@ -71,7 +71,7 @@ class Population:
     def setIndividualSelectionHyperparams(self, selectionMethod: str, tournamentSize: int) -> None:
         """Sets the GA class fields that dictate how the selection of individuals is carried out \n
         :param str selectionMethod: One of following: {"tournament", "roulette", "random"}
-        :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
+        :param int tournamentSize: Size of tournament subset used if selectionMethod = "tournament"
         """
         self.selectionMethod = selectionMethod
         self.tournamentSize = tournamentSize
@@ -83,8 +83,8 @@ class Population:
         :param str selectionMethod: One of following: {"tournament", "roulette", "random", "top"}
         :param str pathRankingOrder: One of following: {"most", "least"}
         :param str pathRankingMethod: One of following: {"cost", "flow", "density", "length"}
-        :param int selectionSize: Number of individuals returned
-        :param int tournamentSize: Size of tournament subset selected if selectionMethod = "tournament"
+        :param int selectionSize: Number of paths returned
+        :param int tournamentSize: Size of tournament subset used if pathSelectionMethod = "tournament"
         """
         self.pathSelectionMethod = selectionMethod
         self.pathRankingOrder = pathRankingOrder
@@ -110,7 +110,7 @@ class Population:
         :param str mutationMethod: One of following: {"randomSingle", "randomTotal", "pathBased"}
         :param str mutationRate: Probability in [0,1] that a mutation occurs
         """
-        self.mutationMethod = mutationMethod  # :param : "randomSingle", "randomTotal", "pathBased"
+        self.mutationMethod = mutationMethod  # :param : "randomSingle", "randomSingleEdge", "randomTotal", "pathBased"
         self.mutationRate = mutationRate
 
     # ============================================
@@ -126,12 +126,9 @@ class Population:
             # TODO - IMPLEMENT SELECTION & CROSSOVER
             # TODO - IMPLEMENT SELECTION & MUTATION
 
-            selection = self.selectIndividuals()
-            print(selection)
 
             self.naiveHillClimb()
             self.solvePopulation()
-
             # Visualize
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
@@ -222,8 +219,17 @@ class Population:
 
     def getMostFitIndividual(self) -> Individual:
         """Returns the most fit individual in the population"""
-        sortedPop = self.rankPopulation()
-        return sortedPop[0]
+        return self.population[self.getMostFitIndividualID()]
+
+    def getMostFitIndividualID(self) -> int:
+        """Returns the most fit individual in the population"""
+        sortedPopulation = self.rankPopulation()
+        return sortedPopulation[0].id
+
+    def getWeakestTwoIndividualIDs(self) -> tuple:
+        """Returns the IDs of the two least fit individuals in the population"""
+        sortedPopulation = self.rankPopulation()
+        return sortedPopulation[-1].id, sortedPopulation[-2].id
 
     # ============================================
     # ============== SOLVER METHODS ==============
@@ -345,9 +351,6 @@ class Population:
             selection.append(topPick[0])
         return selection
 
-    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # TODO - REVISE HERE DOWN (ALL OLD METHODS)
-    # TODO - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # ============================================================
     # ============== PATH SELECTION OPERATORS ====================
     # ============================================================
@@ -356,91 +359,96 @@ class Population:
         selectedPaths = []
         # If paths are selected randomly, skip the ranking process
         if self.pathSelectionMethod == "random":
-            selectedPaths = self.randomPathSelection(individualID, self.pathSelectionSize)
-        # Else rank paths as a set of tuples based on self.pathRankingMethod
+            selectedPaths = self.randomPathSelection(individualID)
+        # Else rank paths as a set of tuples based on self.pathRankingMethod and self.pathRankingOrder
         else:
             individual = self.population[individualID]
             rankedPaths = []
             # Compute paths and resize return selection length if necessary
             if len(individual.paths) == 0:
-                individual.allUsedPaths()
+                individual.computeAllUsedPaths()
                 # If the number of paths is still zero, return an empty list
                 if len(individual.paths) == 0:
                     return []
+            # Adjust the number of returned paths to either the hyperparameter or the total number of paths (if smaller)
             thisSelectionSize = self.pathSelectionSize
             if self.pathSelectionSize > len(individual.paths):
                 thisSelectionSize = len(individual.paths)
-            # Rank paths based on self.pathRankingMethod hyperparameter
-            if self.pathRankingMethod == "mostDense":
-                for path in individual.paths:
-                    rankedPaths.append((path, path.flowPerCostDensity))
-                rankedPaths.sort(key=lambda p: p[1], reverse=True)
-            elif self.pathRankingMethod == "leastDense":
-                for path in individual.paths:
-                    rankedPaths.append((path, path.flowPerCostDensity))
-                rankedPaths.sort(key=lambda p: p[1], reverse=False)
-            elif self.pathRankingMethod == "mostFlow":
-                for path in individual.paths:
-                    rankedPaths.append((path, path.flow))
-                rankedPaths.sort(key=lambda p: p[1], reverse=True)
-            elif self.pathRankingMethod == "leastFlow":
-                for path in individual.paths:
-                    rankedPaths.append((path, path.flow))
-                rankedPaths.sort(key=lambda p: p[1], reverse=False)
-            elif self.pathRankingMethod == "mostCost":
-                for path in individual.paths:
-                    rankedPaths.append((path, path.routingCost))
-                rankedPaths.sort(key=lambda p: p[1], reverse=True)
-            elif self.pathRankingMethod == "leastCost":
-                for path in individual.paths:
-                    rankedPaths.append((path, path.routingCost))
-                rankedPaths.sort(key=lambda p: p[1], reverse=False)
-            elif self.pathRankingMethod == "mostEdges":
-                for path in individual.paths:
-                    rankedPaths.append((path, len(path.edges)))
-                rankedPaths.sort(key=lambda p: p[1], reverse=True)
-            elif self.pathRankingMethod == "leastEdges":
-                for path in individual.paths:
-                    rankedPaths.append((path, len(path.edges)))
-                rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            # Rank paths based on self.pathRankingMethod and self.pathRankingOrder hyperparameters
+            if self.pathRankingMethod == "cost":
+                if self.pathRankingOrder == "most":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.pathRoutingCost))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=True)
+                elif self.pathRankingOrder == "least":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.pathRoutingCost))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            elif self.pathRankingMethod == "flow":
+                if self.pathRankingOrder == "most":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.pathFlow))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=True)
+                elif self.pathRankingOrder == "least":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.pathFlow))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            elif self.pathRankingMethod == "density":
+                if self.pathRankingOrder == "most":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.flowPerRoutingCost))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=True)
+                elif self.pathRankingOrder == "least":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.flowPerRoutingCost))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            elif self.pathRankingMethod == "length":
+                if self.pathRankingOrder == "most":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.length))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=True)
+                elif self.pathRankingOrder == "least":
+                    for path in individual.paths:
+                        rankedPaths.append((path, path.length))
+                    rankedPaths.sort(key=lambda p: p[1], reverse=False)
+            print("Ranked Paths: " + str(rankedPaths))
             # Generate selected paths with method call based on pathSelectionMethod
             if self.pathSelectionMethod == "top":
                 selectedPaths = self.topPathSelection(rankedPaths, thisSelectionSize)
             elif self.pathSelectionMethod == "roulette":
                 selectedPaths = self.rouletteWheelPathSelection(rankedPaths, thisSelectionSize)
             elif self.pathSelectionMethod == "tournament":
-                selectedPaths = self.tournamentPathSelection(rankedPaths, thisSelectionSize,
-                                                             self.pathTournamentSize)
+                selectedPaths = self.tournamentPathSelection(rankedPaths, thisSelectionSize)
         return selectedPaths
 
-    def randomPathSelection(self, individualID: int, selectionSize: int) -> list:
+    def randomPathSelection(self, individualID: int) -> list:
         """Returns a random subset of paths in an individual (w/o replacement)"""
         random.seed()
         individual = self.population[individualID]
         # Compute paths and resize return selection length if necessary
         if len(individual.paths) == 0:
-            individual.allUsedPaths()
+            individual.computeAllUsedPaths()
             # If the number of paths is still zero, return an empty list
             if len(individual.paths) == 0:
                 return []
-        thisSelectionSize = selectionSize
-        if selectionSize > len(individual.paths):
+        thisSelectionSize = self.pathSelectionSize
+        if self.pathSelectionSize > len(individual.paths):
             thisSelectionSize = len(individual.paths)
         # Randomly sample the paths list
         selectedPaths = random.sample(individual.paths, thisSelectionSize)
         return selectedPaths
 
     @staticmethod
-    def topPathSelection(rankedPaths: list, selectionSize: int) -> list:
+    def topPathSelection(rankedPaths: list, thisSelectionSize: int) -> list:
         """Returns the n top paths for the individual based on the path ranking method"""
         # Select paths subset from beginning of full path list
         selectedPaths = []
-        for path in range(selectionSize):
+        for path in range(thisSelectionSize):
             selectedPaths.append(rankedPaths[path][0])
         return selectedPaths
 
     @staticmethod
-    def rouletteWheelPathSelection(rankedPaths: list, selectionSize: int) -> list:
+    def rouletteWheelPathSelection(rankedPaths: list, thisSelectionSize: int) -> list:
         """Selects paths from an individual probabilistically by their normalized fitness (based on path ranking method)"""
         random.seed()
         # Build cumulative probability function
@@ -454,31 +462,34 @@ class Population:
         # Build selected paths set
         selectedPaths = []
         duplicateCheckingSet = set()
-        while len(selectedPaths) < selectionSize:
+        while len(selectedPaths) < thisSelectionSize:
             rng = random.random()
             for p in range(len(rankedPaths)):
                 if rng < cumulativeProbabilities[p]:
-                    # Utilize a hashable combo of the path's source and sink to prevent duplication
-                    hashableID = rankedPaths[p][0].start + rankedPaths[p][0].end
+                    # Utilize a tuple of the nodes as a hashable id to prevent duplication
+                    hashableID = tuple(rankedPaths[p][0].nodes)
                     if hashableID not in duplicateCheckingSet:
                         selectedPaths.append(rankedPaths[p][0])
                         duplicateCheckingSet.add(hashableID)
                         break
         return selectedPaths
 
-    def tournamentPathSelection(self, rankedPaths: list, selectionSize: int, tournamentSize: int) -> list:
+    def tournamentPathSelection(self, rankedPaths: list, thisSelectionSize: int) -> list:
         """Selects the best k paths out of a randomly chosen subset of size n"""
         random.seed()
         # Select random subset of paths
-        tournament = random.sample(rankedPaths, tournamentSize)
+        thisTournamentSize = self.pathTournamentSize
+        if self.pathTournamentSize > len(rankedPaths):
+            thisTournamentSize = len(rankedPaths)
+        tournament = random.sample(rankedPaths, thisTournamentSize)
         # Sort the tournament based on most or least direction
-        if self.pathRankingMethod[0] == "m":
+        if self.pathRankingOrder[0] == "m":
             tournament.sort(key=lambda p: p[1], reverse=True)
-        elif self.pathRankingMethod[0] == "l":
+        elif self.pathRankingOrder[0] == "l":
             rankedPaths.sort(key=lambda p: p[1], reverse=False)
         # Select top and return
         selection = []
-        for i in range(selectionSize):
+        for i in range(thisSelectionSize):
             pathTuple = tournament.pop(0)
             selection.append(pathTuple[0])
         return selection
@@ -490,15 +501,17 @@ class Population:
         """Hyper-selection operator that calls specific mutation method based on hyperparameters"""
         if selectedPaths is None:
             selectedPaths = []
-        if self.mutationMethod == "randomSingle":
-            self.randomSingleMutation(individualID)
-        elif self.mutationMethod == "randomTotal":
+        if self.mutationMethod == "randomTotal":
             self.hypermutateIndividual(individualID)
+        elif self.mutationMethod == "randomSingleArc":
+            self.randomSingleArcMutation(individualID)
+        elif self.mutationMethod == "randomSingleEdge":
+            self.randomSingleEdgeMutation(individualID)
         elif self.mutationMethod == "pathBased":
             self.selectedPathsMutation(individualID, selectedPaths)
 
-    def randomSingleMutation(self, individualNum: int) -> None:
-        """Mutates an individual at only one random gene in the chromosome"""
+    def randomSingleArcMutation(self, individualNum: int) -> None:
+        """Mutates an individual at only one random arc in the chromosome"""
         random.seed()
         mutatedEdge = random.randint(0, self.network.numEdges - 1)
         mutatedCap = random.randint(0, self.network.numArcCaps - 1)
@@ -506,149 +519,139 @@ class Population:
         individual.alphaValues[mutatedEdge][mutatedCap] = self.getAlphaValue()
         individual.resetOutputNetwork()
 
+    def randomSingleEdgeMutation(self, individualNum: int) -> None:
+        """Mutates an individual at all arcs in a random edge in the chromosome"""
+        random.seed()
+        mutatedEdge = random.randint(0, self.network.numEdges - 1)
+        individual = self.population[individualNum]
+        for arcIndex in range(self.network.numArcCaps):
+            individual.alphaValues[mutatedEdge][arcIndex] = self.getAlphaValue()
+        individual.resetOutputNetwork()
+
     def selectedPathsMutation(self, individualNum: int, selectedPaths: list) -> None:
-        """Mutates all the edges in the selected paths of an individual"""
+        """Mutates the all arcs for each edge in the selected paths of an individual"""
         individual = self.population[individualNum]
         for path in selectedPaths:
             for edge in path.edges:
-                pass
+                edgeIndex = self.network.edgesDict[edge]
+                for arcIndex in range(self.network.numArcCaps):
+                    individual.alphaValues[edgeIndex][arcIndex] = self.getAlphaValue()
+        individual.resetOutputNetwork()
 
     # =================================================
     # ============== CROSSOVER OPERATORS ==============
     # =================================================
     def crossover(self, parentOneID: int, parentTwoID: int, parentOnePaths=None, parentTwoPaths=None) -> None:
         """Hyper-selection operator that calls specific crossover method based on hyperparameters"""
-        random.seed()
         if parentTwoPaths is None:
             parentTwoPaths = []
         if parentOnePaths is None:
             parentOnePaths = []
-        if self.selectionMethod == "pathBased":
-            self.pathBasedCrossover(parentOneID, parentTwoID, parentOnePaths, parentTwoPaths,
-                                    self.replacementStrategy)
+        if self.selectionMethod == "onePoint":
+            self.randomOnePointCrossover(parentOneID, parentTwoID)
         elif self.selectionMethod == "twoPoint":
-            self.randomTwoPointCrossover(parentOneID, parentTwoID, self.replacementStrategy)
-        elif self.selectionMethod == "onePoint":
-            rng = random.random()
-            if rng < 0.50:
-                self.randomOnePointCrossover(parentOneID, parentTwoID, "fromLeft", self.replacementStrategy)
-            else:
-                self.randomOnePointCrossover(parentOneID, parentTwoID, "fromRight", self.replacementStrategy)
+            self.randomTwoPointCrossover(parentOneID, parentTwoID)
+        elif self.selectionMethod == "pathBased":
+            self.pathBasedCrossover(parentOneID, parentTwoID, parentOnePaths, parentTwoPaths)
+
+    def randomOnePointCrossover(self, parentOneID: int, parentTwoID: int) -> None:
+        """Crossover of 2 chromosomes at a single random point\n
+        :param int parentOneID: Index of first parent in population
+        :param int parentTwoID: Index of second parent in population
+        """
+        random.seed()
+        # Generate crossover point
+        crossoverPoint = random.randint(1, self.network.numEdges - 2)
+        parentOneChromosome = self.population[parentOneID].alphaValues
+        parentTwoChromosome = self.population[parentTwoID].alphaValues
+        # Create new offspring chromosomes
+        offspringOneChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
+        offspringTwoChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
+        # Up to crossover point
+        for edge in range(crossoverPoint):
+            for cap in range(self.network.numArcCaps):
+                offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
+                offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
+        # After crossover point
+        for edge in range(crossoverPoint, self.network.numEdges):
+            for cap in range(self.network.numArcCaps):
+                offspringOneChromosome[edge][cap] = parentTwoChromosome[edge][cap]
+                offspringTwoChromosome[edge][cap] = parentOneChromosome[edge][cap]
+        # Do replacement with offspring
+        self.replaceWithOffspring(parentOneID, parentTwoID, offspringOneChromosome, offspringTwoChromosome)
+
+    def randomTwoPointCrossover(self, parentOneID: int, parentTwoID: int) -> None:
+        """Crossover of 2 chromosomes at a two random points\n
+        :param int parentOneID: Index of first parent in population
+        :param int parentTwoID: Index of second parent in population
+        """
+        random.seed()
+        # Generate crossover points
+        crossoverPointOne = random.randint(0, self.network.numEdges - 3)
+        crossoverPointTwo = random.randint(crossoverPointOne, self.network.numEdges - 1)
+        parentOneChromosome = self.population[parentOneID].alphaValues
+        parentTwoChromosome = self.population[parentTwoID].alphaValues
+        # Create new offspring chromosomes
+        offspringOneChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
+        offspringTwoChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
+        # Up to first point
+        for edge in range(crossoverPointOne):
+            for cap in range(self.network.numArcCaps):
+                offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
+                offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
+        # From point one to point two
+        for edge in range(crossoverPointOne, crossoverPointTwo):
+            for cap in range(self.network.numArcCaps):
+                offspringOneChromosome[edge][cap] = parentTwoChromosome[edge][cap]
+                offspringTwoChromosome[edge][cap] = parentOneChromosome[edge][cap]
+        # From point two to the end
+        for edge in range(crossoverPointTwo, self.network.numEdges):
+            for cap in range(self.network.numArcCaps):
+                offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
+                offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
+        # Do replacement with offspring
+        self.replaceWithOffspring(parentOneID, parentTwoID, offspringOneChromosome, offspringTwoChromosome)
 
     def pathBasedCrossover(self, parentOneID: int, parentTwoID: int, parentOnePaths: list,
-                           parentTwoPaths: list, replacementStrategy: str) -> None:
+                           parentTwoPaths: list) -> None:
         """Crossover based on the flow per cost density of paths of the parents\n
         :param int parentOneID: Index of first parent in population
         :param int parentTwoID: Index of second parent in population
         :param list parentOnePaths: List of paths to be crossed-over from parent 1 to parent 2 (Can be any length)
         :param list parentTwoPaths: List of paths to be crossed-over from parent 2 to parent 1 (Can be any length)
-        :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals"""
-        # Create two offspring, each identical to one parent
-        parentOne = self.population[parentOneID]
-        parentTwo = self.population[parentTwoID]
-        offspringOne = Individual(self.network)
-        offspringOne.alphaValues = copy.deepcopy(parentOne.alphaValues)
-        offspringTwo = Individual(self.network)
-        offspringTwo.alphaValues = copy.deepcopy(parentTwo.alphaValues)
-        # For each path, push all of parent one's alpha values to offspring two
-        for path in parentOnePaths:
-            for edge in path.edges:
-                edgeNum = int(edge.lstrip("e"))
-                offspringTwo.alphaValues[edgeNum] = parentOne.alphaValues[edgeNum]
-        # For each path, push all of parent one's alpha values to offspring two
-        for path in parentTwoPaths:
-            for edge in path.edges:
-                edgeNum = int(edge.lstrip("e"))
-                offspringOne.alphaValues[edgeNum] = parentTwo.alphaValues[edgeNum]
-        # Add offspring into the population via the replacement strategy
-        if replacementStrategy == "replaceParents":
-            self.population[parentOneID] = offspringOne
-            self.population[parentTwoID] = offspringTwo
-        elif replacementStrategy == "replaceWeakestTwo":
-            # Kill weakest two individuals
-            self.rankPopulation()
-            self.population.pop(-1)
-            self.population.pop(-1)
-            self.population.append(offspringOne)
-            self.population.append(offspringTwo)
-
-    def randomOnePointCrossover(self, parentOneID: int, parentTwoID: int, direction: str,
-                                replacementStrategy: str) -> None:
-        """Crossover of 2 chromosomes at a single random point\n
-        :param int parentOneID: Index of first parent in population
-        :param int parentTwoID: Index of second parent in population
-        :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals
-        :param str direction: "fromLeft" finds crossover point from left; "fromRight" finds crossover point from right"""
-        random.seed()
-        parentOneChromosome = copy.copy(self.population[parentOneID].alphaValues)
-        parentTwoChromosome = copy.copy(self.population[parentTwoID].alphaValues)
-        # If from right, reverse input chromosomes
-        if direction == "fromRight":
-            parentOneChromosome.reverse()
-            parentTwoChromosome.reverse()
-        crossoverPoint = random.randint(0, self.network.numEdges - 1)
-        parentOneLeftGenes = []
-        parentTwoLeftGenes = []
-        for i in range(crossoverPoint + 1):
-            parentOneLeftGenes.append(parentOneChromosome.pop(0))
-            parentTwoLeftGenes.append(parentTwoChromosome.pop(0))
-        parentOneRightGenes = parentOneChromosome
-        parentTwoRightGenes = parentTwoChromosome
-        offspringOne = Individual(self.network)
-        offspringOne.alphaValues = parentTwoLeftGenes
-        for gene in parentOneRightGenes:
-            offspringOne.alphaValues.append(gene)
-        offspringTwo = Individual(self.network)
-        offspringTwo.alphaValues = parentOneLeftGenes
-        for gene in parentTwoRightGenes:
-            offspringTwo.alphaValues.append(gene)
-        # If from right, reverse output chromosomes
-        if direction == "fromRight":
-            offspringOne.alphaValues.reverse()
-            offspringTwo.alphaValues.reverse()
-        # Add offspring into the population via the replacement strategy
-        if replacementStrategy == "replaceParents":
-            self.population[parentOneID] = offspringOne
-            self.population[parentTwoID] = offspringTwo
-        elif replacementStrategy == "replaceWeakestTwo":
-            # Kill weakest two individuals
-            self.rankPopulation()
-            self.population.pop(-1)
-            self.population.pop(-1)
-            self.population.append(offspringOne)
-            self.population.append(offspringTwo)
-
-    def randomTwoPointCrossover(self, parentOneID: int, parentTwoID: int, replacementStrategy: str) -> None:
-        """Crossover of 2 chromosomes at a two random points\n
-        :param int parentOneID: Index of first parent in population
-        :param int parentTwoID: Index of second parent in population
-        :param str replacementStrategy: "replaceParents" kills parents; "replaceWeakestTwo" kills two most expensive individuals"""
-        random.seed()
+        """
         parentOneChromosome = self.population[parentOneID].alphaValues
         parentTwoChromosome = self.population[parentTwoID].alphaValues
-        # If from right, reverse input chromosomes
-        crossoverPointOne = random.randint(0, self.network.numEdges - 3)
-        crossoverPointTwo = random.randint(crossoverPointOne, self.network.numEdges - 1)
-        parentOneInteriorGenes = []
-        parentTwoInteriorGenes = []
-        for i in range(crossoverPointOne, crossoverPointTwo):
-            parentOneInteriorGenes.append(parentOneChromosome[i])
-            parentTwoInteriorGenes.append(parentTwoChromosome[i])
-        offspringOne = Individual(self.network)
-        offspringOne.alphaValues = parentOneChromosome
-        offspringTwo = Individual(self.network)
-        offspringTwo.alphaValues = parentTwoChromosome
-        for i in range(crossoverPointOne, crossoverPointTwo):
-            offspringOne.alphaValues[i] = parentTwoInteriorGenes[i - crossoverPointOne]
-            offspringTwo.alphaValues[i] = parentOneInteriorGenes[i - crossoverPointOne]
-        # Add offspring into the population via the replacement strategy
-        if replacementStrategy == "replaceParents":
-            self.population[parentOneID] = offspringOne
-            self.population[parentTwoID] = offspringTwo
-        elif replacementStrategy == "replaceWeakestTwo":
-            # Kill weakest two individuals
-            self.rankPopulation()
-            self.population.pop(-1)
-            self.population.pop(-1)
-            self.population.append(offspringOne)
-            self.population.append(offspringTwo)
+        offspringOneChromosome = copy.deepcopy(parentOneChromosome)
+        offspringTwoChromosome = copy.deepcopy(parentTwoChromosome)
+        # Crossover values in Parent 1's Path
+        for path in parentOnePaths:
+            for edge in path.edges:
+                edgeIndex = self.network.edgesDict[edge]
+                for cap in range(self.network.numArcCaps):
+                    offspringOneChromosome[edgeIndex][cap] = parentTwoChromosome[edgeIndex][cap]
+                    offspringTwoChromosome[edgeIndex][cap] = parentOneChromosome[edgeIndex][cap]
+        # Crossover values in Parent 2's Path
+        for path in parentTwoPaths:
+            for edge in path.edges:
+                edgeIndex = self.network.edgesDict[edge]
+                for cap in range(self.network.numArcCaps):
+                    offspringOneChromosome[edgeIndex][cap] = parentTwoChromosome[edgeIndex][cap]
+                    offspringTwoChromosome[edgeIndex][cap] = parentOneChromosome[edgeIndex][cap]
+        # Do replacement with offspring
+        self.replaceWithOffspring(parentOneID, parentTwoID, offspringOneChromosome, offspringTwoChromosome)
+
+    def replaceWithOffspring(self, parentOneID: int, parentTwoID: int, offspringOneChromosome: ndarray,
+                             offspringTwoChromosome: ndarray) -> None:
+        """Takes the offspring's alpha values and carries out the replacement strategy"""
+        if self.replacementStrategy == "replaceParents":
+            self.population[parentOneID].alphaValues = offspringOneChromosome
+            self.population[parentOneID].resetOutputNetwork()
+            self.population[parentTwoID].alphaValues = offspringTwoChromosome
+            self.population[parentTwoID].resetOutputNetwork()
+        elif self.replacementStrategy == "replaceWeakestTwo":
+            weakestTwoIndividualIDs = self.getWeakestTwoIndividualIDs()
+            self.population[weakestTwoIndividualIDs[0]].alphaValues = offspringOneChromosome
+            self.population[weakestTwoIndividualIDs[0]].resetOutputNetwork()
+            self.population[weakestTwoIndividualIDs[1]].alphaValues = offspringTwoChromosome
+            self.population[weakestTwoIndividualIDs[1]].resetOutputNetwork()
