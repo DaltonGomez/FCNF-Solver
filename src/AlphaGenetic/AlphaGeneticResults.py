@@ -34,14 +34,14 @@ class AlphaGeneticResults:
         self.targetAsPercentTotalDemand = targetAsPercentTotalDemand
         self.numTrials = numTrials
 
-        # Build Networks
-        self.networkList = self.generateRandomNetworks()
-
         # Experimental Results CSV
         now = datetime.now()
         uniqueID = now.strftime("%d_%m_%Y_%H_%M")
         self.fileName = "GA_Results_" + uniqueID
         self.createCSV()
+
+        # Build Networks
+        self.networkList = self.generateRandomNetworks()
 
     def generateRandomNetworks(self) -> list:
         """Creates and saves n new networks based off the input parameters"""
@@ -122,6 +122,10 @@ class AlphaGeneticResults:
             outputRow.append(geneticGap)
             # Append CSV with Output Row
             self.writeRowToCSV(outputRow)
+        # Timestamp at completion
+        now = datetime.now()
+        finishTime = now.strftime("%d_%m_%Y_%H_%M")
+        self.writeRowToCSV(["Finish Time", finishTime])
         print("\nRESULTS EXPERIMENT COMPLETE!!!")
 
     def createCSV(self) -> None:

@@ -34,14 +34,14 @@ class AlphaGeneticTuning:
         self.targetAsPercentTotalDemand = targetAsPercentTotalDemand
         self.numTrials = numTrials
 
-        # Build Networks
-        self.networkList = self.generateRandomNetworks()
-
         # Tuning Output CSV
         now = datetime.now()
         uniqueID = now.strftime("%d_%m_%Y_%H_%M")
         self.fileName = "GA_Tuning_" + uniqueID
         self.createCSV()
+
+        # Build Networks
+        self.networkList = self.generateRandomNetworks()
 
         # Hyperparameter Attributes (Defines the Grid Search Space)
         self.populationSizeSet = (10, 50, 100)
@@ -218,6 +218,10 @@ class AlphaGeneticTuning:
                                                 # Write row to csv and print to console
                                                 self.writeRowToCSV(outputRow)
                                                 print(outputRow)
+        # Timestamp at completion
+        now = datetime.now()
+        finishTime = now.strftime("%d_%m_%Y_%H_%M")
+        self.writeRowToCSV(["Finish Time", finishTime])
         print("\nTUNING EXPERIMENT COMPLETE!")
 
     def createCSV(self) -> None:

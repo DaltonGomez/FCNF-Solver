@@ -8,8 +8,8 @@ py -3.8 run_alpha_ga_tuning.py
 
 if __name__ == "__main__":
     # Input Parameters
-    numNetworks = 1
-    nodeSizeRange = [25, 100]
+    numNetworks = 4
+    nodeSizeRange = [25, 200]
     srcSinkSet = [1, 5, 10]
     arcCostLookupTable = [
         [100, 10, 1]
