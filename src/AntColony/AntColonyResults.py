@@ -10,14 +10,14 @@ from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
 
-class AntResultsExperiment:
-    """Class that defines a Results Experiment object, used for comparing the tuned AntColony to the optimal value for """
+class AntColonyResults:
+    """Class that defines a Results Experiment object, used for comparing the tuned AntColony to the optimal value"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
     def __init__(self, networkList: list, numAnts: int, numEpisodes: int):
-        """Constructor of a Tuning Experiment instance"""
+        """Constructor of a Results Experiment instance"""
         # Input Attributes
         self.networkList = networkList
         self.numAnts = numAnts
@@ -31,7 +31,7 @@ class AntResultsExperiment:
         self.fileName = "Results_" + uniqueID
 
     def runExperiment(self) -> None:
-        """Runs a grid search hyperparameter tuning experiment"""
+        """Solves each network optimally, 10x with the ant colony, and saves the results"""
         for networkName in self.networkList:
             print("Solving " + networkName + "...")
             # Initialize output row

@@ -5,7 +5,6 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
 >> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
-# TODO - Fix bug where solvers sometimes don't return a flow value to the solution object, causing a key error in the visualizer
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
 >> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
@@ -16,16 +15,13 @@ ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
 # TODO - Change pathing to be only pathlets and/or all paths
 # TODO - Implement a nudge mutation, possibly Gaussian
-# TODO - Implement a termination criteria based on convergence, not just number of episodes/generations
 
 
 ALPHA GENETIC ALGORITHM EXPERIMENTS:
 =====================================
-# TODO - Build out accuracy and efficiency experiments
+# TODO - Run tuning and results experiments
 # TODO - Measure population diversity at genotypic and phenotypic levels
 # TODO - Do sensitivity/perturbation analysis on alpha values
-# TODO - Build a tuning experiment
-
 
 ANT COLONY OPTIMIZATION APPROACH:
 =====================================
@@ -46,8 +42,8 @@ ANT COLONY OPTIMIZATION APPROACH:
 
 ANT COLONY OPTIMIZATION EXPERIMENTS:
 =====================================
+# TODO - Clean up ant experiments to resemble the GA experiments
 # TODO - Improve the hyperparameter tuning method and increase the search space
-# TODO - Clean up the way data is exported in the ant experiments
 # TODO - Analyze time constraints
 
 

@@ -1,4 +1,3 @@
-
 class Path:
     """Class that stores opened paths/pathlets within an individual and computes path-based data"""
 

@@ -43,6 +43,7 @@ class FlowNetwork:
         self.isSourceSinkCapacitated = False
         self.sourceCapsArray = None
         self.sinkCapsArray = None
+        self.totalPossibleDemand = 0.0
         # Variable Cost Source/Sink Generalization
         self.isSourceSinkCharged = False
         self.sourceVariableCostsArray = None
@@ -249,6 +250,16 @@ class FlowNetwork:
         """Adds the edge to the node's outgoing edge list"""
         thisNode = self.nodesDict[nodeID]
         thisNode.addOutgoingEdge(outgoingEdge)
+
+    def calculateTotalPossibleDemand(self) -> float:
+        """Calculates the total possible demand as the minimum of the total source or total sink capacity"""
+        totalSrcCapacity = 0.0
+        for srcCap in self.sourceCapsArray:
+            totalSrcCapacity += srcCap
+        totalSinkCapacity = 0.0
+        for sinkCap in self.sinkCapsArray:
+            totalSinkCapacity += sinkCap
+        return min(totalSrcCapacity, totalSinkCapacity)
 
     # ===========================================
     # ============== PRINT METHODS ==============

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from AntColony.AntTuningExperiment import AntTuningExperiment
+from src.AntColony.AntColonyTuning import AntColonyTuning
 from src.Network.FlowNetwork import FlowNetwork
 
 """
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     print(timestamp)
 
     for i in range(4):
-        tuner = AntTuningExperiment(network, targetFlow)
+        tuner = AntColonyTuning(network, targetFlow)
         tuner.runExperiment()
 
     now = datetime.now()

@@ -10,7 +10,7 @@ from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
 
-class AntTuningExperiment:
+class AntColonyTuning:
     """Class that defines a Tuning Experiment object, used for finding the optimal hyperparameters of the AntColony"""
 
     # =========================================

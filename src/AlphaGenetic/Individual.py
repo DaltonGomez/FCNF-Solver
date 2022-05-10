@@ -2,7 +2,7 @@ import sys
 
 from numpy import ndarray
 
-from AlphaGenetic.Path import Path
+from src.AlphaGenetic.Path import Path
 from src.Network.FlowNetwork import FlowNetwork
 
 

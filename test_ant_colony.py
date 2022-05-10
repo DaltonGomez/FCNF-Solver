@@ -1,10 +1,10 @@
 import numpy as np
 
-from Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 from src.AntColony.Colony import Colony
 from src.Network.FlowNetwork import FlowNetwork
 from src.Network.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
+from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
 """
 RUN COMMAND:

@@ -10,7 +10,7 @@ py -3.8 test_network_solver.py
 """
 
 if __name__ == "__main__":
-    name = "test.p"
+    name = ""
     flowNetwork = FlowNetwork()
     flowNetwork = flowNetwork.loadNetwork(name)
 

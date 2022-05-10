@@ -1,7 +1,7 @@
 import math
 import random
 
-from AntColony.AntResultsExperiment import AntResultsExperiment
+from src.AntColony.AntColonyResults import AntColonyResults
 from src.Network.GraphMaker import GraphMaker
 
 """
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     # Solve all networks
     numAnts = 50
     numEpisodes = 15
-    experiment = AntResultsExperiment(networkList, numAnts, numEpisodes)
+    experiment = AntColonyResults(networkList, numAnts, numEpisodes)
     experiment.runExperiment()

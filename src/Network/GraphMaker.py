@@ -201,6 +201,7 @@ class GraphMaker:
                 thisSinkCost = random.uniform(self.sourceSinkChargeRange[0], self.sourceSinkChargeRange[1])
                 tempSinkCosts.append(thisSinkCost)
             self.newNetwork.sinkVariableCostsArray = np.array(tempSinkCosts)
+        self.newNetwork.totalPossibleDemand = self.newNetwork.calculateTotalPossibleDemand()
 
     def setArcCostLookupTable(self, embeddingSize=100.0, edgePenaltyRange=(0.95, 1.50),
                               arcCostLookupTable=(

@@ -1,4 +1,4 @@
-from AntColony.AntResultsExperiment import AntResultsExperiment
+from AntColony.AntColonyResults import AntResultsExperiment
 
 """
 RUN COMMAND:

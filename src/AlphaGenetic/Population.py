@@ -26,6 +26,7 @@ class Population:
         # Population & Solver Instance Objects
         self.population = []
         self.solver = AlphaSolverPDLP(self.network, self.minTargetFlow)  # Pre-builds variables/constraints on init
+        self.bestKnownSolution = None
 
         # =======================
         # GA HYPERPARAMETERS
@@ -126,7 +127,7 @@ class Population:
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self, drawing=False, drawLabels=False) -> Solution:
+    def evolvePopulation(self, printGenerations=False, drawing=False, drawLabels=False) -> tuple:
         """Evolves the population for a specified number of generations"""
         # Initialize Population and Solve
         self.initializePopulation()
@@ -138,19 +139,18 @@ class Population:
             self.selectAndCrossover()
             self.doMutations()
             self.solvePopulation()
-            # Update Current Best Individual
+            # Update Current Best Individual and Evaluate Termination
             bestIndividual = self.getMostFitIndividual()
             self.evaluateTermination(generation, bestIndividual.trueCost)
-            print("Generation = " + str(generation) + "\tBest Individual = " + str(
-                bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
-            # Visualize
+            # Visualize & Print
+            if printGenerations is True:
+                print("Generation = " + str(generation) + "\tBest Individual = " + str(
+                    bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
             generation += 1
-        # Return Best Individual's Solution
-        bestIndividual = self.getMostFitIndividual()
-        bestDiscoveredSolution = self.writeIndividualsSolution(bestIndividual)
-        return bestDiscoveredSolution
+        # Return Best Solution Discovered
+        return self.bestKnownCost, self.bestKnownSolution
 
     def selectAndCrossover(self) -> None:
         """Performs the selection and crossover at each generation"""
@@ -180,21 +180,25 @@ class Population:
                     self.mutate(individualID)
 
     def evaluateTermination(self, generation: int, newBestCost: float) -> None:
-        """Checks for termination used the given method"""
+        """Checks for termination using the given method and updates the best known solution"""
         if self.terminationMethod == "setGenerations":
+            if newBestCost < self.bestKnownCost:
+                self.bestKnownCost = newBestCost
+                self.bestKnownSolution = self.writeIndividualsSolution(self.getMostFitIndividual())
             if generation >= self.numGenerations:
                 self.isTerminated = True
         elif self.terminationMethod == "stagnationPeriod":
             if newBestCost < self.bestKnownCost:
                 self.bestKnownCost = newBestCost
+                self.bestKnownSolution = self.writeIndividualsSolution(self.getMostFitIndividual())
                 self.consecutiveStagnantGenerations = 0
             elif newBestCost >= self.bestKnownCost:
                 self.consecutiveStagnantGenerations += 1
                 if self.consecutiveStagnantGenerations >= self.stagnationPeriod:
                     self.isTerminated = True
 
-    def solveWithNaiveHillClimb(self, drawing=False, drawLabels=False) -> Solution:
-        """Evolves the population for a specified number of generations"""
+    def solveWithNaiveHillClimb(self, printGenerations=False, drawing=False, drawLabels=False) -> tuple:
+        """Solves the population with a naive hill climb method"""
         # Initialize Population and Solve
         self.initializePopulation()
         self.solvePopulation()
@@ -204,19 +208,18 @@ class Population:
             # Execute Hill Climb and Solve
             self.naiveHillClimb()
             self.solvePopulation()
-            # Update Current Best Individual
+            # Update Current Best Individual and Evaluate Termination
             bestIndividual = self.getMostFitIndividual()
             self.evaluateTermination(generation, bestIndividual.trueCost)
-            print("Generation = " + str(generation) + "\tBest Individual = " + str(
-                bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
-            # Visualize
+            # Visualize & Print
+            if printGenerations is True:
+                print("Generation = " + str(generation) + "\tBest Individual = " + str(
+                    bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
             generation += 1
-        # Return Best Individual's Solution
-        bestIndividual = self.getMostFitIndividual()
-        bestDiscoveredSolution = self.writeIndividualsSolution(bestIndividual)
-        return bestDiscoveredSolution
+        # Return Best Solution Discovered
+        return self.bestKnownCost, self.bestKnownSolution
 
     # ====================================================
     # ============== INITIALIZATION METHODS ==============
@@ -266,10 +269,10 @@ class Population:
             self.hypermutateIndividual(individual)
 
     def naiveHillClimb(self) -> None:
-        """Sorts the population by rank and hypermutates the non-best individuals only at each generation"""
-        self.population = self.rankPopulation()
+        """Hypermutates all but the best individual"""
+        sortedPopulation = self.rankPopulation()
         for i in range(1, self.populationSize):
-            self.hypermutateIndividual(i)
+            self.hypermutateIndividual(sortedPopulation[i].id)
 
     # =============================================
     # ============== RANKING METHODS ==============
@@ -330,6 +333,12 @@ class Population:
         else:
             print("An unsolved individual cannot write a solution!")
         return solution
+
+    def resetOutputFields(self) -> None:
+        """Resets the output fields stored in the population"""
+        self.population = []
+        self.solver = AlphaSolverPDLP(self.network, self.minTargetFlow)
+        self.bestKnownSolution = None
 
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
