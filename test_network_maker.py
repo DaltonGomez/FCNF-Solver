@@ -28,10 +28,10 @@ arcCostLookupTable = [
 
 if __name__ == "__main__":
     # Input parameters
-    name = "test2"
-    numNodes = 8
-    numSources = 2
-    numSinks = 2
+    name = "test-large"
+    numNodes = 400
+    numSources = 10
+    numSinks = 10
     # Arc Cost Determining Table
     # Format: cap, fixed cost, variable cost
     arcCostLookupTable = [

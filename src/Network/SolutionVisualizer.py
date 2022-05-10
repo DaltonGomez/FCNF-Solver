@@ -39,7 +39,13 @@ class SolutionVisualizer:
             for edge in nodeObj.incomingEdges:
                 edgeIndex = self.solution.network.edgesDict[edge]
                 for arc in range(self.solution.network.numArcCaps):
-                    flow += self.solution.arcFlows[(edgeIndex, arc)]
+                    # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
+                    try:
+                        flow += self.solution.arcFlows[(edgeIndex, arc)]
+                    except KeyError:
+                        print("Key error on solution.arcFlows[" + str((edgeIndex, arc)) + "]! Skipping value...")
+                    else:
+                        flow += self.solution.arcFlows[(edgeIndex, arc)]
             if flow > 0:
                 self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="black", value=flow,
                                      x=int(nodeObj.xPos * self.positionScalar),
@@ -50,14 +56,21 @@ class SolutionVisualizer:
                                      x=int(nodeObj.xPos * self.positionScalar),
                                      y=int(nodeObj.yPos * self.positionScalar))
         # Add edges
-        for e in range(self.solution.network.numEdges):
-            edge = self.solution.network.edgesArray[e]
-            backEdge = self.solution.network.edgesDict[(edge[1], edge[0])]
+        for edgeIndex in range(self.solution.network.numEdges):
+            edge = self.solution.network.edgesArray[edgeIndex]
+            backEdgeIndex = self.solution.network.edgesDict[(edge[1], edge[0])]
             flow = 0
             backFlow = 0
             for arc in range(self.solution.network.numArcCaps):
-                flow += self.solution.arcFlows[(e, arc)]
-                backFlow += self.solution.arcFlows[(backEdge, arc)]
+                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
+                try:
+                    flow += self.solution.arcFlows[(edgeIndex, arc)]
+                    backFlow += self.solution.arcFlows[(backEdgeIndex, arc)]
+                except KeyError:
+                    print("Key error on solution.arcFlows[" + str((edgeIndex, arc)) + "]! Skipping value...")
+                else:
+                    flow += self.solution.arcFlows[(edgeIndex, arc)]
+                    backFlow += self.solution.arcFlows[(backEdgeIndex, arc)]
             if flow > 0:
                 self.netVis.add_edge(int(edge[0]), int(edge[1]), label=round(flow), color="black", value=flow)
             elif backFlow > 0:

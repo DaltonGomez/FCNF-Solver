@@ -13,16 +13,16 @@ py -3.8 test_alpha_genetic.py
 if __name__ == "__main__":
     # Load Network
     network = FlowNetwork()
-    network = network.loadNetwork("test2.p")
+    network = network.loadNetwork("test-large.p")
     vis = NetworkVisualizer(network, directed=True, supers=False)
     # vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
-    minTargetFlow = 200
+    minTargetFlow = 1000
 
     # Initialize an Alpha-GA Population
     pop = Population(network, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=10, terminationMethod="setGenerations", numGenerations=10,
+    pop.setPopulationHyperparams(populationSize=10, terminationMethod="setGenerations", numGenerations=3,
                                  stagnationPeriod=5, initializationDistribution="uniform",
                                  initializationParams=[0.0, 1.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
@@ -44,4 +44,4 @@ if __name__ == "__main__":
     cplex.findSolution(printDetails=False)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
-    # optVis.drawGraphWithLabels(leadingText="OPT_")
+    optVis.drawGraphWithLabels(leadingText="OPT_")
