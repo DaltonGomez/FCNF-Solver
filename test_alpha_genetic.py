@@ -13,16 +13,16 @@ py -3.8 test_alpha_genetic.py
 if __name__ == "__main__":
     # Load Network
     network = FlowNetwork()
-    network = network.loadNetwork("none.p")
+    network = network.loadNetwork("197-10-1-0.p")
     vis = NetworkVisualizer(network, directed=True, supers=False)
     vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
-    minTargetFlow = 40
+    minTargetFlow = 1000
 
     # Initialize an Alpha-GA Population
     pop = Population(network, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=4, terminationMethod="setGenerations", numGenerations=4,
+    pop.setPopulationHyperparams(populationSize=50, terminationMethod="setGenerations", numGenerations=20,
                                  stagnationPeriod=5, initializationDistribution="uniform",
                                  initializationParams=[0.0, 1.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
@@ -30,10 +30,27 @@ if __name__ == "__main__":
                                     pathRankingMethod="density", pathSelectionSize=2, pathTournamentSize=3)
     pop.setCrossoverHyperparams(crossoverMethod="pathBased", replacementStrategy="replaceParents",
                                 crossoverRate=1.0, crossoverAttemptsPerGeneration=1)
-    pop.setMutationHyperparams(mutationMethod="pathBased", mutationRate=0.25)
+    pop.setMutationHyperparams(mutationMethod="pathBasedNudge", mutationRate=0.25, nudgeParams=[0.0, 1.0])
 
     # Solve the Alpha-GA
-    pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
+    pop.evolvePopulation(printGenerations=True, drawing=False, drawLabels=True)
+
+    # Initialize an Alpha-GA Population
+    pop = Population(network, minTargetFlow)
+
+    # Set Hyperparameters
+    pop.setPopulationHyperparams(populationSize=50, terminationMethod="setGenerations", numGenerations=50,
+                                 stagnationPeriod=5, initializationDistribution="uniform",
+                                 initializationParams=[0.0, 1.0])
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
+    pop.setPathSelectionHyperparams(pathSelectionMethod="roulette", pathRankingOrder="most",
+                                    pathRankingMethod="density", pathSelectionSize=2, pathTournamentSize=3)
+    pop.setCrossoverHyperparams(crossoverMethod="pathBased", replacementStrategy="replaceParents",
+                                crossoverRate=1.0, crossoverAttemptsPerGeneration=1)
+    pop.setMutationHyperparams(mutationMethod="pathBasedNudge", mutationRate=0.25, nudgeParams=[0.0, 1.0])
+
+    # Solve the Alpha-GA
+    pop.evolvePopulation(printGenerations=True, drawing=False, drawLabels=True)
 
     # Solve with Naive Hill Climb
     # hillClimb = Population(network, minTargetFlow)

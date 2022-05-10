@@ -8,12 +8,12 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
 >> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
-# TODO - Implement a Data-In class to read in an input graph from a csv (for example, SimCCS data)
+# TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
 
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
-# TODO - Implement a nudge mutation, possibly Gaussian
+# TODO - Anneal hyperparameters over time
 
 
 ALPHA GENETIC ALGORITHM EXPERIMENTS:

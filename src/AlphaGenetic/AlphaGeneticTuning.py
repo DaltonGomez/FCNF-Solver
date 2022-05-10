@@ -43,13 +43,14 @@ class AlphaGeneticTuning:
         # Build Networks
         self.networkList = self.generateRandomNetworks()
 
-        # Hyperparameter Attributes (Defines the Grid Search Space)
+        """
+        # ALL HYPERPARAMETERS
         self.populationSizeSet = (10, 50, 100)
         self.numGenerationsSet = (10, 50, 100)
         self.initDistributions = (
             ["uniform", [0.0, 1.0]], ["uniform", [0.0, 10.0]], ["gaussian", [1.0, 0.3]], ["gaussian", [10.0, 1.0]])
-        self.terminationMethods = "setGenerations"  # NOT TUNED
-        self.stagnationPeriodSet = 5  # NOT TUNED
+        self.terminationMethods = ("setGenerations", "stagnationPeriod")
+        self.stagnationPeriodSet = (5, 10, 20)
         # Individual Selection HPs
         self.selectionMethodsAndTournySize = (["roulette", 3], ["random", 3], ["tournament", 3], ["tournament", 8])
         # Path Selection HPs
@@ -61,11 +62,32 @@ class AlphaGeneticTuning:
         # Crossover HPs
         self.crossoverMethods = ("onePoint", "twoPoint", "pathBased")
         self.replacementStrategies = ("replaceWeakestTwo", "replaceParents")
-        self.crossoverRateSet = 1.0  # NOT TUNED
-        self.crossoverAttemptsPerGenerationSet = 1  # NOT TUNED
+        self.crossoverRateSet = (1.0, 0.75, 0.50)
+        self.crossoverAttemptsPerGenerationSet = (1, 3, 5)
         # Mutation HPs
-        self.mutationMethods = ("randomSingleEdge", "randomTotal", "pathBased")  # REMOVED: "randomSingleArc"
+        self.mutationMethods = ("randomSingleArc", "randomSingleEdge", "randomTotal", "pathBasedRandom", "pathBasedNudge")
         self.mutationRateSet = (0.05, 0.10, 0.25, 0.50, 0.75)
+        self.nudgeParams = ([0.0, 1.0], [0.0, 0.1], [0.0, 10.0])
+        """
+
+        # HYPERPARAMETERS TO TUNE
+        self.populationSizeSet = 30
+        self.numGenerationsSet = 20
+        self.initDistributions = (["uniform", [0.0, 1.0]], ["gaussian", [1.0, 0.3]])
+        # Individual Selection HPs
+        self.selectionMethodsAndTournySize = (["tournament", 3], ["tournament", 5])
+        # Path Selection HPs
+        self.pathSelectionMethodsAndTournySize = ("tournament", 8)
+        self.pathRankingOrders = ("most", "least")
+        self.pathRankingMethods = ("cost", "flow", "density")
+        self.pathSelectionSizeSet = (1, 3, 6)
+        # Crossover HPs
+        self.crossoverMethods = ("onePoint", "twoPoint", "pathBased")
+        self.replacementStrategies = ("replaceWeakestTwo", "replaceParents")
+        # Mutation HPs
+        self.mutationMethods = (["randomSingleEdge", [0.0, 1.0]], ["pathBasedRandom", [0.0, 1.0]],
+                                ["pathBasedNudge", [0.0, 1.0]], ["pathBasedNudge", [0.0, 0.1]])
+        self.mutationRateSet = (0.01, 0.10, 0.25, 0.50)
 
     def generateRandomNetworks(self) -> list:
         """Creates and saves n new networks based off the input parameters"""
@@ -124,100 +146,101 @@ class AlphaGeneticTuning:
             # Write Network Data and Build Hyperparameter Header
             self.writeRowToCSV(networkDataRow)
             hyperparameterHeader = ["Pop Size", "Generations", "Init Dist", "Init Params", "Selection", "Tourny Size",
-                                    "Crossover", "Replacement", "Mutation", "Mutate Rate", "Path Select", "Path Tourny",
-                                    "Path Order", "Path Rank", "Path Size"]
+                                    "Crossover", "Replacement", "Mutation", "Nudge Params", "Mutate Rate",
+                                    "Path Select", "Path Tourny", "Path Order", "Path Rank", "Path Size"]
             for n in range(self.numTrials):
                 hyperparameterHeader.append("Trial " + str(n + 1))
             hyperparameterHeader.append("Avg Value")
             hyperparameterHeader.append("Opt Gap")
             self.writeRowToCSV(hyperparameterHeader)
             # Begin Grid Search
-            for popSize in self.populationSizeSet:
-                for numGenerations in self.numGenerationsSet:
+            for mutation in self.mutationMethods:  # NOTE: Intentionally placing path-based operations last in tuning
+                for crossover in self.crossoverMethods:  # NOTE: Intentionally placing path-based operations last in tuning
                     for init in self.initDistributions:
                         for selection in self.selectionMethodsAndTournySize:
-                            for crossover in self.crossoverMethods:
-                                for replacement in self.replacementStrategies:
-                                    for mutation in self.mutationMethods:
-                                        for mutateRate in self.mutationRateSet:
-                                            # Initialize a new population
-                                            pop = Population(network, minTargetFlow)
-                                            # Set Hyperparameters
-                                            pop.setPopulationHyperparams(populationSize=popSize,
-                                                                         terminationMethod="setGenerations",
-                                                                         numGenerations=numGenerations,
-                                                                         stagnationPeriod=5,
-                                                                         initializationDistribution=init[0],
-                                                                         initializationParams=init[1])
-                                            pop.setIndividualSelectionHyperparams(selectionMethod=selection[0],
-                                                                                  tournamentSize=selection[1])
-                                            pop.setCrossoverHyperparams(crossoverMethod=crossover,
-                                                                        replacementStrategy=replacement,
-                                                                        crossoverRate=1.0,
-                                                                        crossoverAttemptsPerGeneration=1)
-                                            pop.setMutationHyperparams(mutationMethod=mutation,
-                                                                       mutationRate=mutateRate)
-                                            # Set Path-Based Operators Hyperparameters
-                                            if crossover == "pathBased" or mutation == "pathBased":
-                                                for pathSelection in self.pathSelectionMethodsAndTournySize:
-                                                    for pathOrder in self.pathRankingOrders:
-                                                        for pathRank in self.pathRankingMethods:
-                                                            for pathSize in self.pathSelectionSizeSet:
-                                                                # Update output row
-                                                                outputRow = [popSize, numGenerations, init[0], init[1],
-                                                                             selection[0],
-                                                                             selection[1], crossover, replacement,
-                                                                             mutation, mutateRate]
-                                                                pop.setPathSelectionHyperparams(
-                                                                    pathSelectionMethod=pathSelection[0],
-                                                                    pathRankingOrder=pathOrder,
-                                                                    pathRankingMethod=pathRank,
-                                                                    pathSelectionSize=pathSize,
-                                                                    pathTournamentSize=pathSelection[1])
-                                                                # Write to output row
-                                                                outputRow.append(pathSelection[0])
-                                                                outputRow.append(pathSelection[1])
-                                                                outputRow.append(pathOrder)
-                                                                outputRow.append(pathRank)
-                                                                outputRow.append(pathSize)
-                                                                # Solve population for n trials
-                                                                trials = []
-                                                                for n in range(self.numTrials):
-                                                                    output = pop.evolvePopulation()
-                                                                    outputRow.append(output[0])
-                                                                    trials.append(output[0])
-                                                                    pop.resetOutputFields()
-                                                                # Calculate average and optimality gap
-                                                                average = sum(trials) / len(trials)
-                                                                outputRow.append(average)
-                                                                optGap = ((average / exactValue) - 1) * 100
-                                                                outputRow.append(optGap)
-                                                                # Write row to csv and print to console
-                                                                self.writeRowToCSV(outputRow)
-                                                                print(outputRow)
-                                            else:
-                                                # Update output row
-                                                outputRow = [popSize, numGenerations, init[0], init[1], selection[0],
-                                                             selection[1], crossover, replacement, mutation, mutateRate]
-                                                pop.setPathSelectionHyperparams()
-                                                # Write N/A for path-specific hyperparams as they don't apply
-                                                for n in range(5):
-                                                    outputRow.append("N/A")
-                                                # Solve population for n trials
-                                                trials = []
-                                                for n in range(self.numTrials):
-                                                    output = pop.evolvePopulation()
-                                                    outputRow.append(output[0])
-                                                    trials.append(output[0])
-                                                    pop.resetOutputFields()
-                                                # Calculate average and optimality gap
-                                                average = sum(trials) / len(trials)
-                                                outputRow.append(average)
-                                                optGap = ((average / exactValue) - 1) * 100
-                                                outputRow.append(optGap)
-                                                # Write row to csv and print to console
-                                                self.writeRowToCSV(outputRow)
-                                                print(outputRow)
+                            for replacement in self.replacementStrategies:
+                                for mutateRate in self.mutationRateSet:
+                                    # Initialize a new population
+                                    pop = Population(network, minTargetFlow)
+                                    # Set Hyperparameters
+                                    pop.setPopulationHyperparams(populationSize=self.populationSizeSet,
+                                                                 terminationMethod="setGenerations",
+                                                                 numGenerations=self.numGenerationsSet,
+                                                                 stagnationPeriod=5,
+                                                                 initializationDistribution=init[0],
+                                                                 initializationParams=init[1])
+                                    pop.setIndividualSelectionHyperparams(selectionMethod=selection[0],
+                                                                          tournamentSize=selection[1])
+                                    pop.setCrossoverHyperparams(crossoverMethod=crossover,
+                                                                replacementStrategy=replacement,
+                                                                crossoverRate=1.0,
+                                                                crossoverAttemptsPerGeneration=1)
+                                    pop.setMutationHyperparams(mutationMethod=mutation[0],
+                                                               mutationRate=mutateRate,
+                                                               nudgeParams=mutation[1])
+                                    # Set Path-Based Operators Hyperparameters
+                                    if crossover == "pathBased" or mutation == "pathBasedRandom" or \
+                                            mutation == "pathBasedNudge":
+                                        for pathOrder in self.pathRankingOrders:
+                                            for pathRank in self.pathRankingMethods:
+                                                for pathSize in self.pathSelectionSizeSet:
+                                                    # Update output row
+                                                    outputRow = [self.populationSizeSet, self.numGenerationsSet,
+                                                                 init[0], init[1],
+                                                                 selection[0], selection[1],
+                                                                 crossover, replacement,
+                                                                 mutation[0], mutation[1], mutateRate]
+                                                    pop.setPathSelectionHyperparams(
+                                                        pathSelectionMethod="tournament",
+                                                        pathRankingOrder=pathOrder,
+                                                        pathRankingMethod=pathRank,
+                                                        pathSelectionSize=pathSize,
+                                                        pathTournamentSize=8)
+                                                    # Write to output row
+                                                    outputRow.append("tournament")
+                                                    outputRow.append(8)
+                                                    outputRow.append(pathOrder)
+                                                    outputRow.append(pathRank)
+                                                    outputRow.append(pathSize)
+                                                    # Solve population for n trials
+                                                    trials = []
+                                                    for n in range(self.numTrials):
+                                                        output = pop.evolvePopulation()
+                                                        outputRow.append(output[0])
+                                                        trials.append(output[0])
+                                                        pop.resetOutputFields()
+                                                    # Calculate average and optimality gap
+                                                    average = sum(trials) / len(trials)
+                                                    outputRow.append(average)
+                                                    optGap = ((average / exactValue) - 1) * 100
+                                                    outputRow.append(optGap)
+                                                    # Write row to csv and print to console
+                                                    self.writeRowToCSV(outputRow)
+                                                    print(outputRow)
+                                    else:
+                                        # Update output row
+                                        outputRow = [self.populationSizeSet, self.numGenerationsSet, init[0], init[1],
+                                                     selection[0], selection[1], crossover, replacement, mutation[0],
+                                                     mutation[1], mutateRate]
+                                        pop.setPathSelectionHyperparams()
+                                        # Write N/A for path-specific hyperparams as they don't apply
+                                        for n in range(5):
+                                            outputRow.append("N/A")
+                                        # Solve population for n trials
+                                        trials = []
+                                        for n in range(self.numTrials):
+                                            output = pop.evolvePopulation()
+                                            outputRow.append(output[0])
+                                            trials.append(output[0])
+                                            pop.resetOutputFields()
+                                        # Calculate average and optimality gap
+                                        average = sum(trials) / len(trials)
+                                        outputRow.append(average)
+                                        optGap = ((average / exactValue) - 1) * 100
+                                        outputRow.append(optGap)
+                                        # Write row to csv and print to console
+                                        self.writeRowToCSV(outputRow)
+                                        print(outputRow)
         # Timestamp at completion
         now = datetime.now()
         finishTime = now.strftime("%d_%m_%Y_%H_%M")

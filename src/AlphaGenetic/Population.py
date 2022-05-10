@@ -58,6 +58,7 @@ class Population:
         # Mutation HPs
         self.mutationMethod = "pathBased"  # :param : "randomSingleArc", "randomSingleEdge", "randomTotal", "pathBased"
         self.mutationRate = 0.25
+        self.nudgeParams = [0.0, 1.0]
 
     # ====================================================
     # ============== HYPERPARAMETER SETTERS ==============
@@ -116,13 +117,15 @@ class Population:
         self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
         self.replacementStrategy = replacementStrategy
 
-    def setMutationHyperparams(self, mutationMethod="pathBased", mutationRate=0.25) -> None:
+    def setMutationHyperparams(self, mutationMethod="pathBased", mutationRate=0.25, nudgeParams=(0.0, 1.0)) -> None:
         """Sets the GA class fields that dictate how the mutation of individuals is carried out \n
-        :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomTotal", "pathBased"}
+        :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomTotal", "pathBasedRandom", "pathBasedNudge"}
         :param float mutationRate: Probability in [0,1] that a mutation occurs
+        :param list nudgeParams: mu and sigma of the Gaussian distribution used for nudging
         """
         self.mutationMethod = mutationMethod
         self.mutationRate = mutationRate
+        self.nudgeParams = nudgeParams
 
     # ============================================
     # ============== EVOLUTION LOOP ==============
@@ -571,11 +574,13 @@ class Population:
         elif self.pathRankingOrder[0] == "l":
             rankedPaths.sort(key=lambda p: p[1], reverse=False)
         # Select top and return
-        selection = []
+        selectedPaths = []
+        if len(tournament) < thisSelectionSize:
+            thisSelectionSize = len(tournament)
         for i in range(thisSelectionSize):
             pathTuple = tournament.pop(0)
-            selection.append(pathTuple[0])
-        return selection
+            selectedPaths.append(pathTuple[0])
+        return selectedPaths
 
     # ==============================================
     # ============== MUTATION METHODS ==============
@@ -590,8 +595,10 @@ class Population:
             self.randomSingleArcMutation(individualID)
         elif self.mutationMethod == "randomSingleEdge":
             self.randomSingleEdgeMutation(individualID)
-        elif self.mutationMethod == "pathBased":
+        elif self.mutationMethod == "pathBasedRandom":
             self.selectedPathsRandomMutation(individualID, selectedPaths)
+        elif self.mutationMethod == "pathBasedNudge":
+            self.selectedPathsNudgeMutation(individualID, selectedPaths)
 
     def randomSingleArcMutation(self, individualNum: int) -> None:
         """Mutates an individual at only one random arc in the chromosome"""
@@ -621,11 +628,10 @@ class Population:
                     individual.alphaValues[edgeIndex][arcIndex] = self.getAlphaValue()
         individual.resetOutputNetwork()
 
-    def selectedPathsNudgeUpMutation(self, individualNum: int, selectedPaths: list) -> None:
+    def selectedPathsNudgeMutation(self, individualNum: int, selectedPaths: list) -> None:
         """Nudges all arcs for each edge in the selected paths of an individual"""
-        # TODO - Determine the best method for nudging
-        # TODO - Implement into tuning experiment/hyper-operators
-        nudgeMagnitude = 3.0
+        random.seed()
+        nudgeMagnitude = random.gauss(self.nudgeParams[0], self.nudgeParams[1])
         individual = self.population[individualNum]
         for path in selectedPaths:
             for edge in path.edges:
@@ -633,22 +639,8 @@ class Population:
                 for arcIndex in range(self.network.numArcCaps):
                     individual.alphaValues[edgeIndex][arcIndex] = individual.alphaValues[edgeIndex][
                                                                       arcIndex] + nudgeMagnitude
-        individual.resetOutputNetwork()
-
-    def selectedPathsNudgeDownMutation(self, individualNum: int, selectedPaths: list) -> None:
-        """Nudges all arcs for each edge in the selected paths of an individual"""
-        # TODO - Determine the best method for nudging
-        # TODO - Implement into tuning experiment/hyper-operators
-        nudgeMagnitude = 3.0
-        individual = self.population[individualNum]
-        for path in selectedPaths:
-            for edge in path.edges:
-                edgeIndex = self.network.edgesDict[edge]
-                for arcIndex in range(self.network.numArcCaps):
-                    individual.alphaValues[edgeIndex][arcIndex] = individual.alphaValues[edgeIndex][
-                                                                      arcIndex] - nudgeMagnitude
-                    if individual.alphaValues[edgeIndex][arcIndex] < 0:
-                        individual.alphaValues[edgeIndex][arcIndex] = 0
+                    if individual.alphaValues[edgeIndex][arcIndex] < 0.0:
+                        individual.alphaValues[edgeIndex][arcIndex] = 0.0
         individual.resetOutputNetwork()
 
     # =================================================

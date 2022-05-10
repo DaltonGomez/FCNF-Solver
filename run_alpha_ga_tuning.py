@@ -9,8 +9,8 @@ py -3.8 run_alpha_ga_tuning.py
 if __name__ == "__main__":
     # Input Parameters
     numNetworks = 4
-    nodeSizeRange = [25, 200]
-    srcSinkSet = [1, 5, 10]
+    nodeSizeRange = [25, 100]
+    srcSinkSet = [1, 2, 5]
     arcCostLookupTable = [
         [100, 10, 1]
     ]
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     targetAsPercentTotalDemand = 0.50
     numTrials = 5
 
-    # Build Networks
+    # Initialize and Build Networks
     tuner = AlphaGeneticTuning(numNetworks=numNetworks, nodeSizeRange=nodeSizeRange, srcSinkSet=srcSinkSet,
                                arcCostLookupTable=arcCostLookupTable, srcSinkCapacityRange=srcSinkCapacityRange,
                                srcSinkChargeRange=srcSinkChargeRange,
