@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.AntExperiments.AntTuningExperiment import AntTuningExperiment
+from AntColony.AntTuningExperiment import AntTuningExperiment
 from src.Network.FlowNetwork import FlowNetwork
 
 """

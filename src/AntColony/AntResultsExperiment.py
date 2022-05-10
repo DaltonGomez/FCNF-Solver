@@ -1,16 +1,17 @@
 import csv
+import os
 from datetime import datetime
 
 import numpy as np
 
-from src.Ant.Colony import Colony
+from src.AntColony.Colony import Colony
 from src.Network.FlowNetwork import FlowNetwork
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
 
 class AntResultsExperiment:
-    """Class that defines a Results Experiment object, used for comparing the tuned Ant to the optimal value for """
+    """Class that defines a Results Experiment object, used for comparing the tuned AntColony to the optimal value for """
 
     # =========================================
     # ============== CONSTRUCTOR ==============
@@ -64,15 +65,15 @@ class AntResultsExperiment:
             relaxedSolver.writeSolution()
             outputRow.append(relaxedSolver.trueCost)
             print("Relaxed solution found...")
-            # Run Ant trials
+            # Run AntColony trials
             acoTrials = []
             for trial in range(10):
                 aco = Colony(network, minTargetFlow, self.numAnts, self.numEpisodes)
                 aco.solveNetwork(drawing=False)
                 outputRow.append(aco.bestKnownCost)
                 acoTrials.append(aco.bestKnownCost)
-                print("Ant trial " + str(trial) + " solved...")
-            # Find Ant average
+                print("AntColony trial " + str(trial) + " solved...")
+            # Find AntColony average
             acoAverage = sum(acoTrials) / len(acoTrials)
             outputRow.append(acoAverage)
             # Compute Optimality Gap
@@ -90,19 +91,24 @@ class AntResultsExperiment:
         self.outputBlock.append(["EXPERIMENTAL RESULTS OUTPUT", timestamp])
         self.outputBlock.append(
             ["Num. Nodes", "Num. Parallel Edges", "Num. Src/Sinks", "Min. Target Flow", "Optimal MILP Value",
-             "Relaxed LP Value", "Ant 1", "Ant 2", "Ant 3", "Ant 4", "Ant 5", "Ant 6", "Ant 7", "Ant 8", "Ant 9",
-             "Ant 10", "Avg. Ant Value", "Optimality Gap"])
+             "Relaxed LP Value", "AntColony 1", "AntColony 2", "AntColony 3", "AntColony 4", "AntColony 5",
+             "AntColony 6", "AntColony 7", "AntColony 8", "AntColony 9",
+             "AntColony 10", "Avg. AntColony Value", "Optimality Gap"])
 
     def writeOutputBlock(self) -> None:
         """Writes the output block to a csv file"""
+        currDir = os.getcwd()
         csvName = self.fileName + ".csv"
-        print("Writing output block to: " + csvName)
-        file = open(csvName, "w+", newline="")
+        catPath = os.path.join(currDir, "data/results/antColony", csvName)
+        file = open(catPath, "w+", newline="")
         with file:
             write = csv.writer(file)
             write.writerows(self.outputBlock)
 
     def writeLineToTxtEnd(self, outputRow: list) -> None:
+        """Appends the most recent data onto a .txt file"""
+        currDir = os.getcwd()
         txtName = self.fileName + ".txt"
-        with open(txtName, "a") as file_object:
+        catPath = os.path.join(currDir, "data/results/antColony", txtName)
+        with open(catPath, "a") as file_object:
             file_object.write(str(outputRow) + "\n")

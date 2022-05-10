@@ -1,13 +1,13 @@
 import math
 import random
 
-from src.AntExperiments.AntResultsExperiment import AntResultsExperiment
+from AntColony.AntResultsExperiment import AntResultsExperiment
 from src.Network.GraphMaker import GraphMaker
 
 """
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
-py -3.8 run_ant_batch.py
+py -3.8 run_ant_results_batch.py
 """
 
 if __name__ == "__main__":
@@ -29,9 +29,18 @@ if __name__ == "__main__":
             numSrcSinks = random.randint(srcSinkSet[0], srcSinkSet[1])
         # Build and save the network
         networkName = str(numNodes) + "-" + str(len(possibleArcCaps)) + "-" + str(numSrcSinks) + "-" + str(n)
+        # Arc Cost Determining Table
+        # Format: cap, fixed cost, variable cost
+        arcCostLookupTable = [
+            [100, 10, 1]
+        ]
+        # Source/sink cap and cost ranges
+        srcSinkCapacityRange = [100, 200]
+        srcSinkChargeRange = [10, 25]
         graphMaker = GraphMaker(networkName, numNodes, numSrcSinks, numSrcSinks)
-        graphMaker.setCostDeterminingHyperparameters(possibleArcCaps=possibleArcCaps)
-        graphMaker.setSourceSinkGeneralizations(True, True)
+        graphMaker.setArcCostLookupTable(arcCostLookupTable=arcCostLookupTable)
+        graphMaker.setSourceSinkGeneralizations(True, True, capacityRange=srcSinkCapacityRange,
+                                                chargeRange=srcSinkChargeRange)
         generatedNetwork = graphMaker.generateNetwork()
         generatedNetwork.saveNetwork()
         networkList.append(networkName)

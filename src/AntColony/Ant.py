@@ -6,13 +6,13 @@ from src.Network.Solution import Solution
 
 
 class Ant:
-    """Class that defines an Ant object, representing a single agent exploring the flow network space"""
+    """Class that defines an AntColony object, representing a single agent exploring the flow network space"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
     def __init__(self, network: FlowNetwork, minTargetFlow: float, alpha: float, beta: float):
-        """Constructor of an Ant instance"""
+        """Constructor of an AntColony instance"""
         # Input Attributes
         self.network = network  # Input network data
         self.minTargetFlow = minTargetFlow  # Target flow to assign
@@ -35,7 +35,7 @@ class Ant:
         # Trip Attributes
         # NOTE: A "trip" is a single supersource -> supersink path that assigns only x amount of flow
         self.tripStack = []  # Maintains the arcs traveled on the current trip (NOTE: Should be treated as a true stack- push/pop only!)
-        self.nodesVisitedThisTrip = set()  # Ant's memory of visited nodes this trip (Used for cycle/backtracking detection)
+        self.nodesVisitedThisTrip = set()  # AntColony's memory of visited nodes this trip (Used for cycle/backtracking detection)
 
         # Solution Attributes (Written after an ant completes a tour)
         self.trueCost = 0.0
@@ -230,7 +230,7 @@ class Ant:
     def writeSolution(self) -> Solution:
         """Writes the single ant's solution to a Solution instance for visualization/saving"""
         solution = Solution(self.network, self.minTargetFlow, self.trueCost, self.trueCost, self.sourceFlows,
-                            self.sinkFlows, self.arcFlows, self.arcsOpened, "Ant", False,
+                            self.sinkFlows, self.arcFlows, self.arcsOpened, "AntColony", False,
                             self.network.isSourceSinkCapacitated, self.network.isSourceSinkCharged)
         return solution
 

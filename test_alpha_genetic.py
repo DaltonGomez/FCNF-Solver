@@ -13,10 +13,10 @@ py -3.8 test_alpha_genetic.py
 if __name__ == "__main__":
     # Load Network
     network = FlowNetwork()
-    network = network.loadNetwork("test-large.p")
+    network = network.loadNetwork("test.p")
     vis = NetworkVisualizer(network, directed=True, supers=False)
     # vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
-    minTargetFlow = 1000
+    minTargetFlow = 100
 
     # Initialize an Alpha-GA Population
     pop = Population(network, minTargetFlow)
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     pop.setMutationHyperparams(mutationMethod="pathBased", mutationRate=0.25)
 
     # Solve the Alpha-GA
-    pop.evolvePopulation(drawing=True, drawLabels=True)
+    pop.evolvePopulation(drawing=True, drawLabels=False)
 
     # Solve with Naive Hill Climb
     # hillClimb = Population(network, minTargetFlow)
@@ -44,4 +44,4 @@ if __name__ == "__main__":
     cplex.findSolution(printDetails=False)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
-    optVis.drawGraphWithLabels(leadingText="OPT_")
+    optVis.drawUnlabeledGraph(leadingText="OPT_")

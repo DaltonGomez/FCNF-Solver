@@ -1,16 +1,17 @@
 import csv
+import os
 from datetime import datetime
 
 import numpy as np
 
-from src.Ant.Colony import Colony
+from src.AntColony.Colony import Colony
 from src.Network.FlowNetwork import FlowNetwork
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
 
 class AntTuningExperiment:
-    """Class that defines a Tuning Experiment object, used for finding the optimal hyperparameters of the Ant"""
+    """Class that defines a Tuning Experiment object, used for finding the optimal hyperparameters of the AntColony"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
@@ -37,12 +38,15 @@ class AntTuningExperiment:
         self.exactCost, self.exactSoln = self.findExactSolution()
         print("Mathematical programming solvers executed...")
 
-        # Ant Approach
+        # AntColony Approach
         self.aco = Colony(network, minTargetFlow, self.numAnts[0], self.numEpisodes[0])
 
         # Tuning Results
         self.outputBlock = []
         self.buildOutputHeader()
+        now = datetime.now()
+        uniqueID = now.strftime("%d_%m_%Y_%H_%M")
+        self.fileName = "Tuning_" + uniqueID + ".csv"
 
     def runExperiment(self) -> None:
         """Runs a grid search hyperparameter tuning experiment"""
@@ -70,8 +74,8 @@ class AntTuningExperiment:
 
     def setAntColonyHyperparameters(self, numAnts: int, initialPheromone: float, evaporation: float, alpha: float,
                                     beta: float, Q: float) -> None:
-        """Sets the hyperparameters of the Ant object"""
-        self.aco = Colony(self.network, self.minTargetFlow, numAnts, self.numEpisodes[0])  # Reset the Ant object
+        """Sets the hyperparameters of the AntColony object"""
+        self.aco = Colony(self.network, self.minTargetFlow, numAnts, self.numEpisodes[0])  # Reset the AntColony object
         self.aco.numAnts = numAnts
         self.aco.initialPheromoneConcentration = initialPheromone
         self.aco.evaporationRate = evaporation
@@ -98,20 +102,17 @@ class AntTuningExperiment:
 
     def writeOutputBlock(self) -> None:
         """Writes the output block to a csv file"""
-        now = datetime.now()
-        uniqueID = now.strftime("%d_%m_%Y_%H_%M")
-        fileName = "Tuning_" + uniqueID + ".csv"
-        print("Writing output block to: " + fileName)
-        file = open(fileName, "w+", newline="")
+        currDir = os.getcwd()
+        csvName = self.fileName + ".csv"
+        catPath = os.path.join(currDir, "data/results/antColony", csvName)
+        file = open(catPath, "w+", newline="")
         with file:
             write = csv.writer(file)
             write.writerows(self.outputBlock)
 
     def buildOutputHeader(self) -> None:
         """Builds the header of the output block"""
-        now = datetime.now()
-        timestamp = now.strftime("%d/%m/%Y %H:%M:%S")
-        self.outputBlock.append(["Tuning Experiment Output", timestamp])
+        self.outputBlock.append(["Tuning Experiment Output", self.fileName])
         self.outputBlock.append(["Network", self.network.name])
         self.outputBlock.append(["Min Target Flow", self.minTargetFlow])
         self.outputBlock.append(["Exact Cost", self.exactCost])

@@ -1,13 +1,13 @@
 import sys
 
-from src.Ant.Ant import Ant
+from src.AntColony.Ant import Ant
 from src.Network.FlowNetwork import FlowNetwork
 from src.Network.Solution import Solution
 from src.Network.SolutionVisualizer import SolutionVisualizer
 
 
 class Colony:
-    """Class that defines a Colony object, representing an entire ant colony in the Ant approach"""
+    """Class that defines a Colony object, representing an entire ant colony in the AntColony approach"""
 
     # =========================================
     # ============== CONSTRUCTOR ==============
@@ -37,7 +37,7 @@ class Colony:
         self.visual = None  # Object used to view the best solutions of the episode over time
 
     def solveNetwork(self, drawing=True, labels=True) -> Solution:
-        """Main loop that solves the Flow Network instance with the Ant"""
+        """Main loop that solves the Flow Network instance with the AntColony"""
         # EPISODE LOOP
         for episode in range(self.numEpisodes):
             # print("\nStarting Episode " + str(episode) + "...")  # PRINT OPTION

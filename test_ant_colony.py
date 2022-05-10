@@ -1,7 +1,7 @@
 import numpy as np
 
 from Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
-from src.Ant.Colony import Colony
+from src.AntColony.Colony import Colony
 from src.Network.FlowNetwork import FlowNetwork
 from src.Network.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
