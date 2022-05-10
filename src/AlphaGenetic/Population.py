@@ -1,5 +1,6 @@
 import copy
 import random
+import sys
 
 import numpy as np
 from numpy import ndarray
@@ -31,7 +32,12 @@ class Population:
         # -----------------------
         # Globals & Initialization HPs
         self.populationSize = populationSize
+        self.isTerminated = False
+        self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
         self.numGenerations = numGenerations
+        self.stagnationPeriod = 5
+        self.bestKnownCost = sys.maxsize
+        self.consecutiveStagnantGenerations = 0
         self.initializationDistribution = "uniform"  # :param : "uniform", "gaussian"
         self.initializationParams = [0.0, 1.0]  # :param: range if uniform distribution, mu and sigma if Gaussian
         # Individual Selection HPs
@@ -55,16 +61,21 @@ class Population:
     # ====================================================
     # ============== HYPERPARAMETER SETTERS ==============
     # ====================================================
-    def setPopulationHyperparams(self, populationSize=10, numGenerations=10, initializationDistribution="uniform",
+    def setPopulationHyperparams(self, populationSize=10, terminationMethod="setGenerations", numGenerations=10,
+                                 stagnationPeriod=5, initializationDistribution="uniform",
                                  initializationParams=(0.0, 1.0)) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
+        :param str terminationMethod: One of following: {"setGenerations", "stagnationPeriod"}
         :param int numGenerations: Number of iterations the population evolves for
+        :param int stagnationPeriod: Number of stagnant consecutive generations needed for termination
         :param str initializationDistribution: One of following: {"uniform", "gaussian"}
-        :param list initializationParams: Lower and upper bounds if uniform distribution, mu and sigma if Gaussian
+        :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian
         """
         self.populationSize = populationSize
+        self.terminationMethod = terminationMethod
         self.numGenerations = numGenerations
+        self.stagnationPeriod = stagnationPeriod
         self.initializationDistribution = initializationDistribution
         self.initializationParams = initializationParams
 
@@ -115,24 +126,31 @@ class Population:
     # ============================================
     # ============== EVOLUTION LOOP ==============
     # ============================================
-    def evolvePopulation(self, drawing=False, drawLabels=False) -> None:
+    def evolvePopulation(self, drawing=False, drawLabels=False) -> Solution:
         """Evolves the population for a specified number of generations"""
         # Initialize Population and Solve
         self.initializePopulation()
         self.solvePopulation()
+        generation = 0
         # Evolve Population
-        for generation in range(self.numGenerations):
-            # Perform Operators
+        while self.isTerminated is not True:
+            # Perform Operators and Solve
             self.selectAndCrossover()
             self.doMutations()
-            # Solve and Visualize
             self.solvePopulation()
-            if drawing is True:
-                self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
-            # Print Best Individual
+            # Update Current Best Individual
             bestIndividual = self.getMostFitIndividual()
+            self.evaluateTermination(generation, bestIndividual.trueCost)
             print("Generation = " + str(generation) + "\tBest Individual = " + str(
                 bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
+            # Visualize
+            if drawing is True:
+                self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
+            generation += 1
+        # Return Best Individual's Solution
+        bestIndividual = self.getMostFitIndividual()
+        bestDiscoveredSolution = self.writeIndividualsSolution(bestIndividual)
+        return bestDiscoveredSolution
 
     def selectAndCrossover(self) -> None:
         """Performs the selection and crossover at each generation"""
@@ -161,23 +179,44 @@ class Population:
                 else:
                     self.mutate(individualID)
 
-    def solveWithNaiveHillClimb(self, drawing=False, drawLabels=False) -> None:
+    def evaluateTermination(self, generation: int, newBestCost: float) -> None:
+        """Checks for termination used the given method"""
+        if self.terminationMethod == "setGenerations":
+            if generation >= self.numGenerations:
+                self.isTerminated = True
+        elif self.terminationMethod == "stagnationPeriod":
+            if newBestCost < self.bestKnownCost:
+                self.bestKnownCost = newBestCost
+                self.consecutiveStagnantGenerations = 0
+            elif newBestCost >= self.bestKnownCost:
+                self.consecutiveStagnantGenerations += 1
+                if self.consecutiveStagnantGenerations >= self.stagnationPeriod:
+                    self.isTerminated = True
+
+    def solveWithNaiveHillClimb(self, drawing=False, drawLabels=False) -> Solution:
         """Evolves the population for a specified number of generations"""
         # Initialize Population and Solve
         self.initializePopulation()
         self.solvePopulation()
+        generation = 0
         # Execute Hill Climb
-        for generation in range(self.numGenerations):
-            # Solve
+        while self.isTerminated is not True:
+            # Execute Hill Climb and Solve
             self.naiveHillClimb()
             self.solvePopulation()
+            # Update Current Best Individual
+            bestIndividual = self.getMostFitIndividual()
+            self.evaluateTermination(generation, bestIndividual.trueCost)
+            print("Generation = " + str(generation) + "\tBest Individual = " + str(
+                bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
             # Visualize
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
-            # Print Best Individual
-            bestIndividual = self.getMostFitIndividual()
-            print("Generation = " + str(generation) + "\tBest Individual = " + str(
-                bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost)))
+            generation += 1
+        # Return Best Individual's Solution
+        bestIndividual = self.getMostFitIndividual()
+        bestDiscoveredSolution = self.writeIndividualsSolution(bestIndividual)
+        return bestDiscoveredSolution
 
     # ====================================================
     # ============== INITIALIZATION METHODS ==============
@@ -280,9 +319,30 @@ class Population:
         # Reset solver
         self.solver.resetSolver()
 
+    def writeIndividualsSolution(self, individual: Individual) -> Solution:
+        """Writes the individual's output to as solution object"""
+        solution = None
+        if individual.isSolved is True:
+            solution = Solution(self.network, self.minTargetFlow, individual.fakeCost, individual.trueCost,
+                                individual.srcFlows, individual.sinkFlows, individual.arcFlows, individual.arcsOpened,
+                                "alphaGA", False, self.network.isSourceSinkCapacitated,
+                                self.network.isSourceSinkCharged)
+        else:
+            print("An unsolved individual cannot write a solution!")
+        return solution
+
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
+    def visualizeIndividual(self, individual: Individual, labels=False, leadingText="") -> None:
+        """Renders the visualization for a specified individual"""
+        solution = self.writeIndividualsSolution(individual)
+        visualizer = SolutionVisualizer(solution)
+        if labels is True:
+            visualizer.drawGraphWithLabels(leadingText=leadingText)
+        else:
+            visualizer.drawUnlabeledGraph(leadingText=leadingText)
+
     def visualizeBestIndividual(self, labels=False, leadingText="") -> None:
         """Renders the visualization for the most fit individual in the population at any time"""
         bestIndividual = self.getMostFitIndividual()
@@ -294,17 +354,6 @@ class Population:
         for individual in self.population:
             self.visualizeIndividual(individual, labels=labels, leadingText=leadingText + "_" + str(i))
             i += 1
-
-    def visualizeIndividual(self, individual: Individual, labels=False, leadingText="") -> None:
-        """Renders the visualization for a specified individual"""
-        solution = Solution(self.network, self.minTargetFlow, individual.fakeCost, individual.trueCost,
-                            individual.srcFlows, individual.sinkFlows, individual.arcFlows, individual.arcsOpened,
-                            "alphaGA", False, self.network.isSourceSinkCapacitated, self.network.isSourceSinkCharged)
-        visualizer = SolutionVisualizer(solution)
-        if labels is True:
-            visualizer.drawGraphWithLabels(leadingText=leadingText)
-        else:
-            visualizer.drawUnlabeledGraph(leadingText=leadingText)
 
     def printBestIndividualsPaths(self) -> None:
         """Prints the path data of the best individual"""
