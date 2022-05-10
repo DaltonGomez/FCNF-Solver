@@ -26,18 +26,18 @@ class Population:
         # Population & Solver Instance Objects
         self.population = []
         self.solver = AlphaSolverPDLP(self.network, self.minTargetFlow)  # Pre-builds variables/constraints on init
+        self.isTerminated = False
         self.bestKnownSolution = None
+        self.bestKnownCost = sys.maxsize
 
         # =======================
         # GA HYPERPARAMETERS
         # -----------------------
         # Globals & Initialization HPs
         self.populationSize = populationSize
-        self.isTerminated = False
         self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
         self.numGenerations = numGenerations
         self.stagnationPeriod = 5
-        self.bestKnownCost = sys.maxsize
         self.consecutiveStagnantGenerations = 0
         self.initializationDistribution = "uniform"  # :param : "uniform", "gaussian"
         self.initializationParams = [0.0, 1.0]  # :param: range if uniform distribution, mu and sigma if Gaussian
@@ -336,9 +336,11 @@ class Population:
 
     def resetOutputFields(self) -> None:
         """Resets the output fields stored in the population"""
+        self.isTerminated = False
         self.population = []
-        self.solver = AlphaSolverPDLP(self.network, self.minTargetFlow)
+        self.solver = AlphaSolverPDLP(self.network, self.minTargetFlow)  # Pre-builds variables/constraints on init
         self.bestKnownSolution = None
+        self.bestKnownCost = sys.maxsize
 
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
@@ -589,7 +591,7 @@ class Population:
         elif self.mutationMethod == "randomSingleEdge":
             self.randomSingleEdgeMutation(individualID)
         elif self.mutationMethod == "pathBased":
-            self.selectedPathsMutation(individualID, selectedPaths)
+            self.selectedPathsRandomMutation(individualID, selectedPaths)
 
     def randomSingleArcMutation(self, individualNum: int) -> None:
         """Mutates an individual at only one random arc in the chromosome"""
@@ -609,14 +611,44 @@ class Population:
             individual.alphaValues[mutatedEdge][arcIndex] = self.getAlphaValue()
         individual.resetOutputNetwork()
 
-    def selectedPathsMutation(self, individualNum: int, selectedPaths: list) -> None:
-        """Mutates the all arcs for each edge in the selected paths of an individual"""
+    def selectedPathsRandomMutation(self, individualNum: int, selectedPaths: list) -> None:
+        """Randomly mutates all arcs for each edge in the selected paths of an individual"""
         individual = self.population[individualNum]
         for path in selectedPaths:
             for edge in path.edges:
                 edgeIndex = self.network.edgesDict[edge]
                 for arcIndex in range(self.network.numArcCaps):
                     individual.alphaValues[edgeIndex][arcIndex] = self.getAlphaValue()
+        individual.resetOutputNetwork()
+
+    def selectedPathsNudgeUpMutation(self, individualNum: int, selectedPaths: list) -> None:
+        """Nudges all arcs for each edge in the selected paths of an individual"""
+        # TODO - Determine the best method for nudging
+        # TODO - Implement into tuning experiment/hyper-operators
+        nudgeMagnitude = 3.0
+        individual = self.population[individualNum]
+        for path in selectedPaths:
+            for edge in path.edges:
+                edgeIndex = self.network.edgesDict[edge]
+                for arcIndex in range(self.network.numArcCaps):
+                    individual.alphaValues[edgeIndex][arcIndex] = individual.alphaValues[edgeIndex][
+                                                                      arcIndex] + nudgeMagnitude
+        individual.resetOutputNetwork()
+
+    def selectedPathsNudgeDownMutation(self, individualNum: int, selectedPaths: list) -> None:
+        """Nudges all arcs for each edge in the selected paths of an individual"""
+        # TODO - Determine the best method for nudging
+        # TODO - Implement into tuning experiment/hyper-operators
+        nudgeMagnitude = 3.0
+        individual = self.population[individualNum]
+        for path in selectedPaths:
+            for edge in path.edges:
+                edgeIndex = self.network.edgesDict[edge]
+                for arcIndex in range(self.network.numArcCaps):
+                    individual.alphaValues[edgeIndex][arcIndex] = individual.alphaValues[edgeIndex][
+                                                                      arcIndex] - nudgeMagnitude
+                    if individual.alphaValues[edgeIndex][arcIndex] < 0:
+                        individual.alphaValues[edgeIndex][arcIndex] = 0
         individual.resetOutputNetwork()
 
     # =================================================

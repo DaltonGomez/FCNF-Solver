@@ -13,7 +13,6 @@ GENERAL/NETWORK/SOLVERS:
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
-# TODO - Change pathing to be only pathlets and/or all paths
 # TODO - Implement a nudge mutation, possibly Gaussian
 
 
@@ -22,6 +21,7 @@ ALPHA GENETIC ALGORITHM EXPERIMENTS:
 # TODO - Run tuning and results experiments
 # TODO - Measure population diversity at genotypic and phenotypic levels
 # TODO - Do sensitivity/perturbation analysis on alpha values
+
 
 ANT COLONY OPTIMIZATION APPROACH:
 =====================================
