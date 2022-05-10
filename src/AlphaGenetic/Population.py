@@ -36,27 +36,27 @@ class Population:
         self.initializationParams = [0.0, 1.0]  # :param: range if uniform distribution, mu and sigma if Gaussian
         # Individual Selection HPs
         self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "random"
-        self.tournamentSize = 2
+        self.tournamentSize = 3
         # Path Selection HPs
         self.pathSelectionMethod = "roulette"  # :param : "tournament", "roulette", "random", "top"
-        self.pathRankingOrder = "least"  # :param : "most", "least"
+        self.pathRankingOrder = "most"  # :param : "most", "least"
         self.pathRankingMethod = "density"  # :param : "cost", "flow", "density", "length"
         self.pathSelectionSize = 2
-        self.pathTournamentSize = 2
+        self.pathTournamentSize = 3
         # Crossover HPs
         self.crossoverMethod = "pathBased"  # :param : "onePoint", "twoPoint", "pathBased"
-        self.crossoverRate = 0.90
+        self.crossoverRate = 1.0
         self.crossoverAttemptsPerGeneration = 1
-        self.replacementStrategy = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents"
+        self.replacementStrategy = "replaceParents"  # : param : "replaceWeakestTwo", "replaceParents"
         # Mutation HPs
         self.mutationMethod = "pathBased"  # :param : "randomSingleArc", "randomSingleEdge", "randomTotal", "pathBased"
-        self.mutationRate = 0.50
+        self.mutationRate = 0.25
 
-    # ==================================================================
-    # ============== HYPERPARAMETER SETTERS & INITIALIZER ==============
-    # ==================================================================
-    def setPopulationHyperparams(self, populationSize: int, numGenerations: int, initializationDistribution: str,
-                                 initializationParams: list) -> None:
+    # ====================================================
+    # ============== HYPERPARAMETER SETTERS ==============
+    # ====================================================
+    def setPopulationHyperparams(self, populationSize=10, numGenerations=10, initializationDistribution="uniform",
+                                 initializationParams=(0.0, 1.0)) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
         :param int numGenerations: Number of iterations the population evolves for
@@ -68,7 +68,7 @@ class Population:
         self.initializationDistribution = initializationDistribution
         self.initializationParams = initializationParams
 
-    def setIndividualSelectionHyperparams(self, selectionMethod: str, tournamentSize: int) -> None:
+    def setIndividualSelectionHyperparams(self, selectionMethod="tournament", tournamentSize=3) -> None:
         """Sets the GA class fields that dictate how the selection of individuals is carried out \n
         :param str selectionMethod: One of following: {"tournament", "roulette", "random"}
         :param int tournamentSize: Size of tournament subset used if selectionMethod = "tournament"
@@ -76,28 +76,27 @@ class Population:
         self.selectionMethod = selectionMethod
         self.tournamentSize = tournamentSize
 
-    def setPathSelectionHyperparams(self, selectionMethod: str, pathRankingOrder: str, pathRankingMethod: str,
-                                    selectionSize: int,
-                                    tournamentSize: int) -> None:
+    def setPathSelectionHyperparams(self, pathSelectionMethod="roulette", pathRankingOrder="most",
+                                    pathRankingMethod="density", pathSelectionSize=2, pathTournamentSize=3) -> None:
         """Sets the GA class fields that dictate how the selection of paths is carried out \n
-        :param str selectionMethod: One of following: {"tournament", "roulette", "random", "top"}
+        :param str pathSelectionMethod: One of following: {"tournament", "roulette", "random", "top"}
         :param str pathRankingOrder: One of following: {"most", "least"}
         :param str pathRankingMethod: One of following: {"cost", "flow", "density", "length"}
-        :param int selectionSize: Number of paths returned
-        :param int tournamentSize: Size of tournament subset used if pathSelectionMethod = "tournament"
+        :param int pathSelectionSize: Number of paths returned
+        :param int pathTournamentSize: Size of tournament subset used if pathSelectionMethod = "tournament"
         """
-        self.pathSelectionMethod = selectionMethod
+        self.pathSelectionMethod = pathSelectionMethod
         self.pathRankingOrder = pathRankingOrder
         self.pathRankingMethod = pathRankingMethod
-        self.pathSelectionSize = selectionSize
-        self.pathTournamentSize = tournamentSize
+        self.pathSelectionSize = pathSelectionSize
+        self.pathTournamentSize = pathTournamentSize
 
-    def setCrossoverHyperparams(self, crossoverMethod: str, replacementStrategy: str, crossoverRate: float,
-                                crossoverAttemptsPerGeneration: int) -> None:
+    def setCrossoverHyperparams(self, crossoverMethod="pathBased", replacementStrategy="replaceParents",
+                                crossoverRate=1.0, crossoverAttemptsPerGeneration=1) -> None:
         """Sets the GA class fields that dictate how the crossover of individuals is carried out \n
         :param str crossoverMethod: One of following: {"onePoint", "twoPoint", "pathBased"}
-        :param int replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents"}
-        :param str crossoverRate: Probability in [0,1] that a crossover occurs
+        :param str replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents"}
+        :param float crossoverRate: Probability in [0,1] that a crossover occurs
         :param int crossoverAttemptsPerGeneration: Number of attempted crossovers per generation
         """
         self.crossoverMethod = crossoverMethod
@@ -105,12 +104,12 @@ class Population:
         self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
         self.replacementStrategy = replacementStrategy
 
-    def setMutationHyperparams(self, mutationMethod: str, mutationRate: float) -> None:
+    def setMutationHyperparams(self, mutationMethod="pathBased", mutationRate=0.25) -> None:
         """Sets the GA class fields that dictate how the mutation of individuals is carried out \n
-        :param str mutationMethod: One of following: {"randomSingle", "randomTotal", "pathBased"}
-        :param str mutationRate: Probability in [0,1] that a mutation occurs
+        :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomTotal", "pathBased"}
+        :param float mutationRate: Probability in [0,1] that a mutation occurs
         """
-        self.mutationMethod = mutationMethod  # :param : "randomSingle", "randomSingleEdge", "randomTotal", "pathBased"
+        self.mutationMethod = mutationMethod
         self.mutationRate = mutationRate
 
     # ============================================
@@ -123,19 +122,44 @@ class Population:
         self.solvePopulation()
         # Evolve Population
         for generation in range(self.numGenerations):
-            # TODO - IMPLEMENT SELECTION & CROSSOVER
-            # TODO - IMPLEMENT SELECTION & MUTATION
-
-
-            self.naiveHillClimb()
+            # Perform Operators
+            self.selectAndCrossover()
+            self.doMutations()
+            # Solve and Visualize
             self.solvePopulation()
-            # Visualize
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
             # Print Best Individual
             bestIndividual = self.getMostFitIndividual()
             print("Generation = " + str(generation) + "\tBest Individual = " + str(
                 bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
+
+    def selectAndCrossover(self) -> None:
+        """Performs the selection and crossover at each generation"""
+        random.seed()
+        for n in range(self.crossoverAttemptsPerGeneration):
+            if random.random() < self.crossoverRate:
+                parents = self.selectIndividuals()
+                if self.crossoverMethod == "pathBased":
+                    parentOnePaths = self.selectPaths(parents[0])
+                    parentTwoPaths = self.selectPaths(parents[1])
+                    self.crossover(parents[0], parents[1], parentOnePaths=parentOnePaths, parentTwoPaths=parentTwoPaths)
+                else:
+                    self.crossover(parents[0], parents[1])
+
+    def doMutations(self) -> None:
+        """Performs mutations on individuals given a mutation probability"""
+        random.seed()
+        for individualID in range(self.populationSize):
+            individual = self.population[individualID]
+            if individual.isSolved is False:
+                continue
+            if random.random() < self.mutationRate:
+                if self.mutationMethod == "pathBased":
+                    individualPaths = self.selectPaths(individualID)
+                    self.mutate(individualID, selectedPaths=individualPaths)
+                else:
+                    self.mutate(individualID)
 
     def solveWithNaiveHillClimb(self, drawing=False, drawLabels=False) -> None:
         """Evolves the population for a specified number of generations"""
@@ -411,7 +435,6 @@ class Population:
                     for path in individual.paths:
                         rankedPaths.append((path, path.length))
                     rankedPaths.sort(key=lambda p: p[1], reverse=False)
-            print("Ranked Paths: " + str(rankedPaths))
             # Generate selected paths with method call based on pathSelectionMethod
             if self.pathSelectionMethod == "top":
                 selectedPaths = self.topPathSelection(rankedPaths, thisSelectionSize)

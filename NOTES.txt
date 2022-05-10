@@ -2,7 +2,6 @@ NOTES & TODOS:
 
 GENERAL/NETWORK/SOLVERS:
 =====================================
-# TODO - Update the edge penalty assignment method in network generation so that opposing edges get the same penalty
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
 >> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
@@ -15,9 +14,6 @@ GENERAL/NETWORK/SOLVERS:
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
-# TODO - Double-check the Individual and Population class in Alpha-GA, as they were adapted from the older version with little care
-# TODO - Implement other probability functions for randomly initializing alpha values
-% Don't even bother with roulette wheel selection as the pressure is too high, according to Sheppard
 # TODO - Change pathing to be only pathlets and/or all paths
 # TODO - Implement a nudge mutation, possibly Gaussian
 # TODO - Implement a termination criteria based on convergence, not just number of episodes/generations

@@ -18,9 +18,20 @@ if __name__ == "__main__":
     # vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
     minTargetFlow = 200
 
-    # Solve with Alpha-GA
-    pop = Population(network, minTargetFlow, populationSize=10, numGenerations=1)
-    pop.evolvePopulation(drawing=False, drawLabels=True)
+    # Initialize a Alpha-GA
+    pop = Population(network, minTargetFlow)
+    pop.setPopulationHyperparams(populationSize=10, numGenerations=10,
+                                 initializationDistribution="uniform", initializationParams=[0.0, 1.0])
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
+    pop.setPathSelectionHyperparams(pathSelectionMethod="roulette", pathRankingOrder="most",
+                                    pathRankingMethod="density", pathSelectionSize=2, pathTournamentSize=3)
+
+    pop.setCrossoverHyperparams(crossoverMethod="pathBased", replacementStrategy="replaceParents",
+                                crossoverRate=1.0, crossoverAttemptsPerGeneration=1)
+    pop.setMutationHyperparams(mutationMethod="pathBased", mutationRate=0.25)
+
+    # Solve the Alpha-GA
+    pop.evolvePopulation(drawing=True, drawLabels=True)
 
     # Solve with Naive Hill Climb
     # pop.solveWithNaiveHillClimb(drawing=True, drawLabels=True)
