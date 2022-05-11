@@ -82,11 +82,13 @@ class AlphaGeneticTuning:
         self.pathRankingMethods = ("cost", "flow", "density")
         self.pathSelectionSizeSet = (1, 3, 6)
         # Crossover HPs
-        self.crossoverMethods = ("onePoint", "twoPoint", "pathBased")
+        self.crossoverMethods = ("onePoint", "twoPoint")
+        # self.crossoverMethods = ("onePoint", "twoPoint", "pathBased")  # TODO - Uncomment when pathing fixed
         self.replacementStrategies = ("replaceWeakestTwo", "replaceParents")
         # Mutation HPs
-        self.mutationMethods = (["randomSingleEdge", [0.0, 1.0]], ["pathBasedRandom", [0.0, 1.0]],
-                                ["pathBasedNudge", [0.0, 1.0]], ["pathBasedNudge", [0.0, 0.1]])
+        self.mutationMethods = (["randomSingleEdge", [0.0, 1.0]], ["randomTotal", [0.0, 1.0]])
+        # TODO - Uncomment when pathing fixed
+        # self.mutationMethods = (["randomSingleEdge", [0.0, 1.0]], ["pathBasedRandom", [0.0, 1.0]], ["pathBasedNudge", [0.0, 1.0]], ["pathBasedNudge", [0.0, 0.1]])
         self.mutationRateSet = (0.01, 0.10, 0.25, 0.50)
 
     def generateRandomNetworks(self) -> list:
@@ -154,8 +156,9 @@ class AlphaGeneticTuning:
             hyperparameterHeader.append("Opt Gap")
             self.writeRowToCSV(hyperparameterHeader)
             # Begin Grid Search
-            for mutation in self.mutationMethods:  # NOTE: Intentionally placing path-based operations last in tuning
-                for crossover in self.crossoverMethods:  # NOTE: Intentionally placing path-based operations last in tuning
+            # NOTE: Intentionally placing path-based operations last in tuning
+            for mutation in self.mutationMethods:
+                for crossover in self.crossoverMethods:
                     for init in self.initDistributions:
                         for selection in self.selectionMethodsAndTournySize:
                             for replacement in self.replacementStrategies:
@@ -179,8 +182,8 @@ class AlphaGeneticTuning:
                                                                mutationRate=mutateRate,
                                                                nudgeParams=mutation[1])
                                     # Set Path-Based Operators Hyperparameters
-                                    if crossover == "pathBased" or mutation == "pathBasedRandom" or \
-                                            mutation == "pathBasedNudge":
+                                    if crossover == "pathBased" or mutation[0] == "pathBasedRandom" or \
+                                            mutation[0] == "pathBasedNudge":
                                         for pathOrder in self.pathRankingOrders:
                                             for pathRank in self.pathRankingMethods:
                                                 for pathSize in self.pathSelectionSizeSet:

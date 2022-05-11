@@ -63,6 +63,8 @@ class Individual:
         if self.isSolved is False:
             print("Cannot compute paths on an unsolved instance!")
         else:
+            # TODO - Resolve bug in pathing methods that causes program to get stuck
+            edgesAssignedToPaths = set()  # Attempts to prevent looping in the buildPathlet() recursion
             # For all sources with an assigned flow
             for srcIndex in range(self.network.numSources):
                 if self.srcFlows[srcIndex] > 0:
@@ -71,9 +73,9 @@ class Individual:
                     # For all outgoing edges with flow, build pathlets
                     for outgoingEdge in srcObj.outgoingEdges:
                         if self.getEdgeFlow(outgoingEdge) > 0:
-                            self.buildPathlet(src, outgoingEdge)
+                            self.buildPathlet(src, outgoingEdge, edgesAssignedToPaths)
 
-    def buildPathlet(self, startingNode: int, startingEdge: tuple) -> None:
+    def buildPathlet(self, startingNode: int, startingEdge: tuple, edgesAssignedToPaths: set) -> None:
         """Builds a pathlet from a starting node in a particular direction"""
         visitedNodes = [startingNode]
         visitedEdges = [startingEdge]
@@ -93,6 +95,8 @@ class Individual:
             pathFlowAndCosts = self.calculatePathCostAndFlow(visitedNodes, visitedEdges)
             thisPathlet = Path(visitedNodes, visitedEdges, pathFlowAndCosts)
             self.paths.append(thisPathlet)
+            for edge in visitedEdges:
+                edgesAssignedToPaths.add(edge)
         # Recurse on buildPathlet() if the termination of the last pathlet should initiate a new pathlet
         # If the toNode is a branch point
         outgoingFlows = 0
@@ -101,8 +105,8 @@ class Individual:
                 outgoingFlows += 1
         if outgoingFlows > 1:
             for edge in toNodeObj.outgoingEdges:
-                if self.getEdgeFlow(edge) > 0:
-                    self.buildPathlet(toNode, edge)
+                if self.getEdgeFlow(edge) > 0 and edge not in edgesAssignedToPaths:
+                    self.buildPathlet(toNode, edge, edgesAssignedToPaths)
         # If the toNode is a confluence point
         incomingFlows = 0
         for edge in toNodeObj.incomingEdges:
@@ -110,13 +114,13 @@ class Individual:
                 incomingFlows += 1
         if incomingFlows > 1:
             for edge in toNodeObj.outgoingEdges:
-                if self.getEdgeFlow(edge) > 0:
-                    self.buildPathlet(toNode, edge)
+                if self.getEdgeFlow(edge) > 0 and edge not in edgesAssignedToPaths:
+                    self.buildPathlet(toNode, edge, edgesAssignedToPaths)
         # If the toNode is a sink that has positive outgoing flow
         if toNodeObj.nodeType == 1:
             for edge in toNodeObj.outgoingEdges:
-                if self.getEdgeFlow(edge) > 0:
-                    self.buildPathlet(toNode, edge)
+                if self.getEdgeFlow(edge) > 0 and edge not in edgesAssignedToPaths:
+                    self.buildPathlet(toNode, edge, edgesAssignedToPaths)
 
     def isEndOfPathlet(self, toNode: int) -> bool:
         """Checks if the pathlet should end"""
