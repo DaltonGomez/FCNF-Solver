@@ -147,6 +147,7 @@ class AlphaGeneticTuning:
             print("Exact solution found...")
             # Write Network Data and Build Hyperparameter Header
             self.writeRowToCSV(networkDataRow)
+            print(networkDataRow)
             hyperparameterHeader = ["Pop Size", "Generations", "Init Dist", "Init Params", "Selection", "Tourny Size",
                                     "Crossover", "Replacement", "Mutation", "Nudge Params", "Mutate Rate",
                                     "Path Select", "Path Tourny", "Path Order", "Path Rank", "Path Size"]
@@ -155,6 +156,7 @@ class AlphaGeneticTuning:
             hyperparameterHeader.append("Avg Value")
             hyperparameterHeader.append("Opt Gap")
             self.writeRowToCSV(hyperparameterHeader)
+            print(hyperparameterHeader)
             # Begin Grid Search
             # NOTE: Intentionally placing path-based operations last in tuning
             for mutation in self.mutationMethods:

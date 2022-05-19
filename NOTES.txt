@@ -9,10 +9,17 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
 >> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
 # TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
+# TODO - Revise how the network is generated
+>> % Place a pont down and then place a bunch of sources or sinks inside a circle centered around that point (i.e. clusters)
+>> % Multiply the cost through by 100,000 (?) to make bigger numbers
+>> % Total sink cap > total source cap
+>> % Then set all node variable costs to zero
+>> % Run w/ target at total source cap
 
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
+# TODO - Correct pathing
 # TODO - Anneal hyperparameters over time
 
 
