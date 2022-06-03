@@ -5,7 +5,7 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - UPDATE README.md/Docs
 # TODO - Add Unit Tests
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
->> % I'm wondering if this is essentially as it extends the alpha value to the sources and sinks when they are recast as edges
+>> % I'm wondering if this is essential as it extends the alpha value to the sources and sinks when they are recast as edges
 >> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
@@ -13,7 +13,7 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
 # TODO - Revise how the network is generated
 >> % Place a pont down and then place a bunch of sources or sinks inside a circle centered around that point (i.e. clusters)
->> % Multiply the cost through by 100,000 (?) to make bigger numbers
+>> % Multiply the cost through by 100,000 (?) to get away from the sub-single digits
 >> % Total sink cap > total source cap
 >> % Then set all node variable costs to zero
 >> % Run w/ target at total source cap
