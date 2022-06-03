@@ -13,16 +13,16 @@ py -3.8 test_alpha_genetic.py
 if __name__ == "__main__":
     # Load Network
     network = FlowNetwork()
-    network = network.loadNetwork("197-10-1-0.p")
+    network = network.loadNetwork("215-5-1-4.p")
     vis = NetworkVisualizer(network, directed=True, supers=False)
     vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
-    minTargetFlow = 1000
+    minTargetFlow = 750
 
     # Initialize an Alpha-GA Population
     pop = Population(network, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=50, terminationMethod="setGenerations", numGenerations=20,
+    pop.setPopulationHyperparams(populationSize=4, terminationMethod="setGenerations", numGenerations=1,
                                  stagnationPeriod=5, initializationDistribution="uniform",
                                  initializationParams=[0.0, 1.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
@@ -33,13 +33,13 @@ if __name__ == "__main__":
     pop.setMutationHyperparams(mutationMethod="pathBasedNudge", mutationRate=0.25, nudgeParams=[0.0, 1.0])
 
     # Solve the Alpha-GA
-    pop.evolvePopulation(printGenerations=True, drawing=False, drawLabels=True)
+    pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=False)
 
     # Initialize an Alpha-GA Population
     pop = Population(network, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=50, terminationMethod="setGenerations", numGenerations=50,
+    pop.setPopulationHyperparams(populationSize=4, terminationMethod="setGenerations", numGenerations=1,
                                  stagnationPeriod=5, initializationDistribution="uniform",
                                  initializationParams=[0.0, 1.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     pop.setMutationHyperparams(mutationMethod="pathBasedNudge", mutationRate=0.25, nudgeParams=[0.0, 1.0])
 
     # Solve the Alpha-GA
-    pop.evolvePopulation(printGenerations=True, drawing=False, drawLabels=True)
+    pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=False)
 
     # Solve with Naive Hill Climb
     # hillClimb = Population(network, minTargetFlow)
