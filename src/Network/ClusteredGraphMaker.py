@@ -7,11 +7,12 @@ from scipy.spatial import Delaunay
 from src.Network.FlowNetwork import FlowNetwork
 
 
-class GraphMaker:
-    """Class that generates pseudorandom graphs from 2D embedded points and their Delaunay triangulation"""
+class ClusteredGraphMaker:
+    """Class that generates pseudorandom graphs from clustered sources/sinks and their Delaunay triangulation"""
 
+    # TODO - CURRENTLY JUST A COPY OF `GraphMaker.py`
     def __init__(self, name: str, numNodes: int, numSources: int, numSinks: int):
-        """Constructor of a GraphMaker instance"""
+        """Constructor of a ClusteredGraphMaker instance"""
         # Hyperparameters For Network Generation/Computing Pseudo-Random Costs
         self.embeddingSize = 100.0
         self.arcCostLookupTable = self.getArcCostLookupTable()

@@ -2,7 +2,7 @@ NOTES & TODOS:
 
 GENERAL/NETWORK/SOLVERS:
 =====================================
-# TODO - UPDATE README.md/Docs
+# TODO - Update README with Documentation
 # TODO - Add Unit Tests
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> % I'm wondering if this is essential as it extends the alpha value to the sources and sinks when they are recast as edges
@@ -11,12 +11,14 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
 >> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
 # TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
-# TODO - Revise how the network is generated
->> % Place a pont down and then place a bunch of sources or sinks inside a circle centered around that point (i.e. clusters)
->> % Multiply the cost through by 100,000 (?) to get away from the sub-single digits
->> % Total sink cap > total source cap
->> % Then set all node variable costs to zero
->> % Run w/ target at total source cap
+# TODO - Revise how the network is generated (to be more clustered)
+>> % Clustered Generation Strategy:
+>> %    Place a point down and then place a bunch of sources or sinks inside a circle centered around that point (i.e. clusters)
+>> %    Multiply the cost through by 100,000 (?) to get away from the sub-single digits
+>> %    Total sink cap > total source cap
+>> %    Then set all node variable costs to zero
+>> %    Run w/ target at total source cap
+# TODO - Also, use source and sink data to generate capacity distributions to sample in network generation
 
 
 ALPHA GENETIC ALGORITHM APPROACH:
