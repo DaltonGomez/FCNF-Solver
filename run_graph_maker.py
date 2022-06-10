@@ -3,7 +3,7 @@ from Network.ClusteredGraphMaker import ClusteredGraphMaker
 """
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
-py -3.8 test_clustered_network_maker.py
+py -3.8 run_graph_maker.py
 """
 
 # ORIGINAL COST DETERMINING TABLE ADAPTED FROM SIMCCS MODEL (see data/SimCCS_models/Pipeline Cost Model.xlsm)
@@ -40,8 +40,8 @@ if __name__ == "__main__":
         clusterRadiusRange = (10, 20)
         # Source/sink cap ranges
         isSrcSinkCapacitated = True
-        srcCapRange = (5, 20)
-        sinkCapRange = (1, 10)
+        srcCapRange = (2, 10)
+        sinkCapRange = (5, 20)
         # Make graph
         graphMaker = ClusteredGraphMaker(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
                                          numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)

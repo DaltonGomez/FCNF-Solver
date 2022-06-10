@@ -9,7 +9,7 @@ from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 """
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
-py -3.8 test_ant_colony.py
+py -3.8 run_ant_colony.py
 """
 
 if __name__ == "__main__":

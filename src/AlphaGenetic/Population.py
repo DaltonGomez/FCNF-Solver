@@ -56,8 +56,9 @@ class Population:
         self.crossoverAttemptsPerGeneration = 1
         self.replacementStrategy = "replaceParents"  # : param : "replaceWeakestTwo", "replaceParents"
         # Mutation HPs
-        self.mutationMethod = "pathBased"  # :param : "randomSingleArc", "randomSingleEdge", "randomTotal", "pathBased"
-        self.mutationRate = 0.25
+        self.mutationMethod = "randomPerArc"  # :param : "randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal", "pathBased"
+        self.mutationRate = 0.10
+        self.perArcEdgeMutationRate = 0.25
         self.nudgeParams = [0.0, 1.0]
 
     # ====================================================
@@ -117,15 +118,17 @@ class Population:
         self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
         self.replacementStrategy = replacementStrategy
 
-    def setMutationHyperparams(self, mutationMethod="randomSingleEdge", mutationRate=0.25,
+    def setMutationHyperparams(self, mutationMethod="randomPerArc", mutationRate=0.10, perArcEdgeMutationRate=0.25,
                                nudgeParams=(0.0, 1.0)) -> None:
         """Sets the GA class fields that dictate how the mutation of individuals is carried out \n
-        :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomTotal", "pathBasedRandom", "pathBasedNudge"}
-        :param float mutationRate: Probability in [0,1] that a mutation occurs
+        :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal", "pathBasedRandom", "pathBasedNudge"}
+        :param float mutationRate: Probability in [0,1] that an individual mutates
+        :param float perArcEdgeMutationRate: Probability in [0,1] that an edge/arc mutates given that an individual mutates
         :param list nudgeParams: mu and sigma of the Gaussian distribution used for nudging
         """
         self.mutationMethod = mutationMethod
         self.mutationRate = mutationRate
+        self.perArcEdgeMutationRate = perArcEdgeMutationRate
         self.nudgeParams = nudgeParams
 
     # ============================================
@@ -151,7 +154,7 @@ class Population:
                 print("Generation = " + str(generation) + "\tBest Individual = " + str(
                     bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
             if drawing is True:
-                self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
+                self.visualizeBestIndividual(labels=drawLabels, leadingText="GA_Gen" + str(generation) + "_")
             generation += 1
         # Return Best Solution Discovered
         return self.bestKnownCost, self.bestKnownSolution
@@ -220,7 +223,7 @@ class Population:
                 print("Generation = " + str(generation) + "\tBest Individual = " + str(
                     bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
             if drawing is True:
-                self.visualizeBestIndividual(labels=drawLabels, leadingText="Gen" + str(generation) + "_")
+                self.visualizeBestIndividual(labels=drawLabels, leadingText="HC_Gen" + str(generation) + "_")
             generation += 1
         # Return Best Solution Discovered
         return self.bestKnownCost, self.bestKnownSolution
@@ -306,8 +309,9 @@ class Population:
     # ============================================
     def solvePopulation(self) -> None:
         """Solves all unsolved instances in the entire population"""
-        for individual in self.population:
+        for indIndex, individual in enumerate(self.population):
             if individual.isSolved is False:
+                print("Solving individual " + str(indIndex) + "...")
                 self.solveIndividual(individual)
 
     def solveIndividual(self, individual: Individual) -> None:
@@ -596,6 +600,10 @@ class Population:
             self.randomSingleArcMutation(individualID)
         elif self.mutationMethod == "randomSingleEdge":
             self.randomSingleEdgeMutation(individualID)
+        elif self.mutationMethod == "randomPerArc":
+            self.randomPerArcMutation(individualID)
+        elif self.mutationMethod == "randomPerEdge":
+            self.randomPerEdgeMutation(individualID)
         elif self.mutationMethod == "pathBasedRandom":
             self.selectedPathsRandomMutation(individualID, selectedPaths)
         elif self.mutationMethod == "pathBasedNudge":
@@ -617,6 +625,26 @@ class Population:
         individual = self.population[individualNum]
         for arcIndex in range(self.network.numArcCaps):
             individual.alphaValues[mutatedEdge][arcIndex] = self.getAlphaValue()
+        individual.resetOutputNetwork()
+
+    def randomPerArcMutation(self, individualNum: int) -> None:
+        """Iterates over all (edge, arc) pairs and mutates if the perArcEdgeMutation rate rng rolls"""
+        random.seed()
+        individual = self.population[individualNum]
+        for edge in range(self.network.numEdges):
+            for arcIndex in range(self.network.numArcCaps):
+                if random.random() < self.perArcEdgeMutationRate:
+                    individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
+        individual.resetOutputNetwork()
+
+    def randomPerEdgeMutation(self, individualNum: int) -> None:
+        """Iterates over all edges and mutates at all arcs if the perArcEdgeMutation rate rng rolls"""
+        random.seed()
+        individual = self.population[individualNum]
+        for edge in range(self.network.numEdges):
+            if random.random() < self.perArcEdgeMutationRate:
+                for arcIndex in range(self.network.numArcCaps):
+                    individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
         individual.resetOutputNetwork()
 
     def selectedPathsRandomMutation(self, individualNum: int, selectedPaths: list) -> None:

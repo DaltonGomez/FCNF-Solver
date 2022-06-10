@@ -50,11 +50,11 @@ class SolutionVisualizer:
                     else:
                         flow += self.solution.arcFlows[(edgeIndex, arc)]
             if flow > 0:
-                self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="black", value=flow,
+                self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="rgba(0, 0, 0, 1)", value=flow,
                                      x=int(nodeObj.xPos * self.positionScalar),
                                      y=int(nodeObj.yPos * self.positionScalar))
             else:
-                self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="rgba(155, 155, 155, 0.35)",
+                self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="rgba(155, 155, 155, 0.30)",
                                      value=flow,
                                      x=int(nodeObj.xPos * self.positionScalar),
                                      y=int(nodeObj.yPos * self.positionScalar))
@@ -99,7 +99,7 @@ class SolutionVisualizer:
         """Returns an RGB tuple from arcs opened on edge, where
         (0,0,0) = 1 arc, (0,0,255) = 2 arcs; (255,0,0) = max arcs"""
         # CURRENT IMPLEMENTATION RAMPS FROM BLUE (FEW ARCS) TO RED (MANY ARCS) WITH BLACK AS ONE ARC
-        if arcsOpened == 1:
+        if arcsOpened <= 1:
             return 0, 0, 0
         else:
             maxArcs = self.solution.network.numArcCaps

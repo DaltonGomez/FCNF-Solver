@@ -35,5 +35,5 @@ sinksPerClusterRange = (2, 4)
 clusterRadiusRange = (10, 20)
 # Source/sink cap ranges
 isSrcSinkCapacitated = True
-srcCapRange = (5, 20)
-sinkCapRange = (1, 10)
+srcCapRange = (2, 10)
+sinkCapRange = (5, 20)
