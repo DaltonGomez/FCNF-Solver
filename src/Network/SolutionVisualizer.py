@@ -45,7 +45,8 @@ class SolutionVisualizer:
                     try:
                         flow += self.solution.arcFlows[(edgeIndex, arc)]
                     except KeyError:
-                        print("Key error on solution.arcFlows[" + str((edgeIndex, arc)) + "]! Skipping value...")
+                        print("ERROR: Key error on solution.arcFlows[" + str((edgeIndex, arc)) +
+                              "] (edge = " + str(edge) + "! Assuming CPLEX decided zero flow...")
                     else:
                         flow += self.solution.arcFlows[(edgeIndex, arc)]
             if flow > 0:
@@ -72,7 +73,8 @@ class SolutionVisualizer:
                     flow += self.solution.arcFlows[(edgeIndex, arc)]
                     backFlow += self.solution.arcFlows[(backEdgeIndex, arc)]
                 except KeyError:
-                    print("Key error on solution.arcFlows[" + str((edgeIndex, arc)) + "]! Skipping value...")
+                    print("ERROR: Key error on solution.arcFlows[" + str((edgeIndex, arc)) +
+                          "] (edge = " + str(edge) + "! Assuming CPLEX decided zero flow...")
                 else:
                     flow += self.solution.arcFlows[(edgeIndex, arc)]
                     if self.solution.arcFlows[(edgeIndex, arc)] > 0:
@@ -82,7 +84,8 @@ class SolutionVisualizer:
                         numBackArcsOpened += 1
             # Print a warning if there are opposing flows
             if flow > 0 and backFlow > 0:
-                print("WARNING: OPPOSING FLOWS CHECK THROWN")
+                print("WARNING: Opposing flows check thrown on edge index [" + str(edgeIndex) + "] and back-edge [" +
+                      str(backEdgeIndex) + "]! Ignoring and rendering the forward flow only...")
             if flow > 0:
                 rgbTuple = self.makeScaledRGBTupleFromArcsOpened(numArcsOpened)
                 rgbString = "rgba(" + str(rgbTuple[0]) + ", " + str(rgbTuple[1]) + ", " + str(rgbTuple[2]) + ", 1)"

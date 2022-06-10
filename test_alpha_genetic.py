@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # Set Hyperparameters
     pop.setPopulationHyperparams(populationSize=10, numGenerations=10,
-                                 initializationDistribution="uniform", initializationParams=[0.0, 1000.0])
+                                 initializationDistribution="uniform", initializationParams=[0.0, 100.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceParents")
     pop.setMutationHyperparams(mutationMethod="randomTotal", mutationRate=0.50)
