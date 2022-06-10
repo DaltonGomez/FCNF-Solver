@@ -8,7 +8,7 @@ from src.Network.Solution import Solution
 class RelaxedLPSolverPDLP:
     """Class that solves an alpha-relaxed instance approximately via a PDLP gradient descent solver from Google"""
 
-    def __init__(self, network: FlowNetwork, minTargetFlow: float, isSrcSinkConstrained=True, isSrcSinkCharged=True):
+    def __init__(self, network: FlowNetwork, minTargetFlow: float, isSrcSinkConstrained=True, isSrcSinkCharged=False):
         """Constructor of a AlphaSolverPDLP instance"""
         # Input attributes
         self.network = network

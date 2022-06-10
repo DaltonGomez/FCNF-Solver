@@ -5,26 +5,36 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Update README with Documentation
 # TODO - Add Unit Tests
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
->> % I'm wondering if this is essential as it extends the alpha value to the sources and sinks when they are recast as edges
->> % On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
+>> I'm wondering if this is essential as it extends the alpha value to the sources and sinks when they are recast as edges
+>> On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
 # TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
->> % Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
+>> Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
 # TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
 # TODO - Revise how the network is generated (to be more clustered)
->> % Clustered Generation Strategy:
->> %    Place a point down and then place a bunch of sources or sinks inside a circle centered around that point (i.e. clusters)
->> %    Multiply the cost through by 100,000 (?) to get away from the sub-single digits
->> %    Total sink cap > total source cap
->> %    Then set all node variable costs to zero
->> %    Run w/ target at total source cap
+>> Clustered Generation Strategy:
+    >> Place a point down and then place a bunch of sources or sinks inside a circle centered around that point (i.e. clusters)
+    >> Multiply the cost through by 100,000 (?) to get away from the sub-single digits
+    >> Total sink cap > total source cap
+    >> Then set all node variable costs to zero
+    >> Run w/ target at total source cap
 # TODO - Also, use source and sink data to generate capacity distributions to sample in network generation
 
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
 # TODO - Correct pathing
+>> Sean's Recommendation for Computing Pathlets:
+    >> On a copy of the network:
+        >> for node in nodes:
+            >> if node.degree == 2 and node.type != src/sink:
+                >> collapseEdges(node.edges)
+                >> remove(node)
+            >> return pathlet graph as (remaining nodes, collapsed edges, dict[collapsedEdge] = listOfOriginalEdges)
+# TODO - Use a timed-then-interrupted run of CPLEX-MILP to generate initial alpha values for the population
 # TODO - Anneal hyperparameters over time
+# TODO - Try the CPLEX library instead of docplex
+>> Is the range of possible alpha values at initialization/mutation significant
 
 
 ALPHA GENETIC ALGORITHM EXPERIMENTS:
@@ -60,10 +70,10 @@ ANT COLONY OPTIMIZATION EXPERIMENTS:
 
 GA/ACO INTEGRATION:
 =====================================
-% Use the ants to determine paths/trim input graph and then use the GA to refine, potentially as an iterative process until convergence.
+>> Use the ants to determine paths/trim input graph and then use the GA to refine, potentially as an iterative process until convergence.
 
 
 OTHER FUTURE IDEAS:
 =====================================
-% Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
-% Use the dynamic nature of ACO for the sink capacity uncertainty
+>> Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
+>> Use the dynamic nature of ACO for the sink capacity uncertainty

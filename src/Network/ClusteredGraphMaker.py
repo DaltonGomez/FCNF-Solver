@@ -10,8 +10,8 @@ from src.Network.FlowNetwork import FlowNetwork
 class ClusteredGraphMaker:
     """Class that generates pseudorandom graphs from clustered sources/sinks and their Delaunay triangulation"""
 
-    # TODO - CURRENTLY JUST A COPY OF `GraphMaker.py`
-    def __init__(self, name: str, numNodes: int, numSources: int, numSinks: int):
+    def __init__(self, name: str, numNodes: int, numSources: int, minSourceClusters: int, sourcesPerClusterRange: tuple,
+                 numSinks: int, minSinkClusters: int, sinksPerClusterRange: tuple, clusterRadiusRange: tuple):
         """Constructor of a ClusteredGraphMaker instance"""
         # Hyperparameters For Network Generation/Computing Pseudo-Random Costs
         self.embeddingSize = 100.0
@@ -19,9 +19,17 @@ class ClusteredGraphMaker:
         self.edgePenaltyRange = [0.95, 1.50]
         self.randomEdgePenalties = None
         self.isSourceSinkCapacitated = True
-        self.sourceSinkCapacityRange = [0.01, 2]  # TODO - Update how the src/sinks are capacitated
-        self.isSourceSinkCharged = True
-        self.sourceSinkChargeRange = [0.01, 2]  # TODO - Update how the src/sinks are charged
+        self.sourceSinkCapacityRange = [1, 20]
+        self.isSourceSinkCharged = False
+        self.sourceSinkChargeRange = [1, 20]
+        # Cluster specific hyperparameters
+        self.minSourceClusters = minSourceClusters
+        self.sourcesPerClusterRange = sourcesPerClusterRange
+        self.minSinkClusters = minSinkClusters
+        self.sinksPerClusterRange = sinksPerClusterRange
+        self.clusterRadiusRange = clusterRadiusRange
+        self.tempNodeIDs = []
+        self.tempPoints = []
 
         # Output Network To Be Built
         self.newNetwork = FlowNetwork()
@@ -32,8 +40,8 @@ class ClusteredGraphMaker:
 
     def generateNetwork(self) -> FlowNetwork:
         """Constructs a pseudo-random flow network embedded in a 2D plane"""
-        self.embedRandomPoints()
-        self.assignRandomSourceSinks()
+        self.embedRandomIntermediatePoints()
+        self.assignClusteredSourceSinks()
         self.buildEdgesFromTriangulation()
         self.computeEdgeDistances()
         self.randomEdgePenalties = self.initializeRandomEdgePenalties()
@@ -43,33 +51,111 @@ class ClusteredGraphMaker:
         self.assignSourceSinkCapAndCharge()
         return self.newNetwork
 
-    def embedRandomPoints(self) -> None:
-        """Randomly embeds n points in a 2D plane"""
+    def embedRandomIntermediatePoints(self) -> None:
+        """Randomly embeds the intermediate points (i.e. n - (s + t)) in a 2D plane"""
         random.seed()
-        tempPoints = []
-        for n in range(self.newNetwork.numTotalNodes):
+        tempInterNodes = []
+        for n in range(self.newNetwork.numTotalNodes - (self.newNetwork.numSources + self.newNetwork.numSinks)):
             xPos = random.random() * self.embeddingSize
             yPos = random.random() * self.embeddingSize
-            tempPoints.append((xPos, yPos))
+            self.tempNodeIDs.append((n, xPos, yPos))
             self.newNetwork.addNodeToDict(n, xPos, yPos)
-        self.newNetwork.points = np.array(tempPoints)
-
-    def assignRandomSourceSinks(self) -> None:
-        """Randomly assigns source and sink IDs to nodes"""
-        random.seed()
-        tempNodes = set(range(self.newNetwork.numTotalNodes))
-        tempSrcSinks = set(random.sample(tempNodes, self.newNetwork.numSources + self.newNetwork.numSinks))
-        tempInterNodes = tempNodes.symmetric_difference(tempSrcSinks)
-        tempSources = set(random.sample(tempSrcSinks, self.newNetwork.numSources))
-        tempSinks = tempSrcSinks.symmetric_difference(tempSources)
-        self.newNetwork.sourcesArray = np.array(list(tempSources))
-        for source in self.newNetwork.sourcesArray:
-            self.newNetwork.setNodeType(source, 0)
-        self.newNetwork.sinksArray = np.array(list(tempSinks))
-        for sink in self.newNetwork.sinksArray:
-            self.newNetwork.setNodeType(sink, 1)
-        self.newNetwork.interNodesArray = np.array(list(tempInterNodes))
+            self.tempPoints.append((xPos, yPos))
+            tempInterNodes.append(n)
+        self.newNetwork.interNodesArray = np.array(tempInterNodes)
         self.newNetwork.numInterNodes = len(self.newNetwork.interNodesArray)
+
+    def assignClusteredSourceSinks(self) -> None:
+        """Randomly embeds source and sink using a pseudo-random clustered strategy"""
+        random.seed()
+        # Create all sources in clusters
+        tempSrcIDs = []
+        remainingSources = self.newNetwork.numSources
+        # Create each cluster
+        for srcCluster in range(self.minSourceClusters):
+            # Randomly generate a number of sources for this cluster within the bounds
+            thisClusterDensity = random.randint(self.sourcesPerClusterRange[0], self.sourcesPerClusterRange[1])
+            # Check if a cluster can be filled; otherwise, give it remaining sources
+            if remainingSources < thisClusterDensity:
+                thisClusterOfSources = self.buildClusteredPoints(remainingSources)
+            else:
+                thisClusterOfSources = self.buildClusteredPoints(thisClusterDensity)
+            # Decrement sources left to assign
+            remainingSources -= thisClusterDensity
+            # Create each source
+            for sourcePos in thisClusterOfSources:
+                nodeID = len(self.tempNodeIDs)
+                tempSrcIDs.append(nodeID)
+                self.tempNodeIDs.append((nodeID, sourcePos[0], sourcePos[1]))
+                self.tempPoints.append((sourcePos[0], sourcePos[1]))
+                self.newNetwork.addNodeToDict(nodeID, sourcePos[0], sourcePos[1])
+                self.newNetwork.setNodeType(nodeID, 0)
+        # Ensure all sources were assigned; otherwise assign randomly across R^2
+        while len(tempSrcIDs) < self.newNetwork.numSources:
+            xPos = random.random() * self.embeddingSize
+            yPos = random.random() * self.embeddingSize
+            nodeID = len(self.tempNodeIDs)
+            tempSrcIDs.append(nodeID)
+            self.tempNodeIDs.append((nodeID, xPos, yPos))
+            self.tempPoints.append((xPos, yPos))
+            self.newNetwork.addNodeToDict(nodeID, xPos, yPos)
+            self.newNetwork.setNodeType(nodeID, 0)
+        # Build sources array
+        self.newNetwork.sourcesArray = np.array(tempSrcIDs)
+        # Create all sinks in clusters
+        tempSinkIDs = []
+        remainingSinks = self.newNetwork.numSinks
+        # Create each cluster
+        for sinkCluster in range(self.minSinkClusters):
+            # Randomly generate a number of sources for this cluster within the bounds
+            thisClusterDensity = random.randint(self.sinksPerClusterRange[0], self.sinksPerClusterRange[1])
+            # Check if a cluster can be filled; otherwise, give it remaining sources
+            if remainingSinks < thisClusterDensity:
+                thisClusterOfSinks = self.buildClusteredPoints(remainingSinks)
+            else:
+                thisClusterOfSinks = self.buildClusteredPoints(thisClusterDensity)
+            # Decrement sources left to assign
+            remainingSinks -= thisClusterDensity
+            # Create each source
+            for sinkPos in thisClusterOfSinks:
+                nodeID = len(self.tempNodeIDs)
+                tempSinkIDs.append(nodeID)
+                self.tempNodeIDs.append((nodeID, sinkPos[0], sinkPos[1]))
+                self.tempPoints.append((sinkPos[0], sinkPos[1]))
+                self.newNetwork.addNodeToDict(nodeID, sinkPos[0], sinkPos[1])
+                self.newNetwork.setNodeType(nodeID, 0)
+        # Ensure all sinks were assigned; otherwise assign randomly across R^2
+        while len(tempSinkIDs) < self.newNetwork.numSinks:
+            xPos = random.random() * self.embeddingSize
+            yPos = random.random() * self.embeddingSize
+            nodeID = len(self.tempNodeIDs)
+            tempSinkIDs.append(nodeID)
+            self.tempNodeIDs.append((nodeID, xPos, yPos))
+            self.tempPoints.append((xPos, yPos))
+            self.newNetwork.addNodeToDict(nodeID, xPos, yPos)
+            self.newNetwork.setNodeType(nodeID, 0)
+        # Build sources array
+        self.newNetwork.sinksArray = np.array(tempSinkIDs)
+        # Cast temp points list to ndArrays in the newNetwork object
+        self.newNetwork.points = np.array(self.tempPoints)
+
+    def buildClusteredPoints(self, numNodesInCluster: int) -> list:
+        """Builds a cluster of points for source/sink generation sources or sinks"""
+        random.seed()
+        clusteredPoints = []
+        # Randomly choose cluster radius
+        thisClusterRadius = random.randint(self.clusterRadiusRange[0], self.clusterRadiusRange[1])
+        # Build cluster center
+        xClusterCenter = random.random() * self.embeddingSize
+        yClusterCenter = random.random() * self.embeddingSize
+        # Generate each point around center
+        for thisPoint in range(numNodesInCluster):
+            distFromCenter = thisClusterRadius * math.sqrt(random.random())
+            angle = 2 * math.pi * random.random()
+            xPos = xClusterCenter + distFromCenter * math.cos(angle)
+            yPos = yClusterCenter + distFromCenter * math.sin(angle)
+            clusteredPoints.append((xPos, yPos))
+        return clusteredPoints
 
     def buildEdgesFromTriangulation(self) -> None:
         """Builds a Delaunay triangulation to determine edges"""

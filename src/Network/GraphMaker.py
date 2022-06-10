@@ -18,9 +18,9 @@ class GraphMaker:
         self.edgePenaltyRange = [0.95, 1.50]
         self.randomEdgePenalties = None
         self.isSourceSinkCapacitated = True
-        self.sourceSinkCapacityRange = [0.01, 2]  # TODO - Update how the src/sinks are capacitated
+        self.sourceSinkCapacityRange = [1, 20]  # TODO - Update how the src/sinks are capacitated
         self.isSourceSinkCharged = True
-        self.sourceSinkChargeRange = [0.01, 2]  # TODO - Update how the src/sinks are charged
+        self.sourceSinkChargeRange = [1, 20]  # TODO - Update how the src/sinks are charged
 
         # Output Network To Be Built
         self.newNetwork = FlowNetwork()

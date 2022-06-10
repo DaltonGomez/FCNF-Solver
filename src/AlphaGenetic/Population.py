@@ -104,7 +104,7 @@ class Population:
         self.pathSelectionSize = pathSelectionSize
         self.pathTournamentSize = pathTournamentSize
 
-    def setCrossoverHyperparams(self, crossoverMethod="pathBased", replacementStrategy="replaceParents",
+    def setCrossoverHyperparams(self, crossoverMethod="onePoint", replacementStrategy="replaceParents",
                                 crossoverRate=1.0, crossoverAttemptsPerGeneration=1) -> None:
         """Sets the GA class fields that dictate how the crossover of individuals is carried out \n
         :param str crossoverMethod: One of following: {"onePoint", "twoPoint", "pathBased"}
@@ -117,7 +117,8 @@ class Population:
         self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
         self.replacementStrategy = replacementStrategy
 
-    def setMutationHyperparams(self, mutationMethod="pathBased", mutationRate=0.25, nudgeParams=(0.0, 1.0)) -> None:
+    def setMutationHyperparams(self, mutationMethod="randomSingleEdge", mutationRate=0.25,
+                               nudgeParams=(0.0, 1.0)) -> None:
         """Sets the GA class fields that dictate how the mutation of individuals is carried out \n
         :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomTotal", "pathBasedRandom", "pathBasedNudge"}
         :param float mutationRate: Probability in [0,1] that a mutation occurs

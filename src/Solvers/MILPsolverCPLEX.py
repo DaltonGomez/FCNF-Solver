@@ -8,7 +8,7 @@ class MILPsolverCPLEX:
     """Class that solves a FCFN instance exactly via a MILP model within CPLEX"""
 
     def __init__(self, network: FlowNetwork, minTargetFlow: float, isOneArcPerEdge=True, isSrcSinkConstrained=True,
-                 isSrcSinkCharged=True):
+                 isSrcSinkCharged=False):
         """Constructor of a MILP-Solver instance"""
         # Input attributes
         self.network = network
