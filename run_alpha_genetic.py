@@ -1,7 +1,7 @@
-from Network.SolutionVisualizer import SolutionVisualizer
-from Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.AlphaGenetic.Population import Population
 from src.Network.FlowNetwork import FlowNetwork
+from src.Network.SolutionVisualizer import SolutionVisualizer
+from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 """
 RUN COMMAND:
