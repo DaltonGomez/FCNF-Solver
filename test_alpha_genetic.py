@@ -12,23 +12,29 @@ py -3.8 test_alpha_genetic.py
 if __name__ == "__main__":
     # Load Network
     network = FlowNetwork()
-    network = network.loadNetwork("cluster_test_8.p")
+    network = network.loadNetwork("basic_5.p")
     # vis = NetworkVisualizer(network, directed=True, supers=False)
     # vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
-    minTargetFlow = network.calculateTotalPossibleDemand()
+    minTargetFlow = network.totalPossibleDemand
 
     # Initialize an Alpha-GA Population
     pop = Population(network, minTargetFlow)
 
+    """
+    # Solve with Naive Hill Climb
+    hillClimb = Population(network, minTargetFlow)
+    hillClimb.solveWithNaiveHillClimb(printGenerations=True, drawing=True, drawLabels=True)
+    """
+
     # Set Hyperparameters
     pop.setPopulationHyperparams(populationSize=10, numGenerations=10,
-                                 initializationDistribution="uniform", initializationParams=[0.0, 2.0])
+                                 initializationDistribution="uniform", initializationParams=[0.0, 1000.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceParents")
-    pop.setMutationHyperparams(mutationMethod="randomSingleEdge", mutationRate=0.25)
+    pop.setMutationHyperparams(mutationMethod="randomTotal", mutationRate=0.50)
 
     # Solve the Alpha-GA
-    pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=False)
+    pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
 
     # Solve Optimally with CPLEX
     cplex = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)

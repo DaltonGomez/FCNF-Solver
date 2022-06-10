@@ -1,3 +1,5 @@
+import math
+
 from pyvis.network import Network as netVis
 
 from src.Network.Solution import Solution
@@ -61,8 +63,11 @@ class SolutionVisualizer:
             backEdgeIndex = self.solution.network.edgesDict[(edge[1], edge[0])]
             flow = 0
             backFlow = 0
+            numArcsOpened = 0
+            numBackArcsOpened = 0
             for arc in range(self.solution.network.numArcCaps):
                 # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
+                # This assumes that values CPLEX does not write should zero flow
                 try:
                     flow += self.solution.arcFlows[(edgeIndex, arc)]
                     backFlow += self.solution.arcFlows[(backEdgeIndex, arc)]
@@ -70,14 +75,37 @@ class SolutionVisualizer:
                     print("Key error on solution.arcFlows[" + str((edgeIndex, arc)) + "]! Skipping value...")
                 else:
                     flow += self.solution.arcFlows[(edgeIndex, arc)]
+                    if self.solution.arcFlows[(edgeIndex, arc)] > 0:
+                        numArcsOpened += 1
                     backFlow += self.solution.arcFlows[(backEdgeIndex, arc)]
+                    if self.solution.arcFlows[(backEdgeIndex, arc)] > 0:
+                        numBackArcsOpened += 1
+            # Print a warning if there are opposing flows
+            if flow > 0 and backFlow > 0:
+                print("WARNING: OPPOSING FLOWS CHECK THROWN")
             if flow > 0:
-                self.netVis.add_edge(int(edge[0]), int(edge[1]), label=round(flow), color="black", value=flow)
+                rgbTuple = self.makeScaledRGBTupleFromArcsOpened(numArcsOpened)
+                rgbString = "rgba(" + str(rgbTuple[0]) + ", " + str(rgbTuple[1]) + ", " + str(rgbTuple[2]) + ", 1)"
+                self.netVis.add_edge(int(edge[0]), int(edge[1]), label=round(flow), color=rgbString, value=flow)
             elif backFlow > 0:
-                self.netVis.add_edge(int(edge[1]), int(edge[0]), label=round(backFlow), color="black", value=backFlow)
+                rgbTuple = self.makeScaledRGBTupleFromArcsOpened(numBackArcsOpened)
+                rgbString = "rgba(" + str(rgbTuple[0]) + ", " + str(rgbTuple[1]) + ", " + str(rgbTuple[2]) + ", 1)"
+                self.netVis.add_edge(int(edge[1]), int(edge[0]), label=round(backFlow), color=rgbString, value=backFlow)
             elif flow == 0 and backFlow == 0:
                 self.netVis.add_edge(int(edge[0]), int(edge[1]), color="rgba(155, 155, 155, 0.35)", value=flow)
                 self.netVis.add_edge(int(edge[1]), int(edge[0]), color="rgba(155, 155, 155, 0.35)", value=backFlow)
+
+    def makeScaledRGBTupleFromArcsOpened(self, arcsOpened: int) -> tuple:
+        """Returns an RGB tuple from arcs opened on edge, where
+        (0,0,0) = 1 arc, (0,0,255) = 2 arcs; (255,0,0) = max arcs"""
+        # CURRENT IMPLEMENTATION RAMPS FROM BLUE (FEW ARCS) TO RED (MANY ARCS) WITH BLACK AS ONE ARC
+        if arcsOpened == 1:
+            return 0, 0, 0
+        else:
+            maxArcs = self.solution.network.numArcCaps
+            redVal = int(255 * (math.log(arcsOpened)) / (math.log(maxArcs)))
+            blueVal = min((int(255 / ((math.log(arcsOpened)) / (math.log(maxArcs)))) - 255), 255)
+            return redVal, 0, blueVal
 
     def drawGraphWithLabels(self, leadingText="") -> None:
         """Displays the Solution using PyVis and a set of hardcoded options"""

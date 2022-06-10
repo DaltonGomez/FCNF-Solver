@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from numpy import ndarray
 from scipy.spatial import Delaunay
 
+import Network
 from src.Network.Arc import Arc
 from src.Network.Node import Node
 
@@ -72,7 +73,7 @@ class FlowNetwork:
         # Save figure and display
         currDir = os.getcwd()
         networkFile = self.name + ".png"
-        catPath = os.path.join(currDir, "data/network_instances/delaunay", networkFile)
+        catPath = os.path.join(currDir, "data/network_instances/delaunayFigs", networkFile)
         plt.savefig(catPath)
         plt.show()
 
@@ -90,7 +91,7 @@ class FlowNetwork:
         pickle.dump(self, open(catPath, "wb"))
 
     @staticmethod
-    def loadNetwork(networkFile: str):
+    def loadNetwork(networkFile: str) -> Network:
         """Loads a network instance via a pickle load"""
         # Path management
         currDir = os.getcwd()

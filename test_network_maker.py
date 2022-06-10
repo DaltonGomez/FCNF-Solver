@@ -22,8 +22,8 @@ costLookupTable = [
     [119.16, 172.7476864, 1.09878848],
 ]
 
-srcSinkCapacityRange = (0.01, 2)  # TODO - Determine range based on real datasets
-srcSinkChargeRange = (0.01, 2)  # TODO - Determine range based on real datasets
+srcSinkCapacityRange = (1, 20)  # TODO - Determine range based on real datasets
+srcSinkChargeRange = (1, 20)  # TODO - Determine range based on real datasets
 
 if __name__ == "__main__":
     # Input parameters

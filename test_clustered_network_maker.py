@@ -22,29 +22,30 @@ costLookupTable = [
     [119.16, 172.7476864, 1.09878848],
 ]
 
-srcSinkCapacityRange = (0.01, 2)  # TODO - Determine range based on real datasets
-srcSinkChargeRange = (0.01, 2)  # TODO - Determine range based on real datasets
+srcSinkCapacityRange = (1, 20)  # TODO - Determine range based on real datasets
+srcSinkChargeRange = (1, 20)  # TODO - Determine range based on real datasets
 
 if __name__ == "__main__":
     for n in range(10):
         # Input parameters
-        name = "cluster_test_" + str(n)
-        numNodes = 100
-        numSources = 15
-        numSinks = 15
+        name = "basic_" + str(n)
+        numNodes = 25
+        numSources = 4
+        numSinks = 4
         # Cluster parameters
-        minSourceClusters = 3
-        sourcesPerClusterRange = (3, 6)
-        minSinkClusters = 3
-        sinksPerClusterRange = (3, 6)
+        minSourceClusters = 1
+        sourcesPerClusterRange = (2, 4)
+        minSinkClusters = 1
+        sinksPerClusterRange = (2, 4)
         clusterRadiusRange = (10, 20)
         # Source/sink cap ranges
+        isSrcSinkCapacitated = True
         srcCapRange = (1, 20)
-        sinkCapRange = (1, 20)
+        sinkCapRange = (1, 15)
         # Make graph
         graphMaker = ClusteredGraphMaker(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
                                          numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)
-        graphMaker.setSourceSinkGeneralizations(isCapacitated=True, isCharged=False,
+        graphMaker.setSourceSinkGeneralizations(isCapacitated=isSrcSinkCapacitated, isCharged=False,
                                                 srcCapRange=srcCapRange, sinkCapRange=sinkCapRange)
         newGraph = graphMaker.generateNetwork()
         newGraph.drawNetworkTriangulation()
