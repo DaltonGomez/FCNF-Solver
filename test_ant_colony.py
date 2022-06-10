@@ -14,7 +14,7 @@ py -3.8 test_ant_colony.py
 
 if __name__ == "__main__":
     # Load Network
-    networkFile = "test.p"
+    networkFile = ".p"
     network = FlowNetwork()
     network = network.loadNetwork(networkFile)
     targetFlow = 40

@@ -67,21 +67,18 @@ class SolutionVisualizer:
             numArcsOpened = 0
             numBackArcsOpened = 0
             for arc in range(self.solution.network.numArcCaps):
-                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
+                # Try/Except block as CPLEX sometimes fails to write flow decision variables to the solution object
                 # This assumes that values CPLEX does not write should zero flow
                 try:
                     flow += self.solution.arcFlows[(edgeIndex, arc)]
                     backFlow += self.solution.arcFlows[(backEdgeIndex, arc)]
+                    if self.solution.arcFlows[(edgeIndex, arc)] > 0:
+                        numArcsOpened += 1
+                    if self.solution.arcFlows[(backEdgeIndex, arc)] > 0:
+                        numBackArcsOpened += 1
                 except KeyError:
                     print("ERROR: Key error on solution.arcFlows[" + str((edgeIndex, arc)) +
                           "] (edge = " + str(edge) + "! Assuming CPLEX decided zero flow...")
-                else:
-                    flow += self.solution.arcFlows[(edgeIndex, arc)]
-                    if self.solution.arcFlows[(edgeIndex, arc)] > 0:
-                        numArcsOpened += 1
-                    backFlow += self.solution.arcFlows[(backEdgeIndex, arc)]
-                    if self.solution.arcFlows[(backEdgeIndex, arc)] > 0:
-                        numBackArcsOpened += 1
             # Print a warning if there are opposing flows
             if flow > 0 and backFlow > 0:
                 print("WARNING: Opposing flows check thrown on edge index [" + str(edgeIndex) + "] and back-edge [" +

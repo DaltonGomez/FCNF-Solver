@@ -40,8 +40,8 @@ if __name__ == "__main__":
         clusterRadiusRange = (10, 20)
         # Source/sink cap ranges
         isSrcSinkCapacitated = True
-        srcCapRange = (1, 20)
-        sinkCapRange = (1, 15)
+        srcCapRange = (5, 20)
+        sinkCapRange = (1, 10)
         # Make graph
         graphMaker = ClusteredGraphMaker(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
                                          numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)

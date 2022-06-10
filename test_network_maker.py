@@ -27,10 +27,10 @@ srcSinkChargeRange = (1, 20)  # TODO - Determine range based on real datasets
 
 if __name__ == "__main__":
     # Input parameters
-    name = "ccs_costModel_500_50_50"
-    numNodes = 500
-    numSources = 50
-    numSinks = 50
+    name = "simple"
+    numNodes = 5
+    numSources = 1
+    numSinks = 2
     # Source/sink cap ranges
     srcCapRange = (1, 20)
     sinkCapRange = (1, 20)

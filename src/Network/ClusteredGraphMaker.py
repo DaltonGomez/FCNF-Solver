@@ -125,7 +125,7 @@ class ClusteredGraphMaker:
                 self.tempNodeIDs.append((nodeID, sinkPos[0], sinkPos[1]))
                 self.tempPoints.append((sinkPos[0], sinkPos[1]))
                 self.newNetwork.addNodeToDict(nodeID, sinkPos[0], sinkPos[1])
-                self.newNetwork.setNodeType(nodeID, 0)
+                self.newNetwork.setNodeType(nodeID, 1)
         # Ensure all sinks were assigned; otherwise assign randomly across R^2
         while len(tempSinkIDs) < self.newNetwork.numSinks:
             xPos = random.random() * self.embeddingSize
@@ -135,7 +135,7 @@ class ClusteredGraphMaker:
             self.tempNodeIDs.append((nodeID, xPos, yPos))
             self.tempPoints.append((xPos, yPos))
             self.newNetwork.addNodeToDict(nodeID, xPos, yPos)
-            self.newNetwork.setNodeType(nodeID, 0)
+            self.newNetwork.setNodeType(nodeID, 1)
         # Build sources array
         self.newNetwork.sinksArray = np.array(tempSinkIDs)
         # Cast temp points list to ndArrays in the newNetwork object
