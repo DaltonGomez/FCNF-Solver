@@ -22,6 +22,9 @@ costLookupTable = [
     [119.16, 172.7476864, 1.09878848],
 ]
 
+srcSinkCapacityRange = (0.01, 2)  # TODO - Determine range based on real datasets
+srcSinkChargeRange = (0.01, 2)  # TODO - Determine range based on real datasets
+
 if __name__ == "__main__":
     for n in range(10):
         # Input parameters
@@ -35,12 +38,14 @@ if __name__ == "__main__":
         minSinkClusters = 3
         sinksPerClusterRange = (3, 6)
         clusterRadiusRange = (10, 20)
-        # Source/sink cap and cost ranges
-        srcSinkCapacityRange = (1, 20)
+        # Source/sink cap ranges
+        srcCapRange = (1, 20)
+        sinkCapRange = (1, 20)
         # Make graph
         graphMaker = ClusteredGraphMaker(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
                                          numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)
-        graphMaker.setSourceSinkGeneralizations(True, False, capacityRange=srcSinkCapacityRange)
+        graphMaker.setSourceSinkGeneralizations(isCapacitated=True, isCharged=False,
+                                                srcCapRange=srcCapRange, sinkCapRange=sinkCapRange)
         newGraph = graphMaker.generateNetwork()
         newGraph.drawNetworkTriangulation()
         newGraph.saveNetwork()

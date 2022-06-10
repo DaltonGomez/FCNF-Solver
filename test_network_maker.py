@@ -22,8 +22,8 @@ costLookupTable = [
     [119.16, 172.7476864, 1.09878848],
 ]
 
-srcSinkCapacityRange = [0.01, 2]  # TODO - Determine range based on real datasets
-srcSinkChargeRange = [0.01, 2]  # TODO - Determine range based on real datasets
+srcSinkCapacityRange = (0.01, 2)  # TODO - Determine range based on real datasets
+srcSinkChargeRange = (0.01, 2)  # TODO - Determine range based on real datasets
 
 if __name__ == "__main__":
     # Input parameters
@@ -31,11 +31,13 @@ if __name__ == "__main__":
     numNodes = 500
     numSources = 50
     numSinks = 50
-    # Arc Cost Determining Table
-    srcSinkCapacityRange = (1, 20)
+    # Source/sink cap ranges
+    srcCapRange = (1, 20)
+    sinkCapRange = (1, 20)
     # Make graph
     graphMaker = GraphMaker(name, numNodes, numSources, numSinks)
-    graphMaker.setSourceSinkGeneralizations(True, False, capacityRange=srcSinkCapacityRange)
+    graphMaker.setSourceSinkGeneralizations(isCapacitated=True, isCharged=False,
+                                            srcCapRange=srcCapRange, sinkCapRange=sinkCapRange)
     newGraph = graphMaker.generateNetwork()
     newGraph.drawNetworkTriangulation()
     newGraph.saveNetwork()

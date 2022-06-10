@@ -19,9 +19,11 @@ class ClusteredGraphMaker:
         self.edgePenaltyRange = [0.95, 1.50]
         self.randomEdgePenalties = None
         self.isSourceSinkCapacitated = True
-        self.sourceSinkCapacityRange = [1, 20]
+        self.sourceCapRange = [1, 20]
+        self.sinkCapRange = [1, 20]
         self.isSourceSinkCharged = False
-        self.sourceSinkChargeRange = [1, 20]
+        self.sourceChargeRange = [1, 20]
+        self.sinkChargeRange = [1, 20]
         # Cluster specific hyperparameters
         self.minSourceClusters = minSourceClusters
         self.sourcesPerClusterRange = sourcesPerClusterRange
@@ -268,24 +270,24 @@ class ClusteredGraphMaker:
             self.newNetwork.isSourceSinkCapacitated = True
             tempSrcCaps = []
             for source in range(self.newNetwork.numSources):
-                thisSrcCap = random.uniform(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
+                thisSrcCap = random.uniform(self.sourceCapRange[0], self.sourceCapRange[1])
                 tempSrcCaps.append(thisSrcCap)
             self.newNetwork.sourceCapsArray = np.array(tempSrcCaps)
             tempSinkCaps = []
             for sink in range(self.newNetwork.numSinks):
-                thisSinkCap = random.uniform(self.sourceSinkCapacityRange[0], self.sourceSinkCapacityRange[1])
+                thisSinkCap = random.uniform(self.sinkCapRange[0], self.sinkCapRange[1])
                 tempSinkCaps.append(thisSinkCap)
             self.newNetwork.sinkCapsArray = np.array(tempSinkCaps)
         if self.isSourceSinkCharged is True:
             self.newNetwork.isSourceSinkCharged = True
             tempSrcCosts = []
             for source in range(self.newNetwork.numSources):
-                thisSrcCost = random.uniform(self.sourceSinkChargeRange[0], self.sourceSinkChargeRange[1])
+                thisSrcCost = random.uniform(self.sourceChargeRange[0], self.sourceChargeRange[1])
                 tempSrcCosts.append(thisSrcCost)
             self.newNetwork.sourceVariableCostsArray = np.array(tempSrcCosts)
             tempSinkCosts = []
             for sink in range(self.newNetwork.numSinks):
-                thisSinkCost = random.uniform(self.sourceSinkChargeRange[0], self.sourceSinkChargeRange[1])
+                thisSinkCost = random.uniform(self.sinkChargeRange[0], self.sinkChargeRange[1])
                 tempSinkCosts.append(thisSinkCost)
             self.newNetwork.sinkVariableCostsArray = np.array(tempSinkCosts)
         self.newNetwork.totalPossibleDemand = self.newNetwork.calculateTotalPossibleDemand()
@@ -309,13 +311,16 @@ class ClusteredGraphMaker:
         self.edgePenaltyRange = edgePenaltyRange
         self.arcCostLookupTable = arcCostLookupTable
 
-    def setSourceSinkGeneralizations(self, isCapacitated: bool, isCharged: bool, capacityRange=(0.01, 2),
-                                     chargeRange=(0.01, 2)) -> None:
-        """Allows the capacitated/charged source sink generalizes to be turned on and tuned"""
+    def setSourceSinkGeneralizations(self, isCapacitated=True, isCharged=False, srcCapRange=(1, 20),
+                                     sinkCapRange=(1, 20),
+                                     srcChargeRange=(1, 20), sinkChargeRange=(1, 20)) -> None:
+        """Allows the capacitated/charged source/sink generalizations to be turned on and tuned"""
         self.isSourceSinkCapacitated = isCapacitated
-        self.sourceSinkCapacityRange = capacityRange
+        self.sourceCapRange = srcCapRange
+        self.sinkCapRange = sinkCapRange
         self.isSourceSinkCharged = isCharged
-        self.sourceSinkChargeRange = chargeRange
+        self.sourceChargeRange = srcChargeRange
+        self.sinkChargeRange = sinkChargeRange
 
     @staticmethod
     def getArcCostLookupTable() -> list:

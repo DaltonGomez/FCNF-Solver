@@ -4,6 +4,8 @@ GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Update README with Documentation
 # TODO - Add Unit Tests
+# TODO - Update network visualization to include coloring for number of arcs per edge selected
+# TODO - Do another large overhual, including exposing classes only through getters/settings, making attributes private, and remove/optimizing duplicate attributes
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> I'm wondering if this is essential as it extends the alpha value to the sources and sinks when they are recast as edges
 >> On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
@@ -34,6 +36,8 @@ ALPHA GENETIC ALGORITHM APPROACH:
 # TODO - Use a timed-then-interrupted run of CPLEX-MILP to generate initial alpha values for the population
 # TODO - Anneal hyperparameters over time
 # TODO - Try the CPLEX library instead of docplex
+# TODO - Make mutations more extreme to better capture the 0/1 edge opened decision
+# TODO - Implement Pandas Dataframes and MatPlotLib to visualize algorithm properties (i.e. convergences, etc.)
 >> Is the range of possible alpha values at initialization/mutation significant
 
 
