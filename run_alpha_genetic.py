@@ -11,18 +11,19 @@ py -3.8 run_alpha_genetic.py
 if __name__ == "__main__":
     # Load Network
     network = FlowNetwork()
-    network = network.loadNetwork("cluster_test_1.p")
+    network = network.loadNetwork("cluster_test_8.p")
     minTargetFlow = network.totalPossibleDemand
 
     # Initialize an Alpha-GA Population
     pop = Population(network, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=25, numGenerations=10, initializationStrategy="perEdge",
-                                 initializationDistribution="uniform", initializationParams=[0.0, 10.0])
-    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
-    pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo")
-    pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.10, perArcEdgeMutationRate=0.25)
+    pop.setPopulationHyperparams(populationSize=100, numGenerations=100, initializationStrategy="perEdge",
+                                 initializationDistribution="digital", initializationParams=[0.0, 500000.0])
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
+    pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo", crossoverRate=1.0,
+                                crossoverAttemptsPerGeneration=1)
+    pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.02, perArcEdgeMutationRate=0.10)
 
     # Solve the Alpha-GA
     solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)

@@ -321,13 +321,14 @@ class Population:
     # ============================================
     def solvePopulation(self) -> None:
         """Solves all unsolved instances in the entire population"""
-        for indIndex, individual in enumerate(self.population):
+        for individualNum, individual in enumerate(self.population):
             if individual.isSolved is False:
-                print("Solving individual " + str(indIndex) + "...")
-                self.solveIndividual(individual)
+                print("Solving individual " + str(individualNum) + "...")
+                self.solveIndividual(individualNum)
 
-    def solveIndividual(self, individual: Individual) -> None:
+    def solveIndividual(self, individualNum: int) -> None:
         """Solves a single individual and writes the expressed network to the individual"""
+        individual = self.population[individualNum]
         # Overwrite new objective function with new alpha values and solve
         self.solver.updateObjectiveFunction(individual.alphaValues)
         self.solver.solveModel()
@@ -339,6 +340,10 @@ class Population:
         individual.sinkFlows = self.solver.getSinkFlowsList()
         individual.trueCost = self.solver.calculateTrueCost()
         individual.fakeCost = self.solver.getObjectiveValue()
+        # If no solution was found, hypermutate individual
+        if individual.trueCost == 0:
+            print("ERROR: Individual " + str(individualNum) + " is infeasible! Hypermutating individual...")
+            self.hypermutateIndividual(individualNum)
         # Reset solver
         self.solver.resetSolver()
 
@@ -703,11 +708,11 @@ class Population:
             parentTwoPaths = []
         if parentOnePaths is None:
             parentOnePaths = []
-        if self.selectionMethod == "onePoint":
+        if self.crossoverMethod == "onePoint":
             self.randomOnePointCrossover(parentOneID, parentTwoID)
-        elif self.selectionMethod == "twoPoint":
+        elif self.crossoverMethod == "twoPoint":
             self.randomTwoPointCrossover(parentOneID, parentTwoID)
-        elif self.selectionMethod == "pathBased":
+        elif self.crossoverMethod == "pathBased":
             self.pathBasedCrossover(parentOneID, parentTwoID, parentOnePaths, parentTwoPaths)
 
     def randomOnePointCrossover(self, parentOneID: int, parentTwoID: int) -> None:
@@ -801,6 +806,7 @@ class Population:
                              offspringTwoChromosome: ndarray) -> None:
         """Takes the offspring's alpha values and carries out the replacement strategy"""
         if self.replacementStrategy == "replaceParents":
+            print("CROSSOVER")
             self.population[parentOneID].alphaValues = offspringOneChromosome
             self.population[parentOneID].resetOutputNetwork()
             self.population[parentTwoID].alphaValues = offspringTwoChromosome

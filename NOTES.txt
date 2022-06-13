@@ -4,7 +4,6 @@ GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Update README with Documentation
 # TODO - Add Unit Tests
-# TODO - Update network visualization to include coloring for number of arcs per edge selected
 # TODO - Do another large overhual, including exposing classes only through getters/settings, making attributes private, and remove/optimizing duplicate attributes
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> I'm wondering if this is essential as it extends the alpha value to the sources and sinks when they are recast as edges
@@ -25,6 +24,7 @@ GENERAL/NETWORK/SOLVERS:
 
 ALPHA GENETIC ALGORITHM APPROACH:
 =====================================
+# TODO - Update to have infeasible solutions individuals thrown out (or at least not counted as the best)
 # TODO - Correct pathing
 >> Sean's Recommendation for Computing Pathlets:
     >> On a copy of the network:
