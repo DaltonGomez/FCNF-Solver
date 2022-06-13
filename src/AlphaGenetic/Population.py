@@ -39,6 +39,7 @@ class Population:
         self.numGenerations = numGenerations
         self.stagnationPeriod = 5
         self.consecutiveStagnantGenerations = 0
+        self.initializationStrategy = "perArc"  # :param : "perArc", "perEdge"
         self.initializationDistribution = "uniform"  # :param : "uniform", "gaussian", "digital"
         self.initializationParams = [0.0,
                                      1.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
@@ -66,13 +67,15 @@ class Population:
     # ============== HYPERPARAMETER SETTERS ==============
     # ====================================================
     def setPopulationHyperparams(self, populationSize=10, terminationMethod="setGenerations", numGenerations=10,
-                                 stagnationPeriod=5, initializationDistribution="uniform",
+                                 stagnationPeriod=5, initializationStrategy="perArc",
+                                 initializationDistribution="uniform",
                                  initializationParams=(0.0, 1.0)) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
         :param str terminationMethod: One of following: {"setGenerations", "stagnationPeriod"}
         :param int numGenerations: Number of iterations the population evolves for
         :param int stagnationPeriod: Number of stagnant consecutive generations needed for termination
+        :param str initializationStrategy: One of following: {"perEdge", "perArc"}
         :param str initializationDistribution: One of following: {"uniform", "gaussian", "digital"}
         :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian; low and high value if digital
         """
@@ -80,6 +83,7 @@ class Population:
         self.terminationMethod = terminationMethod
         self.numGenerations = numGenerations
         self.stagnationPeriod = stagnationPeriod
+        self.initializationStrategy = initializationStrategy
         self.initializationDistribution = initializationDistribution
         self.initializationParams = initializationParams
 
@@ -244,9 +248,14 @@ class Population:
         tempAlphaValues = []
         for edge in range(self.network.numEdges):
             tempEdge = []
-            for cap in range(self.network.numArcCaps):
-                thisAlphaValue = self.getAlphaValue()
-                tempEdge.append(thisAlphaValue)
+            if self.initializationStrategy == "perArc":
+                for cap in range(self.network.numArcCaps):
+                    thisArcsAlphaValue = self.getAlphaValue()
+                    tempEdge.append(thisArcsAlphaValue)
+            elif self.initializationStrategy == "perEdge":
+                thisEdgesAlphaValue = self.getAlphaValue()
+                for cap in range(self.network.numArcCaps):
+                    tempEdge.append(thisEdgesAlphaValue)
             tempAlphaValues.append(tempEdge)
         initialGenotype = np.array(tempAlphaValues)
         return initialGenotype
@@ -626,8 +635,13 @@ class Population:
         random.seed()
         mutatedEdge = random.randint(0, self.network.numEdges - 1)
         individual = self.population[individualNum]
-        for arcIndex in range(self.network.numArcCaps):
-            individual.alphaValues[mutatedEdge][arcIndex] = self.getAlphaValue()
+        if self.initializationStrategy == "perArc":
+            for arcIndex in range(self.network.numArcCaps):
+                individual.alphaValues[mutatedEdge][arcIndex] = self.getAlphaValue()
+        elif self.initializationStrategy == "perEdge":
+            thisEdgeAlpha = self.getAlphaValue()
+            for arcIndex in range(self.network.numArcCaps):
+                individual.alphaValues[mutatedEdge][arcIndex] = thisEdgeAlpha
         individual.resetOutputNetwork()
 
     def randomPerArcMutation(self, individualNum: int) -> None:
@@ -646,8 +660,13 @@ class Population:
         individual = self.population[individualNum]
         for edge in range(self.network.numEdges):
             if random.random() < self.perArcEdgeMutationRate:
-                for arcIndex in range(self.network.numArcCaps):
-                    individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
+                if self.initializationStrategy == "perArc":
+                    for arcIndex in range(self.network.numArcCaps):
+                        individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
+                elif self.initializationStrategy == "perEdge":
+                    thisEdgeAlpha = self.getAlphaValue()
+                    for arcIndex in range(self.network.numArcCaps):
+                        individual.alphaValues[edge][arcIndex] = thisEdgeAlpha
         individual.resetOutputNetwork()
 
     def selectedPathsRandomMutation(self, individualNum: int, selectedPaths: list) -> None:

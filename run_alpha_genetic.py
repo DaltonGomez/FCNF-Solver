@@ -18,11 +18,11 @@ if __name__ == "__main__":
     pop = Population(network, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=10, numGenerations=10,
-                                 initializationDistribution="digital", initializationParams=[1.0, 100000.0])
-    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
+    pop.setPopulationHyperparams(populationSize=25, numGenerations=10, initializationStrategy="perEdge",
+                                 initializationDistribution="uniform", initializationParams=[0.0, 10.0])
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo")
-    pop.setMutationHyperparams(mutationMethod="randomPerArc", mutationRate=0.10, perArcEdgeMutationRate=0.25)
+    pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.10, perArcEdgeMutationRate=0.25)
 
     # Solve the Alpha-GA
     solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
