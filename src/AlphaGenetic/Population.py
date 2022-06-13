@@ -39,8 +39,9 @@ class Population:
         self.numGenerations = numGenerations
         self.stagnationPeriod = 5
         self.consecutiveStagnantGenerations = 0
-        self.initializationDistribution = "uniform"  # :param : "uniform", "gaussian"
-        self.initializationParams = [0.0, 1.0]  # :param: range if uniform distribution, mu and sigma if Gaussian
+        self.initializationDistribution = "uniform"  # :param : "uniform", "gaussian", "digital"
+        self.initializationParams = [0.0,
+                                     1.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
         # Individual Selection HPs
         self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "random"
         self.tournamentSize = 3
@@ -72,8 +73,8 @@ class Population:
         :param str terminationMethod: One of following: {"setGenerations", "stagnationPeriod"}
         :param int numGenerations: Number of iterations the population evolves for
         :param int stagnationPeriod: Number of stagnant consecutive generations needed for termination
-        :param str initializationDistribution: One of following: {"uniform", "gaussian"}
-        :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian
+        :param str initializationDistribution: One of following: {"uniform", "gaussian", "digital"}
+        :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian; low and high value if digital
         """
         self.populationSize = populationSize
         self.terminationMethod = terminationMethod
@@ -258,6 +259,8 @@ class Population:
             randomGene = random.uniform(self.initializationParams[0], self.initializationParams[1])
         elif self.initializationDistribution == "gaussian":
             randomGene = random.gauss(self.initializationParams[0], self.initializationParams[1])
+        elif self.initializationDistribution == "digital":
+            randomGene = random.choice(self.initializationParams)
         return randomGene
 
     # ===============================================================

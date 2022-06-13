@@ -1,7 +1,6 @@
 from src.AlphaGenetic.Population import Population
 from src.Network.FlowNetwork import FlowNetwork
 from src.Network.SolutionVisualizer import SolutionVisualizer
-from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 """
 RUN COMMAND:
@@ -19,25 +18,26 @@ if __name__ == "__main__":
     pop = Population(network, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=100, numGenerations=10,
-                                 initializationDistribution="uniform", initializationParams=[0.0, 100.0])
+    pop.setPopulationHyperparams(populationSize=10, numGenerations=10,
+                                 initializationDistribution="digital", initializationParams=[1.0, 100000.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo")
     pop.setMutationHyperparams(mutationMethod="randomPerArc", mutationRate=0.10, perArcEdgeMutationRate=0.25)
 
     # Solve the Alpha-GA
     solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
-
     print("Best solution found = " + str(solutionTuple[0]))
     solVis = SolutionVisualizer(solutionTuple[1])
     solVis.drawGraphWithLabels(leadingText="GA_best_")
 
+    """
     # Solve Optimally with CPLEX
     cplex = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
     cplex.findSolution(printDetails=True)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
     optVis.drawGraphWithLabels(leadingText="OPT_")
+    """
 
     """
     # All hyperparameter setters
