@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 
 from src.AntColony.Colony import Colony
-from src.Network.FlowNetwork import FlowNetwork
+from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
@@ -48,8 +48,8 @@ class AntColonyResults:
             outputRow.append(minTargetFlow)
             # Load network
             networkFile = networkName + ".p"
-            network = FlowNetwork()
-            network = network.loadNetwork(networkFile)
+            network = CandidateGraph()
+            network = network.loadCandidateGraph(networkFile)
             # Find exact solution
             exactSolver = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
             exactSolver.buildModel()
@@ -59,7 +59,7 @@ class AntColonyResults:
             print("Exact solution found...")
             # Find relaxed solution
             relaxedSolver = RelaxedLPSolverPDLP(network, minTargetFlow)
-            alphaValues = np.full((network.numEdges, network.numArcCaps), 1.0)
+            alphaValues = np.full((network.numEdges, network.numArcsPerEdge), 1.0)
             relaxedSolver.updateObjectiveFunction(alphaValues)
             relaxedSolver.solveModel()
             relaxedSolver.writeSolution()

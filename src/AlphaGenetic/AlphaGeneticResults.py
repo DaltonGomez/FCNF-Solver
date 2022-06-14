@@ -4,9 +4,9 @@ import os
 import random
 from datetime import datetime
 
+from Utilities.old_code.OLDGraphMaker import GraphMaker
 from src.AlphaGenetic.Population import Population
-from src.Network.FlowNetwork import FlowNetwork
-from src.Network.GraphMaker import GraphMaker
+from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 
@@ -16,7 +16,7 @@ class AlphaGeneticResults:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, numNetworks=10, nodeSizeRange=(25, 400), srcSinkSet=(1, 5, 10), arcCostLookupTable=None,
+    def __init__(self, numGraphs=10, nodeSizeRange=(25, 400), srcSinkSet=(1, 5, 10), arcCostLookupTable=None,
                  srcSinkCapacityRange=(100, 200), srcSinkChargeRange=(10, 25), targetAsPercentTotalDemand=0.50,
                  numTrials=10):
         """Constructor of a Results Experiment instance"""
@@ -25,7 +25,7 @@ class AlphaGeneticResults:
             arcCostLookupTable = [
                 [100, 10, 1]
             ]
-        self.numNetworks = numNetworks
+        self.numGraphs = numGraphs
         self.nodeSizeRange = nodeSizeRange
         self.srcSinkSet = srcSinkSet
         self.arcCostLookupTable = arcCostLookupTable
@@ -48,7 +48,7 @@ class AlphaGeneticResults:
         random.seed()
         networkList = []
         # Automatically generate n input networks
-        for n in range(self.numNetworks):
+        for n in range(self.numGraphs):
             # Uniformly sample number of nodes
             numNodes = random.randint(self.nodeSizeRange[0], self.nodeSizeRange[1])
             numSrcSinks = random.sample(self.srcSinkSet, 1)[0]
@@ -61,10 +61,10 @@ class AlphaGeneticResults:
                 n)
             graphMaker = GraphMaker(networkName, numNodes, numSrcSinks, numSrcSinks)
             graphMaker.setArcCostLookupTable(arcCostLookupTable=self.arcCostLookupTable)
-            graphMaker.setSourceSinkGeneralizations(True, True, capacityRange=self.srcSinkCapacityRange,
-                                                    chargeRange=self.srcSinkChargeRange)
+            graphMaker.setSourceSinkGeneralizations(isCapacitated=True, isCharged=False,
+                                                    srcCapRange=(2, 10), sinkCapRange=(5, 20))
             generatedNetwork = graphMaker.generateNetwork()
-            generatedNetwork.saveNetwork()
+            generatedNetwork.saveCandidateGraph()
             networkList.append(networkName)
         return networkList
 
@@ -74,7 +74,7 @@ class AlphaGeneticResults:
             print("Solving " + networkName + "...")
             # Initialize Output Row
             outputRow = []
-            # Parse Input Network Data
+            # Parse Input FlowNetwork Data
             networkData = networkName.split("-")
             numNode = int(networkData[0])
             outputRow.append(numNode)
@@ -82,10 +82,10 @@ class AlphaGeneticResults:
             outputRow.append(numSrcSinks)
             parallelEdges = int(networkData[2])
             outputRow.append(parallelEdges)
-            # Load Network
+            # Load FlowNetwork
             networkFile = networkName + ".p"
-            network = FlowNetwork()
-            network = network.loadNetwork(networkFile)
+            network = CandidateGraph()
+            network = network.loadCandidateGraph(networkFile)
             minTargetFlow = math.floor(self.targetAsPercentTotalDemand * network.totalPossibleDemand)
             outputRow.append(minTargetFlow)
             # Find Exact Solution

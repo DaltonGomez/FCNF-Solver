@@ -1,0 +1,20 @@
+Graph Notes
+
+___________________
+medium_n
+===================
+# Input parameters
+name = "medium_" + str(n)
+numNodes = 70
+numSources = 10
+numSinks = 10
+# Cluster parameters
+minSourceClusters = 2
+sourcesPerClusterRange = (3, 6)
+minSinkClusters = 2
+sinksPerClusterRange = (3, 6)
+clusterRadiusRange = (10, 20)
+# Source/sink cap ranges
+isSrcSinkCapacitated = True
+srcCapRange = (1, 20)
+sinkCapRange = (1, 20)

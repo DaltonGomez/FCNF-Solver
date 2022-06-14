@@ -1,8 +1,8 @@
 import random
 import sys
 
-from src.Network.FlowNetwork import FlowNetwork
-from src.Network.Solution import Solution
+from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 
 
 class Ant:
@@ -11,10 +11,10 @@ class Ant:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, network: FlowNetwork, minTargetFlow: float, alpha: float, beta: float):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, alpha: float, beta: float):
         """Constructor of an AntColony instance"""
         # Input Attributes
-        self.network = network  # Input network data
+        self.graph = graph  # Input graph data
         self.minTargetFlow = minTargetFlow  # Target flow to assign
         self.pheromoneDict = {}  # Dictionary indexed on key (fromNode, toNode, cap) with value (pheromone deposited in previous episodes)
         self.goodnessDict = {}  # Dictionary indexed on key (fromNode, toNode, cap) with value (eta) (i.e. the "goodness" of taking that arc)
@@ -24,7 +24,7 @@ class Ant:
         self.beta = beta  # beta = Relative importance to the ant of "goodness" of arc over pheromone
 
         # Tour Attributes
-        # NOTE: A "tour" is a complete feasible solution that assigns all target flow across the network in a number of trips
+        # NOTE: A "tour" is a complete feasible solution that assigns all target flow across the graph in a number of trips
         self.time = 0  # Incremented every time an arc is traveled (i.e. measure of the total search time for the ant to complete a tour)
         self.numTrips = 0  # Number of trips the ant has taken
         self.currentPosition = -1  # Node ID of the ant's position- NOTE: -1 Represents the supersource and -2 represents the supersink
@@ -75,18 +75,18 @@ class Ant:
         options = []
         # Evaluate options if you're at supersource
         if self.currentPosition == -1:
-            for srcIndex in range(self.network.numSources):
-                source = self.network.sourcesArray[srcIndex]
-                cap = self.network.sourceCapsArray[srcIndex]
+            for srcIndex in range(self.graph.numSources):
+                source = self.graph.sourcesArray[srcIndex]
+                cap = self.graph.sourceCapsArray[srcIndex]
                 arcID = (-1, source, cap)
                 if self.availableCapacityDict[arcID] > 0.0:
                     options.append((-1, source, cap))
         # Evaluate options if you're anywhere else
         else:
-            nodeObj = self.network.nodesDict[self.currentPosition]
+            nodeObj = self.graph.nodesDict[self.currentPosition]
             # Add all arcs that are not at capacity to the options
             for edge in nodeObj.outgoingEdges:
-                for cap in self.network.possibleArcCapsArray:
+                for cap in self.graph.possibleArcCapsArray:
                     arcID = (edge[0], edge[1], cap)
                     # Previous is was: if self.availableCapacity[arcID] > 0.0 and arcID not in self.arcsVisitedThisTrip:
                     if self.availableCapacityDict[arcID] > 0.0:
@@ -96,9 +96,9 @@ class Ant:
                 options.append((nodeObj.nodeID, -1, -1))
             # Give the possibility to go to the supersink if at a sink
             elif nodeObj.nodeType == 1:
-                for sinkIndex in range(self.network.numSinks):
-                    if nodeObj.nodeID == self.network.sinksArray[sinkIndex]:
-                        options.append((nodeObj.nodeID, -2, self.network.sinkCapsArray[sinkIndex]))
+                for sinkIndex in range(self.graph.numSinks):
+                    if nodeObj.nodeID == self.graph.sinksArray[sinkIndex]:
+                        options.append((nodeObj.nodeID, -2, self.graph.sinkCapsArray[sinkIndex]))
         return options
 
     def decideArcToTraverse(self, options: list) -> tuple:
@@ -163,34 +163,34 @@ class Ant:
     def resolveOpposingFlows(self) -> None:
         """Iterates over resulting network and reduces opposing flows to be unidirectional"""
         # For each edge
-        for edgeIndex in range(self.network.numEdges):
+        for edgeIndex in range(self.graph.numEdges):
             forwardFlow = 0
             backwardFlow = 0
-            edge = self.network.edgesArray[edgeIndex]
+            edge = self.graph.edgesArray[edgeIndex]
             # Find the total forward and backward flow
-            for capIndex in range(self.network.numArcCaps):
-                cap = self.network.possibleArcCapsArray[capIndex]
+            for capIndex in range(self.graph.numArcsPerEdge):
+                cap = self.graph.possibleArcCapsArray[capIndex]
                 forwardFlow += self.assignedFlowDict[(edge[0], edge[1], cap)]
                 backwardFlow += self.assignedFlowDict[(edge[1], edge[0], cap)]
             # Resolve if both non-zero and equal to one another
             if 0 < forwardFlow == backwardFlow > 0:
-                for capIndex in range(self.network.numArcCaps):
-                    cap = self.network.possibleArcCapsArray[capIndex]
+                for capIndex in range(self.graph.numArcsPerEdge):
+                    cap = self.graph.possibleArcCapsArray[capIndex]
                     self.assignedFlowDict[(edge[0], edge[1], cap)] = 0
                     self.assignedFlowDict[(edge[1], edge[0], cap)] = 0
             # Resolve if both non-zero and forward flow is greater than backward flow
             # TODO - This (and the complementary condition below) will probably error out on flow distributed across parallel arcs
             elif forwardFlow > 0 and 0 < backwardFlow < forwardFlow:
                 netFlow = forwardFlow - backwardFlow
-                for capIndex in range(self.network.numArcCaps):
-                    cap = self.network.possibleArcCapsArray[capIndex]
+                for capIndex in range(self.graph.numArcsPerEdge):
+                    cap = self.graph.possibleArcCapsArray[capIndex]
                     self.assignedFlowDict[(edge[0], edge[1], cap)] = netFlow
                     self.assignedFlowDict[(edge[1], edge[0], cap)] = 0
             # Resolve if both non-zero and forward flow is less than backward flow
             elif 0 < forwardFlow < backwardFlow and backwardFlow > 0:
                 netFlow = backwardFlow - forwardFlow
-                for capIndex in range(self.network.numArcCaps):
-                    cap = self.network.possibleArcCapsArray[capIndex]
+                for capIndex in range(self.graph.numArcsPerEdge):
+                    cap = self.graph.possibleArcCapsArray[capIndex]
                     self.assignedFlowDict[(edge[0], edge[1], cap)] = 0
                     self.assignedFlowDict[(edge[1], edge[0], cap)] = netFlow
 
@@ -198,27 +198,27 @@ class Ant:
         """Calculates the cost of the ant's solution"""
         trueCost = 0.0
         # Calculate source costs
-        for sourceIndex in range(self.network.numSources):
-            sourceID = self.network.sourcesArray[sourceIndex]
-            sourceCapacity = self.network.sourceCapsArray[sourceIndex]
+        for sourceIndex in range(self.graph.numSources):
+            sourceID = self.graph.sourcesArray[sourceIndex]
+            sourceCapacity = self.graph.sourceCapsArray[sourceIndex]
             sourceFlow = self.assignedFlowDict[(-1, sourceID, sourceCapacity)]
             self.sourceFlows.append(int(sourceFlow))
-            sourceVariableCost = self.network.sourceVariableCostsArray[sourceIndex]
+            sourceVariableCost = self.graph.sourceVariableCostsArray[sourceIndex]
             trueCost += sourceVariableCost * sourceFlow
         # Calculate sink costs
-        for sinkIndex in range(self.network.numSinks):
-            sinkID = self.network.sinksArray[sinkIndex]
-            sinkCapacity = self.network.sinkCapsArray[sinkIndex]
+        for sinkIndex in range(self.graph.numSinks):
+            sinkID = self.graph.sinksArray[sinkIndex]
+            sinkCapacity = self.graph.sinkCapsArray[sinkIndex]
             sinkFlow = self.assignedFlowDict[(sinkID, -2, sinkCapacity)]
             self.sinkFlows.append(int(sinkFlow))
-            sinkVariableCost = self.network.sinkVariableCostsArray[sinkIndex]
+            sinkVariableCost = self.graph.sinkVariableCostsArray[sinkIndex]
             trueCost += sinkVariableCost * sinkFlow
         # Calculate edge costs
-        for edgeIndex in range(self.network.numEdges):
-            for capIndex in range(self.network.numArcCaps):
-                edge = self.network.edgesArray[edgeIndex]
-                cap = self.network.possibleArcCapsArray[capIndex]
-                arcObj = self.network.arcsDict[(edge[0], edge[1], cap)]
+        for edgeIndex in range(self.graph.numEdges):
+            for capIndex in range(self.graph.numArcsPerEdge):
+                edge = self.graph.edgesArray[edgeIndex]
+                cap = self.graph.possibleArcCapsArray[capIndex]
+                arcObj = self.graph.arcsDict[(edge[0], edge[1], cap)]
                 arcFlow = self.assignedFlowDict[(edge[0], edge[1], cap)]
                 self.arcFlows[(edgeIndex, capIndex)] = int(arcFlow)
                 self.arcsOpened[(edgeIndex, capIndex)] = 0
@@ -227,30 +227,30 @@ class Ant:
                     self.arcsOpened[(edgeIndex, capIndex)] = 1
         self.trueCost = trueCost
 
-    def writeSolution(self) -> Solution:
+    def writeSolution(self) -> FlowNetworkSolution:
         """Writes the single ant's solution to a Solution instance for visualization/saving"""
-        solution = Solution(self.network, self.minTargetFlow, self.trueCost, self.trueCost, self.sourceFlows,
-                            self.sinkFlows, self.arcFlows, self.arcsOpened, "AntColony", False,
-                            self.network.isSourceSinkCapacitated, self.network.isSourceSinkCharged)
+        solution = FlowNetworkSolution(self.graph, self.minTargetFlow, self.trueCost, self.trueCost,
+                                       self.sourceFlows, self.sinkFlows, self.arcFlows, self.arcsOpened, "AntColony",
+                                       False, self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged)
         return solution
 
     def initializeAssignedFlowDict(self) -> dict:
         """Adds all possible arcs and supersource/sink as keys to the assigned flow dictionary with a value of zero"""
         assignedFlowDict = {}
         # For all edge, cap pairs, initialize with zero
-        for edge in self.network.edgesArray:
-            for cap in self.network.possibleArcCapsArray:
+        for edge in self.graph.edgesArray:
+            for cap in self.graph.possibleArcCapsArray:
                 assignedFlowDict[(edge[0], edge[1], cap)] = 0
         # For all supersource -> source and visa versa, initialize with zero
-        for srcIndex in range(self.network.numSources):
-            source = self.network.sourcesArray[srcIndex]
-            cap = self.network.sourceCapsArray[srcIndex]
+        for srcIndex in range(self.graph.numSources):
+            source = self.graph.sourcesArray[srcIndex]
+            cap = self.graph.sourceCapsArray[srcIndex]
             assignedFlowDict[(-1, source, cap)] = 0
             assignedFlowDict[(source, -1, -1)] = 0
         # For all supersink -> sink, initialize with zero (NOTE: You can't go back from a supersink)
-        for sinkIndex in range(self.network.numSinks):
-            sink = self.network.sinksArray[sinkIndex]
-            cap = self.network.sinkCapsArray[sinkIndex]
+        for sinkIndex in range(self.graph.numSinks):
+            sink = self.graph.sinksArray[sinkIndex]
+            cap = self.graph.sinkCapsArray[sinkIndex]
             assignedFlowDict[(sink, -2, cap)] = 0
         return assignedFlowDict
 
@@ -258,19 +258,19 @@ class Ant:
         """Adds all possible arcs and supersource/sink as keys to the available capacity dictionary with value capacity"""
         availableCapacity = {}
         # For all edge, cap pairs, initialize with cap
-        for edge in self.network.edgesArray:
-            for cap in self.network.possibleArcCapsArray:
+        for edge in self.graph.edgesArray:
+            for cap in self.graph.possibleArcCapsArray:
                 availableCapacity[(edge[0], edge[1], cap)] = cap
         # For all supersource -> source initialize with cap, and for visa versa initialize with MAX_INT
-        for srcIndex in range(self.network.numSources):
-            source = self.network.sourcesArray[srcIndex]
-            cap = self.network.sourceCapsArray[srcIndex]
+        for srcIndex in range(self.graph.numSources):
+            source = self.graph.sourcesArray[srcIndex]
+            cap = self.graph.sourceCapsArray[srcIndex]
             availableCapacity[(-1, source, cap)] = cap
             availableCapacity[(source, -1, -1)] = sys.maxsize
         # For all supersink -> sink, initialize with zero (NOTE: You can't go back from a supersink)
-        for sinkIndex in range(self.network.numSinks):
-            sink = self.network.sinksArray[sinkIndex]
-            cap = self.network.sinkCapsArray[sinkIndex]
+        for sinkIndex in range(self.graph.numSinks):
+            sink = self.graph.sinksArray[sinkIndex]
+            cap = self.graph.sinkCapsArray[sinkIndex]
             availableCapacity[(sink, -2, cap)] = cap
         return availableCapacity
 

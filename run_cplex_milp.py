@@ -1,6 +1,6 @@
-from src.Network.FlowNetwork import FlowNetwork
-from src.Network.NetworkVisualizer import NetworkVisualizer
-from src.Network.SolutionVisualizer import SolutionVisualizer
+from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.GraphVisualizer import GraphVisualizer
+from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 """
@@ -10,16 +10,16 @@ py -3.8 run_cplex_milp.py
 """
 
 if __name__ == "__main__":
-    # Load Network
-    network = FlowNetwork()
-    network = network.loadNetwork("basic_5.p")
-    vis = NetworkVisualizer(network, directed=True, supers=False)
+    # Load FlowNetwork
+    graph = CandidateGraph()
+    graph = graph.loadCandidateGraph("medium_9.p")
+    vis = GraphVisualizer(graph, directed=True, supers=False)
     # vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
-    minTargetFlow = network.totalPossibleDemand
+    minTargetFlow = graph.totalPossibleDemand
 
     # Solve Optimally with CPLEX
-    cplex = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
+    cplex = MILPsolverCPLEX(graph, minTargetFlow, isOneArcPerEdge=False)
     cplex.findSolution(printDetails=True)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
-    optVis.drawGraphWithLabels(leadingText="OPT_")
+    optVis.drawLabeledSolution(leadingText="OPT_")

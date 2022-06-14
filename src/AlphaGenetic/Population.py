@@ -1,15 +1,16 @@
 import copy
 import random
 import sys
+from typing import List
 
 import numpy as np
 from numpy import ndarray
 
 from src.AlphaGenetic.AlphaSolverPDLP import AlphaSolverPDLP
 from src.AlphaGenetic.Individual import Individual
-from src.Network.FlowNetwork import FlowNetwork
-from src.Network.Solution import Solution
-from src.Network.SolutionVisualizer import SolutionVisualizer
+from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
+from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 
 
 class Population:
@@ -18,17 +19,17 @@ class Population:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, network: FlowNetwork, minTargetFlow: float, populationSize=10, numGenerations=10):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, populationSize=10, numGenerations=10):
         """Constructor of a Population instance"""
         # Input Attributes
-        self.network = network
-        self.minTargetFlow = minTargetFlow
+        self.graph: CandidateGraph = graph  # Input candidate graph instance to be solved
+        self.minTargetFlow: float = minTargetFlow  # Input target flow to be realized in output solution
         # Population & Solver Instance Objects
-        self.population = []
-        self.solver = AlphaSolverPDLP(self.network, self.minTargetFlow)  # Pre-builds variables/constraints on init
-        self.isTerminated = False
-        self.bestKnownSolution = None
-        self.bestKnownCost = sys.maxsize
+        self.population: List[Individual] = []  # List of Individual objects
+        self.solver: AlphaSolverPDLP = AlphaSolverPDLP(self.graph, self.minTargetFlow)  # Solver object, which pre-builds variables and constraints once on initialization
+        self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
+        self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
+        self.bestKnownSolution = None  # Holds the best (i.e. lowest cost) solution discovered during the evolution
 
         # =======================
         # GA HYPERPARAMETERS
@@ -240,21 +241,21 @@ class Population:
         """Initializes the GA population with random alpha values"""
         for individual in range(self.populationSize):
             thisGenotype = self.getInitialAlphaValues()
-            thisIndividual = Individual(individual, self.network, thisGenotype)
+            thisIndividual = Individual(individual, self.graph, thisGenotype)
             self.population.append(thisIndividual)
 
     def getInitialAlphaValues(self) -> ndarray:
         """Returns a randomly initialized array of alpha values (i.e. the genotype)"""
         tempAlphaValues = []
-        for edge in range(self.network.numEdges):
+        for edge in range(self.graph.numEdges):
             tempEdge = []
             if self.initializationStrategy == "perArc":
-                for cap in range(self.network.numArcCaps):
+                for cap in range(self.graph.numArcsPerEdge):
                     thisArcsAlphaValue = self.getAlphaValue()
                     tempEdge.append(thisArcsAlphaValue)
             elif self.initializationStrategy == "perEdge":
                 thisEdgesAlphaValue = self.getAlphaValue()
-                for cap in range(self.network.numArcCaps):
+                for cap in range(self.graph.numArcsPerEdge):
                     tempEdge.append(thisEdgesAlphaValue)
             tempAlphaValues.append(tempEdge)
         initialGenotype = np.array(tempAlphaValues)
@@ -347,14 +348,14 @@ class Population:
         # Reset solver
         self.solver.resetSolver()
 
-    def writeIndividualsSolution(self, individual: Individual) -> Solution:
+    def writeIndividualsSolution(self, individual: Individual) -> FlowNetworkSolution:
         """Writes the individual's output to as solution object"""
         solution = None
         if individual.isSolved is True:
-            solution = Solution(self.network, self.minTargetFlow, individual.fakeCost, individual.trueCost,
+            solution = FlowNetworkSolution(self.graph, self.minTargetFlow, individual.fakeCost, individual.trueCost,
                                 individual.srcFlows, individual.sinkFlows, individual.arcFlows, individual.arcsOpened,
-                                "alphaGA", False, self.network.isSourceSinkCapacitated,
-                                self.network.isSourceSinkCharged)
+                                "alphaGA", False, self.graph.isSourceSinkCapacitated,
+                                self.graph.isSourceSinkCharged)
         else:
             print("An unsolved individual cannot write a solution!")
         return solution
@@ -363,7 +364,7 @@ class Population:
         """Resets the output fields stored in the population"""
         self.isTerminated = False
         self.population = []
-        self.solver = AlphaSolverPDLP(self.network, self.minTargetFlow)  # Pre-builds variables/constraints on init
+        self.solver = AlphaSolverPDLP(self.graph, self.minTargetFlow)  # Pre-builds variables/constraints on init
         self.bestKnownSolution = None
         self.bestKnownCost = sys.maxsize
 
@@ -375,9 +376,9 @@ class Population:
         solution = self.writeIndividualsSolution(individual)
         visualizer = SolutionVisualizer(solution)
         if labels is True:
-            visualizer.drawGraphWithLabels(leadingText=leadingText)
+            visualizer.drawLabeledSolution(leadingText=leadingText)
         else:
-            visualizer.drawUnlabeledGraph(leadingText=leadingText)
+            visualizer.drawUnlabeledSolution(leadingText=leadingText)
 
     def visualizeBestIndividual(self, labels=False, leadingText="") -> None:
         """Renders the visualization for the most fit individual in the population at any time"""
@@ -629,8 +630,8 @@ class Population:
     def randomSingleArcMutation(self, individualNum: int) -> None:
         """Mutates an individual at only one random arc in the chromosome"""
         random.seed()
-        mutatedEdge = random.randint(0, self.network.numEdges - 1)
-        mutatedCap = random.randint(0, self.network.numArcCaps - 1)
+        mutatedEdge = random.randint(0, self.graph.numEdges - 1)
+        mutatedCap = random.randint(0, self.graph.numArcsPerEdge - 1)
         individual = self.population[individualNum]
         individual.alphaValues[mutatedEdge][mutatedCap] = self.getAlphaValue()
         individual.resetOutputNetwork()
@@ -638,14 +639,14 @@ class Population:
     def randomSingleEdgeMutation(self, individualNum: int) -> None:
         """Mutates an individual at all arcs in a random edge in the chromosome"""
         random.seed()
-        mutatedEdge = random.randint(0, self.network.numEdges - 1)
+        mutatedEdge = random.randint(0, self.graph.numEdges - 1)
         individual = self.population[individualNum]
         if self.initializationStrategy == "perArc":
-            for arcIndex in range(self.network.numArcCaps):
+            for arcIndex in range(self.graph.numArcsPerEdge):
                 individual.alphaValues[mutatedEdge][arcIndex] = self.getAlphaValue()
         elif self.initializationStrategy == "perEdge":
             thisEdgeAlpha = self.getAlphaValue()
-            for arcIndex in range(self.network.numArcCaps):
+            for arcIndex in range(self.graph.numArcsPerEdge):
                 individual.alphaValues[mutatedEdge][arcIndex] = thisEdgeAlpha
         individual.resetOutputNetwork()
 
@@ -653,8 +654,8 @@ class Population:
         """Iterates over all (edge, arc) pairs and mutates if the perArcEdgeMutation rate rng rolls"""
         random.seed()
         individual = self.population[individualNum]
-        for edge in range(self.network.numEdges):
-            for arcIndex in range(self.network.numArcCaps):
+        for edge in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
                 if random.random() < self.perArcEdgeMutationRate:
                     individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
         individual.resetOutputNetwork()
@@ -663,14 +664,14 @@ class Population:
         """Iterates over all edges and mutates at all arcs if the perArcEdgeMutation rate rng rolls"""
         random.seed()
         individual = self.population[individualNum]
-        for edge in range(self.network.numEdges):
+        for edge in range(self.graph.numEdges):
             if random.random() < self.perArcEdgeMutationRate:
                 if self.initializationStrategy == "perArc":
-                    for arcIndex in range(self.network.numArcCaps):
+                    for arcIndex in range(self.graph.numArcsPerEdge):
                         individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
                 elif self.initializationStrategy == "perEdge":
                     thisEdgeAlpha = self.getAlphaValue()
-                    for arcIndex in range(self.network.numArcCaps):
+                    for arcIndex in range(self.graph.numArcsPerEdge):
                         individual.alphaValues[edge][arcIndex] = thisEdgeAlpha
         individual.resetOutputNetwork()
 
@@ -679,8 +680,8 @@ class Population:
         individual = self.population[individualNum]
         for path in selectedPaths:
             for edge in path.edges:
-                edgeIndex = self.network.edgesDict[edge]
-                for arcIndex in range(self.network.numArcCaps):
+                edgeIndex = self.graph.edgesDict[edge]
+                for arcIndex in range(self.graph.numArcsPerEdge):
                     individual.alphaValues[edgeIndex][arcIndex] = self.getAlphaValue()
         individual.resetOutputNetwork()
 
@@ -691,8 +692,8 @@ class Population:
         individual = self.population[individualNum]
         for path in selectedPaths:
             for edge in path.edges:
-                edgeIndex = self.network.edgesDict[edge]
-                for arcIndex in range(self.network.numArcCaps):
+                edgeIndex = self.graph.edgesDict[edge]
+                for arcIndex in range(self.graph.numArcsPerEdge):
                     individual.alphaValues[edgeIndex][arcIndex] = individual.alphaValues[edgeIndex][
                                                                       arcIndex] + nudgeMagnitude
                     if individual.alphaValues[edgeIndex][arcIndex] < 0.0:
@@ -722,20 +723,20 @@ class Population:
         """
         random.seed()
         # Generate crossover point
-        crossoverPoint = random.randint(1, self.network.numEdges - 2)
+        crossoverPoint = random.randint(1, self.graph.numEdges - 2)
         parentOneChromosome = self.population[parentOneID].alphaValues
         parentTwoChromosome = self.population[parentTwoID].alphaValues
         # Create new offspring chromosomes
-        offspringOneChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
-        offspringTwoChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
+        offspringOneChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
+        offspringTwoChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
         # Up to crossover point
         for edge in range(crossoverPoint):
-            for cap in range(self.network.numArcCaps):
+            for cap in range(self.graph.numArcsPerEdge):
                 offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
                 offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
         # After crossover point
-        for edge in range(crossoverPoint, self.network.numEdges):
-            for cap in range(self.network.numArcCaps):
+        for edge in range(crossoverPoint, self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
                 offspringOneChromosome[edge][cap] = parentTwoChromosome[edge][cap]
                 offspringTwoChromosome[edge][cap] = parentOneChromosome[edge][cap]
         # Do replacement with offspring
@@ -748,26 +749,26 @@ class Population:
         """
         random.seed()
         # Generate crossover points
-        crossoverPointOne = random.randint(0, self.network.numEdges - 3)
-        crossoverPointTwo = random.randint(crossoverPointOne, self.network.numEdges - 1)
+        crossoverPointOne = random.randint(0, self.graph.numEdges - 3)
+        crossoverPointTwo = random.randint(crossoverPointOne, self.graph.numEdges - 1)
         parentOneChromosome = self.population[parentOneID].alphaValues
         parentTwoChromosome = self.population[parentTwoID].alphaValues
         # Create new offspring chromosomes
-        offspringOneChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
-        offspringTwoChromosome = np.zeros((self.network.numEdges, self.network.numArcCaps))
+        offspringOneChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
+        offspringTwoChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
         # Up to first point
         for edge in range(crossoverPointOne):
-            for cap in range(self.network.numArcCaps):
+            for cap in range(self.graph.numArcsPerEdge):
                 offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
                 offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
         # From point one to point two
         for edge in range(crossoverPointOne, crossoverPointTwo):
-            for cap in range(self.network.numArcCaps):
+            for cap in range(self.graph.numArcsPerEdge):
                 offspringOneChromosome[edge][cap] = parentTwoChromosome[edge][cap]
                 offspringTwoChromosome[edge][cap] = parentOneChromosome[edge][cap]
         # From point two to the end
-        for edge in range(crossoverPointTwo, self.network.numEdges):
-            for cap in range(self.network.numArcCaps):
+        for edge in range(crossoverPointTwo, self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
                 offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
                 offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
         # Do replacement with offspring
@@ -788,15 +789,15 @@ class Population:
         # Crossover values in Parent 1's Path
         for path in parentOnePaths:
             for edge in path.edges:
-                edgeIndex = self.network.edgesDict[edge]
-                for cap in range(self.network.numArcCaps):
+                edgeIndex = self.graph.edgesDict[edge]
+                for cap in range(self.graph.numArcsPerEdge):
                     offspringOneChromosome[edgeIndex][cap] = parentTwoChromosome[edgeIndex][cap]
                     offspringTwoChromosome[edgeIndex][cap] = parentOneChromosome[edgeIndex][cap]
         # Crossover values in Parent 2's Path
         for path in parentTwoPaths:
             for edge in path.edges:
-                edgeIndex = self.network.edgesDict[edge]
-                for cap in range(self.network.numArcCaps):
+                edgeIndex = self.graph.edgesDict[edge]
+                for cap in range(self.graph.numArcsPerEdge):
                     offspringOneChromosome[edgeIndex][cap] = parentTwoChromosome[edgeIndex][cap]
                     offspringTwoChromosome[edgeIndex][cap] = parentOneChromosome[edgeIndex][cap]
         # Do replacement with offspring

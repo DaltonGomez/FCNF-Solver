@@ -1,138 +1,144 @@
 from numpy import ndarray
 from ortools.linear_solver import pywraplp
 
-from src.Network.FlowNetwork import FlowNetwork
-from src.Network.Solution import Solution
+from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 
 
 class AlphaSolverPDLP:
     """Class that solves an alpha-relaxed instance approximately via a PDLP gradient descent solver from Google"""
 
-    def __init__(self, network: FlowNetwork, minTargetFlow: float, isSrcSinkConstrained=True, isSrcSinkCharged=False):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isSrcSinkConstrained=True, isSrcSinkCharged=False):
         """Constructor of a AlphaSolverPDLP instance"""
         # Input attributes
-        self.network = network
-        self.minTargetFlow = minTargetFlow
-        self.isSrcSinkConstrained = isSrcSinkConstrained
-        self.isSrcSinkCharged = isSrcSinkCharged
+        self.graph: CandidateGraph = graph  # Input candidate graph to solve optimally
+        self.minTargetFlow: float = minTargetFlow  # Target flow that the solution must capture
+        self.isSrcSinkConstrained: bool = isSrcSinkConstrained  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
+        self.isSrcSinkCharged: bool = isSrcSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver attributes
-        self.solver = pywraplp.Solver.CreateSolver("PDLP")
-        self.status = None
-        self.isRun = False
-        self.trueCost = 0.0
+        self.solver: pywraplp.Solver = pywraplp.Solver.CreateSolver(
+            "PDLP")  # Solver object acting as a wrapper to Google OR-Tools PDLP solver
+        self.status = None  # Captures the returned value of solving the solver object
+        self.isRun = False  # Boolean indicating if the solver has been run
+        self.trueCost: float = 0.0  # True cost of the solution under the Fixed-Charge Network Flow model
         # Pre-build Model
-        self.prebuildVariablesAndConstraints()
+        self.prebuildVariablesAndConstraints()  # Called on initialization to build only the variables and constraints in the model
 
     def prebuildVariablesAndConstraints(self) -> None:
         """Builds the decision variables and constraints at initialization (the objective function is updated later)"""
         # =================== DECISION VARIABLES ===================
         # Source and sink decision variables and determines flow from/to each node - Indexed on src/sink matrix
-        for s in range(self.network.numSources):
+        for s in range(self.graph.numSources):
             self.solver.NumVar(0, self.solver.infinity(), "s_" + str(s))
-        for t in range(self.network.numSinks):
+        for t in range(self.graph.numSinks):
             self.solver.NumVar(0, self.solver.infinity(), "t_" + str(t))
         # Arc flow variables - Indexed on the arc matrix and determines flow on each arc
-        for e in range(self.network.numEdges):
-            for cap in range(self.network.numArcCaps):
+        for e in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
                 self.solver.NumVar(0, self.solver.infinity(), "a_" + str(e) + "_" + str(cap))
 
         # =================== CONSTRAINTS ===================
         # Minimum flow constraint (Constructed as the sum of all sinks in-flows)
-        self.solver.Add(sum(self.solver.LookupVariable("t_" + str(t)) for t in range(self.network.numSinks)) >=
+        self.solver.Add(sum(self.solver.LookupVariable("t_" + str(t)) for t in range(self.graph.numSinks)) >=
                         self.minTargetFlow, "minFlow")
 
         # Edge opening/capacity constraints
-        for e in range(self.network.numEdges):
-            for cap in range(self.network.numArcCaps):
-                capacity = self.network.possibleArcCapsArray[cap]
+        for e in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
+                capacity = self.graph.possibleArcCapsArray[cap]
                 varName = "a_" + str(e) + "_" + str(cap)
                 self.solver.Add(self.solver.LookupVariable(varName) <= capacity, varName + "_Cap")
 
         # Capacity constraints of sources
-        if self.network.isSourceSinkCapacitated is True:
-            for s in range(self.network.numSources):
+        if self.graph.isSourceSinkCapacitated is True:
+            for s in range(self.graph.numSources):
                 varName = "s_" + str(s)
-                self.solver.Add(self.solver.LookupVariable(varName) <= self.network.sourceCapsArray[s],
+                self.solver.Add(self.solver.LookupVariable(varName) <= self.graph.sourceCapsArray[s],
                                 varName + "_Cap")
 
         # Capacity constraints of sinks
-        if self.network.isSourceSinkCapacitated is True:
-            for t in range(self.network.numSinks):
+        if self.graph.isSourceSinkCapacitated is True:
+            for t in range(self.graph.numSinks):
                 varName = "t_" + str(t)
-                self.solver.Add(self.solver.LookupVariable(varName) <= self.network.sinkCapsArray[t], varName + "_Cap")
+                self.solver.Add(self.solver.LookupVariable(varName) <= self.graph.sinkCapsArray[t], varName + "_Cap")
 
         # Conservation of flow constraints
         # Source flow conservation
-        for s in range(self.network.numSources):
-            source = self.network.sourcesArray[s]
-            sourceObj = self.network.nodesDict[source]
+        for s in range(self.graph.numSources):
+            source = self.graph.sourcesArray[s]
+            sourceObj = self.graph.nodesDict[source]
             outgoingIndexes = []
             for edge in sourceObj.outgoingEdges:
-                outgoingIndexes.append(self.network.edgesDict[edge])
+                outgoingIndexes.append(self.graph.edgesDict[edge])
             incomingIndexes = []
             for edge in sourceObj.incomingEdges:
-                incomingIndexes.append(self.network.edgesDict[edge])
+                incomingIndexes.append(self.graph.edgesDict[edge])
             varName = "s_" + str(s)
             self.solver.Add(self.solver.LookupVariable(varName) ==
-                            sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(c)) for i in
-                                outgoingIndexes for c in range(self.network.numArcCaps)) -
-                            sum(self.solver.LookupVariable("a_" + str(j) + "_" + str(d)) for j in
-                                incomingIndexes for d in range(self.network.numArcCaps)), varName + "_Conserv")
+                            sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(c))
+                                for i in outgoingIndexes
+                                for c in range(self.graph.numArcsPerEdge)) -
+                            sum(self.solver.LookupVariable("a_" + str(j) + "_" + str(d))
+                                for j in incomingIndexes
+                                for d in range(self.graph.numArcsPerEdge)), varName + "_Conserv")
         # Sink flow conservation
-        for t in range(self.network.numSinks):
-            sink = self.network.sinksArray[t]
-            sinkObj = self.network.nodesDict[sink]
+        for t in range(self.graph.numSinks):
+            sink = self.graph.sinksArray[t]
+            sinkObj = self.graph.nodesDict[sink]
             incomingIndexes = []
             for edge in sinkObj.incomingEdges:
-                incomingIndexes.append(self.network.edgesDict[edge])
+                incomingIndexes.append(self.graph.edgesDict[edge])
             outgoingIndexes = []
             for edge in sinkObj.outgoingEdges:
-                outgoingIndexes.append(self.network.edgesDict[edge])
+                outgoingIndexes.append(self.graph.edgesDict[edge])
             varName = "t_" + str(t)
             self.solver.Add(self.solver.LookupVariable(varName) ==
                             sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(c)) for i in
-                                incomingIndexes for c in range(self.network.numArcCaps)) -
+                                incomingIndexes for c in range(self.graph.numArcsPerEdge)) -
                             sum(self.solver.LookupVariable("a_" + str(j) + "_" + str(d)) for j in
-                                outgoingIndexes for d in range(self.network.numArcCaps)), varName + "_Conserv")
+                                outgoingIndexes for d in range(self.graph.numArcsPerEdge)), varName + "_Conserv")
         # Intermediate node flow conservation
-        for n in range(self.network.numInterNodes):
-            interNode = self.network.interNodesArray[n]
-            nodeObj = self.network.nodesDict[interNode]
+        for n in range(self.graph.numInterNodes):
+            interNode = self.graph.interNodesArray[n]
+            nodeObj = self.graph.nodesDict[interNode]
             incomingIndexes = []
             for edge in nodeObj.incomingEdges:
-                incomingIndexes.append(self.network.edgesDict[edge])
+                incomingIndexes.append(self.graph.edgesDict[edge])
             outgoingIndexes = []
             for edge in nodeObj.outgoingEdges:
-                outgoingIndexes.append(self.network.edgesDict[edge])
+                outgoingIndexes.append(self.graph.edgesDict[edge])
             name = "n_" + str(n) + "_Conserv"
-            self.solver.Add(0 == sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(c)) for i in
-                                     incomingIndexes for c in range(self.network.numArcCaps)) -
-                            sum(self.solver.LookupVariable("a_" + str(j) + "_" + str(d)) for j in
-                                outgoingIndexes for d in range(self.network.numArcCaps)), name)
+            self.solver.Add(0 == sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(c))
+                                     for i in incomingIndexes
+                                     for c in range(self.graph.numArcsPerEdge)) -
+                                 sum(self.solver.LookupVariable("a_" + str(j) + "_" + str(d))
+                                     for j in outgoingIndexes
+                                     for d in range(self.graph.numArcsPerEdge)), name)
 
     def updateObjectiveFunction(self, alphaValues: ndarray) -> None:
         """Updates the objective function based on the input alpha values"""
         # Clear any existing objective function
         self.solver.Objective().Clear()
         # Write new objective function
-        if self.network.isSourceSinkCharged is True:
+        # Write new objective function
+        if self.graph.isSourceSinkCharged is True:
             self.solver.Minimize(
                 sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) * (
-                        self.network.getArcVariableCostFromEdgeCapIndices(i, j) +
-                        self.network.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j]) for i in
-                    range(self.network.numEdges)
-                    for j in range(self.network.numArcCaps)) + sum(
-                    self.solver.LookupVariable("s_" + str(s)) * self.network.sourceVariableCostsArray[s]
-                    for s in range(self.network.numSources)) + sum(
-                    self.solver.LookupVariable("t_" + str(t)) * self.network.sinkVariableCostsArray[t]
-                    for t in range(self.network.numSinks)))
-        elif self.network.isSourceSinkCharged is False:
+                            self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
+                            self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
+                    for i in range(self.graph.numEdges)
+                    for j in range(self.graph.numArcsPerEdge)) +
+                sum(self.solver.LookupVariable("s_" + str(s)) * self.graph.sourceVariableCostsArray[s]
+                    for s in range(self.graph.numSources)) +
+                sum(self.solver.LookupVariable("t_" + str(t)) * self.graph.sinkVariableCostsArray[t]
+                    for t in range(self.graph.numSinks)))
+        elif self.graph.isSourceSinkCharged is False:
             self.solver.Minimize(
                 sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) * (
-                        self.network.getArcVariableCostFromEdgeCapIndices(i, j) +
-                        self.network.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j]) for i
-                    in range(self.network.numEdges)
-                    for j in range(self.network.numArcCaps)))
+                            self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
+                            self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
+                    for i in range(self.graph.numEdges)
+                    for j in range(self.graph.numArcsPerEdge)))
 
     def solveModel(self) -> None:
         """Solves the alpha-relaxed LP model with PDLP"""
@@ -141,7 +147,7 @@ class AlphaSolverPDLP:
         self.isRun = True
         # print("Solver execution complete...\n")
 
-    def writeSolution(self) -> Solution:
+    def writeSolution(self) -> FlowNetworkSolution:
         """Saves the solution instance"""
         if self.isRun is False:
             print("You must run the solver before building a solution!")
@@ -153,9 +159,9 @@ class AlphaSolverPDLP:
             arcFlows = self.getArcFlowsDict()
             arcsOpen = self.getArcsOpenDict()
             self.trueCost = self.calculateTrueCost()
-            thisSolution = Solution(self.network, self.minTargetFlow, objValue, self.trueCost, srcFlows, sinkFlows,
-                                    arcFlows,
-                                    arcsOpen, "gor_PDLP", False, self.isSrcSinkConstrained, self.isSrcSinkCharged)
+            thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, self.trueCost,
+                                               srcFlows, sinkFlows, arcFlows, arcsOpen, "gor_PDLP",
+                                               False, self.isSrcSinkConstrained, self.isSrcSinkCharged)
             print("Solution built!")
             return thisSolution
         else:
@@ -175,15 +181,15 @@ class AlphaSolverPDLP:
         arcsOpen = self.getArcsOpenDict()
         trueCost = 0.0
         if self.isSrcSinkCharged is True:
-            for s in range(self.network.numSources):
-                trueCost += self.network.sourceVariableCostsArray[s] * srcFlows[s]
-            for t in range(self.network.numSinks):
-                trueCost += self.network.sinkVariableCostsArray[t] * sinkFlows[t]
-        for edge in range(self.network.numEdges):
-            for cap in range(self.network.numArcCaps):
+            for s in range(self.graph.numSources):
+                trueCost += self.graph.sourceVariableCostsArray[s] * srcFlows[s]
+            for t in range(self.graph.numSinks):
+                trueCost += self.graph.sinkVariableCostsArray[t] * sinkFlows[t]
+        for edge in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
                 if arcsOpen[(edge, cap)] == 1:
-                    arcVariableCost = self.network.getArcVariableCostFromEdgeCapIndices(edge, cap)
-                    arcFixedCost = self.network.getArcFixedCostFromEdgeCapIndices(edge, cap)
+                    arcVariableCost = self.graph.getArcVariableCostFromEdgeCapIndices(edge, cap)
+                    arcFixedCost = self.graph.getArcFixedCostFromEdgeCapIndices(edge, cap)
                     trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
         return trueCost
 
@@ -194,8 +200,8 @@ class AlphaSolverPDLP:
     def getArcFlowsDict(self) -> dict:
         """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""
         arcFlows = {}
-        for edge in range(self.network.numEdges):
-            for cap in range(self.network.numArcCaps):
+        for edge in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
                 thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
                 arcFlows[(edge, cap)] = thisFlow
         return arcFlows
@@ -203,8 +209,8 @@ class AlphaSolverPDLP:
     def getArcsOpenDict(self) -> dict:
         """Returns the dictionary of arcs opened with key (edgeIndex, capIndex)"""
         arcsOpen = {}
-        for edge in range(self.network.numEdges):
-            for cap in range(self.network.numArcCaps):
+        for edge in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
                 thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
                 if thisFlow > 0:
                     arcsOpen[(edge, cap)] = 1
@@ -215,14 +221,14 @@ class AlphaSolverPDLP:
     def getSrcFlowsList(self) -> list:
         """Returns the list of source flows"""
         srcFlows = []
-        for s in range(self.network.numSources):
+        for s in range(self.graph.numSources):
             srcFlows.append(self.solver.LookupVariable("s_" + str(s)).SolutionValue())
         return srcFlows
 
     def getSinkFlowsList(self) -> list:
         """Returns the list of sink flows"""
         sinkFlows = []
-        for t in range(self.network.numSinks):
+        for t in range(self.graph.numSinks):
             sinkFlows.append(self.solver.LookupVariable("t_" + str(t)).SolutionValue())
         return sinkFlows
 

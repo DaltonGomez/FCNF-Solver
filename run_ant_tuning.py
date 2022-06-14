@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from src.AntColony.AntColonyTuning import AntColonyTuning
-from src.Network.FlowNetwork import FlowNetwork
+from src.FlowNetwork.CandidateGraph import CandidateGraph
 
 """
 RUN COMMAND:
@@ -10,9 +10,9 @@ py -3.8 run_ant_tuning.py
 """
 
 if __name__ == "__main__":
-    networkFile = "25-1-1.p"
-    network = FlowNetwork()
-    network = network.loadNetwork(networkFile)
+    graphFile = "25-1-1.p"
+    graph = CandidateGraph()
+    graph = graph.loadCandidateGraph(graphFile)
     targetFlow = 100
 
     now = datetime.now()
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     print(timestamp)
 
     for i in range(4):
-        tuner = AntColonyTuning(network, targetFlow)
+        tuner = AntColonyTuning(graph, targetFlow)
         tuner.runExperiment()
 
     now = datetime.now()

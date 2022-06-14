@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 
 from src.AntColony.Colony import Colony
-from src.Network.FlowNetwork import FlowNetwork
+from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
@@ -16,7 +16,7 @@ class AntColonyTuning:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, network: FlowNetwork, minTargetFlow: float):
+    def __init__(self, network: CandidateGraph, minTargetFlow: float):
         """Constructor of a Tuning Experiment instance"""
         # Input Attributes
         self.network = network
@@ -85,7 +85,7 @@ class AntColonyTuning:
 
     def findRelaxedSolution(self) -> tuple:
         """Computes the LP relaxed solution"""
-        alphaValues = np.full((self.network.numEdges, self.network.numArcCaps), 1.0)
+        alphaValues = np.full((self.network.numEdges, self.network.numArcsPerEdge), 1.0)
         self.relaxedSolver.updateObjectiveFunction(alphaValues)
         self.relaxedSolver.solveModel()
         # self.relaxedSolver.printSolverOverview()
@@ -113,7 +113,7 @@ class AntColonyTuning:
     def buildOutputHeader(self) -> None:
         """Builds the header of the output block"""
         self.outputBlock.append(["Tuning Experiment Output", self.fileName])
-        self.outputBlock.append(["Network", self.network.name])
+        self.outputBlock.append(["FlowNetwork", self.network.name])
         self.outputBlock.append(["Min Target Flow", self.minTargetFlow])
         self.outputBlock.append(["Exact Cost", self.exactCost])
         self.outputBlock.append(["Relaxed Cost", self.relaxedCost])

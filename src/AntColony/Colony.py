@@ -1,9 +1,9 @@
 import sys
 
 from src.AntColony.Ant import Ant
-from src.Network.FlowNetwork import FlowNetwork
-from src.Network.Solution import Solution
-from src.Network.SolutionVisualizer import SolutionVisualizer
+from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
+from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 
 
 class Colony:
@@ -12,10 +12,10 @@ class Colony:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, network: FlowNetwork, minTargetFlow: float, numAnts: int, numEpisodes: int):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, numAnts: int, numEpisodes: int):
         """Constructor of a Colony instance"""
         # Input Attributes
-        self.network = network
+        self.graph = graph
         self.minTargetFlow = minTargetFlow
 
         # Hyperparameters
@@ -36,8 +36,8 @@ class Colony:
         self.convergenceData = []  # Stores the best known cost after each episode of the colony
         self.visual = None  # Object used to view the best solutions of the episode over time
 
-    def solveNetwork(self, drawing=True, labels=True) -> Solution:
-        """Main loop that solves the Flow Network instance with the AntColony"""
+    def solveNetwork(self, drawing=True, labels=True) -> FlowNetworkSolution:
+        """Main loop that solves the candidate graph instance with the AntColony"""
         # EPISODE LOOP
         for episode in range(self.numEpisodes):
             # print("\nStarting Episode " + str(episode) + "...")  # PRINT OPTION
@@ -56,9 +56,9 @@ class Colony:
             if drawing is True:
                 self.visual = SolutionVisualizer(self.bestKnownSolution)  # Instantiate a visualizer
                 if labels is True:
-                    self.visual.drawGraphWithLabels(leadingText="Ep" + str(episode) + "_")  # Draw graph w/ labels
+                    self.visual.drawLabeledSolution(leadingText="Ep" + str(episode) + "_")  # Draw graph w/ labels
                 else:
-                    self.visual.drawUnlabeledGraph(leadingText="Ep" + str(episode) + "_")  # Draw graph w/o labels
+                    self.visual.drawUnlabeledSolution(leadingText="Ep" + str(episode) + "_")  # Draw graph w/o labels
         return self.bestKnownSolution  # Should return the best solution found at the end
 
     def updateBestSolution(self) -> None:
@@ -86,28 +86,28 @@ class Colony:
     def depositPheromone(self) -> None:
         """Deposits new pheromone on the arcs contained in the best known solution so far"""
         # Deposit pheromone on edges
-        for edgeIndex in range(self.network.numEdges):
-            for capIndex in range(self.network.numArcCaps):
-                edge = self.network.edgesArray[edgeIndex]
-                cap = self.network.possibleArcCapsArray[capIndex]
+        for edgeIndex in range(self.graph.numEdges):
+            for capIndex in range(self.graph.numArcsPerEdge):
+                edge = self.graph.edgesArray[edgeIndex]
+                cap = self.graph.possibleArcCapsArray[capIndex]
                 arcFlow = self.bestKnownSolution.arcFlows[(edgeIndex, capIndex)]
                 if arcFlow > 0.0:
                     # OLD: self.pheromoneDict[(edge[0], edge[1], cap)] += self.Q / self.bestKnownCost
                     self.pheromoneDict[(edge[0], edge[1], cap)] += (self.Q * arcFlow) / self.bestKnownCost
         # Deposit pheromone on sources
-        for sourceIndex in range(self.network.numSources):
-            source = self.network.sourcesArray[sourceIndex]
+        for sourceIndex in range(self.graph.numSources):
+            source = self.graph.sourcesArray[sourceIndex]
             srcFlow = self.bestKnownSolution.sourceFlows[sourceIndex]
             if srcFlow > 0.0:
-                srcKey = (-1, source, self.network.sourceCapsArray[sourceIndex])
+                srcKey = (-1, source, self.graph.sourceCapsArray[sourceIndex])
                 # OLD: self.pheromoneDict[srcKey] += self.Q / self.bestKnownCost
                 self.pheromoneDict[srcKey] += (self.Q * srcFlow) / self.bestKnownCost
         # Deposit pheromone on sinks
-        for sinkIndex in range(self.network.numSinks):
-            sink = self.network.sinksArray[sinkIndex]
+        for sinkIndex in range(self.graph.numSinks):
+            sink = self.graph.sinksArray[sinkIndex]
             sinkFlow = self.bestKnownSolution.sinkFlows[sinkIndex]
             if sinkFlow > 0.0:
-                sinkKey = (sink, -2, self.network.sinkCapsArray[sinkIndex])
+                sinkKey = (sink, -2, self.graph.sinkCapsArray[sinkIndex])
                 # OLD: self.pheromoneDict[sinkKey] += self.Q / self.bestKnownCost
                 self.pheromoneDict[sinkKey] += (self.Q * sinkFlow) / self.bestKnownCost
 
@@ -115,7 +115,7 @@ class Colony:
         """Initializes the population with ants objects"""
         population = []
         for n in range(self.numAnts):
-            thisAnt = Ant(self.network, self.minTargetFlow, self.alpha, self.beta)
+            thisAnt = Ant(self.graph, self.minTargetFlow, self.alpha, self.beta)
             population.append(thisAnt)
         return population
 
@@ -123,19 +123,19 @@ class Colony:
         """Adds all possible arcs and supersource/sink as keys to the pheromone dictionary"""
         pheromoneDict = {}
         # For all edge, cap pairs, initialize with one
-        for edge in self.network.edgesArray:
-            for cap in self.network.possibleArcCapsArray:
+        for edge in self.graph.edgesArray:
+            for cap in self.graph.possibleArcCapsArray:
                 pheromoneDict[(edge[0], edge[1], cap)] = self.initialPheromoneConcentration
         # For all supersource -> source and visa versa, initialize with zero
-        for srcIndex in range(self.network.numSources):
-            source = self.network.sourcesArray[srcIndex]
-            cap = self.network.sourceCapsArray[srcIndex]
+        for srcIndex in range(self.graph.numSources):
+            source = self.graph.sourcesArray[srcIndex]
+            cap = self.graph.sourceCapsArray[srcIndex]
             pheromoneDict[(-1, source, cap)] = self.initialPheromoneConcentration
             pheromoneDict[(source, -1, -1)] = 0.0
         # For all supersink -> sink, initialize with zero (NOTE: You can't go back from a supersink)
-        for sinkIndex in range(self.network.numSinks):
-            sink = self.network.sinksArray[sinkIndex]
-            cap = self.network.sinkCapsArray[sinkIndex]
+        for sinkIndex in range(self.graph.numSinks):
+            sink = self.graph.sinksArray[sinkIndex]
+            cap = self.graph.sinkCapsArray[sinkIndex]
             pheromoneDict[(sink, -2, cap)] = self.initialPheromoneConcentration
         return pheromoneDict
 
@@ -144,28 +144,28 @@ class Colony:
         arcGoodnessScalar = 10  # Based off the magnitude of the arc costs (~10^2)
         arcGoodnessDict = {}
         # For all edge, cap pairs, initialize with one
-        for edge in self.network.edgesArray:
-            for cap in self.network.possibleArcCapsArray:
-                arcObj = self.network.arcsDict[(edge[0], edge[1], cap)]
+        for edge in self.graph.edgesArray:
+            for cap in self.graph.possibleArcCapsArray:
+                arcObj = self.graph.arcsDict[(edge[0], edge[1], cap)]
                 # OLD: arcGoodness = arcGoodnessScalar / (arcObj.fixedCost + arcObj.variableCost)
                 # OLD: arcGoodness = (arcGoodnessScalar * cap) / (arcObj.fixedCost + arcObj.variableCost)
                 arcGoodness = (arcGoodnessScalar * cap) / (arcObj.fixedCost + arcObj.variableCost * cap)
                 arcGoodnessDict[(edge[0], edge[1], cap)] = arcGoodness
         # For all supersource -> source and visa versa, initialize with zero
-        for srcIndex in range(self.network.numSources):
-            source = self.network.sourcesArray[srcIndex]
-            cap = self.network.sourceCapsArray[srcIndex]
-            variableCost = self.network.sourceVariableCostsArray[srcIndex]
+        for srcIndex in range(self.graph.numSources):
+            source = self.graph.sourcesArray[srcIndex]
+            cap = self.graph.sourceCapsArray[srcIndex]
+            variableCost = self.graph.sourceVariableCostsArray[srcIndex]
             # OLD: srcGoodness = arcGoodnessScalar / variableCost
             # OLD: srcGoodness = (cap * arcGoodnessScalar) / variableCost
             srcGoodness = (cap * arcGoodnessScalar) / (variableCost * cap)
             arcGoodnessDict[(-1, source, cap)] = srcGoodness
             arcGoodnessDict[(source, -1, -1)] = 0.0  # NOTE: MAKES THE "GOODNESS" OF MOVING SOURCE -> SUPERSOURCE ZERO
         # For all supersink -> sink, initialize with zero (NOTE: You can't go back from a supersink)
-        for sinkIndex in range(self.network.numSinks):
-            sink = self.network.sinksArray[sinkIndex]
-            cap = self.network.sinkCapsArray[sinkIndex]
-            variableCost = self.network.sinkVariableCostsArray[sinkIndex]
+        for sinkIndex in range(self.graph.numSinks):
+            sink = self.graph.sinksArray[sinkIndex]
+            cap = self.graph.sinkCapsArray[sinkIndex]
+            variableCost = self.graph.sinkVariableCostsArray[sinkIndex]
             # OLD: sinkGoodness = arcGoodnessScalar * 10 / variableCost
             # OLD: sinkGoodness = (cap * arcGoodnessScalar ** 2) / variableCost
             sinkGoodness = (cap * arcGoodnessScalar ** 2) / (

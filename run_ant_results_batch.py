@@ -1,8 +1,8 @@
 import math
 import random
 
+from Utilities.old_code.OLDGraphMaker import GraphMaker
 from src.AntColony.AntColonyResults import AntColonyResults
-from src.Network.GraphMaker import GraphMaker
 
 """
 RUN COMMAND:
@@ -39,10 +39,10 @@ if __name__ == "__main__":
         srcSinkChargeRange = [10, 25]
         graphMaker = GraphMaker(networkName, numNodes, numSrcSinks, numSrcSinks)
         graphMaker.setArcCostLookupTable(arcCostLookupTable=arcCostLookupTable)
-        graphMaker.setSourceSinkGeneralizations(True, True, capacityRange=srcSinkCapacityRange,
-                                                chargeRange=srcSinkChargeRange)
+        graphMaker.setSourceSinkGeneralizations(isCapacitated=True, isCharged=False,
+                                                srcCapRange=(1, 20), sinkCapRange=(1, 20))
         generatedNetwork = graphMaker.generateNetwork()
-        generatedNetwork.saveNetwork()
+        generatedNetwork.saveCandidateGraph()
         networkList.append(networkName)
 
     # Solve all networks

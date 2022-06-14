@@ -5,10 +5,10 @@ GENERAL/NETWORK/SOLVERS:
 # TODO - Update README with Documentation
 # TODO - Add Unit Tests
 # TODO - Do another large overhual, including exposing classes only through getters/settings, making attributes private, and remove/optimizing duplicate attributes
+# TODO - Break out GA operators as interfaces via a strategy pattern
 # TODO - Consider reformulating FlowNetwork as single super-source/single super-sink
 >> I'm wondering if this is essential as it extends the alpha value to the sources and sinks when they are recast as edges
 >> On second thought, I don't think this matters as alpha values only remedy the fixed charge problem and src/sink are only variable charged
-# TODO - Add to solution visualization a way to capture relative edge costs in color (or another meaning metric)
 # TODO - Figure out how to enforce the one arc per edge constraint in the alpha-relaxed LP
 >> Do not worry about the single arc per edge constraint- it is implied if the capacity vs. cost function is convex
 # TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data

@@ -1,4 +1,4 @@
-from Network.ClusteredGraphMaker import ClusteredGraphMaker
+from FlowNetwork.GraphGenerator import GraphGenerator
 
 """
 RUN COMMAND:
@@ -26,27 +26,28 @@ srcSinkCapacityRange = (1, 20)  # TODO - Determine range based on real datasets
 srcSinkChargeRange = (1, 20)  # TODO - Determine range based on real datasets
 
 if __name__ == "__main__":
-    for n in range(10):
+    numGraphs = 10
+    for n in range(numGraphs):
         # Input parameters
-        name = "basic_" + str(n)
-        numNodes = 25
-        numSources = 4
-        numSinks = 4
+        name = "medium_" + str(n)
+        numNodes = 70
+        numSources = 10
+        numSinks = 10
         # Cluster parameters
-        minSourceClusters = 1
-        sourcesPerClusterRange = (2, 4)
-        minSinkClusters = 1
-        sinksPerClusterRange = (2, 4)
+        minSourceClusters = 2
+        sourcesPerClusterRange = (3, 6)
+        minSinkClusters = 2
+        sinksPerClusterRange = (3, 6)
         clusterRadiusRange = (10, 20)
         # Source/sink cap ranges
         isSrcSinkCapacitated = True
-        srcCapRange = (2, 10)
-        sinkCapRange = (5, 20)
+        srcCapRange = (1, 20)
+        sinkCapRange = (1, 20)
         # Make graph
-        graphMaker = ClusteredGraphMaker(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
-                                         numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)
+        graphMaker = GraphGenerator(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
+                                    numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)
         graphMaker.setSourceSinkGeneralizations(isCapacitated=isSrcSinkCapacitated, isCharged=False,
                                                 srcCapRange=srcCapRange, sinkCapRange=sinkCapRange)
-        newGraph = graphMaker.generateNetwork()
-        newGraph.drawNetworkTriangulation()
-        newGraph.saveNetwork()
+        newGraph = graphMaker.generateGraph()
+        newGraph.drawGraphTriangulation()
+        newGraph.saveCandidateGraph()

@@ -1,6 +1,6 @@
 from src.AlphaGenetic.Population import Population
-from src.Network.FlowNetwork import FlowNetwork
-from src.Network.SolutionVisualizer import SolutionVisualizer
+from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 
 """
 RUN COMMAND:
@@ -9,18 +9,18 @@ py -3.8 run_alpha_genetic.py
 """
 
 if __name__ == "__main__":
-    # Load Network
-    network = FlowNetwork()
-    network = network.loadNetwork("cluster_test_8.p")
-    minTargetFlow = network.totalPossibleDemand
+    # Load FlowNetwork
+    graph = CandidateGraph()
+    graph = graph.loadCandidateGraph("medium_9.p")
+    minTargetFlow = graph.totalPossibleDemand
 
     # Initialize an Alpha-GA Population
-    pop = Population(network, minTargetFlow)
+    pop = Population(graph, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=100, numGenerations=100, initializationStrategy="perEdge",
+    pop.setPopulationHyperparams(populationSize=10, numGenerations=4, initializationStrategy="perEdge",
                                  initializationDistribution="digital", initializationParams=[0.0, 500000.0])
-    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo", crossoverRate=1.0,
                                 crossoverAttemptsPerGeneration=1)
     pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.02, perArcEdgeMutationRate=0.10)
@@ -29,18 +29,19 @@ if __name__ == "__main__":
     solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
     print("Best solution found = " + str(solutionTuple[0]))
     solVis = SolutionVisualizer(solutionTuple[1])
-    solVis.drawGraphWithLabels(leadingText="GA_best_")
+    solVis.drawLabeledSolution(leadingText="GA_best_")
 
     """
     # Solve Optimally with CPLEX
-    cplex = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
+    cplex = MILPsolverCPLEX(graph, minTargetFlow, isOneArcPerEdge=False)
     cplex.findSolution(printDetails=True)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
-    optVis.drawGraphWithLabels(leadingText="OPT_")
+    optVis.drawLabeledSolution(leadingText="OPT_")
     """
 
     """
+    # TODO - Update as these are out of date
     # All hyperparameter setters
     pop.setPopulationHyperparams(populationSize=10, terminationMethod="setGenerations", numGenerations=1,
                                  stagnationPeriod=5, initializationDistribution="uniform",
@@ -54,14 +55,7 @@ if __name__ == "__main__":
     """
 
     """
-    # Solve Optimally with CPLEX
-    cplex = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
-    cplex.findSolution(printDetails=True)
-    opt = cplex.writeSolution()
-    optVis = SolutionVisualizer(opt)
-    optVis.drawGraphWithLabels(leadingText="OPT_")
-    
     # Solve with Naive Hill Climb
-    hillClimb = Population(network, minTargetFlow)
+    hillClimb = Population(graph, minTargetFlow)
     hillClimb.solveWithNaiveHillClimb(printGenerations=True, drawing=True, drawLabels=True)
     """

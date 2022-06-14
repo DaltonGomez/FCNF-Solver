@@ -1,5 +1,5 @@
 from src.AlphaGenetic.Population import Population
-from src.Network.FlowNetwork import FlowNetwork
+from src.FlowNetwork.CandidateGraph import CandidateGraph
 
 """
 RUN COMMAND:
@@ -8,11 +8,11 @@ py -3.8 run_naive_hillclimb.py
 """
 
 if __name__ == "__main__":
-    # Load Network
-    network = FlowNetwork()
-    network = network.loadNetwork("basic_5.p")
-    minTargetFlow = network.totalPossibleDemand
+    # Load FlowNetwork
+    graph = CandidateGraph()
+    graph = graph.loadCandidateGraph("medium_9.p")
+    minTargetFlow = graph.totalPossibleDemand
 
     # Solve with Naive Hill Climb
-    hillClimb = Population(network, minTargetFlow)
+    hillClimb = Population(graph, minTargetFlow)
     hillClimb.solveWithNaiveHillClimb(printGenerations=True, drawing=True, drawLabels=True)

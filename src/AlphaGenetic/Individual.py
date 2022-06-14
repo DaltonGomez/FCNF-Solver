@@ -1,9 +1,10 @@
 import sys
+from typing import Dict, Tuple, List
 
 from numpy import ndarray
 
 from src.AlphaGenetic.Path import Path
-from src.Network.FlowNetwork import FlowNetwork
+from src.FlowNetwork.CandidateGraph import CandidateGraph
 
 
 class Individual:
@@ -12,23 +13,25 @@ class Individual:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, ID: int, network: FlowNetwork, initialAlphaValues: ndarray):
+    def __init__(self, ID: int, graph: CandidateGraph, initialAlphaValues: ndarray):
         """Constructor of an Individual instance"""
-        # Input Network and ID in the Population
-        self.id = ID
-        self.network = network
+        # Input candidate graph and ID in the population
+        self.id: int = ID  # Integer ID specifying the individuals index in the population
+        self.graph: CandidateGraph = graph  # Input candidate graph instance
         # Alpha Values (a.k.a. the genotype of the individual)
-        self.alphaValues = initialAlphaValues
-        # Expressed Network (a.k.a. the phenotype of the individual)
-        self.isSolved = False  # Flip true when a relaxed-LP solver runs/returns solution data; flip false when the alpha values array is modified
-        self.arcFlows = {}
-        self.arcsOpened = {}
-        self.srcFlows = []
-        self.sinkFlows = []
-        self.paths = []  # Data structure for topology-based operators
+        self.alphaValues: ndarray = initialAlphaValues  # Numpy array of alpha values assigned to the individual at initialization
+        # Expressed FlowNetwork (a.k.a. the phenotype of the individual)
+        self.isSolved: bool = False  # Flip true when a relaxed-LP solver runs/returns solution data; flip false when the alpha values array is modified
+        self.arcFlows: Dict[Tuple[int, int], float] = {}  # Dictionary mapping (edgeIndex, capIndex) keys to values of assigned flow
+        self.arcsOpened: Dict[Tuple[int, int], int] = {}  # Dictionary mapping (edgeIndex, capIndex) keys to values of 0/1 integers if an arc was opened
+        self.srcFlows: List[float] = []  # List of assigned flows on each source, where indices match graph.sourcesArray
+        self.sinkFlows: List[float] = []  # List of assigned flows on each sink, where indices match graph.sourcesArray
         # Returned Cost (a.k.a. the fitness of the individual)
-        self.trueCost = 0.0
-        self.fakeCost = 0.0
+        self.trueCost: float = 0.0  # True cost computed by using the assigned flows and the Fixed Charge Network Flow model formulation
+        self.fakeCost: float = 0.0  # Actual objective value returned by the solver (used only for debugging purposes)
+
+        # TODO - Decide if pathing is to remain or be removed
+        self.paths = []
 
     # ============================================
     # ============== HELPER METHODS ==============
@@ -58,18 +61,18 @@ class Individual:
     # =============================================
     # ============== PATHING METHODS ==============
     # =============================================
+    # TODO - Improve pathing methods- Currently not working!
     def computeAllUsedPaths(self) -> None:
         """Computes all the pathlets that have a positive flow"""
         if self.isSolved is False:
             print("Cannot compute paths on an unsolved instance!")
         else:
-            # TODO - Resolve bug in pathing methods that causes program to get stuck
             edgesAssignedToPaths = set()  # Attempts to prevent looping in the buildPathlet() recursion
             # For all sources with an assigned flow
-            for srcIndex in range(self.network.numSources):
+            for srcIndex in range(self.graph.numSources):
                 if self.srcFlows[srcIndex] > 0:
-                    src = self.network.sourcesArray[srcIndex]
-                    srcObj = self.network.nodesDict[src]
+                    src = self.graph.sourcesArray[srcIndex]
+                    srcObj = self.graph.nodesDict[src]
                     # For all outgoing edges with flow, build pathlets
                     for outgoingEdge in srcObj.outgoingEdges:
                         if self.getEdgeFlow(outgoingEdge) > 0:
@@ -80,7 +83,7 @@ class Individual:
         visitedNodes = [startingNode]
         visitedEdges = [startingEdge]
         toNode = startingEdge[1]
-        toNodeObj = self.network.nodesDict[toNode]
+        toNodeObj = self.graph.nodesDict[toNode]
         # While the pathlet hasn't been interrupted, travel it
         while self.isEndOfPathlet(toNode) is not True:
             for edge in toNodeObj.outgoingEdges:
@@ -88,7 +91,7 @@ class Individual:
                     visitedNodes.append(toNode)
                     visitedEdges.append(edge)
                     toNode = edge[1]
-                    toNodeObj = self.network.nodesDict[toNode]
+                    toNodeObj = self.graph.nodesDict[toNode]
         # When the pathlet is interrupted, construct a Path object
         visitedNodes.append(toNode)
         if self.isDuplicatePathlet(visitedNodes) is not True:
@@ -124,7 +127,7 @@ class Individual:
 
     def isEndOfPathlet(self, toNode: int) -> bool:
         """Checks if the pathlet should end"""
-        toNodeObj = self.network.nodesDict[toNode]
+        toNodeObj = self.graph.nodesDict[toNode]
         # Check if toNode is a sink
         if toNodeObj.nodeType == 1:
             return True
@@ -159,8 +162,8 @@ class Individual:
     def getEdgeFlow(self, edge: tuple) -> float:
         """Calculates the combined flow of the edge by considering all parallel arcs"""
         edgeFlow = 0.0
-        edgeIndex = self.network.edgesDict[edge]
-        for capIndex in range(self.network.numArcCaps):
+        edgeIndex = self.graph.edgesDict[edge]
+        for capIndex in range(self.graph.numArcsPerEdge):
             edgeFlow += self.arcFlows[(edgeIndex, capIndex)]
         return edgeFlow
 
@@ -176,27 +179,27 @@ class Individual:
             if thisEdgeFlow < pathFlow:
                 pathFlow = thisEdgeFlow
             # Update cost on a per arc basis
-            edgeIndex = self.network.edgesDict[edge]
-            for capIndex in range(self.network.numArcCaps):
+            edgeIndex = self.graph.edgesDict[edge]
+            for capIndex in range(self.graph.numArcsPerEdge):
                 thisArcFlow = self.arcFlows[(edgeIndex, capIndex)]
                 if thisArcFlow > 0:
-                    cap = self.network.possibleArcCapsArray[capIndex]
-                    fixedCost = self.network.arcsDict[(edge[0], edge[1], cap)].fixedCost
-                    variableCost = self.network.arcsDict[(edge[0], edge[1], cap)].variableCost
+                    cap = self.graph.possibleArcCapsArray[capIndex]
+                    fixedCost = self.graph.arcsDict[(edge[0], edge[1], cap)].fixedCost
+                    variableCost = self.graph.arcsDict[(edge[0], edge[1], cap)].variableCost
                     pathFixedCost += fixedCost
                     pathVariableCost += variableCost * thisArcFlow
         # Account for source/sink costs
         for node in visitedNodes:
-            nodeObj = self.network.nodesDict[node]
+            nodeObj = self.graph.nodesDict[node]
             if nodeObj.nodeType == 0:
-                for srcIndex in range(self.network.numSources):
-                    if self.network.sourcesArray[srcIndex] == node:
-                        variableCost = self.network.sourceVariableCostsArray[srcIndex]
+                for srcIndex in range(self.graph.numSources):
+                    if self.graph.sourcesArray[srcIndex] == node:
+                        variableCost = self.graph.sourceVariableCostsArray[srcIndex]
                         sinkSrcCost += variableCost * pathFlow
             elif nodeObj.nodeType == 1:
-                for sinkIndex in range(self.network.numSinks):
-                    if self.network.sinksArray[sinkIndex] == node:
-                        variableCost = self.network.sinkVariableCostsArray[sinkIndex]
+                for sinkIndex in range(self.graph.numSinks):
+                    if self.graph.sinksArray[sinkIndex] == node:
+                        variableCost = self.graph.sinkVariableCostsArray[sinkIndex]
                         sinkSrcCost += variableCost * pathFlow
         return pathFlow, pathFixedCost, pathVariableCost, sinkSrcCost
 

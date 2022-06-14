@@ -6,6 +6,7 @@ class Path:
     # =========================================
     def __init__(self, visitedNodes: list, visitedEdges: list, pathFlowAndCosts: tuple):
         """Constructor of a Path instance"""
+        # TODO - Decide if pathing is to remain or be removed
         # Path topology fields
         self.nodes = visitedNodes
         self.edges = visitedEdges
