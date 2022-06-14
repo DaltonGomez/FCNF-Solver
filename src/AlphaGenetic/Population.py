@@ -30,14 +30,16 @@ class Population:
         self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
         self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
         self.bestKnownSolution = None  # Holds the best (i.e. lowest cost) solution discovered during the evolution
+        # Global hyperparameters
+        self.populationSize: int = populationSize  # Defines the number of individuals in the population
+        self.numGenerations: int = numGenerations  # Defines the number of iterations the evolution loop will run for
 
         # =======================
         # GA HYPERPARAMETERS
         # -----------------------
-        # Globals & Initialization HPs
-        self.populationSize = populationSize
+        # TODO - Implement the operators/hyperparameters through a strategy pattern
+        # Initialization HPs
         self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
-        self.numGenerations = numGenerations
         self.stagnationPeriod = 5
         self.consecutiveStagnantGenerations = 0
         self.initializationStrategy = "perArc"  # :param : "perArc", "perEdge"
@@ -285,8 +287,8 @@ class Population:
 
     def hypermutatePopulation(self) -> None:
         """Reinitializes the entire population (i.e. an extinction event with a brand new population spawned)"""
-        for individual in self.population:
-            self.hypermutateIndividual(individual)
+        for individualNum in range(len(self.population)):
+            self.hypermutateIndividual(individualNum)
 
     def naiveHillClimb(self) -> None:
         """Hypermutates all but the best individual"""
@@ -341,10 +343,11 @@ class Population:
         individual.sinkFlows = self.solver.getSinkFlowsList()
         individual.trueCost = self.solver.calculateTrueCost()
         individual.fakeCost = self.solver.getObjectiveValue()
-        # If no solution was found, hypermutate individual
+        # If no solution was found, hypermutate individual and recursively solve until solution is found
         if individual.trueCost == 0:
             print("ERROR: Individual " + str(individualNum) + " is infeasible! Hypermutating individual...")
             self.hypermutateIndividual(individualNum)
+            self.solveIndividual(individualNum)
         # Reset solver
         self.solver.resetSolver()
 

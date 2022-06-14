@@ -29,20 +29,20 @@ if __name__ == "__main__":
     numGraphs = 10
     for n in range(numGraphs):
         # Input parameters
-        name = "medium_" + str(n)
-        numNodes = 70
-        numSources = 10
-        numSinks = 10
+        name = "huge_" + str(n)
+        numNodes = 140
+        numSources = 20
+        numSinks = 20
         # Cluster parameters
-        minSourceClusters = 2
-        sourcesPerClusterRange = (3, 6)
-        minSinkClusters = 2
-        sinksPerClusterRange = (3, 6)
+        minSourceClusters = 4
+        sourcesPerClusterRange = (5, 10)
+        minSinkClusters = 4
+        sinksPerClusterRange = (5, 10)
         clusterRadiusRange = (10, 20)
         # Source/sink cap ranges
         isSrcSinkCapacitated = True
-        srcCapRange = (1, 20)
-        sinkCapRange = (1, 20)
+        srcCapRange = (1, 10)
+        sinkCapRange = (5, 20)
         # Make graph
         graphMaker = GraphGenerator(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
                                     numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)

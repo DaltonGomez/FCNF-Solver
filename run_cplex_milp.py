@@ -1,5 +1,4 @@
 from src.FlowNetwork.CandidateGraph import CandidateGraph
-from src.FlowNetwork.GraphVisualizer import GraphVisualizer
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
@@ -13,13 +12,13 @@ if __name__ == "__main__":
     # Load FlowNetwork
     graph = CandidateGraph()
     graph = graph.loadCandidateGraph("medium_9.p")
-    vis = GraphVisualizer(graph, directed=True, supers=False)
+    # vis = GraphVisualizer(graph, directed=True, supers=False)
     # vis.drawBidirectionalGraphWithSmoothedLabeledEdges()
     minTargetFlow = graph.totalPossibleDemand
 
     # Solve Optimally with CPLEX
     cplex = MILPsolverCPLEX(graph, minTargetFlow, isOneArcPerEdge=False)
-    cplex.findSolution(printDetails=True)
+    cplex.findSolution(printDetails=False)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
     optVis.drawLabeledSolution(leadingText="OPT_")

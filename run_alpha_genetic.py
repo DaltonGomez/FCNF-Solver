@@ -1,6 +1,7 @@
 from src.AlphaGenetic.Population import Population
 from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
+from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 """
 RUN COMMAND:
@@ -18,12 +19,12 @@ if __name__ == "__main__":
     pop = Population(graph, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=10, numGenerations=4, initializationStrategy="perEdge",
-                                 initializationDistribution="digital", initializationParams=[0.0, 500000.0])
-    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
+    pop.setPopulationHyperparams(populationSize=100, numGenerations=100, initializationStrategy="perEdge",
+                                 initializationDistribution="digital", initializationParams=[0.0, 200000.0])
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo", crossoverRate=1.0,
-                                crossoverAttemptsPerGeneration=1)
-    pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.02, perArcEdgeMutationRate=0.10)
+                                crossoverAttemptsPerGeneration=3)
+    pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20)
 
     # Solve the Alpha-GA
     solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
@@ -31,14 +32,12 @@ if __name__ == "__main__":
     solVis = SolutionVisualizer(solutionTuple[1])
     solVis.drawLabeledSolution(leadingText="GA_best_")
 
-    """
     # Solve Optimally with CPLEX
     cplex = MILPsolverCPLEX(graph, minTargetFlow, isOneArcPerEdge=False)
     cplex.findSolution(printDetails=True)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
     optVis.drawLabeledSolution(leadingText="OPT_")
-    """
 
     """
     # TODO - Update as these are out of date
