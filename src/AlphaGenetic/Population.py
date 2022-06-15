@@ -260,7 +260,7 @@ class Population:
                 for cap in range(self.graph.numArcsPerEdge):
                     tempEdge.append(thisEdgesAlphaValue)
             tempAlphaValues.append(tempEdge)
-        initialGenotype = np.array(tempAlphaValues)
+        initialGenotype = np.array(tempAlphaValues, dtype='f')
         return initialGenotype
 
     def getAlphaValue(self) -> float:
@@ -341,6 +341,10 @@ class Population:
         individual.arcsOpened = self.solver.getArcsOpenDict()
         individual.srcFlows = self.solver.getSrcFlowsList()
         individual.sinkFlows = self.solver.getSinkFlowsList()
+        if self.solver.isOptimizedArcSelections is True:
+            optimizedArcsTuple = self.solver.optimizeArcSelection(individual.arcFlows)
+            individual.arcFlows = optimizedArcsTuple[0]
+            individual.arcsOpened = optimizedArcsTuple[1]
         individual.trueCost = self.solver.calculateTrueCost()
         individual.fakeCost = self.solver.getObjectiveValue()
         # If no solution was found, hypermutate individual and recursively solve until solution is found
@@ -730,8 +734,8 @@ class Population:
         parentOneChromosome = self.population[parentOneID].alphaValues
         parentTwoChromosome = self.population[parentTwoID].alphaValues
         # Create new offspring chromosomes
-        offspringOneChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
-        offspringTwoChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
+        offspringOneChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge), dtype='f')
+        offspringTwoChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge), dtype='f')
         # Up to crossover point
         for edge in range(crossoverPoint):
             for cap in range(self.graph.numArcsPerEdge):

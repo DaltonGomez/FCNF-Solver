@@ -12,7 +12,7 @@ py -3.8 run_alpha_genetic.py
 if __name__ == "__main__":
     # Load FlowNetwork
     graph = CandidateGraph()
-    graph = graph.loadCandidateGraph("medium_9.p")
+    graph = graph.loadCandidateGraph("medium_2.p")
     minTargetFlow = graph.totalPossibleDemand
 
     # Initialize an Alpha-GA Population
