@@ -12,9 +12,10 @@ py -3.8 run_alpha_genetic.py
 """
 
 if __name__ == "__main__":
-    # Load FlowNetwork
+    # Load Candidate Graph
+    graphName = "medium_2.p"
     graph = CandidateGraph()
-    graph = graph.loadCandidateGraph("medium_2.p")
+    graph = graph.loadCandidateGraph(graphName)
     minTargetFlow = graph.totalPossibleDemand
 
     # Initialize an Alpha-GA Population
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 
     # Timestamp the start of the GA evolution
     gaStartTime = datetime.now()
-    print("Solving the graph with a GA population of " + str(pop.populationSize) + " for " + str(pop.numGenerations) + " generations...")
+    print("Solving the " + graphName + " graph with a GA population of " + str(pop.populationSize) + " for " + str(pop.numGenerations) + " generations...")
     print("GA Start: " + str(gaStartTime))
 
     # Solve the Alpha-GA
