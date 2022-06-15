@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.AlphaGenetic.Population import Population
 from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
@@ -26,11 +28,22 @@ if __name__ == "__main__":
                                 crossoverAttemptsPerGeneration=3)
     pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20)
 
+    # Timestamp the start of the GA evolution
+    gaStartTime = datetime.now()
+    print("Solving the graph with a GA population of " + str(pop.populationSize) + " for " + str(pop.numGenerations) + " generations...")
+    print("GA Start: " + str(gaStartTime))
+
     # Solve the Alpha-GA
     solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
     print("Best solution found = " + str(solutionTuple[0]))
     solVis = SolutionVisualizer(solutionTuple[1])
     solVis.drawLabeledSolution(leadingText="GA_best_")
+
+    # Timestamp the finish of the GA evolution/start of the optimal MILP solver
+    gaFinishOptStart = datetime.now()
+    print("GA Finish/OPT Start: " + str(gaFinishOptStart))
+    gaRuntime = gaFinishOptStart - gaStartTime
+    print("GA Runtime in Minutes: " + str(gaRuntime.seconds / 60))
 
     # Solve Optimally with CPLEX
     cplex = MILPsolverCPLEX(graph, minTargetFlow, isOneArcPerEdge=False)
@@ -39,22 +52,10 @@ if __name__ == "__main__":
     optVis = SolutionVisualizer(opt)
     optVis.drawLabeledSolution(leadingText="OPT_")
 
-    """
-    # TODO - Update as these are out of date
-    # All hyperparameter setters
-    pop.setPopulationHyperparams(populationSize=10, terminationMethod="setGenerations", numGenerations=1,
-                                 stagnationPeriod=5, initializationDistribution="uniform",
-                                 initializationParams=[0.0, 1.0])
-    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
-    pop.setPathSelectionHyperparams(pathSelectionMethod="roulette", pathRankingOrder="most",
-                                    pathRankingMethod="density", pathSelectionSize=2, pathTournamentSize=3)
-    pop.setCrossoverHyperparams(crossoverMethod="pathBased", replacementStrategy="replaceParents",
-                                crossoverRate=1.0, crossoverAttemptsPerGeneration=1)
-    pop.setMutationHyperparams(mutationMethod="pathBasedNudge", mutationRate=0.25, nudgeParams=[0.0, 1.0])
-    """
+    # Timestamp the finish of the optimal MILP solver
+    optFinish = datetime.now()
+    print("OPT Finish: " + str(optFinish))
+    optRuntime = optFinish - gaFinishOptStart
+    print("OPT Runtime in Minutes: " + str(optRuntime.seconds / 60))
 
-    """
-    # Solve with Naive Hill Climb
-    hillClimb = Population(graph, minTargetFlow)
-    hillClimb.solveWithNaiveHillClimb(printGenerations=True, drawing=True, drawLabels=True)
-    """
+    print("Program complete! Terminating...")
