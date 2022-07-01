@@ -13,7 +13,7 @@ py -3.8 run_alpha_genetic.py
 
 if __name__ == "__main__":
     # Load Candidate Graph
-    graphName = "medium_2.p"
+    graphName = "test_8.p"
     graph = CandidateGraph()
     graph = graph.loadCandidateGraph(graphName)
     minTargetFlow = graph.totalPossibleDemand
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     pop = Population(graph, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=10, numGenerations=5, initializationStrategy="perEdge",
+    pop.setPopulationHyperparams(populationSize=10, numGenerations=3, initializationStrategy="perEdge",
                                  initializationDistribution="digital", initializationParams=[0.0, 200000.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo", crossoverRate=1.0,

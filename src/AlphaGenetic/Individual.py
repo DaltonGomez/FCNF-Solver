@@ -58,6 +58,7 @@ class Individual:
         self.trueCost = 0.0
         self.fakeCost = 0.0
 
+    # TODO - Improve pathing methods- Currently not working!
     # =============================================
     # ============== PATHING METHODS ==============
     # =============================================

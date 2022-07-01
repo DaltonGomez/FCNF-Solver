@@ -731,23 +731,14 @@ class Population:
         random.seed()
         # Generate crossover point
         crossoverPoint = random.randint(1, self.graph.numEdges - 2)
-        parentOneChromosome = self.population[parentOneID].alphaValues
-        parentTwoChromosome = self.population[parentTwoID].alphaValues
-        # Create new offspring chromosomes
-        offspringOneChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge), dtype='f')
-        offspringTwoChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge), dtype='f')
-        # Up to crossover point
-        for edge in range(crossoverPoint):
-            for cap in range(self.graph.numArcsPerEdge):
-                offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
-                offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
-        # After crossover point
-        for edge in range(crossoverPoint, self.graph.numEdges):
-            for cap in range(self.graph.numArcsPerEdge):
-                offspringOneChromosome[edge][cap] = parentTwoChromosome[edge][cap]
-                offspringTwoChromosome[edge][cap] = parentOneChromosome[edge][cap]
+        # Simplify parent chromosomes naming
+        parentOne = self.population[parentOneID].alphaValues
+        parentTwo = self.population[parentTwoID].alphaValues
+        # Perform crossover
+        childOne = np.vstack((parentOne[:crossoverPoint], parentTwo[crossoverPoint:]))
+        childTwo = np.vstack((parentTwo[:crossoverPoint], parentOne[crossoverPoint:]))
         # Do replacement with offspring
-        self.replaceWithOffspring(parentOneID, parentTwoID, offspringOneChromosome, offspringTwoChromosome)
+        self.replaceWithOffspring(parentOneID, parentTwoID, childOne, childTwo)
 
     def randomTwoPointCrossover(self, parentOneID: int, parentTwoID: int) -> None:
         """Crossover of 2 chromosomes at a two random points\n
@@ -756,30 +747,16 @@ class Population:
         """
         random.seed()
         # Generate crossover points
-        crossoverPointOne = random.randint(0, self.graph.numEdges - 3)
-        crossoverPointTwo = random.randint(crossoverPointOne, self.graph.numEdges - 1)
-        parentOneChromosome = self.population[parentOneID].alphaValues
-        parentTwoChromosome = self.population[parentTwoID].alphaValues
-        # Create new offspring chromosomes
-        offspringOneChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
-        offspringTwoChromosome = np.zeros((self.graph.numEdges, self.graph.numArcsPerEdge))
-        # Up to first point
-        for edge in range(crossoverPointOne):
-            for cap in range(self.graph.numArcsPerEdge):
-                offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
-                offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
-        # From point one to point two
-        for edge in range(crossoverPointOne, crossoverPointTwo):
-            for cap in range(self.graph.numArcsPerEdge):
-                offspringOneChromosome[edge][cap] = parentTwoChromosome[edge][cap]
-                offspringTwoChromosome[edge][cap] = parentOneChromosome[edge][cap]
-        # From point two to the end
-        for edge in range(crossoverPointTwo, self.graph.numEdges):
-            for cap in range(self.graph.numArcsPerEdge):
-                offspringOneChromosome[edge][cap] = parentOneChromosome[edge][cap]
-                offspringTwoChromosome[edge][cap] = parentTwoChromosome[edge][cap]
+        crossoverOne = random.randint(0, self.graph.numEdges - 3)
+        crossoverTwo = random.randint(crossoverOne, self.graph.numEdges - 1)
+        # Simplify parent chromosomes naming
+        parentOne = self.population[parentOneID].alphaValues
+        parentTwo = self.population[parentTwoID].alphaValues
+        # Perform crossover
+        childOne = np.vstack((parentOne[:crossoverOne], parentTwo[crossoverOne:crossoverTwo], parentOne[crossoverTwo:]))
+        childTwo = np.vstack((parentTwo[:crossoverOne], parentOne[crossoverOne:crossoverTwo], parentTwo[crossoverTwo:]))
         # Do replacement with offspring
-        self.replaceWithOffspring(parentOneID, parentTwoID, offspringOneChromosome, offspringTwoChromosome)
+        self.replaceWithOffspring(parentOneID, parentTwoID, childOne, childTwo)
 
     def pathBasedCrossover(self, parentOneID: int, parentTwoID: int, parentOnePaths: list,
                            parentTwoPaths: list) -> None:
@@ -814,7 +791,6 @@ class Population:
                              offspringTwoChromosome: ndarray) -> None:
         """Takes the offspring's alpha values and carries out the replacement strategy"""
         if self.replacementStrategy == "replaceParents":
-            print("CROSSOVER")
             self.population[parentOneID].alphaValues = offspringOneChromosome
             self.population[parentOneID].resetOutputNetwork()
             self.population[parentTwoID].alphaValues = offspringTwoChromosome

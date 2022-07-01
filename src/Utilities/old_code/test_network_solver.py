@@ -1,5 +1,5 @@
-from src.FlowNetwork.CandidateGraph import FlowNetwork
-from src.FlowNetwork.GraphVisualizer import NetworkVisualizer
+from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.GraphVisualizer import GraphVisualizer
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
@@ -11,11 +11,11 @@ py -3.8 test_network_solver.py
 
 if __name__ == "__main__":
     name = ""
-    flowNetwork = FlowNetwork()
-    flowNetwork = flowNetwork.loadNetwork(name)
+    flowNetwork = CandidateGraph()
+    flowNetwork = flowNetwork.loadCandidateGraph(name)
 
     # FlowNetwork Visualization Test
-    visualizer = NetworkVisualizer(flowNetwork, directed=False, supers=False)
+    visualizer = GraphVisualizer(flowNetwork, directed=False, supers=False)
     visualizer.drawUnlabeledGraph()
 
     # Solver Test
@@ -31,4 +31,4 @@ if __name__ == "__main__":
     # Solution Visualizer Test
     solnVisualizer = SolutionVisualizer(solution)
     # solnVisualizer.drawUnlabeledGraph()
-    solnVisualizer.drawGraphWithLabels()
+    solnVisualizer.drawLabeledSolution()

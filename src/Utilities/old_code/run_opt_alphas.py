@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.FlowNetwork.CandidateGraph import FlowNetwork
+from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
@@ -15,15 +15,15 @@ if __name__ == "__main__":
     # Get inputs
     minTargetFlow = 1000
     networkName = "1000-1-10.p"
-    network = FlowNetwork()
-    network = network.loadNetwork(networkName)
+    network = CandidateGraph()
+    network = network.loadCandidateGraph(networkName)
 
     # Find exact solution
     milp = MILPsolverCPLEX(network, minTargetFlow, isOneArcPerEdge=False)
     exact = milp.findSolution()
     # exact.saveSolution()
     exactVisual = SolutionVisualizer(exact)
-    exactVisual.drawGraphWithLabels()
+    exactVisual.drawLabeledSolution()
 
     # Reverse engineer "optimal" alpha values
     alphaValues = np.full((network.numEdges, network.numArcsPerEdge), 1.0)
@@ -45,4 +45,4 @@ if __name__ == "__main__":
     approx = relaxedLp.writeSolution()
     # approx.saveSolution()
     approxVisual = SolutionVisualizer(approx)
-    approxVisual.drawGraphWithLabels()
+    approxVisual.drawLabeledSolution()

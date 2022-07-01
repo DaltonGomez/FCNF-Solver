@@ -1,4 +1,4 @@
-from AntColony.AntColonyResults import AntResultsExperiment
+from AntColony.AntColonyResults import AntColonyResults
 
 """
 RUN COMMAND:
@@ -13,7 +13,7 @@ if __name__ == "__main__":
         "25-1-1",
     ]
 
-    experiment = AntResultsExperiment(networkList, numAnts, numEpisodes)
+    experiment = AntColonyResults(networkList, numAnts, numEpisodes)
     experiment.runExperiment()
 
 """
