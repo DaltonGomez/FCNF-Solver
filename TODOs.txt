@@ -1,0 +1,64 @@
+TODOS & NOTES:
+
+GENERAL/NETWORK/SOLVERS:
+=====================================
+# TODO - Update README with documentation
+# TODO - Add unit tests
+# TODO - Optimize redundant data structures and algorithm calls
+# TODO - Update CPLEX solver class to append a log file on disc, allowing the best found so far and percent gap to be read during runtime
+# TODO - Try the CPLEX library instead of docplex (Lower level library => Less intuitive modeling but faster Python to CPLEX data transfer)
+# TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
+# TODO - Use SimCCS source and sink data to generate capacity distributions to sample in network generation
+# TODO - Add parallelism to the alpha-relaxed solver to decrease runtime speed
+
+
+ALPHA GENETIC ALGORITHM:
+=====================================
+# TODO - Break out GA operators as interfaces via a strategy pattern
+# TODO - If initializing all arcs within an edge to be the same alpha values, reduce the alpha table to 1-dimensional
+# TODO - Implement a random per edge nudge mutation
+# TODO - Use a brief, interrupted run of CPLEX-MILP to generate initial alpha values for the population
+# TODO - Add a daemon update that updates X individual's alpha values by nudging down arc's in the global best and up otherwise (proportional to the assigned flow)
+# TODO - Add a daemon update that updates each individual's alpha values with up/down nudges based on the assigned flow in the individual's previous solution (to drive out low flow edges)
+# TODO - Anneal hyperparameters over time
+# TODO - Implement Pandas Dataframes and MatPlotLib to visualize algorithm properties (i.e. convergences, etc.)
+# TODO - Run tuning and results experiments
+# TODO - Measure population diversity at genotypic and phenotypic levels
+# TODO - Do sensitivity/perturbation analysis on alpha values
+# TODO - Correct pathing (if determined to be a potentially effective operator)
+>> Recommended Pseudocode for Computing Pathlets:
+    >> On a copy of the network:
+        >> for node in nodes:
+            >> if node.degree == 2 and node.type != src/sink:
+                >> collapseEdges(node.edges)
+                >> remove(node)
+            >> return pathlet graph as (remaining nodes, collapsed edges, dict[collapsedEdge] = listOfOriginalEdges)
+
+
+ANT COLONY OPTIMIZATION ALGORITHM:
+=====================================
+# TODO - Determine if source/sink arcs should have special pheromone deposition and/or "goodness" of arc calculations
+# TODO - Update behavior to preferentially select arcs with opposing flows as those are cost saving (in the post-processing)
+# TODO - Revise the post-processing to cancel opposing flows so that it handles parallel arcs
+# TODO - Adapt to account for parallel arcs (i.e. more than one possible edge capacity) and test on parallel edges
+# TODO - Implement a termination criteria based on convergence, not just number of episodes/generations
+# TODO - Run the ants in parallel
+# TODO - Construct feasibility proof of the solution returned by an ant
+# TODO - Attempt to prove the convergence of the colony's solution in the limit
+# TODO - Consider adding some annealing schedules to hyperparameters to reset the amount of exploration
+# TODO - Clean up ant experiments to resemble the GA experiments
+# TODO - Improve the hyperparameter tuning method and increase the search space
+# TODO - Analyze time constraints
+# TODO - Revisit and test pheromone deposition and arc "goodness" equations
+>> Should "goodness" equation be, G(e) = cap(e) / (FC(e) + VC(e) * cap(e)), as this would be flow/$ if the pipeline was at capacity.
+
+
+GA/ACO INTEGRATION:
+=====================================
+>> Use the ants to determine paths/trim input graph and then use the GA to refine, potentially as an iterative process until convergence.
+
+
+OTHER FUTURE IDEAS:
+=====================================
+>> Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
+>> Use the dynamic nature of ACO for the sink capacity uncertainty

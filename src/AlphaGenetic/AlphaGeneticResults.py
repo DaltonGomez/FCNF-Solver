@@ -12,7 +12,7 @@ from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 class AlphaGeneticResults:
     """Class that defines an Alpha Genetic Results object, used for experimenting on the tuned AlphaGenetic Population"""
-
+    # TODO - Rename AlphaGeneticDriver and rework class
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================

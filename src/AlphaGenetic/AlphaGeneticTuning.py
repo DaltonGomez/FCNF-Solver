@@ -12,7 +12,7 @@ from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 class AlphaGeneticTuning:
     """Class that defines a Tuning Experiment object, used for finding the optimal hyperparameters of the Alpha GA"""
-
+    # TODO - Rework class
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================

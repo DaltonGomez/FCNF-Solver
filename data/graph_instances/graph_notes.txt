@@ -94,3 +94,22 @@ clusterRadiusRange = (10, 20)
 isSrcSinkCapacitated = True
 srcCapRange = (1, 10)
 sinkCapRange = (5, 20)
+
+___________________
+massive_n
+===================
+# Input parameters
+name = "massive_" + str(n)
+numNodes = 500
+numSources = 50
+numSinks = 50
+# Cluster parameters
+minSourceClusters = 8
+sourcesPerClusterRange = (5, 10)
+minSinkClusters = 8
+sinksPerClusterRange = (5, 10)
+clusterRadiusRange = (10, 20)
+# Source/sink cap ranges
+isSrcSinkCapacitated = True
+srcCapRange = (5, 20)
+sinkCapRange = (5, 20)

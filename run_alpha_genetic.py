@@ -22,27 +22,27 @@ if __name__ == "__main__":
     pop = Population(graph, minTargetFlow)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=100, numGenerations=100, initializationStrategy="perEdge",
+    pop.setPopulationHyperparams(populationSize=10, numGenerations=5, initializationStrategy="perEdge",
                                  initializationDistribution="digital", initializationParams=[0.0, 200000.0])
-    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=5)
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", replacementStrategy="replaceWeakestTwo", crossoverRate=1.0,
                                 crossoverAttemptsPerGeneration=3)
     pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20)
 
     # Timestamp the start of the GA evolution
     gaStartTime = datetime.now()
-    print("Solving the " + graphName + " graph with a GA population of " + str(pop.populationSize) + " for " + str(pop.numGenerations) + " generations...")
-    print("GA Start: " + str(gaStartTime))
+    print("\n\nSolving the " + graphName + " graph with a GA population of " + str(pop.populationSize) + " for " + str(pop.numGenerations) + " generations...")
+    print("GA Start: " + str(gaStartTime) + "\n")
 
     # Solve the Alpha-GA
     solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
-    print("Best solution found = " + str(solutionTuple[0]))
+    print("\nBest solution found = " + str(solutionTuple[0]))
     solVis = SolutionVisualizer(solutionTuple[1])
     solVis.drawLabeledSolution(leadingText="GA_best_")
 
     # Timestamp the finish of the GA evolution/start of the optimal MILP solver
     gaFinishOptStart = datetime.now()
-    print("GA Finish/OPT Start: " + str(gaFinishOptStart))
+    print("\nGA Finish/OPT Start: " + str(gaFinishOptStart))
     gaRuntime = gaFinishOptStart - gaStartTime
     print("GA Runtime in Minutes: " + str(gaRuntime.seconds / 60))
 
@@ -55,8 +55,8 @@ if __name__ == "__main__":
 
     # Timestamp the finish of the optimal MILP solver
     optFinish = datetime.now()
-    print("OPT Finish: " + str(optFinish))
+    print("\nOPT Finish: " + str(optFinish))
     optRuntime = optFinish - gaFinishOptStart
     print("OPT Runtime in Minutes: " + str(optRuntime.seconds / 60))
 
-    print("Program complete! Terminating...")
+    print("\n\nProgram complete! Terminating...")
