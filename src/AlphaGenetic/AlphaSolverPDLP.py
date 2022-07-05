@@ -8,14 +8,14 @@ from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 class AlphaSolverPDLP:
     """Class that solves an alpha-relaxed instance approximately via a PDLP gradient descent solver from Google"""
 
-    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isSrcSinkConstrained=True, isSrcSinkCharged=False,
-                 isOptimizedArcSelections=True):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isSourceSinkCapacitated=True,
+                 isSourceSinkCharged=False, isOptimizedArcSelections=True):
         """Constructor of a AlphaSolverPDLP instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph to solve optimally
         self.minTargetFlow: float = minTargetFlow  # Target flow that the solution must capture
-        self.isSrcSinkConstrained: bool = isSrcSinkConstrained  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
-        self.isSrcSinkCharged: bool = isSrcSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
+        self.isSourceSinkCapacitated: bool = isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
+        self.isSourceSinkCharged: bool = isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver attributes
         self.solver: pywraplp.Solver = pywraplp.Solver.CreateSolver(
             "PDLP")  # Solver object acting as a wrapper to Google OR-Tools PDLP solver
@@ -175,33 +175,6 @@ class AlphaSolverPDLP:
             if self.graph.possibleArcCapsArray[arcCapIndex] >= totalAssignedFlow:
                 return arcCapIndex
 
-    def writeSolution(self) -> FlowNetworkSolution:
-        """Saves the solution instance"""
-        if self.isRun is False:
-            print("You must run the solver before building a solution!")
-        elif self.status == pywraplp.Solver.OPTIMAL:
-            print("Building solution...")
-            objValue = self.solver.Objective().Value()
-            srcFlows = self.getSrcFlowsList()
-            sinkFlows = self.getSinkFlowsList()
-            arcFlows = self.getArcFlowsDict()
-            if self.isOptimizedArcSelections is True:
-                arcFlows = self.optimizeArcSelection(arcFlows)
-            self.trueCost = self.calculateTrueCost()
-            thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, self.trueCost,
-                                               srcFlows, sinkFlows, arcFlows, "gor_PDLP", False,
-                                               self.isSrcSinkConstrained, self.isSrcSinkCharged)
-            print("Solution built!")
-            return thisSolution
-        else:
-            print("No feasible solution exists!")
-
-    def resetSolver(self) -> None:
-        """Resets all the output data structures of the solver (but model variables and constraints remain)"""
-        self.status = None
-        self.isRun = False
-        self.trueCost = 0.0
-
     def calculateTrueCost(self) -> float:
         """Calculates the true cost of the alpha-relaxed LP's output with the true discrete FCNF objective function"""
         srcFlows = self.getSrcFlowsList()
@@ -210,7 +183,7 @@ class AlphaSolverPDLP:
         if self.isOptimizedArcSelections is True:
             arcFlows = self.optimizeArcSelection(arcFlows)
         trueCost = 0.0
-        if self.isSrcSinkCharged is True:
+        if self.isSourceSinkCharged is True:
             for s in range(self.graph.numSources):
                 trueCost += self.graph.sourceVariableCostsArray[s] * srcFlows[s]
             for t in range(self.graph.numSinks):
@@ -249,6 +222,33 @@ class AlphaSolverPDLP:
         for t in range(self.graph.numSinks):
             sinkFlows.append(self.solver.LookupVariable("t_" + str(t)).SolutionValue())
         return sinkFlows
+
+    def writeSolution(self) -> FlowNetworkSolution:
+        """Writes the solution instance"""
+        if self.isRun is False:
+            print("You must run the solver before building a solution!")
+        elif self.status == pywraplp.Solver.OPTIMAL:
+            print("Building solution from solver...")
+            objValue = self.solver.Objective().Value()
+            srcFlows = self.getSrcFlowsList()
+            sinkFlows = self.getSinkFlowsList()
+            arcFlows = self.getArcFlowsDict()
+            if self.isOptimizedArcSelections is True:
+                arcFlows = self.optimizeArcSelection(arcFlows)
+            self.trueCost = self.calculateTrueCost()
+            thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, self.trueCost,
+                                               srcFlows, sinkFlows, arcFlows, "gor_PDLP", False,
+                                               self.isSourceSinkCapacitated, self.isSourceSinkCharged)
+            print("Solution built!")
+            return thisSolution
+        else:
+            print("No feasible solution exists!")
+
+    def resetSolver(self) -> None:
+        """Resets all the output data structures of the solver (but model variables and constraints remain)"""
+        self.status = None
+        self.isRun = False
+        self.trueCost = 0.0
 
     def printSolverOverview(self) -> None:
         """Prints the most important and concise details of the solver, model and solution"""

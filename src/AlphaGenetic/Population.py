@@ -354,13 +354,7 @@ class Population:
 
     def writeIndividualsSolution(self, individual: Individual) -> FlowNetworkSolution:
         """Writes the individual's output to as solution object"""
-        solution = None
-        if individual.isSolved is True:
-            solution = FlowNetworkSolution(self.graph, self.minTargetFlow, individual.fakeCost, individual.trueCost,
-                                individual.srcFlows, individual.sinkFlows, individual.arcFlows, "alphaGA", False,
-                                self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged)
-        else:
-            print("An unsolved individual cannot write a solution!")
+        solution = individual.writeIndividualAsSolution(self.minTargetFlow)
         return solution
 
     def resetOutputFields(self) -> None:

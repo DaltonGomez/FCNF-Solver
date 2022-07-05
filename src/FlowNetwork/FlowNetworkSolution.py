@@ -10,7 +10,7 @@ class FlowNetworkSolution:
 
     def __init__(self, graph: CandidateGraph, minTargetFlow: float, objectiveValue: float, trueCost: float,
                  sourceFlows: list, sinkFlows: list, arcFlows: dict, solvedBy: str, isOneArcPerEdge: bool,
-                 isSrcSinkConstrained: bool, isSrcSinkCharged: bool, optionalDescription=""):
+                 isSourceSinkCapacitated: bool, isSourceSinkCharged: bool, optionalDescription=""):
         """Constructor of a flow network solution instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph that the flow network solution solves
@@ -25,8 +25,8 @@ class FlowNetworkSolution:
         self.name: str = "soln-" + self.graph.name + "_" + str(int(self.minTargetFlow)) + "_" + str(int(self.trueCost)) + solvedBy  # Solution name for saving
         self.solvedBy: str = solvedBy  # Solver method
         self.isOneArcPerEdge: bool = isOneArcPerEdge  # Boolean indicating if the solver considered the constraint that only opens one arc per edge (MILP only)
-        self.isSrcSinkConstrained: bool = isSrcSinkConstrained  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
-        self.isSrcSinkCharged: bool = isSrcSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
+        self.isSourceSinkCapacitated: bool = isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
+        self.isSourceSinkCharged: bool = isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         self.optionalDescription: str = optionalDescription  # Optional keyword argument to contain additional explanation as needed
 
     # =================================================

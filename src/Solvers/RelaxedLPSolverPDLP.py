@@ -8,13 +8,13 @@ from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 class RelaxedLPSolverPDLP:
     """Class that solves an alpha-relaxed instance approximately via a PDLP gradient descent solver from Google OR-Tools"""
 
-    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isSrcSinkConstrained=True, isSrcSinkCharged=False):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isSourceSinkCapacitated=True, isSourceSinkCharged=False):
         """Constructor of a AlphaSolverPDLP instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph to solve optimally
         self.minTargetFlow: float = minTargetFlow  # Target flow that the solution must capture
-        self.isSrcSinkConstrained: bool = isSrcSinkConstrained  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
-        self.isSrcSinkCharged: bool = isSrcSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
+        self.isSourceSinkCapacitated: bool = isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
+        self.isSourceSinkCharged: bool = isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver attributes
         self.solver: pywraplp.Solver = pywraplp.Solver.CreateSolver("PDLP")  # Solver object acting as a wrapper to Google OR-Tools PDLP solver
         self.status = None  # Captures the returned value of solving the solver object
@@ -152,7 +152,7 @@ class RelaxedLPSolverPDLP:
             self.trueCost = self.calculateTrueCost()
             thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, self.trueCost,
                                                srcFlows, sinkFlows, arcFlows, "gor_PDLP", False,
-                                               self.isSrcSinkConstrained, self.isSrcSinkCharged)
+                                               self.isSourceSinkCapacitated, self.isSourceSinkCharged)
             # print("Solution built!")  # PRINT OPTION
             return thisSolution
         else:
@@ -170,7 +170,7 @@ class RelaxedLPSolverPDLP:
         sinkFlows = self.getSinkFlowsList()
         arcFlows = self.getArcFlowsDict()
         trueCost = 0.0
-        if self.isSrcSinkCharged is True:
+        if self.isSourceSinkCharged is True:
             for s in range(self.graph.numSources):
                 trueCost += self.graph.sourceVariableCostsArray[s] * srcFlows[s]
             for t in range(self.graph.numSinks):

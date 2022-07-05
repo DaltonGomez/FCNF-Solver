@@ -9,15 +9,15 @@ from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 class MILPsolverCPLEX:
     """Class that solves a candidate graph instance optimally via a MILP model within CPLEX"""
 
-    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneArcPerEdge=True, isSrcSinkConstrained=True,
-                 isSrcSinkCharged=False):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneArcPerEdge=True, isSourceSinkCapacitated=True,
+                 isSourceSinkCharged=False):
         """Constructor of a MILPsolverCPLEX instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph to solve optimally
         self.minTargetFlow: float = minTargetFlow  # Target flow that the solution must capture
         self.isOneArcPerEdge: bool = isOneArcPerEdge  # Boolean indicating if the solver considered the constraint that only opens one arc per edge (MILP only)
-        self.isSrcSinkConstrained: bool = isSrcSinkConstrained  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
-        self.isSrcSinkCharged: bool = isSrcSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
+        self.isSourceSinkCapacitated: bool = isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
+        self.isSourceSinkCharged: bool = isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver model
         self.model: Model = Model(name="FCFN-MILP-Solvers", log_output=False, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
         self.isRun: bool = False  # Boolean indicating if the solver has been run
@@ -166,7 +166,7 @@ class MILPsolverCPLEX:
             arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
             thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, objValue, srcFlows,
                                                sinkFlows, arcFlows, "cplex_milp", self.isOneArcPerEdge,
-                                               self.isSrcSinkConstrained, self.isSrcSinkCharged,
+                                               self.isSourceSinkCapacitated, self.isSourceSinkCharged,
                                                optionalDescription=str(self.model.get_solve_details()))
             # print("Solution built!")  # PRINT OPTION
             return thisSolution
