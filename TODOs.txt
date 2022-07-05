@@ -25,7 +25,7 @@ ALPHA GENETIC ALGORITHM:
 # TODO - Run tuning and results experiments
 # TODO - Measure population diversity at genotypic and phenotypic levels
 # TODO - Do sensitivity/perturbation analysis on alpha values
-# TODO - Correct pathing (if determined to be a potentially effective operator)
+# TODO - Correct pathing (if path based operators prove to be effective)
 >> Recommended Pseudocode for Computing Pathlets:
     >> On a copy of the network:
         >> for node in nodes:
