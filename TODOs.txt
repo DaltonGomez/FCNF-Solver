@@ -62,3 +62,10 @@ OTHER FUTURE IDEAS:
 =====================================
 >> Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
 >> Use the dynamic nature of ACO for the sink capacity uncertainty
+
+
+VERSIONS (AS BRANCHES):
+=====================================
+>> main -> The most current development of the FCNF-Solver for the Genetic Algorithm matheuristic paper
+>> VERSION_2 -> FCNF-Solver prior to data structure optimizations and design pattern revisions
+>> VERSION_1 -> An initial development of the FCNF-Solver with a drastically different architecture than the main

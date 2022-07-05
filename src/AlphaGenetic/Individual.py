@@ -48,9 +48,9 @@ class Individual:
         self.arcsOpened = {}
         self.srcFlows = []
         self.sinkFlows = []
-        self.paths = []
         self.trueCost = 0.0
         self.fakeCost = 0.0
+        self.paths = []
 
     def resetCostValues(self) -> None:
         """Resets just the cost values (i.e. fitness) of the individual"""
