@@ -125,9 +125,9 @@ class AlphaSolverPDLP:
         # Write new objective function
         if self.graph.isSourceSinkCharged is True:
             self.solver.Minimize(
-                sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) * (
-                            self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
-                            self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
+                sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) *
+                        (self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
+                        self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
                     for i in range(self.graph.numEdges)
                     for j in range(self.graph.numArcsPerEdge)) +
                 sum(self.solver.LookupVariable("s_" + str(s)) * self.graph.sourceVariableCostsArray[s]
@@ -149,10 +149,9 @@ class AlphaSolverPDLP:
         self.isRun = True
         # print("Solver execution complete...\n")
 
-    def optimizeArcSelection(self, rawArcFlows: dict) -> tuple:
+    def optimizeArcSelection(self, rawArcFlows: dict) -> dict:
         """Iterates over all opened edges and picks the arc capacity that best fits the assigned flow"""
         optimalArcFlows = {}
-        optimalArcsOpened = {}
         # Iterate over all edges in the candidate graph
         for edgeIndex in range(self.graph.numEdges):
             thisEdgeFlow = 0.0
@@ -166,11 +165,9 @@ class AlphaSolverPDLP:
                 arcKeyTuple = (edgeIndex, arcIndex)
                 if arcIndex == optimalCapIndex and thisEdgeFlow > 0.0:
                     optimalArcFlows[arcKeyTuple] = thisEdgeFlow
-                    optimalArcsOpened[arcKeyTuple] = 1
                 else:
                     optimalArcFlows[arcKeyTuple] = 0.0
-                    optimalArcsOpened[arcKeyTuple] = 0
-        return optimalArcFlows, optimalArcsOpened
+        return optimalArcFlows
 
     def getOptimalArcCapIndex(self, totalAssignedFlow: float) -> int:
         """Returns the optimal arc capacity for the edge based on the total assigned flow"""
@@ -188,15 +185,12 @@ class AlphaSolverPDLP:
             srcFlows = self.getSrcFlowsList()
             sinkFlows = self.getSinkFlowsList()
             arcFlows = self.getArcFlowsDict()
-            arcsOpen = self.getArcsOpenDict()
             if self.isOptimizedArcSelections is True:
-                optimizedArcsTuple = self.optimizeArcSelection(arcFlows)
-                arcFlows = optimizedArcsTuple[0]
-                arcsOpen = optimizedArcsTuple[1]
+                arcFlows = self.optimizeArcSelection(arcFlows)
             self.trueCost = self.calculateTrueCost()
             thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, self.trueCost,
-                                               srcFlows, sinkFlows, arcFlows, arcsOpen, "gor_PDLP",
-                                               False, self.isSrcSinkConstrained, self.isSrcSinkCharged)
+                                               srcFlows, sinkFlows, arcFlows, "gor_PDLP", False,
+                                               self.isSrcSinkConstrained, self.isSrcSinkCharged)
             print("Solution built!")
             return thisSolution
         else:
@@ -213,11 +207,8 @@ class AlphaSolverPDLP:
         srcFlows = self.getSrcFlowsList()
         sinkFlows = self.getSinkFlowsList()
         arcFlows = self.getArcFlowsDict()
-        arcsOpen = self.getArcsOpenDict()
         if self.isOptimizedArcSelections is True:
-            optimizedArcsTuple = self.optimizeArcSelection(arcFlows)
-            arcFlows = optimizedArcsTuple[0]
-            arcsOpen = optimizedArcsTuple[1]
+            arcFlows = self.optimizeArcSelection(arcFlows)
         trueCost = 0.0
         if self.isSrcSinkCharged is True:
             for s in range(self.graph.numSources):
@@ -226,7 +217,7 @@ class AlphaSolverPDLP:
                 trueCost += self.graph.sinkVariableCostsArray[t] * sinkFlows[t]
         for edge in range(self.graph.numEdges):
             for cap in range(self.graph.numArcsPerEdge):
-                if arcsOpen[(edge, cap)] == 1:
+                if arcFlows[(edge, cap)] > 0.0:
                     arcVariableCost = self.graph.getArcVariableCostFromEdgeCapIndices(edge, cap)
                     arcFixedCost = self.graph.getArcFixedCostFromEdgeCapIndices(edge, cap)
                     trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
@@ -244,18 +235,6 @@ class AlphaSolverPDLP:
                 thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
                 arcFlows[(edge, cap)] = thisFlow
         return arcFlows
-
-    def getArcsOpenDict(self) -> dict:
-        """Returns the dictionary of arcs opened with key (edgeIndex, capIndex)"""
-        arcsOpen = {}
-        for edge in range(self.graph.numEdges):
-            for cap in range(self.graph.numArcsPerEdge):
-                thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
-                if thisFlow > 0:
-                    arcsOpen[(edge, cap)] = 1
-                else:
-                    arcsOpen[(edge, cap)] = 0
-        return arcsOpen
 
     def getSrcFlowsList(self) -> list:
         """Returns the list of source flows"""

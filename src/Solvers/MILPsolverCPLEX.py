@@ -164,9 +164,8 @@ class MILPsolverCPLEX:
             srcFlows = self.model.solution.get_value_list(self.sourceFlowVars)
             sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
             arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
-            arcsOpen = self.model.solution.get_value_dict(self.arcOpenedVars)
             thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, objValue, srcFlows,
-                                               sinkFlows, arcFlows, arcsOpen, "cplex_milp", self.isOneArcPerEdge,
+                                               sinkFlows, arcFlows, "cplex_milp", self.isOneArcPerEdge,
                                                self.isSrcSinkConstrained, self.isSrcSinkCharged,
                                                optionalDescription=str(self.model.get_solve_details()))
             # print("Solution built!")  # PRINT OPTION

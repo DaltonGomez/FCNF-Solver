@@ -149,11 +149,10 @@ class RelaxedLPSolverPDLP:
             srcFlows = self.getSrcFlowsList()
             sinkFlows = self.getSinkFlowsList()
             arcFlows = self.getArcFlowsDict()
-            arcsOpen = self.getArcsOpenDict()
             self.trueCost = self.calculateTrueCost()
             thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, self.trueCost,
-                                               srcFlows, sinkFlows, arcFlows, arcsOpen, "gor_PDLP",
-                                               False, self.isSrcSinkConstrained, self.isSrcSinkCharged)
+                                               srcFlows, sinkFlows, arcFlows, "gor_PDLP", False,
+                                               self.isSrcSinkConstrained, self.isSrcSinkCharged)
             # print("Solution built!")  # PRINT OPTION
             return thisSolution
         else:
@@ -170,7 +169,6 @@ class RelaxedLPSolverPDLP:
         srcFlows = self.getSrcFlowsList()
         sinkFlows = self.getSinkFlowsList()
         arcFlows = self.getArcFlowsDict()
-        arcsOpen = self.getArcsOpenDict()
         trueCost = 0.0
         if self.isSrcSinkCharged is True:
             for s in range(self.graph.numSources):
@@ -179,7 +177,7 @@ class RelaxedLPSolverPDLP:
                 trueCost += self.graph.sinkVariableCostsArray[t] * sinkFlows[t]
         for edge in range(self.graph.numEdges):
             for cap in range(self.graph.numArcsPerEdge):
-                if arcsOpen[(edge, cap)] == 1:
+                if arcFlows[(edge, cap)] > 0.0:
                     arcVariableCost = self.graph.getArcVariableCostFromEdgeCapIndices(edge, cap)
                     arcFixedCost = self.graph.getArcFixedCostFromEdgeCapIndices(edge, cap)
                     trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
@@ -197,18 +195,6 @@ class RelaxedLPSolverPDLP:
                 thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
                 arcFlows[(edge, cap)] = thisFlow
         return arcFlows
-
-    def getArcsOpenDict(self) -> dict:
-        """Returns the dictionary of arcs opened with key (edgeIndex, capIndex)"""
-        arcsOpen = {}
-        for edge in range(self.graph.numEdges):
-            for cap in range(self.graph.numArcsPerEdge):
-                thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
-                if thisFlow > 0:
-                    arcsOpen[(edge, cap)] = 1
-                else:
-                    arcsOpen[(edge, cap)] = 0
-        return arcsOpen
 
     def getSrcFlowsList(self) -> list:
         """Returns the list of source flows"""

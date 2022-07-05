@@ -338,13 +338,10 @@ class Population:
         # Write expressed network output data to individual
         individual.isSolved = True
         individual.arcFlows = self.solver.getArcFlowsDict()
-        individual.arcsOpened = self.solver.getArcsOpenDict()
         individual.srcFlows = self.solver.getSrcFlowsList()
         individual.sinkFlows = self.solver.getSinkFlowsList()
         if self.solver.isOptimizedArcSelections is True:
-            optimizedArcsTuple = self.solver.optimizeArcSelection(individual.arcFlows)
-            individual.arcFlows = optimizedArcsTuple[0]
-            individual.arcsOpened = optimizedArcsTuple[1]
+            individual.arcFlows = self.solver.optimizeArcSelection(individual.arcFlows)
         individual.trueCost = self.solver.calculateTrueCost()
         individual.fakeCost = self.solver.getObjectiveValue()
         # If no solution was found, hypermutate individual and recursively solve until solution is found
@@ -360,9 +357,8 @@ class Population:
         solution = None
         if individual.isSolved is True:
             solution = FlowNetworkSolution(self.graph, self.minTargetFlow, individual.fakeCost, individual.trueCost,
-                                individual.srcFlows, individual.sinkFlows, individual.arcFlows, individual.arcsOpened,
-                                "alphaGA", False, self.graph.isSourceSinkCapacitated,
-                                self.graph.isSourceSinkCharged)
+                                individual.srcFlows, individual.sinkFlows, individual.arcFlows, "alphaGA", False,
+                                self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged)
         else:
             print("An unsolved individual cannot write a solution!")
         return solution

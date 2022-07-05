@@ -9,8 +9,8 @@ class FlowNetworkSolution:
     """Class that stores the flow network solution to a candidate graph instance"""
 
     def __init__(self, graph: CandidateGraph, minTargetFlow: float, objectiveValue: float, trueCost: float,
-                 sourceFlows: list, sinkFlows: list, arcFlows: dict, arcsOpened: dict, solvedBy: str,
-                 isOneArcPerEdge: bool, isSrcSinkConstrained: bool, isSrcSinkCharged: bool, optionalDescription=""):
+                 sourceFlows: list, sinkFlows: list, arcFlows: dict, solvedBy: str, isOneArcPerEdge: bool,
+                 isSrcSinkConstrained: bool, isSrcSinkCharged: bool, optionalDescription=""):
         """Constructor of a flow network solution instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph that the flow network solution solves
@@ -21,7 +21,6 @@ class FlowNetworkSolution:
         self.sourceFlows: List[float] = sourceFlows  # List of the flow values assigned to each source, indexed the same as the graph.sourcesArray
         self.sinkFlows: List[float] = sinkFlows  # List of the flow values assigned to each sink, indexed the same as the graph.sinksArray
         self.arcFlows: Dict[Tuple[int, int], float] = arcFlows  # Dictionary mapping (edgeIndex, arcIndex) keys to assigned flow values
-        self.arcsOpened: Dict[Tuple[int, int], int] = arcsOpened  # Dictionary mapping (edgeIndex, arcIndex) keys to 0/1 value of if the arc was opened in the solution
         # Metadata/Conditions/Generalizations
         self.name: str = "soln-" + self.graph.name + "_" + str(int(self.minTargetFlow)) + "_" + str(int(self.trueCost)) + solvedBy  # Solution name for saving
         self.solvedBy: str = solvedBy  # Solver method

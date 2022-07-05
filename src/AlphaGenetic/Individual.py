@@ -23,7 +23,6 @@ class Individual:
         # Expressed FlowNetwork (a.k.a. the phenotype of the individual)
         self.isSolved: bool = False  # Flip true when a relaxed-LP solver runs/returns solution data; flip false when the alpha values array is modified
         self.arcFlows: Dict[Tuple[int, int], float] = {}  # Dictionary mapping (edgeIndex, capIndex) keys to values of assigned flow
-        self.arcsOpened: Dict[Tuple[int, int], int] = {}  # Dictionary mapping (edgeIndex, capIndex) keys to values of 0/1 integers if an arc was opened
         self.srcFlows: List[float] = []  # List of assigned flows on each source, where indices match graph.sourcesArray
         self.sinkFlows: List[float] = []  # List of assigned flows on each sink, where indices match graph.sourcesArray
         # Returned Cost (a.k.a. the fitness of the individual)
@@ -44,10 +43,9 @@ class Individual:
     def resetOutputNetwork(self) -> None:
         """Resets the expressed network (i.e. phenotype) output data in the individual"""
         self.isSolved = False
-        self.arcFlows = {}
-        self.arcsOpened = {}
         self.srcFlows = []
         self.sinkFlows = []
+        self.arcFlows = {}
         self.trueCost = 0.0
         self.fakeCost = 0.0
         self.paths = []
