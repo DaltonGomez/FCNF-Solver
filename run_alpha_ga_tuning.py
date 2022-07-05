@@ -1,4 +1,4 @@
-from src.AlphaGenetic.AlphaGeneticTuning import AlphaGeneticTuning
+from Utilities.old_code.OLD_AlphaGeneticTuning import AlphaGeneticTuning
 
 """
 RUN COMMAND:

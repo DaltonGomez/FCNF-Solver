@@ -4,12 +4,12 @@ GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Update README with documentation
 # TODO - Add unit tests
-# TODO - Optimize redundant data structures and algorithm calls
 # TODO - Update CPLEX solver class to append a log file on disc, allowing the best found so far and percent gap to be read during runtime
 # TODO - Try the CPLEX library instead of docplex (Lower level library => Less intuitive modeling but faster Python to CPLEX data transfer)
 # TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
 # TODO - Use SimCCS source and sink data to generate capacity distributions to sample in network generation
 # TODO - Add parallelism to the alpha-relaxed solver to decrease runtime speed
+# DONE - Optimize redundant data structures and algorithm calls
 
 
 ALPHA GENETIC ALGORITHM:

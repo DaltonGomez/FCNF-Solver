@@ -1,4 +1,4 @@
-from src.AlphaGenetic.AlphaGeneticResults import AlphaGeneticResults
+from Utilities.old_code.OLD_AlphaGeneticResults import AlphaGeneticResults
 
 """
 RUN COMMAND:

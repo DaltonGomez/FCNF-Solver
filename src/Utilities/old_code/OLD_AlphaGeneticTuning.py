@@ -4,7 +4,7 @@ import os
 import random
 from datetime import datetime
 
-from Utilities.old_code.OLDGraphMaker import GraphMaker
+from Utilities.old_code.OLD_GraphMaker import GraphMaker
 from src.AlphaGenetic.Population import Population
 from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX

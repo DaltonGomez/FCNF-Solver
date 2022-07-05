@@ -10,7 +10,7 @@ class MILPsolverCPLEX:
     """Class that solves a candidate graph instance optimally via a MILP model within CPLEX"""
 
     def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneArcPerEdge=True, isSourceSinkCapacitated=True,
-                 isSourceSinkCharged=False):
+                 isSourceSinkCharged=False, logOutput=False):
         """Constructor of a MILPsolverCPLEX instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph to solve optimally
@@ -19,7 +19,7 @@ class MILPsolverCPLEX:
         self.isSourceSinkCapacitated: bool = isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
         self.isSourceSinkCharged: bool = isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver model
-        self.model: Model = Model(name="FCFN-MILP-Solvers", log_output=False, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
+        self.model: Model = Model(name="FCFN-MILP-Solvers", log_output=logOutput, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
         self.isRun: bool = False  # Boolean indicating if the solver has been run
         # Decision variables
         self.sourceFlowVars: List[float] = []  # List of the flow values assigned to each source, indexed the same as the graph.sourcesArray
@@ -146,6 +146,13 @@ class MILPsolverCPLEX:
                                             sum(self.arcOpenedVars[(m, n)] * self.graph.getArcFixedCostFromEdgeCapIndices(m, n)
                                                 for m in range(self.graph.numEdges)
                                                 for n in range(self.graph.numArcsPerEdge)))
+
+    def setTimeLimit(self, timeLimitInSeconds: int) -> None:
+        """Sets the time limit, in seconds, for the CPLEX MILP model to run"""
+        print("Setting CPLEX time limit to " + str(timeLimitInSeconds) + " seconds...")
+        self.model.set_time_limit(timeLimitInSeconds)
+
+
 
     def solveModel(self) -> None:
         """Solves the MILP model in CPLEX"""

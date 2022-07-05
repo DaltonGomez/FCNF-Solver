@@ -1,7 +1,7 @@
 import math
 import random
 
-from Utilities.old_code.OLDGraphMaker import GraphMaker
+from Utilities.old_code.OLD_GraphMaker import GraphMaker
 from src.AntColony.AntColonyResults import AntColonyResults
 
 """
