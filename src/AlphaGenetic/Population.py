@@ -1,6 +1,5 @@
 import random
 import sys
-from datetime import datetime
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -25,7 +24,6 @@ class Population:
         """Constructor of a Population instance"""
         # Input Attributes
         self.graph: CandidateGraph = graph  # Input candidate graph instance to be solved
-        self.isOneDimAlphaTable = isOneDimAlphaTable  # Boolean indicating if the alpha table is only one dimensional (i.e. only one arc per edge)
         self.minTargetFlow: float = minTargetFlow  # Input target flow to be realized in output solution
         # Population & Solver Instance Objects
         self.population: List[Individual] = []  # List of Individual objects
@@ -42,6 +40,8 @@ class Population:
         # Global hyperparameters
         self.populationSize: int = populationSize  # Defines the number of individuals in the population
         self.numGenerations: int = numGenerations  # Defines the number of iterations the evolution loop will run for
+        self.isOneDimAlphaTable = isOneDimAlphaTable  # Boolean indicating if the alpha table is only one dimensional (i.e. only one arc per edge)
+        self.isOptimizedArcSelections = isOptimizedArcSelections  # Boolean indicating post-processing individuals to best fit the assigned flow to a capacity
         # Initialization HPs
         self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
         self.stagnationPeriod = 5
@@ -76,27 +76,35 @@ class Population:
     # ====================================================
     def setPopulationHyperparams(self, populationSize=10, numGenerations=10,
                                  terminationMethod="setGenerations", stagnationPeriod=5,
-                                 initializationStrategy="perEdge", initializationDistribution="digital",
-                                 initializationParams=(0.0, 100000.0)) -> None:
+                                 isOneDimAlphaTable=True, isOptimizedArcSelections=True) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
         :param int numGenerations: Number of iterations the population evolves for
         :param str terminationMethod: One of following: {"setGenerations", "stagnationPeriod"}
         :param int stagnationPeriod: Number of stagnant consecutive generations needed for termination
-        :param str initializationStrategy: One of following: {"perEdge", "perArc"}
-        :param str initializationDistribution: One of following: {"uniform", "gaussian", "digital"}
-        :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian; low and high value if digital
+        :param bool isOneDimAlphaTable: Boolean indicating if the alpha table will be reduced to 1-dimension
+        :param bool isOptimizedArcSelections: Boolean indicating if post-processing will fit assigned flows to optimal capacity
         """
         self.populationSize = populationSize
         self.terminationMethod = terminationMethod
         self.numGenerations = numGenerations
         self.stagnationPeriod = stagnationPeriod
+        self.isOneDimAlphaTable = isOneDimAlphaTable
+        self.isOptimizedArcSelections = isOptimizedArcSelections
+
+    def setInitializationHyperparams(self, initializationStrategy="perEdge", initializationDistribution="digital",
+                                 initializationParams=(0.0, 100000.0)) -> None:
+        """Sets the GA attributes that dictate the initialization/updating of alpha values \n
+        :param str initializationStrategy: One of following: {"perEdge", "perArc"}
+        :param str initializationDistribution: One of following: {"uniform", "gaussian", "digital"}
+        :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian; low and high value if digital
+        """
         self.initializationStrategy = initializationStrategy
         self.initializationDistribution = initializationDistribution
         self.initializationParams = initializationParams
 
     def setIndividualSelectionHyperparams(self, selectionMethod="tournament", tournamentSize=3) -> None:
-        """Sets the GA class fields that dictate how the selection of individuals is carried out \n
+        """Sets the GA attributes that dictate how the selection of individuals is carried out \n
         :param str selectionMethod: One of following: {"tournament", "roulette", "random"}
         :param int tournamentSize: Size of tournament subset used if selectionMethod = "tournament"
         """
@@ -105,7 +113,7 @@ class Population:
 
     def setCrossoverHyperparams(self, crossoverMethod="onePoint", crossoverRate=1.0,
                                 crossoverAttemptsPerGeneration=1, replacementStrategy="replaceWeakestTwo") -> None:
-        """Sets the GA class fields that dictate how the crossover of individuals is carried out \n
+        """Sets the GA attributes that dictate how the crossover of individuals is carried out \n
         :param str crossoverMethod: One of following: {"onePoint", "twoPoint"}
         :param float crossoverRate: Probability in [0,1] that a crossover occurs
         :param int crossoverAttemptsPerGeneration: Number of attempted crossovers per generation
@@ -118,7 +126,7 @@ class Population:
 
     def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20,
                                nudgeParams=(0.0, 1.0)) -> None:
-        """Sets the GA class fields that dictate how the mutation of individuals is carried out \n
+        """Sets the GA attributes that dictate how the mutation of individuals is carried out \n
         :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"}
         :param float mutationRate: Probability in [0,1] that an individual mutates
         :param float perArcEdgeMutationRate: Probability in [0,1] that an edge/arc mutates given that an individual mutates
@@ -132,7 +140,8 @@ class Population:
     # ====================================================
     # ============== EVOLUTION LOOP/METHODS ==============
     # ====================================================
-    def evolvePopulation(self, printGenerations=True, drawing=True, drawLabels=False, isGraphing=True) -> FlowNetworkSolution:
+    def evolvePopulation(self, printGenerations=True, drawing=True, drawLabels=False,
+                         isGraphing=True, runID="") -> FlowNetworkSolution:
         """Evolves the population for a specified number of generations"""
         # Initialize population and solve
         self.initializePopulation()
@@ -162,7 +171,7 @@ class Population:
             generation += 1
         # Plot statistics
         if isGraphing is True:
-            self.plotEvolutionStatistics()
+            self.plotEvolutionStatistics(runID=runID)
         # Return best solution
         return self.bestKnownSolution
 
@@ -538,7 +547,7 @@ class Population:
         self.medianStats.append(np.median(fitnessArray))
         self.stdDevStats.append(np.std(fitnessArray))
 
-    def plotEvolutionStatistics(self) -> None:
+    def plotEvolutionStatistics(self, runID="") -> None:
         """Renders MatPlotLib graphs for each of the evolution statistics lists"""
         # Get generations and build figure/subplots
         generations = list(range(len(self.convergenceStats)))
@@ -564,8 +573,7 @@ class Population:
                             wspace=0.6,
                             hspace=0.4)
         # Save timestamped plot
-        timestamp = datetime.now().strftime("%y-%m-%d-%H-%M-%S")
-        plt.savefig("GeneticEvoStats-" + self.graph.name + "-" + timestamp + ".png")
+        plt.savefig("GeneticEvoStats--" + runID + ".png")
         plt.close(fig)
 
     # ===============================================================
