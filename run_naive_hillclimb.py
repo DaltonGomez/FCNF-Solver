@@ -1,5 +1,5 @@
 from src.AlphaGenetic.Population import Population
-from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.Graph.CandidateGraph import CandidateGraph
 
 """
 RUN COMMAND:

@@ -1,5 +1,5 @@
-from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
+from src.Graph.CandidateGraph import CandidateGraph
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 """

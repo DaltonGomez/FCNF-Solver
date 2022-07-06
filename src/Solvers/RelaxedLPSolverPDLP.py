@@ -1,8 +1,8 @@
 from numpy import ndarray
 from ortools.linear_solver import pywraplp
 
-from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
+from src.Graph.CandidateGraph import CandidateGraph
 
 
 class RelaxedLPSolverPDLP:

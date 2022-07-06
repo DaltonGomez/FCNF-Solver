@@ -2,7 +2,7 @@ import os
 import pickle
 from typing import List, Dict, Tuple
 
-from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.Graph.CandidateGraph import CandidateGraph
 
 
 class FlowNetworkSolution:

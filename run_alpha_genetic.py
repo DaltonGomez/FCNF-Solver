@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from src.AlphaGenetic.Population import Population
-from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
+from src.Graph.CandidateGraph import CandidateGraph
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 """
@@ -13,7 +13,7 @@ py -3.8 run_alpha_genetic.py
 
 if __name__ == "__main__":
     # Load Candidate Graph
-    graphName = "huge_6.p"
+    graphName = "small_2.p"
     graph = CandidateGraph()
     graph = graph.loadCandidateGraph(graphName)
     minTargetFlow = graph.totalPossibleDemand
@@ -22,12 +22,12 @@ if __name__ == "__main__":
     pop = Population(graph, minTargetFlow, isOneDimAlphaTable=True, isOptimizedArcSelections=True)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=25, numGenerations=20, initializationStrategy="perEdge",
-                                 initializationDistribution="digital", initializationParams=[0.0, 200000.0])
-    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
-    pop.setCrossoverHyperparams(crossoverMethod="onePoint", crossoverRate=1.0, crossoverAttemptsPerGeneration=3,
+    pop.setPopulationHyperparams(populationSize=20, numGenerations=20, initializationStrategy="perEdge",
+                                 initializationDistribution="digital", initializationParams=[0.0, 100000.0])
+    pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=4)
+    pop.setCrossoverHyperparams(crossoverMethod="twoPoint", crossoverRate=1.0, crossoverAttemptsPerGeneration=1,
                                 replacementStrategy="replaceWeakestTwo")
-    pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20)
+    pop.setMutationHyperparams(mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.25)
 
     # Timestamp the start of the GA evolution
     gaStartTime = datetime.now()
@@ -35,9 +35,9 @@ if __name__ == "__main__":
     print("GA Start: " + str(gaStartTime) + "\n")
 
     # Solve the Alpha-GA
-    solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=False)
-    print("\nBest solution found = " + str(solutionTuple[0]))
-    solVis = SolutionVisualizer(solutionTuple[1])
+    gaSolution = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=False)
+    print("\nBest solution found = " + str(gaSolution.trueCost))
+    solVis = SolutionVisualizer(gaSolution)
     solVis.drawUnlabeledSolution(leadingText="GA-BEST_")
 
     # Timestamp the finish of the GA evolution/start of the optimal MILP solver

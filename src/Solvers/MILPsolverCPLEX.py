@@ -2,8 +2,8 @@ from typing import List, Dict, Tuple
 
 from docplex.mp.model import Model
 
-from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
+from src.Graph.CandidateGraph import CandidateGraph
 
 
 class MILPsolverCPLEX:

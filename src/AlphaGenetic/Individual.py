@@ -3,8 +3,8 @@ from typing import Dict, Tuple, List
 
 from numpy import ndarray
 
-from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
+from src.Graph.CandidateGraph import CandidateGraph
 
 
 class Individual:
@@ -57,7 +57,6 @@ class Individual:
         if self.isSolved is False:
             print("You must solve the individual before writing a solution!")
         else:
-            print("Writing solution from individual #" + str(self.id) + "...")
             thisSolution = FlowNetworkSolution(self.graph, minTargetFlow, self.fakeCost, self.trueCost,
                                                self.srcFlows, self.sinkFlows, self.arcFlows, "Alpha_GA", False,
                                                self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged,

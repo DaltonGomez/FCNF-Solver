@@ -1,8 +1,8 @@
 from numpy import ndarray
 from ortools.linear_solver import pywraplp
 
-from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
+from src.Graph.CandidateGraph import CandidateGraph
 
 
 class AlphaSolverPDLP:
@@ -257,6 +257,41 @@ class AlphaSolverPDLP:
         self.isRun = True
         # print("Solver execution complete...\n")
 
+    def getArcFlowsDict(self) -> dict:
+        """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""
+        arcFlows = {}
+        # Model if NOT reducing to a one-dimensional alpha table
+        if self.isOneDimAlphaTable is False:
+            for edge in range(self.graph.numEdges):
+                for cap in range(self.graph.numArcsPerEdge):
+                    thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
+                    arcFlows[(edge, cap)] = thisFlow
+        # Model if reducing to a one-dimensional alpha table
+        elif self.isOneDimAlphaTable is True:
+            largestCapIndex = len(self.graph.possibleArcCapsArray) - 1
+            for edge in range(self.graph.numEdges):
+                for cap in range(self.graph.numArcsPerEdge):
+                    # Initialize all dictionary values with zero
+                    arcFlows[(edge, cap)] = 0
+                # Update largest capacity value for this edge
+                thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(-1)).SolutionValue()
+                arcFlows[(edge, largestCapIndex)] = thisFlow
+        return arcFlows
+
+    def getSrcFlowsList(self) -> list:
+        """Returns the list of source flows"""
+        srcFlows = []
+        for s in range(self.graph.numSources):
+            srcFlows.append(self.solver.LookupVariable("s_" + str(s)).SolutionValue())
+        return srcFlows
+
+    def getSinkFlowsList(self) -> list:
+        """Returns the list of sink flows"""
+        sinkFlows = []
+        for t in range(self.graph.numSinks):
+            sinkFlows.append(self.solver.LookupVariable("t_" + str(t)).SolutionValue())
+        return sinkFlows
+
     def optimizeArcSelection(self, rawArcFlows: dict) -> dict:
         """Iterates over all opened edges and picks the arc capacity that best fits the assigned flow"""
         optimalArcFlows = {}
@@ -307,41 +342,6 @@ class AlphaSolverPDLP:
     def getObjectiveValue(self) -> float:
         """Returns the objective value (i.e. fake cost) of the alpha-relaxed LP solver"""
         return self.solver.Objective().Value()
-
-    def getArcFlowsDict(self) -> dict:
-        """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""
-        arcFlows = {}
-        # Model if NOT reducing to a one-dimensional alpha table
-        if self.isOneDimAlphaTable is False:
-            for edge in range(self.graph.numEdges):
-                for cap in range(self.graph.numArcsPerEdge):
-                    thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(cap)).SolutionValue()
-                    arcFlows[(edge, cap)] = thisFlow
-        # Model if reducing to a one-dimensional alpha table
-        elif self.isOneDimAlphaTable is True:
-            largestCapIndex = len(self.graph.possibleArcCapsArray) - 1
-            for edge in range(self.graph.numEdges):
-                for cap in range(self.graph.numArcsPerEdge):
-                    # Initialize all dictionary values with zero
-                    arcFlows[(edge, cap)] = 0
-                # Update largest capacity value for this edge
-                thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(-1)).SolutionValue()
-                arcFlows[(edge, largestCapIndex)] = thisFlow
-        return arcFlows
-
-    def getSrcFlowsList(self) -> list:
-        """Returns the list of source flows"""
-        srcFlows = []
-        for s in range(self.graph.numSources):
-            srcFlows.append(self.solver.LookupVariable("s_" + str(s)).SolutionValue())
-        return srcFlows
-
-    def getSinkFlowsList(self) -> list:
-        """Returns the list of sink flows"""
-        sinkFlows = []
-        for t in range(self.graph.numSinks):
-            sinkFlows.append(self.solver.LookupVariable("t_" + str(t)).SolutionValue())
-        return sinkFlows
 
     def writeSolution(self) -> FlowNetworkSolution:
         """Writes the solution instance"""

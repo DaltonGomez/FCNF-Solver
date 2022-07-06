@@ -7,9 +7,9 @@ from numpy import ndarray
 
 from src.AlphaGenetic.AlphaSolverPDLP import AlphaSolverPDLP
 from src.AlphaGenetic.Individual import Individual
-from src.FlowNetwork.CandidateGraph import CandidateGraph
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
+from src.Graph.CandidateGraph import CandidateGraph
 
 
 class Population:
@@ -123,7 +123,7 @@ class Population:
     # ====================================================
     # ============== EVOLUTION LOOP/METHODS ==============
     # ====================================================
-    def evolvePopulation(self, printGenerations=False, drawing=False, drawLabels=False) -> tuple:
+    def evolvePopulation(self, printGenerations=False, drawing=False, drawLabels=False) -> FlowNetworkSolution:
         """Evolves the population for a specified number of generations"""
         # Initialize Population and Solve
         self.initializePopulation()
@@ -141,12 +141,12 @@ class Population:
             # Visualize & Print
             if printGenerations is True:
                 print("Generation = " + str(generation) + "\tBest Individual = " + str(
-                    bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
+                    bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)) + "\n")
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="GA_Gen" + str(generation) + "_")
             generation += 1
         # Return Best Solution Discovered
-        return self.bestKnownCost, self.bestKnownSolution
+        return self.bestKnownSolution
 
     def selectAndCrossover(self) -> None:
         """Performs the selection and crossover at each generation"""
@@ -385,6 +385,7 @@ class Population:
     # ==============================================
     def mutate(self, individualID: int) -> None:
         """Hyper-selection operator that calls specific mutation method based on hyperparameters"""
+        print("Performing mutation on individual " + str(individualID) + "...")
         if self.mutationMethod == "randomTotal":
             self.hypermutateIndividual(individualID)
         elif self.mutationMethod == "randomSingleArc":
@@ -449,6 +450,7 @@ class Population:
     # =================================================
     def crossover(self, parentOneID: int, parentTwoID: int) -> None:
         """Hyper-selection operator that calls specific crossover method based on hyperparameters"""
+        print("Performing crossover on individual " + str(parentOneID) + " and individual " + str(parentTwoID) + "...")
         if self.crossoverMethod == "onePoint":
             self.randomOnePointCrossover(parentOneID, parentTwoID)
         elif self.crossoverMethod == "twoPoint":
