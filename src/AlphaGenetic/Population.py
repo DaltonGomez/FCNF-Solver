@@ -545,16 +545,16 @@ class Population:
         fig, axs = plt.subplots(2, 2)
         fig.suptitle("Population Fitness Statistics over Generations")
         # Most Fit Individual Subplot
-        axs[0, 0].plot(generations, self.convergenceStats)
+        axs[0, 0].plot(generations, self.convergenceStats, color="b")
         axs[0, 0].set_title("Most Fit")
         # Mean Fitness Subplot
-        axs[0, 1].plot(generations, self.meanStats, "tab:orange")
+        axs[0, 1].plot(generations, self.meanStats, color="r")
         axs[0, 1].set_title("Mean")
         # Std. Dev. Subplot
-        axs[1, 0].plot(generations, self.stdDevStats, "tab:green")
+        axs[1, 0].plot(generations, self.stdDevStats, color="g")
         axs[1, 0].set_title("Std. Dev.")
         # Median Subplot
-        axs[1, 1].plot(generations, self.medianStats, "tab:red")
+        axs[1, 1].plot(generations, self.medianStats, color="m")
         axs[1, 1].set_title("Median")
         # Add spacing
         plt.subplots_adjust(left=0.2,
@@ -564,8 +564,9 @@ class Population:
                             wspace=0.6,
                             hspace=0.4)
         # Save timestamped plot
-        timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
-        plt.savefig("GeneticEvoStats_" + self.graph.name + "_" + timestamp + ".png")
+        timestamp = datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+        plt.savefig("GeneticEvoStats-" + self.graph.name + "-" + timestamp + ".png")
+        plt.close(fig)
 
     # ===============================================================
     # ============== HYPER-MUTATION/HILL CLIMB METHODS ==============

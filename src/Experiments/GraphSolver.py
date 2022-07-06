@@ -1,5 +1,8 @@
 from datetime import datetime
 
+import numpy as np
+from matplotlib import pyplot as plt
+
 from src.AlphaGenetic.Population import Population
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from src.Graph.CandidateGraph import CandidateGraph
@@ -49,9 +52,8 @@ class GraphSolver:
         self.milpCplexSolver: MILPsolverCPLEX = MILPsolverCPLEX(self.graph, self.minTargetFlow,
                                           isOneArcPerEdge=False, logOutput=isOutputtingCPLEX)
 
-        # Execution attributes
+        # Execution and output attributes
         self.geneticRuntimeInSeconds: float = -1
-        self.milpRuntimeInSeconds: float = -1
 
     def solveGraph(self) -> None:
         """Solves the graph with the genetic algorithm and/or the MILP formulation in CPLEX"""
@@ -65,6 +67,7 @@ class GraphSolver:
             gaSolution = self.geneticPop.evolvePopulation(printGenerations=True, drawing=self.isDrawing,
                                                           drawLabels=self.isLabeling, isGraphing=self.isGraphing)
             print("\nGenetic Algorithm Complete!\nBest solution found = " + str(gaSolution.trueCost))
+            # Draw if expected
             if self.isDrawing is True:
                 solVis = SolutionVisualizer(gaSolution)
                 if self.isLabeling is True:
@@ -74,22 +77,86 @@ class GraphSolver:
             # Timestamp and stop the GA
             gaFinishOptStart = datetime.now()
             gaRuntime = gaFinishOptStart - gaStartTime
-            self.geneticRuntimeInSeconds = gaRuntime.seconds
+            self.geneticRuntimeInSeconds = gaRuntime.seconds + gaRuntime.microseconds/1000000
             print("\nGA Runtime (in seconds): " + str(self.geneticRuntimeInSeconds))
         # Solve the MILP formulation in CPLEX
         if self.isSolvedWithCPLEX is True:
+            print("\n============================================================================")
+            print("Solving the " + self.graphName + " graph with a MILP formulation in CPLEX...\n")
             # Set time limit if CPLEX is racing GA
             if self.isRace is True:
                 self.milpCplexSolver.setTimeLimit(self.geneticRuntimeInSeconds)
+            # Call CPLEX to solve MILP
             self.milpCplexSolver.findSolution(printDetails=False)
             print("\nCPLEX MILP Solver Complete!\nBest solution found = " + str(self.milpCplexSolver.getObjectiveValue()))
+            # Draw if expected
             if self.isDrawing is True:
+                print("\nFLAGGING ANY KEY ERRORS FROM CPLEX...")
                 opt = self.milpCplexSolver.writeSolution()
                 optVis = SolutionVisualizer(opt)
                 if self.isLabeling is True:
                     optVis.drawLabeledSolution(leadingText="OPT_")
                 else:
                     optVis.drawUnlabeledSolution(leadingText="OPT_")
-            self.milpRuntimeInSeconds = self.milpCplexSolver.getCplexRuntime()
-            print("CPLEX MILP Runtime (in seconds): " + str(self.milpRuntimeInSeconds))
+            # Print solution details
+            print("\nCPLEX MILP Objective Value: " + str(self.milpCplexSolver.getObjectiveValue()))
+            print("CPLEX Runtime (in seconds): " + str(self.milpCplexSolver.getCplexRuntime()))
+            print("CPLEX Status " + self.milpCplexSolver.getCplexStatus())
+            print("CPLEX Gap: " + str(self.milpCplexSolver.getGap() * 100) + "%")
+            print("CPLEX Best Bound: " + str(self.milpCplexSolver.getBestBound()))
+        if self.isSolvedWithGeneticAlg is True and self.isSolvedWithCPLEX is True and self.isRace is True and self.isGraphing is True:
+            self.plotConvergenceAgainstCPLEX()
         print("\n\nProgram complete... Graph solved!\nTerminating execution...\n")
+
+    def plotConvergenceAgainstCPLEX(self) -> None:
+        """Plots the convergence graph against CPLEX's best found solution and gap/best bound"""
+        # Get generations, CPLEX data and plt figure
+        numGenerations = len(self.geneticPop.convergenceStats)
+        generations = list(range(numGenerations))
+        cplexObjectiveValue = self.milpCplexSolver.getObjectiveValue()
+        cplexBestBound = self.milpCplexSolver.getBestBound()
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        # Plot all data
+        ax.plot(generations, self.geneticPop.convergenceStats, label="Most Fit Individual", color="g")
+        ax.plot(generations, self.geneticPop.meanStats, label="Mean Population Fitness", color="b")
+        ax.plot(generations, np.full(numGenerations, cplexObjectiveValue), label="CPLEX Best Soln", linestyle="--", color="y")
+        ax.plot(generations, np.full(numGenerations, cplexBestBound), label="CPLEX MILP Bound", linestyle=":", color="r")
+        # Add graph elements
+        ax.set_title("GA Convergence Against CPLEX over Equal Runtime")
+        ax.legend(loc=4)
+        ax.set_ylim(ymin=0, ymax=max(cplexObjectiveValue, max(self.geneticPop.meanStats))*1.25)
+        ax.set_ylabel("Obj. Value")
+        ax.set_xlabel("Runtime")
+        # Save timestamped plot
+        timestamp = datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+        plt.savefig("GAvsCPLEX-" + self.graph.name + "-" + timestamp + ".png")
+        plt.close(fig)
+
+    def buildGraphDataRow(self, includeHeader=False) -> list:
+        """Builds a list containing the graph data for exporting to a CSV"""
+        pass
+
+    def buildPopulationHyperparamsRow(self, includeHeader=False) -> list:
+        """Builds a list containing the populations hyperparameters for exporting to a CSV"""
+        pass
+
+    def buildGeneticEvolutionRow(self, includeHeader=False) -> list:
+        """Builds a list containing the genetic algorithms evolution for exporting to a CSV"""
+        pass
+
+    def buildCPLEXDataRow(self, includeHeader=False) -> list:
+        """Builds a list containing the solution details of the CPLEX solver on the MILP formulation"""
+        pass
+
+    def concatenateDataRows(self) -> list:
+        """Builds a list of all the data requested via keyword arguments"""
+        pass
+
+    def appendRowToCSV(self, rowToAppend: list) -> None:
+        """Appends a row onto a CSV file"""
+        pass
+
+    def writeEntireCSV(self, dataBlockToWrite: list) -> None:
+        """Writes an entire block of data (i.e. a list of lists) to a CSV file"""
+        pass
