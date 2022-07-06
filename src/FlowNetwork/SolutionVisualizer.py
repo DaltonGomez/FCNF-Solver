@@ -13,7 +13,7 @@ class SolutionVisualizer:
         self.solution: FlowNetworkSolution = solution  # The input solution to be visualized
         self.netVis: netVis = netVis(directed=True)  # PyVis Network visualizer object to render the visualization
         self.positionScalar: int = 8  # Scales the relative position of the nodes within the graph
-        self.populateGraph()  # Calls the populate graph method on instantiation
+        self.populateGraph()  # Calls the populated graph method on instantiation
 
     def populateGraph(self) -> None:
         """Populates a PyVis instance with the solution data"""

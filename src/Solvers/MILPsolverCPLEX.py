@@ -18,7 +18,7 @@ class MILPsolverCPLEX:
         self.isSourceSinkCapacitated: bool = self.graph.isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
         self.isSourceSinkCharged: bool = self.graph.isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver model
-        self.model: Model = Model(name="FCFN-MILP-Solvers", log_output=logOutput, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
+        self.model: Model = Model(name="FCNF-MILP-Solvers", log_output=logOutput, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
         self.isRun: bool = False  # Boolean indicating if the solver has been run
         # Decision variables
         self.sourceFlowVars: List[float] = []  # List of the flow values assigned to each source, indexed the same as the graph.sourcesArray
@@ -225,7 +225,7 @@ class MILPsolverCPLEX:
             self.model.print_solution()
 
     def printModel(self) -> None:
-        """Prints all constraints of the MILP model for the FCFN instance (FOR DEBUGGING- DON'T CALL ON LARGE INPUTS)"""
+        """Prints all constraints of the MILP model for the FCNF instance (FOR DEBUGGING-DON'T CALL ON LARGE INPUTS)"""
         print("=============== MILP MODEL OF FCNF INSTANCE ========================")
         self.model.print_information()
         print("=============== OBJECTIVE FUNCTION ========================")
@@ -247,7 +247,7 @@ class MILPsolverCPLEX:
                 print(self.model.get_constraint_by_name("a_" + str(arcID) + "_CapAndOpen"))
 
     def printSolution(self) -> None:
-        """Prints the solution data of the FCFN instance solved by the MILP model"""
+        """Prints the solution data of the FCNF instance solved by the MILP model"""
         print("=============== SOLUTION DETAILS ========================")
         print(self.model.get_solve_details())
         if self.isRun is True:

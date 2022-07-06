@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # Input graph and solver object w/ options
     inputGraph = "huge_2.p"
     graphSolver = GraphSolver(inputGraph, isSolvedWithGeneticAlg=True, isSolvedWithCPLEX=True, isRace=True,
-                              isDrawing=False, isLabeling=True, isGraphing=True, isOutputtingCPLEX=False)
+                              isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
 
     # Options to adjust the GA hyperparameters
     graphSolver.geneticPop.setPopulationHyperparams(populationSize=5,

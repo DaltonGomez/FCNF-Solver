@@ -142,7 +142,7 @@ class GraphSolver:
         pass
 
     def buildGeneticEvolutionRow(self, includeHeader=False) -> list:
-        """Builds a list containing the genetic algorithms evolution for exporting to a CSV"""
+        """Builds a list containing the genetic algorithm's evolution for exporting to a CSV"""
         pass
 
     def buildCPLEXDataRow(self, includeHeader=False) -> list:

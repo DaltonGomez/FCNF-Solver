@@ -8,7 +8,8 @@ from src.Graph.CandidateGraph import CandidateGraph
 class AlphaSolverPDLP:
     """Class that solves an alpha-relaxed instance approximately via a PDLP gradient descent solver from Google"""
 
-    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneDimAlphaTable=False, isOptimizedArcSelections=True):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneDimAlphaTable=False,
+                 isOptimizedArcSelections=True):
         """Constructor of a AlphaSolverPDLP instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph to solve optimally
@@ -64,7 +65,8 @@ class AlphaSolverPDLP:
             if self.graph.isSourceSinkCapacitated is True:
                 for t in range(self.graph.numSinks):
                     varName = "t_" + str(t)
-                    self.solver.Add(self.solver.LookupVariable(varName) <= self.graph.sinkCapsArray[t], varName + "_Cap")
+                    self.solver.Add(self.solver.LookupVariable(varName) <= self.graph.sinkCapsArray[t],
+                                    varName + "_Cap")
 
             # Conservation of flow constraints
             # Source flow conservation
@@ -115,9 +117,9 @@ class AlphaSolverPDLP:
                 self.solver.Add(0 == sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(c))
                                          for i in incomingIndexes
                                          for c in range(self.graph.numArcsPerEdge)) -
-                                     sum(self.solver.LookupVariable("a_" + str(j) + "_" + str(d))
-                                         for j in outgoingIndexes
-                                         for d in range(self.graph.numArcsPerEdge)), name)
+                                sum(self.solver.LookupVariable("a_" + str(j) + "_" + str(d))
+                                    for j in outgoingIndexes
+                                    for d in range(self.graph.numArcsPerEdge)), name)
         # Model if reducing to a one-dimensional alpha table
         elif self.isOneDimAlphaTable is True:
             # =================== DECISION VARIABLES ===================
@@ -214,8 +216,8 @@ class AlphaSolverPDLP:
             if self.graph.isSourceSinkCharged is True:
                 self.solver.Minimize(
                     sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) *
-                            (self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
-                            self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
+                        (self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
+                         self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
                         for i in range(self.graph.numEdges)
                         for j in range(self.graph.numArcsPerEdge)) +
                     sum(self.solver.LookupVariable("s_" + str(s)) * self.graph.sourceVariableCostsArray[s]
@@ -225,8 +227,8 @@ class AlphaSolverPDLP:
             elif self.graph.isSourceSinkCharged is False:
                 self.solver.Minimize(
                     sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(j)) * (
-                                self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
-                                self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
+                            self.graph.getArcVariableCostFromEdgeCapIndices(i, j) +
+                            self.graph.getArcFixedCostFromEdgeCapIndices(i, j) * alphaValues[i][j])
                         for i in range(self.graph.numEdges)
                         for j in range(self.graph.numArcsPerEdge)))
         # Model if reducing to a one-dimensional alpha table
@@ -236,8 +238,9 @@ class AlphaSolverPDLP:
             if self.graph.isSourceSinkCharged is True:
                 self.solver.Minimize(
                     sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(-1)) *
-                            (self.graph.getArcVariableCostFromEdgeCapIndices(i, largestCapIndex) +
-                            self.graph.getArcFixedCostFromEdgeCapIndices(i, largestCapIndex) * alphaValues[i][largestCapIndex])
+                        (self.graph.getArcVariableCostFromEdgeCapIndices(i, largestCapIndex) +
+                         self.graph.getArcFixedCostFromEdgeCapIndices(i, largestCapIndex) * alphaValues[i][
+                             largestCapIndex])
                         for i in range(self.graph.numEdges)) +
                     sum(self.solver.LookupVariable("s_" + str(s)) * self.graph.sourceVariableCostsArray[s]
                         for s in range(self.graph.numSources)) +
@@ -246,8 +249,9 @@ class AlphaSolverPDLP:
             elif self.graph.isSourceSinkCharged is False:
                 self.solver.Minimize(
                     sum(self.solver.LookupVariable("a_" + str(i) + "_" + str(-1)) * (
-                                self.graph.getArcVariableCostFromEdgeCapIndices(i, largestCapIndex) +
-                                self.graph.getArcFixedCostFromEdgeCapIndices(i, largestCapIndex) * alphaValues[i][largestCapIndex])
+                            self.graph.getArcVariableCostFromEdgeCapIndices(i, largestCapIndex) +
+                            self.graph.getArcFixedCostFromEdgeCapIndices(i, largestCapIndex) * alphaValues[i][
+                                largestCapIndex])
                         for i in range(self.graph.numEdges)))
 
     def solveModel(self) -> None:

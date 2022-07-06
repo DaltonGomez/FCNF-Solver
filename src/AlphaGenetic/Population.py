@@ -492,7 +492,7 @@ class Population:
         self.replaceWithOffspring(parentOneID, parentTwoID, childOne, childTwo)
 
     def randomTwoPointCrossover(self, parentOneID: int, parentTwoID: int) -> None:
-        """Crossover of 2 chromosomes at a two random points\n
+        """Crossover of 2 chromosomes at two random points\n
         :param int parentOneID: Index of first parent in population
         :param int parentTwoID: Index of second parent in population
         """

@@ -16,7 +16,7 @@ class GraphGenerator:
         """Constructor of a GraphGenerator instance"""
         # Hyperparameters for candidate graph generation/computing pseudo-random costs
         self.embeddingSize: float = 100.0  # The n x n size in R^2 that the candidate graph is embedded in
-        self.arcCostLookupTable: List[List[float, float, float]] = self.getArcCostLookupTable()  # List of all posible arc capacities, their fixed cost scalar, and their variable cost scalar
+        self.arcCostLookupTable: List[List[float, float, float]] = self.getArcCostLookupTable()  # List of all possible arc capacities, their fixed cost scalar, and their variable cost scalar
         self.edgePenaltyRange: List[float, float] = [0.95, 1.50]  # Range that is uniformly, randomly sampled for assigning edge penalties
         self.randomEdgePenalties: Dict[Tuple[int, int], float] = {}  # Dictionary mapping edgeID keys, given as (fromNode, toNode), to values of the edge penalty assigned
         self.isSourceSinkCapacitated: bool = True  # Boolean flag indicating if sources and sinks are capacitated
@@ -31,8 +31,8 @@ class GraphGenerator:
         self.minSinkClusters: int = minSinkClusters  # Minimum number of sink clusters that are attempted
         self.sinksPerClusterRange: Tuple[int, int] = sinksPerClusterRange  # Range that is uniformly, randomly sampled to determine the sinks in each cluster
         self.clusterRadiusRange: Tuple[int, int] = clusterRadiusRange  # Range that is uniformly, randomly sampled to determine the maximum radius of each cluster
-        self.tempNodeIDs: List[Tuple[int, float, float]] = []  # Temporary data structure to hold node IDs before casting to an numpy array
-        self.tempPoints: List[Tuple[float, float]] = []  # Temporary data structure to hold node (x-position, y-position) before casting to an numpy array
+        self.tempNodeIDs: List[Tuple[int, float, float]] = []  # Temporary data structure to hold node IDs before casting to a numpy array
+        self.tempPoints: List[Tuple[float, float]] = []  # Temporary data structure to hold node (x-position, y-position) before casting to a numpy array
 
         # Output candidate graph to be built
         self.newGraph: CandidateGraph = CandidateGraph()  # Candidate graph object that the graph generator object constructs

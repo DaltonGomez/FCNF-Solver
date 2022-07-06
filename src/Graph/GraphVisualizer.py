@@ -11,7 +11,7 @@ class GraphVisualizer:
         self.graph: CandidateGraph = graph  # Input candidate graph to be visualized
         self.netVis: netVis = netVis(directed=directed)  # PyVis Network visualizer object to render the visualization
         self.positionScalar: int = 8  # Scales the relative position of the nodes within the graph
-        self.populateGraph(supers=supers)  # Calls the populate graph method on instantiation
+        self.populateGraph(supers=supers)  # Calls the populated graph method on instantiation
 
     def populateGraph(self, supers=False) -> None:
         """Populates a PyVis instance with the graph data"""
