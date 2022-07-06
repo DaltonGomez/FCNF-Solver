@@ -1,9 +1,13 @@
 from src.Graph.GraphGenerator import GraphGenerator
 
 """
-RUN COMMAND:
+WINDOWS RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
 py -3.8 run_graph_maker.py
+
+LINUX RUN COMMAND:
+cd Repos/FCNF-Solver/
+python3 run_graph_maker.py
 """
 
 # ORIGINAL COST DETERMINING TABLE ADAPTED FROM SIMCCS MODEL (see data/SimCCS_models/Pipeline Cost Model.xlsm)

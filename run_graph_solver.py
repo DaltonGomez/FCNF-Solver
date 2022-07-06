@@ -5,6 +5,10 @@ from src.Experiments.GraphSolver import GraphSolver
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
 py -3.8 run_graph_solver.py
+
+LINUX RUN COMMAND:
+cd Repos/FCNF-Solver/
+python3 run_graph_solver.py
 """
 
 if __name__ == "__main__":
