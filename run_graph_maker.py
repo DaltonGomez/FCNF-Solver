@@ -22,14 +22,11 @@ costLookupTable = [
     [119.16, 172.7476864, 1.09878848],
 ]
 
-srcSinkCapacityRange = (1, 20)  # TODO - Determine range based on real datasets
-srcSinkChargeRange = (1, 20)  # TODO - Determine range based on real datasets
-
 if __name__ == "__main__":
     numGraphs = 10
     for n in range(numGraphs):
         # Input parameters
-        name = "name_" + str(n)
+        name = "_NAME_" + str(n)
         numNodes = 500
         numSources = 50
         numSinks = 50
