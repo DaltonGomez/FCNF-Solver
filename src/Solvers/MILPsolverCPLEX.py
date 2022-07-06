@@ -9,15 +9,14 @@ from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 class MILPsolverCPLEX:
     """Class that solves a candidate graph instance optimally via a MILP model within CPLEX"""
 
-    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneArcPerEdge=False, isSourceSinkCapacitated=True,
-                 isSourceSinkCharged=False, logOutput=False):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneArcPerEdge=False, logOutput=False):
         """Constructor of a MILPsolverCPLEX instance"""
         # Input attributes
         self.graph: CandidateGraph = graph  # Input candidate graph to solve optimally
         self.minTargetFlow: float = minTargetFlow  # Target flow that the solution must capture
         self.isOneArcPerEdge: bool = isOneArcPerEdge  # Boolean indicating if the solver considered the constraint that only opens one arc per edge (MILP only)
-        self.isSourceSinkCapacitated: bool = isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
-        self.isSourceSinkCharged: bool = isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
+        self.isSourceSinkCapacitated: bool = self.graph.isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
+        self.isSourceSinkCharged: bool = self.graph.isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver model
         self.model: Model = Model(name="FCFN-MILP-Solvers", log_output=logOutput, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
         self.isRun: bool = False  # Boolean indicating if the solver has been run
@@ -182,7 +181,6 @@ class MILPsolverCPLEX:
         else:
             print("No feasible solution exists!")
 
-    # TODO- Add in methods to get the OBJ_VAL, TIME, STATUS, GAP, BEST_BOUND and any other solution details for analysis
     def getObjectiveValue(self) -> float:
         """Returns the objective value found by the CPLEX MILP solver"""
         return self.model.solution.get_objective_value()

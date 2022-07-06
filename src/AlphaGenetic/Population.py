@@ -18,14 +18,18 @@ class Population:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, graph: CandidateGraph, minTargetFlow: float, populationSize=10, numGenerations=10):
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, populationSize=10, numGenerations=10,
+                 isOneDimAlphaTable=False, isOptimizedArcSelections=True):
         """Constructor of a Population instance"""
         # Input Attributes
         self.graph: CandidateGraph = graph  # Input candidate graph instance to be solved
+        self.isOneDimAlphaTable = isOneDimAlphaTable  # Boolean indicating if the alpha table is only one dimensional (i.e. only one arc per edge)
         self.minTargetFlow: float = minTargetFlow  # Input target flow to be realized in output solution
         # Population & Solver Instance Objects
         self.population: List[Individual] = []  # List of Individual objects
-        self.solver: AlphaSolverPDLP = AlphaSolverPDLP(self.graph, self.minTargetFlow)  # Solver object, which pre-builds variables and constraints once on initialization
+        self.solver: AlphaSolverPDLP = AlphaSolverPDLP(self.graph, self.minTargetFlow,
+                                                       isOneDimAlphaTable=isOneDimAlphaTable,
+                                                       isOptimizedArcSelections=isOptimizedArcSelections)  # Solver object, which pre-builds variables and constraints once on initialization
         self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
         self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
         self.bestKnownSolution = None  # Holds the best (i.e. lowest cost) solution discovered during the evolution
@@ -277,7 +281,8 @@ class Population:
 
     def writeIndividualsSolution(self, individual: Individual) -> FlowNetworkSolution:
         """Writes the individual's output to as solution object"""
-        solution = individual.writeIndividualAsSolution(self.minTargetFlow)
+        solution = individual.writeIndividualAsSolution(self.minTargetFlow, optionalDescription="1D_Alpha_Table = " +
+                                                                                        str(self.isOneDimAlphaTable))
         return solution
 
     def resetOutputFields(self) -> None:

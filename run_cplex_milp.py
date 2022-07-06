@@ -21,9 +21,8 @@ if __name__ == "__main__":
     # Solve Optimally with CPLEX
     cplex = MILPsolverCPLEX(graph, minTargetFlow, logOutput=True)
     # cplex.setTimeLimit(10)
-    cplex.findSolution(printDetails=False)
+    opt = cplex.findSolution()
 
     # Write and draw solution
-    opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
     optVis.drawLabeledSolution(leadingText="OPT_")

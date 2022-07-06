@@ -52,7 +52,7 @@ class Individual:
         self.trueCost = 0.0
         self.fakeCost = 0.0
 
-    def writeIndividualAsSolution(self, minTargetFlow: float) -> FlowNetworkSolution:
+    def writeIndividualAsSolution(self, minTargetFlow: float, optionalDescription="") -> FlowNetworkSolution:
         """Writes the current expressed network as a solution instance"""
         if self.isSolved is False:
             print("You must solve the individual before writing a solution!")
@@ -60,5 +60,6 @@ class Individual:
             print("Writing solution from individual #" + str(self.id) + "...")
             thisSolution = FlowNetworkSolution(self.graph, minTargetFlow, self.fakeCost, self.trueCost,
                                                self.srcFlows, self.sinkFlows, self.arcFlows, "Alpha_GA", False,
-                                               self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged)
+                                               self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged,
+                                               optionalDescription=optionalDescription)
             return thisSolution

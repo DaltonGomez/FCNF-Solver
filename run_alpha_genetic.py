@@ -19,7 +19,7 @@ if __name__ == "__main__":
     minTargetFlow = graph.totalPossibleDemand
 
     # Initialize an Alpha-GA Population
-    pop = Population(graph, minTargetFlow)
+    pop = Population(graph, minTargetFlow, isOneDimAlphaTable=True, isOptimizedArcSelections=True)
 
     # Set Hyperparameters
     pop.setPopulationHyperparams(populationSize=10, numGenerations=3, initializationStrategy="perEdge",
