@@ -1,7 +1,9 @@
 import random
 import sys
+from datetime import datetime
 from typing import List
 
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
 
@@ -19,7 +21,7 @@ class Population:
     # ============== CONSTRUCTOR ==============
     # =========================================
     def __init__(self, graph: CandidateGraph, minTargetFlow: float, populationSize=10, numGenerations=10,
-                 isOneDimAlphaTable=False, isOptimizedArcSelections=True):
+                 isOneDimAlphaTable=True, isOptimizedArcSelections=True):
         """Constructor of a Population instance"""
         # Input Attributes
         self.graph: CandidateGraph = graph  # Input candidate graph instance to be solved
@@ -33,20 +35,20 @@ class Population:
         self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
         self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
         self.bestKnownSolution = None  # Holds the best (i.e. lowest cost) solution discovered during the evolution
-        # Global hyperparameters
-        self.populationSize: int = populationSize  # Defines the number of individuals in the population
-        self.numGenerations: int = numGenerations  # Defines the number of iterations the evolution loop will run for
 
         # =======================
         # GA HYPERPARAMETERS
         # -----------------------
+        # Global hyperparameters
+        self.populationSize: int = populationSize  # Defines the number of individuals in the population
+        self.numGenerations: int = numGenerations  # Defines the number of iterations the evolution loop will run for
         # Initialization HPs
         self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
         self.stagnationPeriod = 5
         self.consecutiveStagnantGenerations = 0
         self.initializationStrategy = "perEdge"  # :param : "perArc", "perEdge"
         self.initializationDistribution = "digital"  # :param : "uniform", "gaussian", "digital"
-        self.initializationParams = [0.0, 200000.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
+        self.initializationParams = [0.0, 100000.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
         # Individual Selection HPs
         self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "random"
         self.tournamentSize = 3
@@ -61,13 +63,21 @@ class Population:
         self.perArcEdgeMutationRate = 0.20
         self.nudgeParams = [0.0, 1.0]
 
+        # =======================
+        # EVOLUTION STATISTICS
+        # -----------------------
+        self.convergenceStats: List = []  # Logs the objective value of the best individual in the population at each generation
+        self.meanStats: List = []  # Logs the mean objective value of the population at each generation
+        self.medianStats: List = []  # Logs the median objective value of the population at each generation
+        self.stdDevStats: List = []  # Logs the standard deviation of the population at each generation
+
     # ====================================================
     # ============== HYPERPARAMETER SETTERS ==============
     # ====================================================
     def setPopulationHyperparams(self, populationSize=10, numGenerations=10,
                                  terminationMethod="setGenerations", stagnationPeriod=5,
                                  initializationStrategy="perEdge", initializationDistribution="digital",
-                                 initializationParams=(0.0, 200000.0)) -> None:
+                                 initializationParams=(0.0, 100000.0)) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
         :param int numGenerations: Number of iterations the population evolves for
@@ -122,30 +132,38 @@ class Population:
     # ====================================================
     # ============== EVOLUTION LOOP/METHODS ==============
     # ====================================================
-    def evolvePopulation(self, printGenerations=False, drawing=False, drawLabels=False) -> FlowNetworkSolution:
+    def evolvePopulation(self, printGenerations=True, drawing=True, drawLabels=False, isGraphing=True) -> FlowNetworkSolution:
         """Evolves the population for a specified number of generations"""
-        # Initialize Population and Solve
+        # Initialize population and solve
         self.initializePopulation()
         self.solvePopulation()
-        generation = 0
-        # Evolve Population
+        if isGraphing is True:
+            self.computeEvolutionStatistics()
+        generation = 1
+        # Evolve population
         while self.isTerminated is not True:
             print("Starting generation " + str(generation))
-            # Perform Operators and Solve
+            # Perform operators and solve
             self.selectAndCrossover()
             self.doMutations()
             self.solvePopulation()
-            # Update Current Best Individual and Evaluate Termination
+            # Update current best individual and evaluate termination
             bestIndividual = self.getMostFitIndividual()
             self.evaluateTermination(generation, bestIndividual.trueCost)
-            # Visualize & Print
+            # Compute statistics
+            if isGraphing is True:
+                self.computeEvolutionStatistics()
+            # Visualize & print
             if printGenerations is True:
                 print("Generation = " + str(generation) + "\t\tBest Individual = " + str(
                     bestIndividual.id) + "\t\tFitness = " + str(round(bestIndividual.trueCost, 2)) + "\n")
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="GA_Gen" + str(generation) + "_")
             generation += 1
-        # Return Best Solution Discovered
+        # Plot statistics
+        if isGraphing is True:
+            self.plotEvolutionStatistics()
+        # Return best solution
         return self.bestKnownSolution
 
     def selectAndCrossover(self) -> None:
@@ -506,15 +524,60 @@ class Population:
             self.population[weakestTwoIndividualIDs[1]].alphaValues = offspringTwoChromosome
             self.population[weakestTwoIndividualIDs[1]].resetOutputNetwork()
 
+    # ==========================================================
+    # ============== EVOLUTION STATISTICS METHODS ==============
+    # ==========================================================
+    def computeEvolutionStatistics(self) -> None:
+        """Computes the population statistics for a given generation and logs them"""
+        fitnessList = []
+        for individual in self.population:
+            fitnessList.append(individual.trueCost)
+        fitnessArray = np.array(fitnessList, dtype='f')
+        self.convergenceStats.append(np.min(fitnessArray))
+        self.meanStats.append(np.mean(fitnessArray))
+        self.medianStats.append(np.median(fitnessArray))
+        self.stdDevStats.append(np.std(fitnessArray))
+
+    def plotEvolutionStatistics(self) -> None:
+        """Renders MatPlotLib graphs for each of the evolution statistics lists"""
+        # Get generations and build figure/subplots
+        generations = list(range(len(self.convergenceStats)))
+        fig, axs = plt.subplots(2, 2)
+        fig.suptitle("Population Fitness Statistics over Generations")
+        # Most Fit Individual Subplot
+        axs[0, 0].plot(generations, self.convergenceStats)
+        axs[0, 0].set_title("Most Fit")
+        # Mean Fitness Subplot
+        axs[0, 1].plot(generations, self.meanStats, "tab:orange")
+        axs[0, 1].set_title("Mean")
+        # Std. Dev. Subplot
+        axs[1, 0].plot(generations, self.stdDevStats, "tab:green")
+        axs[1, 0].set_title("Std. Dev.")
+        # Median Subplot
+        axs[1, 1].plot(generations, self.medianStats, "tab:red")
+        axs[1, 1].set_title("Median")
+        # Add spacing
+        plt.subplots_adjust(left=0.2,
+                            bottom=0.1,
+                            right=0.9,
+                            top=0.9,
+                            wspace=0.6,
+                            hspace=0.4)
+        # Save timestamped plot
+        timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+        plt.savefig("GeneticEvoStats_" + self.graph.name + "_" + timestamp + ".png")
+
     # ===============================================================
     # ============== HYPER-MUTATION/HILL CLIMB METHODS ==============
     # ===============================================================
-    def solveWithNaiveHillClimb(self, printGenerations=False, drawing=False, drawLabels=False) -> tuple:
+    def solveWithNaiveHillClimb(self, printGenerations=True, drawing=True, drawLabels=False, isGraphing=True) -> FlowNetworkSolution:
         """Solves the population with a naive hill climb method"""
         # Initialize Population and Solve
         self.initializePopulation()
         self.solvePopulation()
         generation = 0
+        if isGraphing is True:
+            self.computeEvolutionStatistics()
         # Execute Hill Climb
         while self.isTerminated is not True:
             # Execute Hill Climb and Solve
@@ -523,6 +586,9 @@ class Population:
             # Update Current Best Individual and Evaluate Termination
             bestIndividual = self.getMostFitIndividual()
             self.evaluateTermination(generation, bestIndividual.trueCost)
+            # Compute Statistics
+            if isGraphing is True:
+                self.computeEvolutionStatistics()
             # Visualize & Print
             if printGenerations is True:
                 print("Generation = " + str(generation) + "\tBest Individual = " + str(
@@ -530,8 +596,11 @@ class Population:
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="HC_Gen" + str(generation) + "_")
             generation += 1
+        # Plot Statistics
+        if isGraphing is True:
+            self.plotEvolutionStatistics()
         # Return Best Solution Discovered
-        return self.bestKnownCost, self.bestKnownSolution
+        return self.bestKnownSolution
 
     def naiveHillClimb(self) -> None:
         """Hypermutates all but the best individual"""

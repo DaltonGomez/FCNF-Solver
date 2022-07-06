@@ -10,7 +10,7 @@ class GraphSolver:
     """Class that solves a single graph using the alpha-genetic algorithm and/or the MILP model in CPLEX"""
 
     def __init__(self, inputGraphName: str, isSolvedWithGeneticAlg=True, isSolvedWithCPLEX=True, isRace=True,
-                 isDrawing=True, isLabeling=True, isOutputtingCPLEX=False):
+                 isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=False):
         """Constructor of a GraphSolver instance"""
         # Graph solver options
         self.isSolvedWithGeneticAlg: bool = isSolvedWithGeneticAlg
@@ -18,6 +18,7 @@ class GraphSolver:
         self.isRace: bool = isRace
         self.isDrawing: bool = isDrawing
         self.isLabeling: bool = isLabeling
+        self.isGraphing: bool = isGraphing
         self.isOutputtingCPLEX: bool = isOutputtingCPLEX
 
         # Input graph attributes
@@ -28,15 +29,15 @@ class GraphSolver:
 
         # Alpha-GA population attribute & hyperparameters
         self.geneticPop: Population = Population(self.graph, self.minTargetFlow,
-                         isOneDimAlphaTable=False, isOptimizedArcSelections=True)
-        self.geneticPop.setPopulationHyperparams(populationSize=20,
-                                                 numGenerations=20,
+                         isOneDimAlphaTable=True, isOptimizedArcSelections=True)
+        self.geneticPop.setPopulationHyperparams(populationSize=5,
+                                                 numGenerations=5,
                                                  initializationStrategy="perEdge",
                                                  initializationDistribution="digital",
                                                  initializationParams=[0.0, 100000.0])
         self.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
                                                             tournamentSize=4)
-        self.geneticPop.setCrossoverHyperparams(crossoverMethod="twoPoint",
+        self.geneticPop.setCrossoverHyperparams(crossoverMethod="onePoint",
                                                 crossoverRate=1.0,
                                                 crossoverAttemptsPerGeneration=1,
                                                 replacementStrategy="replaceWeakestTwo")
@@ -61,7 +62,8 @@ class GraphSolver:
                 self.geneticPop.populationSize) + " for " + str(self.geneticPop.numGenerations) + " generations...\n")
             gaStartTime = datetime.now()
             # Evolve the Alpha-GA population
-            gaSolution = self.geneticPop.evolvePopulation(printGenerations=True, drawing=self.isDrawing, drawLabels=self.isLabeling)
+            gaSolution = self.geneticPop.evolvePopulation(printGenerations=True, drawing=self.isDrawing,
+                                                          drawLabels=self.isLabeling, isGraphing=self.isGraphing)
             print("\nGenetic Algorithm Complete!\nBest solution found = " + str(gaSolution.trueCost))
             if self.isDrawing is True:
                 solVis = SolutionVisualizer(gaSolution)
