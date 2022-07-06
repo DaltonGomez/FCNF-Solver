@@ -13,7 +13,7 @@ py -3.8 run_alpha_genetic.py
 
 if __name__ == "__main__":
     # Load Candidate Graph
-    graphName = "test_8.p"
+    graphName = "huge_6.p"
     graph = CandidateGraph()
     graph = graph.loadCandidateGraph(graphName)
     minTargetFlow = graph.totalPossibleDemand
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     pop = Population(graph, minTargetFlow, isOneDimAlphaTable=True, isOptimizedArcSelections=True)
 
     # Set Hyperparameters
-    pop.setPopulationHyperparams(populationSize=10, numGenerations=3, initializationStrategy="perEdge",
+    pop.setPopulationHyperparams(populationSize=25, numGenerations=20, initializationStrategy="perEdge",
                                  initializationDistribution="digital", initializationParams=[0.0, 200000.0])
     pop.setIndividualSelectionHyperparams(selectionMethod="tournament", tournamentSize=3)
     pop.setCrossoverHyperparams(crossoverMethod="onePoint", crossoverRate=1.0, crossoverAttemptsPerGeneration=3,
@@ -35,28 +35,29 @@ if __name__ == "__main__":
     print("GA Start: " + str(gaStartTime) + "\n")
 
     # Solve the Alpha-GA
-    solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=True)
+    solutionTuple = pop.evolvePopulation(printGenerations=True, drawing=True, drawLabels=False)
     print("\nBest solution found = " + str(solutionTuple[0]))
     solVis = SolutionVisualizer(solutionTuple[1])
-    solVis.drawLabeledSolution(leadingText="GA_best_")
+    solVis.drawUnlabeledSolution(leadingText="GA-BEST_")
 
     # Timestamp the finish of the GA evolution/start of the optimal MILP solver
     gaFinishOptStart = datetime.now()
     print("\nGA Finish/OPT Start: " + str(gaFinishOptStart))
     gaRuntime = gaFinishOptStart - gaStartTime
-    print("GA Runtime in Minutes: " + str(gaRuntime.seconds / 60))
+    print("\nGA Runtime (in seconds): " + str(gaRuntime.seconds))
 
     # Solve Optimally with CPLEX
-    cplex = MILPsolverCPLEX(graph, minTargetFlow, isOneArcPerEdge=False)
-    cplex.findSolution(printDetails=True)
+    cplex = MILPsolverCPLEX(graph, minTargetFlow, isOneArcPerEdge=False, logOutput=False)
+    cplex.setTimeLimit(gaRuntime.seconds)
+    cplex.findSolution(printDetails=False)
     opt = cplex.writeSolution()
     optVis = SolutionVisualizer(opt)
-    optVis.drawLabeledSolution(leadingText="OPT_")
+    optVis.drawUnlabeledSolution(leadingText="OPT_")
 
     # Timestamp the finish of the optimal MILP solver
     optFinish = datetime.now()
     print("\nOPT Finish: " + str(optFinish))
     optRuntime = optFinish - gaFinishOptStart
-    print("OPT Runtime in Minutes: " + str(optRuntime.seconds / 60))
+    print("OPT Runtime (in seconds): " + str(optRuntime.seconds))
 
-    print("\n\nProgram complete! Terminating...")
+    print("\n\nProgram complete! Terminating...\n")

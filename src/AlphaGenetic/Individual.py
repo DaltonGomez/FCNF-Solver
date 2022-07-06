@@ -3,8 +3,8 @@ from typing import Dict, Tuple, List
 
 from numpy import ndarray
 
-from FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 from src.FlowNetwork.CandidateGraph import CandidateGraph
+from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 
 
 class Individual:
