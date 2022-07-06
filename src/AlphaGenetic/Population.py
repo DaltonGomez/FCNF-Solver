@@ -40,7 +40,6 @@ class Population:
         # =======================
         # GA HYPERPARAMETERS
         # -----------------------
-        # TODO - Implement the operators/hyperparameters through a strategy pattern
         # Initialization HPs
         self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
         self.stagnationPeriod = 5
@@ -131,6 +130,7 @@ class Population:
         generation = 0
         # Evolve Population
         while self.isTerminated is not True:
+            print("Starting generation " + str(generation))
             # Perform Operators and Solve
             self.selectAndCrossover()
             self.doMutations()
@@ -140,8 +140,8 @@ class Population:
             self.evaluateTermination(generation, bestIndividual.trueCost)
             # Visualize & Print
             if printGenerations is True:
-                print("Generation = " + str(generation) + "\tBest Individual = " + str(
-                    bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)) + "\n")
+                print("Generation = " + str(generation) + "\t\tBest Individual = " + str(
+                    bestIndividual.id) + "\t\tFitness = " + str(round(bestIndividual.trueCost, 2)) + "\n")
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="GA_Gen" + str(generation) + "_")
             generation += 1
