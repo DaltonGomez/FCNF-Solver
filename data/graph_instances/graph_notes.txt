@@ -16,13 +16,13 @@ sinksPerClusterRange = (1, 2)
 clusterRadiusRange = (10, 20)
 # Source/sink cap ranges
 isSrcSinkCapacitated = True
-srcCapRange = (1, 10)
+srcCapRange = (5, 20)
 sinkCapRange = (5, 20)
 
 ___________________
 small_n
 ===================
- # Input parameters
+# Input parameters
 name = "small_" + str(n)
 numNodes = 30
 numSources = 5
@@ -35,7 +35,7 @@ sinksPerClusterRange = (2, 4)
 clusterRadiusRange = (10, 20)
 # Source/sink cap ranges
 isSrcSinkCapacitated = True
-srcCapRange = (1, 10)
+srcCapRange = (5, 20)
 sinkCapRange = (5, 20)
 
 ___________________
@@ -54,7 +54,7 @@ sinksPerClusterRange = (3, 6)
 clusterRadiusRange = (10, 20)
 # Source/sink cap ranges
 isSrcSinkCapacitated = True
-srcCapRange = (1, 10)
+srcCapRange = (5, 20)
 sinkCapRange = (5, 20)
 
 ___________________
@@ -73,7 +73,7 @@ sinksPerClusterRange = (3, 7)
 clusterRadiusRange = (10, 20)
 # Source/sink cap ranges
 isSrcSinkCapacitated = True
-srcCapRange = (1, 10)
+srcCapRange = (5, 20)
 sinkCapRange = (5, 20)
 
 ___________________
@@ -92,7 +92,7 @@ sinksPerClusterRange = (5, 10)
 clusterRadiusRange = (10, 20)
 # Source/sink cap ranges
 isSrcSinkCapacitated = True
-srcCapRange = (1, 10)
+srcCapRange = (5, 20)
 sinkCapRange = (5, 20)
 
 ___________________

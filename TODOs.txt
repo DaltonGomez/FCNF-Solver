@@ -15,7 +15,7 @@ GENERAL/NETWORK/SOLVERS:
 ALPHA GENETIC ALGORITHM:
 =====================================
 # TODO - Break out GA operators as interfaces via a strategy pattern
-# TODO - If initializing all arcs within an edge to be the same alpha values, reduce the alpha table to 1-dimensional
+# Done - If initializing all arcs within an edge to be the same alpha values, reduce the alpha table to 1-dimensional
 # TODO - Implement a random per edge nudge mutation
 # TODO - Use a brief, interrupted run of CPLEX-MILP to generate initial alpha values for the population
 # TODO - Add a daemon update that updates X individual's alpha values by nudging down arc's in the global best and up otherwise (proportional to the assigned flow)
