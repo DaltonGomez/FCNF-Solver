@@ -66,7 +66,7 @@ class GraphSolver:
             # Evolve the Alpha-GA population
             gaSolution = self.geneticPop.evolvePopulation(printGenerations=True, drawing=self.isDrawing,
                                                           drawLabels=self.isLabeling, isGraphing=self.isGraphing)
-            print("\nGenetic Algorithm Complete!\nBest solution found = " + str(gaSolution.trueCost))
+            print("\nGenetic Algorithm Complete!!!\nBest Solution Found = " + str(gaSolution.trueCost))
             # Draw if expected
             if self.isDrawing is True:
                 solVis = SolutionVisualizer(gaSolution)
@@ -88,7 +88,7 @@ class GraphSolver:
                 self.milpCplexSolver.setTimeLimit(self.geneticRuntimeInSeconds)
             # Call CPLEX to solve MILP
             self.milpCplexSolver.findSolution(printDetails=False)
-            print("\nCPLEX MILP Solver Complete!\nBest solution found = " + str(self.milpCplexSolver.getObjectiveValue()))
+            print("\nCPLEX MILP Solver Complete!!!\nBest Solution Found = " + str(self.milpCplexSolver.getObjectiveValue()))
             # Draw if expected
             if self.isDrawing is True:
                 print("\nFLAGGING ANY KEY ERRORS FROM CPLEX...")
@@ -106,7 +106,7 @@ class GraphSolver:
             print("CPLEX Best Bound: " + str(self.milpCplexSolver.getBestBound()))
         if self.isSolvedWithGeneticAlg is True and self.isSolvedWithCPLEX is True and self.isRace is True and self.isGraphing is True:
             self.plotConvergenceAgainstCPLEX()
-        print("\n\nProgram complete... Graph solved!\nTerminating execution...\n")
+        print("\n\nProgram complete... Graph solved!\nTerminating program...\n")
 
     def plotConvergenceAgainstCPLEX(self) -> None:
         """Plots the convergence graph against CPLEX's best found solution and gap/best bound"""
@@ -119,7 +119,8 @@ class GraphSolver:
         ax = fig.add_subplot()
         # Plot all data
         ax.plot(generations, self.geneticPop.convergenceStats, label="Most Fit Individual", color="g")
-        ax.plot(generations, self.geneticPop.meanStats, label="Mean Population Fitness", color="b")
+        ax.plot(generations, self.geneticPop.meanStats, label="Mean Pop. Fitness", color="b")
+        ax.plot(generations, self.geneticPop.medianStats, label="Median Pop. Fitness", color="c")
         ax.plot(generations, np.full(numGenerations, cplexObjectiveValue), label="CPLEX Best Soln", linestyle="--", color="y")
         ax.plot(generations, np.full(numGenerations, cplexBestBound), label="CPLEX MILP Bound", linestyle=":", color="r")
         # Add graph elements

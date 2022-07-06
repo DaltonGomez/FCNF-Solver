@@ -142,7 +142,7 @@ class Population:
         generation = 1
         # Evolve population
         while self.isTerminated is not True:
-            print("Starting generation " + str(generation))
+            print("Starting Generation " + str(generation) + "!!!")
             # Perform operators and solve
             self.selectAndCrossover()
             self.doMutations()
