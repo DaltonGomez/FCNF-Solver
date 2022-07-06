@@ -9,7 +9,7 @@ from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 class MILPsolverCPLEX:
     """Class that solves a candidate graph instance optimally via a MILP model within CPLEX"""
 
-    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneArcPerEdge=True, isSourceSinkCapacitated=True,
+    def __init__(self, graph: CandidateGraph, minTargetFlow: float, isOneArcPerEdge=False, isSourceSinkCapacitated=True,
                  isSourceSinkCharged=False, logOutput=False):
         """Constructor of a MILPsolverCPLEX instance"""
         # Input attributes
@@ -147,12 +147,14 @@ class MILPsolverCPLEX:
                                                 for m in range(self.graph.numEdges)
                                                 for n in range(self.graph.numArcsPerEdge)))
 
-    def setTimeLimit(self, timeLimitInSeconds: int) -> None:
+    def setTimeLimit(self, timeLimitInSeconds: float) -> None:
         """Sets the time limit, in seconds, for the CPLEX MILP model to run"""
         print("Setting CPLEX time limit to " + str(timeLimitInSeconds) + " seconds...")
         self.model.set_time_limit(timeLimitInSeconds)
 
-
+    def getTimeLimit(self) -> float:
+        """Gets the time limit, in seconds, for the CPLEX MILP model to run"""
+        return self.model.get_time_limit()
 
     def solveModel(self) -> None:
         """Solves the MILP model in CPLEX"""
@@ -179,6 +181,36 @@ class MILPsolverCPLEX:
             return thisSolution
         else:
             print("No feasible solution exists!")
+
+    # TODO- Add in methods to get the OBJ_VAL, TIME, STATUS, GAP, BEST_BOUND and any other solution details for analysis
+    def getObjectiveValue(self) -> float:
+        """Returns the objective value found by the CPLEX MILP solver"""
+        return self.model.solution.get_objective_value()
+
+    def getCplexStatus(self) -> str:
+        """Returns the status of the solution found by the CPLEX MILP solver"""
+        return self.model.solve_details.status
+
+    def getCplexStatusCode(self) -> int:
+        """Returns the status code of the solution found by the CPLEX MILP solver. See the following for mapping codes:
+        https://www.ibm.com/docs/en/icos/20.1.0?topic=micclcarm-solution-status-codes-by-number-in-cplex-callable-library-c-api"""
+        return self.model.solve_details.status_code
+
+    def getGap(self) -> float:
+        """Returns the MILP relative gap for the solution found by the CPLEX MILP solver"""
+        return self.model.solve_details.gap
+
+    def getCplexRuntime(self) -> float:
+        """Returns the runtime, in seconds, of the CPLEX MILP solver"""
+        return self.model.solve_details.time
+
+    def getBestBound(self) -> float:
+        """Returns the MILP best bound for the solution found by the CPLEX MILP solver"""
+        return self.model.solve_details.best_bound
+
+    def getDeterministicTime(self) -> float:
+        """Returns the deterministic time (i.e. number of ticks) of the CPLEX MILP solver"""
+        return self.model.solve_details.deterministic_time
 
     def printAllSolverData(self) -> None:
         """Prints all the data store within the solver class"""
