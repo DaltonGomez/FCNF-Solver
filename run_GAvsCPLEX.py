@@ -12,7 +12,7 @@ python3 run_GAvsCPLEX.py
 """
 
 if __name__ == "__main__":
-    # Input graph and solver object w/ options
+    # Input graph and experiment object w/ options
     inputGraph = "huge_2"
     gaVScplex = GAvsCPLEX(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
                               isOptimizedArcSelections=True, isSolvedWithCPLEX=True, isRace=True,
