@@ -19,7 +19,7 @@ class GAvsCPLEX:
                  isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True):
         """Constructor of a GAvsCPLEX instance"""
         # Graph solver options
-        self.runID = inputGraphName + "--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+        self.runID = "GAvsCPLEX--" + inputGraphName + "--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
         self.isSolvedWithGeneticAlg: bool = isSolvedWithGeneticAlg
         self.isSolvedWithCPLEX: bool = isSolvedWithCPLEX
         self.isRace: bool = isRace
@@ -143,7 +143,7 @@ class GAvsCPLEX:
         ax.set_ylabel("Obj. Value")
         ax.set_xlabel("Runtime")
         # Save timestamped plot
-        plt.savefig("GAvsCPLEX--" + self.runID + ".png")
+        plt.savefig(self.runID + ".png")
         plt.close(fig)
 
     def saveOutputAsCSV(self) -> None:
@@ -182,7 +182,7 @@ class GAvsCPLEX:
                         ]
         # Create CSV File
         currDir = os.getcwd()
-        csvName = "GAvsCPLEX--" + self.runID + ".csv"
+        csvName = self.runID + ".csv"
         catPath = os.path.join(currDir, csvName)
         csvFile = open(catPath, "w+", newline="")
         with csvFile:
@@ -192,7 +192,7 @@ class GAvsCPLEX:
     def writeRowToCSV(self, outputRow: list) -> None:
         """Appends the most recent data onto a .csv file"""
         currDir = os.getcwd()
-        csvName = "GAvsCPLEX--" + self.runID + ".csv"
+        csvName = self.runID + ".csv"
         catPath = os.path.join(currDir, csvName)
         csvFile = open(catPath, "a", newline="")
         with csvFile:

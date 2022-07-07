@@ -48,7 +48,7 @@ class Population:
         self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
         self.stagnationPeriod = 5
         self.consecutiveStagnantGenerations = 0
-        self.initializationStrategy = "perEdge"  # :param : "perArc", "perEdge"
+        self.initializationStrategy = "perEdge"  # :param : "perArc", "perEdge", "reciprocalCapThenNudge" NOTE - RECIPROCAL CAP DOES NOT APPLY TO MUTATION
         self.initializationDistribution = "digital"  # :param : "uniform", "gaussian", "digital"
         self.initializationParams = [0.0, 100000.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
         # Individual Selection HPs
@@ -97,7 +97,7 @@ class Population:
     def setInitializationHyperparams(self, initializationStrategy="perEdge", initializationDistribution="digital",
                                  initializationParams=(0.0, 100000.0)) -> None:
         """Sets the GA attributes that dictate the initialization/updating of alpha values \n
-        :param str initializationStrategy: One of following: {"perEdge", "perArc"}
+        :param str initializationStrategy: One of following: {"perEdge", "perArc", "reciprocalCap"}
         :param str initializationDistribution: One of following: {"uniform", "gaussian", "digital"}
         :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian; low and high value if digital
         """
@@ -173,6 +173,7 @@ class Population:
             if drawing is True:
                 self.visualizeBestIndividual(labels=drawLabels, leadingText="GA_Gen" + str(generation) + "_")
             generation += 1
+            self.logGenerationTimestamp(startTime)
         # Plot statistics
         if isGraphing is True:
             self.plotEvolutionStatistics(runID=runID)
@@ -214,6 +215,8 @@ class Population:
                 self.consecutiveStagnantGenerations += 1
                 if self.consecutiveStagnantGenerations >= self.stagnationPeriod:
                     self.isTerminated = True
+        else:
+            print("ERROR - INVALID TERMINATION METHOD!!!")
 
     # ====================================================
     # ============== INITIALIZATION METHODS ==============
@@ -238,6 +241,12 @@ class Population:
                 thisEdgesAlphaValue = self.getAlphaValue()
                 for cap in range(self.graph.numArcsPerEdge):
                     tempEdge.append(thisEdgesAlphaValue)
+            elif self.initializationStrategy == "reciprocalCap":
+                for cap in range(self.graph.numArcsPerEdge):
+                    thisArcsAlphaValue = self.getReciprocalOfMinCap(cap)
+                    tempEdge.append(thisArcsAlphaValue)
+            else:
+                print("ERROR - INVALID INITIALIZATION STRATEGY!!!")
             tempAlphaValues.append(tempEdge)
         initialGenotype = np.array(tempAlphaValues, dtype='f')
         return initialGenotype
@@ -252,7 +261,18 @@ class Population:
             randomGene = random.gauss(self.initializationParams[0], self.initializationParams[1])
         elif self.initializationDistribution == "digital":
             randomGene = random.choice(self.initializationParams)
+        else:
+            print("ERROR - INVALID INITIALIZATION DISTRIBUTION!!!")
         return randomGene
+
+    def getReciprocalOfMinCap(self, arcIndex: int) -> float:
+        """Returns the reciprocal of the lower bound of the capacity for the arc size"""
+        # If the arc is the smallest, return an arbitrarily large number
+        # TODO - Set back to min
+        if arcIndex == len(self.graph.possibleArcCapsArray):
+            return 0.01
+        else:
+            return 1 / (self.graph.possibleArcCapsArray[arcIndex] - 0.01)
 
     # =============================================
     # ============== RANKING METHODS ==============
@@ -360,6 +380,8 @@ class Population:
             selectedIndividualIDs = self.rouletteWheelSelection()
         elif self.selectionMethod == "random":
             selectedIndividualIDs = self.randomSelection()
+        else:
+            print("ERROR - INVALID SELECTION METHOD!!!")
         return selectedIndividualIDs
 
     def randomSelection(self) -> list:
@@ -427,6 +449,8 @@ class Population:
             self.randomPerArcMutation(individualID)
         elif self.mutationMethod == "randomPerEdge":
             self.randomPerEdgeMutation(individualID)
+        else:
+            print("ERROR - INVALID MUTATION METHOD!!!")
 
     def randomSingleArcMutation(self, individualID: int) -> None:
         """Mutates an individual at only one random arc in the chromosome"""
@@ -486,6 +510,8 @@ class Population:
             self.randomOnePointCrossover(parentOneID, parentTwoID)
         elif self.crossoverMethod == "twoPoint":
             self.randomTwoPointCrossover(parentOneID, parentTwoID)
+        else:
+            print("ERROR - INVALID CROSSOVER METHOD!!!")
 
     def randomOnePointCrossover(self, parentOneID: int, parentTwoID: int) -> None:
         """Crossover of 2 chromosomes at a single random point\n
@@ -536,6 +562,8 @@ class Population:
             self.population[weakestTwoIndividualIDs[0]].resetOutputNetwork()
             self.population[weakestTwoIndividualIDs[1]].alphaValues = offspringTwoChromosome
             self.population[weakestTwoIndividualIDs[1]].resetOutputNetwork()
+        else:
+            print("ERROR - INVALID REPLACEMENT STRATEGY!!!")
 
     # ==========================================================
     # ============== EVOLUTION STATISTICS METHODS ==============
