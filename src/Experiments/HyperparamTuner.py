@@ -6,7 +6,7 @@ from typing import List, Dict
 from src.Experiments.GAvsCPLEX import GAvsCPLEX
 
 """
-# COMPLETE HP SPACE DICTIONARY:
+# COMPLETE HP SEARCH-SPACE DICTIONARY:
 self.hpSpace: Dict[str, List] = {
                         "populationSize": [10, 25, 50, 100],
                         "numGenerations": [10, 25, 50, 100],
@@ -101,12 +101,12 @@ class HyperparamTuner:
                                                                                                     isSolvedWithGeneticAlg=True,
                                                                                                     isOneDimAlphaTable=is1dAlpha,
                                                                                                     isOptimizedArcSelections=isOptArcs,
-                                                                                                    isSolvedWithCPLEX=False,
-                                                                                                    isRace=False,
+                                                                                                    isSolvedWithCPLEX=True,
+                                                                                                    isRace=True,
                                                                                                     isDrawing=False,
                                                                                                     isLabeling=False,
                                                                                                     isGraphing=False,
-                                                                                                    isOutputtingCPLEX=False)
+                                                                                                    isOutputtingCPLEX=True)
                                                                                     # Set hyperparameter settings
                                                                                     tunerRun.geneticPop.setPopulationHyperparams(
                                                                                         populationSize=popSize,
@@ -143,7 +143,9 @@ class HyperparamTuner:
                     "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                     "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                     "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                    "Per Arc/Edge Mutate Rate", "GA Best Obj Val", "GA Runtime (sec)"]
+                    "Per Arc/Edge Mutate Rate", "GA Best Obj Val", "GA Runtime (sec)", "CPLEX Obj Val",
+                    "CPLEX Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
+                    "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]
         # Build Output Header
         outputHeader = [["MULTI-GA vs. CPLEX RESULTS OUTPUT", self.tuningRunID, "Runs Per Graph=" + str(self.runsPerGraph)],
                         ["Graphs"],
