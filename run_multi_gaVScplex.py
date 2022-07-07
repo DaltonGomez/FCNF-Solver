@@ -132,7 +132,7 @@ if __name__ == "__main__":
                    "massive_UB_6",
                    "massive_UB_7",
                    "massive_UB_8",
-                   "massive_UB_9",
+                   "massive_UB_9"
                    ]
     # Number of runs per graph
     runsPerGraph = 3

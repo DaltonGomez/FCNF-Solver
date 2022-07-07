@@ -2,6 +2,7 @@ import csv
 import os
 from datetime import datetime
 
+import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -26,6 +27,8 @@ class GAvsCPLEX:
         self.isDrawing: bool = isDrawing
         self.isLabeling: bool = isLabeling
         self.isGraphing: bool = isGraphing
+        if self.isGraphing is True:
+            matplotlib.use("agg")
         self.isOutputtingCPLEX: bool = isOutputtingCPLEX
 
         # Input graph attributes

@@ -163,8 +163,8 @@ class SolutionVisualizer:
                                 }
                             },
                             "scaling": {
-                                "min": 2,
-                                "max": 10
+                                "min": 5,
+                                "max": 20
                             },
                             "smooth": {
                                 "enabled": false,
@@ -262,8 +262,8 @@ class SolutionVisualizer:
                                 }
                             },
                             "scaling": {
-                                "min": 2,
-                                "max": 10
+                                "min": 5,
+                                "max": 20
                             },
                             "smooth": {
                                 "enabled": false,

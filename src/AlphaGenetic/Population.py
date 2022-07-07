@@ -63,7 +63,6 @@ class Population:
         self.mutationMethod = "randomPerEdge"  # :param : "randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"
         self.mutationRate = 0.05
         self.perArcEdgeMutationRate = 0.20
-        self.nudgeParams = [0.0, 1.0]
 
         # =======================
         # EVOLUTION STATISTICS
@@ -88,8 +87,8 @@ class Population:
         :param bool isOptimizedArcSelections: Boolean indicating if post-processing will fit assigned flows to optimal capacity
         """
         self.populationSize = populationSize
-        self.terminationMethod = terminationMethod
         self.numGenerations = numGenerations
+        self.terminationMethod = terminationMethod
         self.stagnationPeriod = stagnationPeriod
         self.isOneDimAlphaTable = isOneDimAlphaTable
         self.isOptimizedArcSelections = isOptimizedArcSelections
@@ -126,18 +125,15 @@ class Population:
         self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
         self.replacementStrategy = replacementStrategy
 
-    def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20,
-                               nudgeParams=(0.0, 1.0)) -> None:
+    def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20) -> None:
         """Sets the GA attributes that dictate how the mutation of individuals is carried out \n
         :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"}
         :param float mutationRate: Probability in [0,1] that an individual mutates
         :param float perArcEdgeMutationRate: Probability in [0,1] that an edge/arc mutates given that an individual mutates
-        :param list nudgeParams: mu and sigma of the Gaussian distribution used for nudging
         """
         self.mutationMethod = mutationMethod
         self.mutationRate = mutationRate
         self.perArcEdgeMutationRate = perArcEdgeMutationRate
-        self.nudgeParams = nudgeParams
 
     # ====================================================
     # ============== EVOLUTION LOOP/METHODS ==============
@@ -268,11 +264,11 @@ class Population:
     def getReciprocalOfMinCap(self, arcIndex: int) -> float:
         """Returns the reciprocal of the lower bound of the capacity for the arc size"""
         # If the arc is the smallest, return an arbitrarily large number
-        # TODO - Set back to min
-        if arcIndex == len(self.graph.possibleArcCapsArray):
-            return 0.01
+        if arcIndex == 0:
+            return 100
+        # Else return the reciprocal of the capacity just below this arc
         else:
-            return 1 / (self.graph.possibleArcCapsArray[arcIndex] - 0.01)
+            return 1 / (self.graph.possibleArcCapsArray[arcIndex-1] + 0.01)
 
     # =============================================
     # ============== RANKING METHODS ==============

@@ -42,11 +42,9 @@ class MultiGAvsCPLEX:
         self.mutationRate: float = 0.05
         self.perArcEdgeMutationRate: float = 0.25
 
-        # Output attributes
-        self.isCsvCreated = False
-
     def runSolversOnAllGraphs(self) -> None:
         """Solves each graph the specified number of times and writes each run to a CSV"""
+        self.createCSV()
         for graphName in self.inputGraphs:
             for runNum in range(self.runsPerGraph):
                 print("\n======================================")
@@ -59,17 +57,21 @@ class MultiGAvsCPLEX:
                                       isRace=self.isRace,
                                       isDrawing=False,
                                       isLabeling=False,
-                                      isGraphing=False,
-                                      isOutputtingCPLEX=False)
-                if self.isCsvCreated is False:
-                    headerRow = gaVScplex.buildSingleRowRunHeaders()
-                    self.createCSV(headerRow)
-                    self.isCsvCreated = True
+                                      isGraphing=True,
+                                      isOutputtingCPLEX=True)
                 thisRunData = gaVScplex.solveGraphWithoutPrints()
                 self.writeRowToCSV(thisRunData)
 
-    def createCSV(self, headerRow: list) -> None:
+    def createCSV(self) -> None:
         """Creates a CSV file for the output data of the run and writes a header"""
+        headerRow = ["Run ID", "Graph Name", "Num Nodes", "Num Sources", "Num Sinks", "Num Edges",
+                    "Num Arc Caps", "Target Flow", "is Src/Sink Capped?", "is Src/Sink Charged?", "Pop Size",
+                    "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
+                    "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
+                    "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
+                    "Per Arc/Edge Mutate Rate", "GA Best Obj Val", "GA Runtime (sec)", "CPLEX Obj Val",
+                    "CPLEX Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
+                    "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]
         # Build Output Header
         outputHeader = [["MULTI-GA vs. CPLEX RESULTS OUTPUT", self.multiRunID], headerRow]
         # Create CSV File
