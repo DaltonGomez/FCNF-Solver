@@ -43,7 +43,6 @@ class GAvsCPLEX:
         self.geneticPop.setPopulationHyperparams(populationSize=10,
                                                  numGenerations=10,
                                                  terminationMethod="setGenerations",
-                                                 stagnationPeriod=5,
                                                  isOneDimAlphaTable=isOneDimAlphaTable,
                                                  isOptimizedArcSelections=isOptimizedArcSelections
                                                  )

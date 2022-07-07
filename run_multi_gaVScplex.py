@@ -144,7 +144,6 @@ if __name__ == "__main__":
     multiGAvsCPLEX.populationSize = 20
     multiGAvsCPLEX.numGenerations = 20
     multiGAvsCPLEX.terminationMethod = "setGenerations"
-    multiGAvsCPLEX.stagnationPeriod = 5
     multiGAvsCPLEX.initializationStrategy = "perEdge"
     multiGAvsCPLEX.initializationDistribution = "digital"
     multiGAvsCPLEX.initializationParams = [0.0, 100000.0]

@@ -20,8 +20,7 @@ if __name__ == "__main__":
     # Alpha-GA population one hyperparameter setters
     gaVSga.geneticPopOne.setPopulationHyperparams(populationSize=20,
                                                 numGenerations=40,
-                                                terminationMethod="setGenerations",
-                                                stagnationPeriod=5)
+                                                terminationMethod="setGenerations")
     gaVSga.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
                                                     initializationDistribution="digital",
                                                     initializationParams=[0.0, 100000.0])

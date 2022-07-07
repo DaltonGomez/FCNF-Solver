@@ -28,7 +28,6 @@ class MultiGAvsCPLEX:
         self.populationSize: int = 10
         self.numGenerations: int = 10
         self.terminationMethod: str = "setGenerations"
-        self.stagnationPeriod: int = 5
         self.initializationStrategy: str = "perEdge"
         self.initializationDistribution: str = "digital"
         self.initializationParams: List[float] = [0.0, 100000.0]

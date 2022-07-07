@@ -137,8 +137,8 @@ class SolutionVisualizer:
                                 "strokeColor": "rgba(0, 200, 0, 0)"
                             },
                             "scaling": {
-                                "min": 5,
-                                "max": 20
+                                "min": 3,
+                                "max": 9
                             },
                             "shadow": {
                                 "enabled": true,
@@ -159,12 +159,12 @@ class SolutionVisualizer:
                             "arrowStrikethrough": false,
                             "arrows": {
                                 "to": {
-                                    "scaleFactor": 1
+                                    "scaleFactor": 0.20
                                 }
                             },
                             "scaling": {
-                                "min": 5,
-                                "max": 20
+                                "min": 3,
+                                "max": 15
                             },
                             "smooth": {
                                 "enabled": false,
@@ -236,8 +236,8 @@ class SolutionVisualizer:
                                 "strokeColor": "rgba(0, 200, 0, 1)"
                             },
                             "scaling": {
-                                "min": 5,
-                                "max": 20
+                                "min": 3,
+                                "max": 9
                             },
                             "shadow": {
                                 "enabled": true,
@@ -258,12 +258,12 @@ class SolutionVisualizer:
                             "arrowStrikethrough": false,
                             "arrows": {
                                 "to": {
-                                    "scaleFactor": 1
+                                    "scaleFactor": 0.20
                                 }
                             },
                             "scaling": {
-                                "min": 5,
-                                "max": 20
+                                "min": 3,
+                                "max": 15
                             },
                             "smooth": {
                                 "enabled": false,

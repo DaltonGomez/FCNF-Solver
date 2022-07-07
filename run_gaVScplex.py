@@ -16,13 +16,12 @@ if __name__ == "__main__":
     inputGraph = "huge_2"
     gaVScplex = GAvsCPLEX(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
                               isOptimizedArcSelections=True, isSolvedWithCPLEX=True, isRace=True,
-                              isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
+                              isDrawing=True, isLabeling=False, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
     gaVScplex.geneticPop.setPopulationHyperparams(populationSize=10,
                                              numGenerations=10,
-                                             terminationMethod="setGenerations",
-                                             stagnationPeriod=5)
+                                             terminationMethod="setGenerations")
     gaVScplex.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                  initializationDistribution="digital",
                                                  initializationParams=[0.0, 100000.0])

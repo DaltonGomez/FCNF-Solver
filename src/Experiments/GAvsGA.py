@@ -32,8 +32,7 @@ class GAvsGA:
                          isOneDimAlphaTable=isOneDimAlphaPopOne, isOptimizedArcSelections=isArcOptimizedPopOne)
         self.geneticPopOne.setPopulationHyperparams(populationSize=10,
                                                  numGenerations=10,
-                                                 terminationMethod="setGenerations",
-                                                 stagnationPeriod=5)
+                                                 terminationMethod="setGenerations")
         self.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
                                                  initializationDistribution="digital",
                                                  initializationParams=[0.0, 100000.0])
@@ -53,8 +52,7 @@ class GAvsGA:
                                                     isOptimizedArcSelections=isArcOptimizedPopTwo)
         self.geneticPopTwo.setPopulationHyperparams(populationSize=10,
                                                     numGenerations=10,
-                                                    terminationMethod="setGenerations",
-                                                    stagnationPeriod=5)
+                                                    terminationMethod="setGenerations")
         self.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perEdge",
                                                         initializationDistribution="digital",
                                                         initializationParams=[0.0, 100000.0])
