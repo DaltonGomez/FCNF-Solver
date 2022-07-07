@@ -1,5 +1,6 @@
 import random
 import sys
+from datetime import datetime
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -30,6 +31,7 @@ class Population:
         self.solver: AlphaSolverPDLP = AlphaSolverPDLP(self.graph, self.minTargetFlow,
                                                        isOneDimAlphaTable=isOneDimAlphaTable,
                                                        isOptimizedArcSelections=isOptimizedArcSelections)  # Solver object, which pre-builds variables and constraints once on initialization
+        self.generationTimestamps: List[float] = []  # List of timestamps, in seconds after evolution start, for each generation
         self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
         self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
         self.bestKnownSolution = None  # Holds the best (i.e. lowest cost) solution discovered during the evolution
@@ -144,11 +146,13 @@ class Population:
                          isGraphing=True, runID="") -> FlowNetworkSolution:
         """Evolves the population for a specified number of generations"""
         # Initialize population and solve
+        startTime = datetime.now()
         self.initializePopulation()
         self.solvePopulation()
         if isGraphing is True:
             self.computeEvolutionStatistics()
         generation = 1
+        self.logGenerationTimestamp(startTime)
         # Evolve population
         while self.isTerminated is not True:
             print("Starting Generation " + str(generation) + "...")
@@ -575,6 +579,13 @@ class Population:
         # Save timestamped plot
         plt.savefig("GeneticEvoStats--" + runID + ".png")
         plt.close(fig)
+
+    def logGenerationTimestamp(self, startTime: datetime) -> None:
+        """Calculates the time, in seconds, since the evolution loop started and logs it"""
+        currentTime = datetime.now()
+        timeDiff = currentTime - startTime
+        secondsElapsed = timeDiff.seconds + timeDiff.microseconds/1000000
+        self.generationTimestamps.append(secondsElapsed)
 
     # ===============================================================
     # ============== HYPER-MUTATION/HILL CLIMB METHODS ==============

@@ -4,11 +4,11 @@ from src.Experiments.MultiGAvsCPLEX import MultiGAvsCPLEX
 """
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
-py -3.8 run_MultiGAvsCPLEX.py
+py -3.8 run_multi_gaVScplex.py
 
 LINUX RUN COMMAND:
 cd Repos/FCNF-Solver/
-python3 run_MultiGAvsCPLEX.py
+python3 run_multi_gaVScplex.py
 """
 
 if __name__ == "__main__":
