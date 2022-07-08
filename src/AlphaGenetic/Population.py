@@ -28,6 +28,7 @@ class Population:
         self.minTargetFlow: float = minTargetFlow  # Input target flow to be realized in output solution
         # Population & Solver Instance Objects
         self.population: List[Individual] = []  # List of Individual objects
+        self.currentGeneration: int = 0  # Tracks generation number during evolution
         self.solver: AlphaSolverPDLP = AlphaSolverPDLP(self.graph, self.minTargetFlow,
                                                        isOneDimAlphaTable=isOneDimAlphaTable,
                                                        isOptimizedArcSelections=isOptimizedArcSelections)  # Solver object, which pre-builds variables and constraints once on initialization
@@ -42,27 +43,33 @@ class Population:
         # Global hyperparameters
         self.populationSize: int = populationSize  # Defines the number of individuals in the population
         self.numGenerations: int = numGenerations  # Defines the number of iterations the evolution loop will run for
-        self.isOneDimAlphaTable = isOneDimAlphaTable  # Boolean indicating if the alpha table is only one dimensional (i.e. only one arc per edge)
-        self.isOptimizedArcSelections = isOptimizedArcSelections  # Boolean indicating post-processing individuals to best fit the assigned flow to a capacity
+        self.isOneDimAlphaTable: bool = isOneDimAlphaTable  # Boolean indicating if the alpha table is only one dimensional (i.e. only one arc per edge)
+        self.isOptimizedArcSelections: bool = isOptimizedArcSelections  # Boolean indicating post-processing individuals to best fit the assigned flow to a capacity
         # Initialization HPs
-        self.terminationMethod = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
-        self.stagnationPeriod = 5
-        self.consecutiveStagnantGenerations = 0
-        self.initializationStrategy = "perEdge"  # :param : "perArc", "perEdge", "reciprocalCapThenNudge" NOTE - RECIPROCAL CAP DOES NOT APPLY TO MUTATION
-        self.initializationDistribution = "digital"  # :param : "uniform", "gaussian", "digital"
-        self.initializationParams = [0.0, 100000.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
+        self.terminationMethod: str = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
+        self.stagnationPeriod: int = 5
+        self.consecutiveStagnantGenerations: int = 0
+        self.initializationStrategy: str = "perEdge"  # :param : "perArc", "perEdge", "reciprocalCapThenNudge" NOTE - RECIPROCAL CAP DOES NOT APPLY TO MUTATION
+        self.initializationDistribution: str = "digital"  # :param : "uniform", "gaussian", "digital"
+        self.initializationParams: List[float] = [0.0, 100000.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
         # Individual Selection HPs
-        self.selectionMethod = "tournament"  # :param : "tournament", "roulette", "random"
-        self.tournamentSize = 3
+        self.selectionMethod: str = "tournament"  # :param : "tournament", "roulette", "random"
+        self.tournamentSize: int = 3
         # Crossover HPs
-        self.crossoverMethod = "onePoint"  # :param : "onePoint", "twoPoint"
-        self.crossoverRate = 1.0
-        self.crossoverAttemptsPerGeneration = 1
-        self.replacementStrategy = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents"
+        self.crossoverMethod: str = "onePoint"  # :param : "onePoint", "twoPoint"
+        self.crossoverRate: float = 1.0
+        self.crossoverAttemptsPerGeneration: int = 1
+        self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents"
         # Mutation HPs
-        self.mutationMethod = "randomPerEdge"  # :param : "randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"
-        self.mutationRate = 0.05
-        self.perArcEdgeMutationRate = 0.20
+        self.mutationMethod: str = "randomPerEdge"  # :param : "randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"
+        self.mutationRate: float = 0.05
+        self.perArcEdgeMutationRate: float = 0.20
+        # Daemon HPs
+        # TODO - WORK ON DAEMON
+        self.isDaemonUsed: bool = False
+        self.annealingConstant: float = 2
+        self.daemonStrategy: str = "globalBinary"  # :param : "globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"
+        self.daemonStrength: float = 1
 
         # =======================
         # EVOLUTION STATISTICS
@@ -135,6 +142,20 @@ class Population:
         self.mutationRate = mutationRate
         self.perArcEdgeMutationRate = perArcEdgeMutationRate
 
+    def setDaemonHyperparams(self, isDaemonUsed=True, annealingConstant=2, daemonStrategy="personalMean",
+                             daemonStrength=0.25) -> None:
+        """Sets the GA attributes that determine the behavior of the annealed daemon update \n
+        :param bool isDaemonUsed: Boolean indicating if a daemon update is attempted
+        :param float annealingConstant: Constant k in the annealing schedule t = k*gen/(gen + maxGen)
+        :param str daemonStrategy: One of following: {"globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"}
+        :param float daemonStrength: Constant that determines how great of an impact the daemon updates have
+        """
+        # TODO - WORK ON DAEMON
+        self.isDaemonUsed = isDaemonUsed
+        self.annealingConstant = annealingConstant
+        self.daemonStrategy = daemonStrategy
+        self.daemonStrength = daemonStrength
+
     # ====================================================
     # ============== EVOLUTION LOOP/METHODS ==============
     # ====================================================
@@ -147,28 +168,31 @@ class Population:
         self.solvePopulation()
         if isGraphing is True:
             self.computeEvolutionStatistics()
-        generation = 1
+        self.currentGeneration = 1
         self.logGenerationTimestamp(startTime)
         # Evolve population
         while self.isTerminated is not True:
-            print("Starting Generation " + str(generation) + "...")
+            print("Starting Generation " + str(self.currentGeneration) + "...")
             # Perform operators and solve
             self.selectAndCrossover()
             self.doMutations()
+            # Apply a daemon update if used
+            if self.isDaemonUsed is True and self.currentGeneration != 1:
+                self.enactDaemon()
             self.solvePopulation()
             # Update current best individual and evaluate termination
             bestIndividual = self.getMostFitIndividual()
-            self.evaluateTermination(generation, bestIndividual.trueCost)
+            self.evaluateTermination(self.currentGeneration, bestIndividual.trueCost)
             # Compute statistics
             if isGraphing is True:
                 self.computeEvolutionStatistics()
             # Visualize & print
             if printGenerations is True:
-                print("Generation = " + str(generation) + "\t\tBest Individual = " + str(
+                print("Generation = " + str(self.currentGeneration) + "\t\tBest Individual = " + str(
                     bestIndividual.id) + "\t\tFitness = " + str(round(bestIndividual.trueCost, 2)) + "\n")
             if drawing is True:
-                self.visualizeBestIndividual(labels=drawLabels, leadingText="GA_Gen" + str(generation) + "_")
-            generation += 1
+                self.visualizeBestIndividual(labels=drawLabels, leadingText="GA_Gen" + str(self.currentGeneration) + "_")
+            self.currentGeneration += 1
             self.logGenerationTimestamp(startTime)
         # Plot statistics
         if isGraphing is True:
@@ -193,6 +217,17 @@ class Population:
                 continue
             if random.random() < self.mutationRate:
                 self.mutate(individualID)
+
+    def enactDaemon(self) -> None:
+        """Applies a daemon update to the population"""
+        random.seed()
+        annealedDaemonProb = self.getAnnealedProportion()
+        for individualID in range(self.populationSize):
+            individual = self.population[individualID]
+            if individual.isSolved is False:
+                continue
+            if random.random() < annealedDaemonProb:
+                self.applyDaemonUpdate(individualID)
 
     def evaluateTermination(self, generation: int, newBestCost: float) -> None:
         """Checks for termination using the given method and updates the best known solution"""
@@ -560,6 +595,128 @@ class Population:
             self.population[weakestTwoIndividualIDs[1]].resetOutputNetwork()
         else:
             print("ERROR - INVALID REPLACEMENT STRATEGY!!!")
+
+    # ===================================================
+    # ============== DAEMON UPDATE METHODS ==============
+    # ===================================================
+    # TODO - WORK ON DAEMON
+    def applyDaemonUpdate(self, individualID: int) -> None:
+        """Applies the daemon update strategy to the individual"""
+        print("Doing a daemon update to individual " + str(individualID) + "...")
+        if self.daemonStrategy == "globalBinary":
+            self.applyGlobalBinaryDaemon(individualID)
+        elif self.daemonStrategy == "globalMean":
+            self.applyGlobalMeanDaemon(individualID)
+        elif self.daemonStrategy == "globalMedian":
+            self.applyGlobalMedianDaemon(individualID)
+        elif self.daemonStrategy == "personalMean":
+            self.applyPersonalMeanDaemon(individualID)
+        elif self.daemonStrategy == "personalMedian":
+            self.applyPersonalMedianDaemon(individualID)
+        else:
+            print("ERROR - INVALID DAEMON STRATEGY!!!")
+
+    def getAnnealedProportion(self) -> float:
+        """Returns a proportion (in [0, 1] if k=2) given the annealing schedule t = k*gen/(gen + maxGen)"""
+        return self.annealingConstant * self.currentGeneration / (self.currentGeneration + self.numGenerations)
+
+    def getDaemonUpdatedAlphaValue(self, currentAlpha: float, flowStatRatio=0.0) -> float:
+        """Returns a new alpha value based on the current alpha, daemon strength, annealing schedule and flow-stat ratio"""
+        # TODO - Figure out what to do when alpha values are less than or equal to 1.0???
+        # If the current alpha is below one, then all of these equations break!
+        # if currentAlpha <= 1.0:
+        #    return -2.0
+        annealedProportion = self.getAnnealedProportion()
+        if flowStatRatio > 0.0:
+            newAlpha = currentAlpha / (self.daemonStrength + annealedProportion + flowStatRatio)
+        elif flowStatRatio < 0.0:
+            newAlpha = currentAlpha * (self.daemonStrength + annealedProportion + flowStatRatio)
+        else:
+            newAlpha = currentAlpha / (self.daemonStrength + annealedProportion)
+        return newAlpha
+
+    def applyGlobalBinaryDaemon(self, individualID: int) -> None:
+        """Applies a daemon update that nudges alpha values for arcs opened in the global best solution"""
+        individual = self.population[individualID]
+        globalBestArcFlows = self.bestKnownSolution.arcFlows
+        for arc in globalBestArcFlows.keys():
+            # If the global best has the arc unopened, do nothing
+            if globalBestArcFlows[arc] == 0.0:
+                continue
+            # Else get new alpha value based on annealed proportion
+            else:
+                individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc])
+        individual.resetOutputNetwork()
+
+    def applyGlobalMeanDaemon(self, individualID: int) -> None:
+        """Applies a daemon update that nudges alpha values based on the mean assigned flow in the global best solution"""
+        individual = self.population[individualID]
+        globalBestArcFlows = self.bestKnownSolution.arcFlows
+        # Find mean flow in the global best solution after removing all unopened arcs from the calculation
+        arcFlowsArr = np.array(list(globalBestArcFlows.values()))
+        arcFlowsArr[arcFlowsArr == 0.0] = np.nan
+        globalMeanFlow = np.nanmean(arcFlowsArr)
+        for arc in globalBestArcFlows.keys():
+            # If the global best solution does not have the arc unopened, go to next arc
+            if globalBestArcFlows[arc] == 0.0:
+                continue
+            # Find the ratio of flow between this arc and the global best's mean arc flow
+            flowMeanRatio = globalBestArcFlows[arc] / globalMeanFlow
+            # Update the alpha value considering the ratio
+            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMeanRatio)
+        individual.resetOutputNetwork()
+
+    def applyGlobalMedianDaemon(self, individualID: int) -> None:
+        """Applies a daemon update that nudges alpha values based on the median assigned flow in the global best solution"""
+        individual = self.population[individualID]
+        globalBestArcFlows = self.bestKnownSolution.arcFlows
+        # Find median flow in the global best solution after removing all unopened arcs from the calculation
+        arcFlowsArr = np.array(list(globalBestArcFlows.values()))
+        arcFlowsArr[arcFlowsArr == 0.0] = np.nan
+        globalMedianFlow = np.nanmedian(arcFlowsArr)
+        for arc in globalBestArcFlows.keys():
+            # If the global best solution does not have the arc unopened, go to next arc
+            if globalBestArcFlows[arc] == 0.0:
+                continue
+            # Find the ratio of flow between this arc and the global best's median arc flow
+            flowMedianRatio = globalBestArcFlows[arc] / globalMedianFlow
+            # Update the alpha value considering the ratio
+            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMedianRatio)
+        individual.resetOutputNetwork()
+
+    def applyPersonalMeanDaemon(self, individualID: int) -> None:
+        """Applies a daemon update that nudges alpha values based on the mean assigned flow in the personal solution"""
+        individual = self.population[individualID]
+        # Find mean flow in the personal solution after removing all unopened arcs from the calculation
+        arcFlowsArr = np.array(list(individual.arcFlows.values()))
+        arcFlowsArr[arcFlowsArr == 0.0] = np.nan
+        personalMeanFlow = np.nanmean(arcFlowsArr)
+        for arc in individual.arcFlows.keys():
+            # If the personal solution does not have the arc unopened, go to next arc
+            if individual.arcFlows[arc] == 0.0:
+                continue
+            # Find the ratio of flow between this arc and the personal's mean arc flow
+            flowMeanRatio = individual.arcFlows[arc] / personalMeanFlow
+            # Update the alpha considering the ratio
+            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMeanRatio)
+        individual.resetOutputNetwork()
+
+    def applyPersonalMedianDaemon(self, individualID: int) -> None:
+        """Applies a daemon update that nudges alpha values based on the median assigned flow in the personal solution"""
+        individual = self.population[individualID]
+        # Find median flow in the personal solution after removing all unopened arcs from the calculation
+        arcFlowsArr = np.array(list(individual.arcFlows.values()))
+        arcFlowsArr[arcFlowsArr == 0.0] = np.nan
+        personalMedianFlow = np.nanmedian(arcFlowsArr)
+        for arc in individual.arcFlows.keys():
+            # If the personal solution does not have the arc unopened, go to next arc
+            if individual.arcFlows[arc] == 0.0:
+                continue
+            # Find the ratio of flow between this arc and the personal's median arc flow
+            flowMedianRatio = individual.arcFlows[arc] / personalMedianFlow
+            # Update the alpha considering the ratio
+            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMedianRatio)
+        individual.resetOutputNetwork()
 
     # ==========================================================
     # ============== EVOLUTION STATISTICS METHODS ==============

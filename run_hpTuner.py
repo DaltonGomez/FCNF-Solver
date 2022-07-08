@@ -14,8 +14,7 @@ python3 run_hpTuner.py
 
 if __name__ == "__main__":
     # Input graph and tuner object w/ options
-    inputGraphs = [
-                "huge_UB_7"]
+    inputGraphs = ["huge_3"]
     runsPerGraph = 1
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph)
 
@@ -23,24 +22,22 @@ if __name__ == "__main__":
     hpTuner.hpSpace = {
                 "isOneDimAlphaTable": [True],
                 "isOptimizedArcSelections": [True],
-                "populationSize": [25, 50, 100],
-                "numGenerations": [25, 50, 100],
+                "populationSize": [10, 25, 50],
+                "numGenerations": [10, 25, 50],
                 "initializationStrategy": ["perEdge"],
                 "initializationDistribution": ["digital"],
                 "initializationParams": [
                                             [0, 100000],
-                                            [1, 100000],
-                                            [10, 100000]
                                         ],
-                "selectionMethod": ["tournament", "roulette", "random"],
-                "tournamentSize": [3, 5, 8],
-                "crossoverMethod": ["onePoint", "twoPoint"],
-                "crossoverRate": [0.66, 1.0],
+                "selectionMethod": ["tournament"],
+                "tournamentSize": [3, 8],
+                "crossoverMethod": ["onePoint"],
+                "crossoverRate": [1.0],
                 "crossoverAttemptsPerGeneration": [1, 3],
-                "replacementStrategy": ["replaceWeakestTwo", "replaceParents"],
-                "mutationMethod": ["randomPerEdge", "randomTotal"],
-                "mutationRate": [0.01, 0.05, 0.10, 0.25],
-                "perArcEdgeMutationRate": [0.10, 0.25, 0.50]
+                "replacementStrategy": ["replaceWeakestTwo"],
+                "mutationMethod": ["randomPerEdge"],
+                "mutationRate": [0.05, 0.10, 0.25],
+                "perArcEdgeMutationRate": [0.25, 0.50, 1.0]
                 }
 
     # Solve the graph
