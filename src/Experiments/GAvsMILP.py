@@ -118,14 +118,34 @@ class GAvsMILP:
             print("MILP Gap: " + str(self.milpCplexSolver.getGap() * 100) + "%")
             print("MILP Best Bound: " + str(self.milpCplexSolver.getBestBound()))
         if self.isSolvedWithGeneticAlg is True and self.isSolvedWithMILP is True and self.isRace is True and self.isGraphing is True:
-            self.plotConvergenceAgainstMILP()
+            self.plotRuntimeConvergenceAgainstMILP()
         self.saveOutputAsCSV()
         print("\nRun complete!\n")
 
-    def plotConvergenceAgainstMILP(self) -> None:
-        """Plots the convergence graph against the MILP's best found solution and gap/best bound"""
+    def plotRuntimeConvergenceAgainstMILP(self) -> None:
+        """Plots the convergence graph against the MILP's objective value and best bound taken from the listener at runtime"""
+        # Get MILP runtime data and plt figure
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        # Plot all data
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.convergenceStats, label="Most Fit GA Ind.", color="g")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.meanStats, label="Mean GA Pop. Fitness", color="b")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.medianStats, label="Median GA Pop. Fitness", color="c")
+        ax.plot(self.milpCplexSolver.runtimeTimestamps, self.milpCplexSolver.runtimeObjectiveValues, label="MILP Obj Val", linestyle="--", color="y")
+        ax.plot(self.milpCplexSolver.runtimeTimestamps, self.milpCplexSolver.runtimeBestBounds, label="MILP Bound", linestyle=":", color="r")
+        # Add graph elements
+        ax.set_title("GA Convergence Against MILP over Equal Runtime")
+        ax.legend(loc=1)
+        ax.set_ylim(ymin=0, ymax=max(max(self.milpCplexSolver.runtimeObjectiveValues), max(self.geneticPop.meanStats))*1.25)
+        ax.set_ylabel("Obj. Value")
+        ax.set_xlabel("Runtime (in sec)")
+        # Save timestamped plot
+        plt.savefig(self.runID + ".png")
+        plt.close(fig)
+
+    def plotGenerationsConvergenceAgainstMILP(self) -> None:
+        """Plots the convergence graph against the MILP's best found solution and gap/best bound at the end"""
         # Get generations, MILP data and plt figure
-        # TODO - Update to include a CPLEX listener to get runtime data
         numGenerations = len(self.geneticPop.convergenceStats)
         generations = list(range(numGenerations))
         cplexObjectiveValue = self.milpCplexSolver.getObjectiveValue()
@@ -140,10 +160,10 @@ class GAvsMILP:
         ax.plot(generations, np.full(numGenerations, cplexBestBound), label="MILP Bound", linestyle=":", color="r")
         # Add graph elements
         ax.set_title("GA Convergence Against MILP over Equal Runtime")
-        ax.legend(loc=4)
+        ax.legend(loc=1)
         ax.set_ylim(ymin=0, ymax=max(cplexObjectiveValue, max(self.geneticPop.meanStats))*1.25)
         ax.set_ylabel("Obj. Value")
-        ax.set_xlabel("Runtime")
+        ax.set_xlabel("Runtime (in generations)")
         # Save timestamped plot
         plt.savefig(self.runID + ".png")
         plt.close(fig)
@@ -256,7 +276,7 @@ class GAvsMILP:
             self.milpCplexSolver.findSolution(printDetails=False)
             print("CPLEX Complete!")
         if self.isSolvedWithGeneticAlg is True and self.isSolvedWithMILP is True and self.isRace is True and self.isGraphing is True:
-            self.plotConvergenceAgainstMILP()
+            self.plotRuntimeConvergenceAgainstMILP()
         return self.buildSingleRowRunData()
 
     def buildSingleRowRunHeaders(self) -> list:

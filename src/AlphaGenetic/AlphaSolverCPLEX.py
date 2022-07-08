@@ -254,10 +254,8 @@ class AlphaSolverCPLEX:
 
     def solveModel(self) -> None:
         """Solves the alpha-relaxed LP model in CPLEX"""
-        # print("\nAttempting to solve model...")  # PRINT OPTION
         self.solver.solve()
         self.isRun = True
-        # print("Solver execution complete...\n")  # PRINT OPTION
 
     def getArcFlowsDict(self) -> dict:
         """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""

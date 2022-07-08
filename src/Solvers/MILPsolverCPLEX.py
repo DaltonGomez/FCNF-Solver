@@ -1,6 +1,7 @@
 from typing import List, Dict, Tuple
 
 from docplex.mp.model import Model
+from docplex.mp.progress import ProgressDataRecorder
 
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 from src.Graph.CandidateGraph import CandidateGraph
@@ -19,6 +20,12 @@ class MILPsolverCPLEX:
         self.isSourceSinkCharged: bool = self.graph.isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver model
         self.model: Model = Model(name="FCNF-MILP-Solvers", log_output=logOutput, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
+        self.progressDataRecorder: ProgressDataRecorder = ProgressDataRecorder(clock="gap")  # Create a progress listener for the MILP model in CPLEX
+        self.model.add_progress_listener(self.progressDataRecorder)  # Attach the progress listener to the MILP model
+        self.runtimeTimestamps: List = []  # Stores the runtime timestamps, in seconds, from CPLEX while solving the MILP
+        self.runtimeObjectiveValues: List = []  # Stores the runtime objective values from CPLEX while solving the MILP
+        self.runtimeBestBounds: List = []  # Stores the runtime best bounds from CPLEX while solving the MILP
+        self.runtimeGaps: List = []  # Stores the runtime gaps of from CPLEX while solving the MILP
         self.isRun: bool = False  # Boolean indicating if the solver has been run
         # Decision variables
         self.sourceFlowVars: List[float] = []  # List of the flow values assigned to each source, indexed the same as the graph.sourcesArray
@@ -59,7 +66,8 @@ class MILPsolverCPLEX:
                 self.model.add_constraint(self.arcFlowVars[(i, j)] <= self.arcOpenedVars[(i, j)] * capacity,
                                           ctname=ctName)
 
-        # Only one arc per edge can be opened constraint (NOTE: Can be turned on/off as an optional param of this class)
+        # Only one arc per edge can be opened constraint
+        # NOTE - Can be turned on/off as an optional param of this class
         if self.isOneArcPerEdge is True:
             for i in range(self.graph.numEdges):
                 ctName = "e_" + str(i) + "_OneArcPerEdge"
@@ -126,7 +134,6 @@ class MILPsolverCPLEX:
                                             ctname=ctName)
 
         # =================== OBJECTIVE FUNCTION ===================
-        # NOTE: Borderline unreadable but verified correct
         if self.graph.isSourceSinkCharged is True:
             self.model.set_objective("min", sum(self.arcFlowVars[(i, j)] * self.graph.getArcVariableCostFromEdgeCapIndices(i, j)
                                                 for i in range(self.graph.numEdges)
@@ -157,10 +164,19 @@ class MILPsolverCPLEX:
 
     def solveModel(self) -> None:
         """Solves the MILP model in CPLEX"""
-        # print("\nAttempting to solve model...")  # PRINT OPTION
         self.model.solve()
         self.isRun = True
-        # print("Solver execution complete...\n")  # PRINT OPTION
+        self.extractRuntimeData()
+
+    def extractRuntimeData(self) -> None:
+        """Pulls runtime data out of the progress listener after solving"""
+        cplexRuntimeDate = self.progressDataRecorder.recorded
+        self.runtimeTimestamps = []
+        for progressData in cplexRuntimeDate:
+            self.runtimeTimestamps.append(progressData[8])  # Index 8 is the timestamp in seconds
+            self.runtimeObjectiveValues.append(progressData[2])  # Index 2 is the current objective value
+            self.runtimeBestBounds.append(progressData[3])  # Index 3 is the current known best bound
+            self.runtimeGaps.append(progressData[4])  # Index 4 is the current gap
 
     def writeSolution(self) -> FlowNetworkSolution:
         """Writes out the solution instance"""

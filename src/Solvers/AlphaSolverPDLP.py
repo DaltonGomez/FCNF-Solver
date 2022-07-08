@@ -256,10 +256,8 @@ class AlphaSolverPDLP:
 
     def solveModel(self) -> None:
         """Solves the alpha-relaxed LP model with PDLP"""
-        # print("\nAttempting to solve model...")
         self.status = self.solver.Solve()
         self.isRun = True
-        # print("Solver execution complete...\n")
 
     def getArcFlowsDict(self) -> dict:
         """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""

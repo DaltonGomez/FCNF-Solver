@@ -1,5 +1,5 @@
 
-from src.Experiments.GAvsMILP import GAvsCPLEX
+from src.Experiments.GAvsMILP import GAvsMILP
 
 """
 RUN COMMAND:
@@ -14,12 +14,12 @@ python3 sandbox.py
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
     inputGraph = "huge_UB_6"
-    sandboxSolver = GAvsCPLEX(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
-                              isOptimizedArcSelections=True, isSolvedWithCPLEX=True, isRace=True,
+    sandboxSolver = GAvsMILP(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
+                              isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=True,
                               isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
-    sandboxSolver.geneticPop.setPopulationHyperparams(populationSize=20,
+    sandboxSolver.geneticPop.setPopulationHyperparams(populationSize=25,
                                              numGenerations=50,
                                              terminationMethod="setGenerations")
     sandboxSolver.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
