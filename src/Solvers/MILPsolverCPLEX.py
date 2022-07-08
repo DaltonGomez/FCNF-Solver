@@ -166,7 +166,38 @@ class MILPsolverCPLEX:
         """Solves the MILP model in CPLEX"""
         self.model.solve()
         self.isRun = True
+        self.verifyTrueCost()
         self.extractRuntimeData()
+
+    def verifyTrueCost(self) -> float:
+        """Checks the true cost of the MILP's output against the solver's returned objective value"""
+        srcFlows = self.model.solution.get_value_list(self.sourceFlowVars)
+        sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
+        arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
+        trueCost = 0.0
+        if self.isSourceSinkCharged is True:
+            for s in range(self.graph.numSources):
+                trueCost += self.graph.sourceVariableCostsArray[s] * srcFlows[s]
+            for t in range(self.graph.numSinks):
+                trueCost += self.graph.sinkVariableCostsArray[t] * sinkFlows[t]
+        for edge in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
+                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
+                try:
+                    if arcFlows[(edge, cap)] > 0.0:
+                        arcVariableCost = self.graph.getArcVariableCostFromEdgeCapIndices(edge, cap)
+                        arcFixedCost = self.graph.getArcFixedCostFromEdgeCapIndices(edge, cap)
+                        trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
+                except KeyError:
+                    print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
+        # Print verification check
+        if round(self.model.solution.get_objective_value()) == round(trueCost):
+            print("\nMILP cost is verified accurate!\n")
+        else:
+            print("\nERROR - TRUE COST OF SOLUTION DOES NOT MATCH THE SOLVER'S OBJECTIVE VALUE!")
+            print("True Cost = " + str(trueCost))
+            print("Solver Obj. Value = " + str(self.model.solution.get_objective_value()))
+        return trueCost
 
     def extractRuntimeData(self) -> None:
         """Pulls runtime data out of the progress listener after solving"""

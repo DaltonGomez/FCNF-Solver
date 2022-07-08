@@ -124,19 +124,19 @@ class GAvsMILP:
 
     def plotRuntimeConvergenceAgainstMILP(self) -> None:
         """Plots the convergence graph against the MILP's objective value and best bound taken from the listener at runtime"""
-        # Get MILP runtime data and plt figure
+        # Get plt figure
         fig = plt.figure()
         ax = fig.add_subplot()
         # Plot all data
-        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.convergenceStats, label="Most Fit GA Ind.", color="g")
-        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.meanStats, label="Mean GA Pop. Fitness", color="b")
-        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.medianStats, label="Median GA Pop. Fitness", color="c")
-        ax.plot(self.milpCplexSolver.runtimeTimestamps, self.milpCplexSolver.runtimeObjectiveValues, label="MILP Obj Val", linestyle="--", color="y")
-        ax.plot(self.milpCplexSolver.runtimeTimestamps, self.milpCplexSolver.runtimeBestBounds, label="MILP Bound", linestyle=":", color="r")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.convergenceStats, label="Most Fit GA Ind", color="g")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.meanStats, label="Mean GA Fitness", color="b", linestyle="--")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.medianStats, label="Median GA Fitness", color="c", linestyle="--")
+        ax.plot(self.milpCplexSolver.runtimeTimestamps, self.milpCplexSolver.runtimeObjectiveValues, label="MILP Obj Val", color="y", linestyle=":")
+        ax.plot(self.milpCplexSolver.runtimeTimestamps, self.milpCplexSolver.runtimeBestBounds, label="MILP Bound", color="r", linestyle=":")
         # Add graph elements
         ax.set_title("GA Convergence Against MILP over Equal Runtime")
         ax.legend(loc=1)
-        ax.set_ylim(ymin=0, ymax=max(max(self.milpCplexSolver.runtimeObjectiveValues), max(self.geneticPop.meanStats))*1.25)
+        ax.set_ylim(ymin=0, ymax=max(max(self.milpCplexSolver.runtimeObjectiveValues)/1.5, max(self.geneticPop.meanStats))*1.05)
         ax.set_ylabel("Obj. Value")
         ax.set_xlabel("Runtime (in sec)")
         # Save timestamped plot
@@ -154,10 +154,10 @@ class GAvsMILP:
         ax = fig.add_subplot()
         # Plot all data
         ax.plot(generations, self.geneticPop.convergenceStats, label="Most Fit Individual", color="g")
-        ax.plot(generations, self.geneticPop.meanStats, label="Mean Pop. Fitness", color="b")
-        ax.plot(generations, self.geneticPop.medianStats, label="Median Pop. Fitness", color="c")
-        ax.plot(generations, np.full(numGenerations, cplexObjectiveValue), label="MILP Best Soln", linestyle="--", color="y")
-        ax.plot(generations, np.full(numGenerations, cplexBestBound), label="MILP Bound", linestyle=":", color="r")
+        ax.plot(generations, self.geneticPop.meanStats, label="Mean Pop. Fitness", color="b", linestyle="--")
+        ax.plot(generations, self.geneticPop.medianStats, label="Median Pop. Fitness", color="c", linestyle="--")
+        ax.plot(generations, np.full(numGenerations, cplexObjectiveValue), label="MILP Best Soln", color="y", linestyle=":")
+        ax.plot(generations, np.full(numGenerations, cplexBestBound), label="MILP Bound", color="r", linestyle=":")
         # Add graph elements
         ax.set_title("GA Convergence Against MILP over Equal Runtime")
         ax.legend(loc=1)
@@ -176,6 +176,8 @@ class GAvsMILP:
             self.writeRowToCSV(self.buildGAHeader())
             self.writeRowToCSV(self.buildGAData())
             self.writeRowToCSV([])
+            self.writeRowToCSV(["GA Generation Timestamps"])
+            self.writeRowToCSV(self.geneticPop.generationTimestamps)
             self.writeRowToCSV(["Most Fit Ind."])
             self.writeRowToCSV(self.geneticPop.convergenceStats)
             self.writeRowToCSV(["Mean Fitness"])
@@ -188,6 +190,14 @@ class GAvsMILP:
         if self.isSolvedWithMILP is True:
             self.writeRowToCSV(self.buildMILPHeaderRow())
             self.writeRowToCSV(self.buildMILPDataRow())
+            self.writeRowToCSV(["MILP Solver Timestamps"])
+            self.writeRowToCSV(self.milpCplexSolver.runtimeTimestamps)
+            self.writeRowToCSV(["MILP Runtime Obj Values"])
+            self.writeRowToCSV(self.milpCplexSolver.runtimeObjectiveValues)
+            self.writeRowToCSV(["MILP Runtime Bound"])
+            self.writeRowToCSV(self.milpCplexSolver.runtimeBestBounds)
+            self.writeRowToCSV(["MILP Runtime Gap"])
+            self.writeRowToCSV(self.milpCplexSolver.runtimeGaps)
 
     def createCSV(self) -> None:
         """Creates a CSV file for the output data of the run and writes a header"""

@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 "crossoverMethod": ["onePoint"],
                 "crossoverRate": [1.0],
                 "crossoverAttemptsPerGeneration": [1, 3],
-                "replacementStrategy": ["replaceWeakestTwo"],
+                "replacementStrategy": ["replaceWeakestTwo", "replaceRandomTwo"],
                 "mutationMethod": ["randomPerEdge"],
                 "mutationRate": [0.05, 0.10, 0.25],
                 "perArcEdgeMutationRate": [0.25, 0.50, 1.0],

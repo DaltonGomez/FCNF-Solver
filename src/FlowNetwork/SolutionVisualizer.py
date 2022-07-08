@@ -47,8 +47,6 @@ class SolutionVisualizer:
                     except KeyError:
                         print("ERROR: Key error on solution.arcFlows[" + str((edgeIndex, arc)) +
                               "] (edge = " + str(edge) + "! Assuming CPLEX decided zero flow...")
-                    else:
-                        flow += self.solution.arcFlows[(edgeIndex, arc)]
             if flow > 0:
                 self.netVis.add_node(nodeObj.nodeID, label=nodeObj.nodeID, color="rgba(0, 0, 0, 1)", value=flow,
                                      x=int(nodeObj.xPos * self.positionScalar),

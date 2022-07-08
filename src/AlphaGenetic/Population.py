@@ -59,7 +59,7 @@ class Population:
         self.crossoverMethod: str = "onePoint"  # :param : "onePoint", "twoPoint"
         self.crossoverRate: float = 1.0
         self.crossoverAttemptsPerGeneration: int = 1
-        self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents"
+        self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents", "replaceRandomTwo"
         # Mutation HPs
         self.mutationMethod: str = "randomPerEdge"  # :param : "randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"
         self.mutationRate: float = 0.05
@@ -119,7 +119,7 @@ class Population:
         :param str crossoverMethod: One of following: {"onePoint", "twoPoint"}
         :param float crossoverRate: Probability in [0,1] that a crossover occurs
         :param int crossoverAttemptsPerGeneration: Number of attempted crossovers per generation
-        :param str replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents"}
+        :param str replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents", "replaceRandomTwo"}
         """
         self.crossoverMethod = crossoverMethod
         self.crossoverRate = crossoverRate
@@ -287,6 +287,8 @@ class Population:
             randomGene = random.choice(self.initializationParams)
         else:
             print("ERROR - INVALID INITIALIZATION DISTRIBUTION!!!")
+        if randomGene < 0.0:
+            randomGene = 0.0
         return randomGene
 
     def getReciprocalOfMinCap(self, arcIndex: int) -> float:
@@ -588,6 +590,12 @@ class Population:
             self.population[weakestTwoIndividualIDs[0]].resetOutputNetwork()
             self.population[weakestTwoIndividualIDs[1]].alphaValues = offspringTwoChromosome
             self.population[weakestTwoIndividualIDs[1]].resetOutputNetwork()
+        elif self.replacementStrategy == "replaceRandomTwo":
+            randomTwoIndividualIDs = self.randomSelection()
+            self.population[randomTwoIndividualIDs[0]].alphaValues = offspringOneChromosome
+            self.population[randomTwoIndividualIDs[0]].resetOutputNetwork()
+            self.population[randomTwoIndividualIDs[1]].alphaValues = offspringTwoChromosome
+            self.population[randomTwoIndividualIDs[1]].resetOutputNetwork()
         else:
             print("ERROR - INVALID REPLACEMENT STRATEGY!!!")
 
@@ -622,11 +630,11 @@ class Population:
         # Otherwise
         annealedProportion = self.getAnnealedProportion()
         if flowStatRatio > 0.0:
-            newAlpha = currentAlpha / (self.daemonStrength + annealedProportion + flowStatRatio)
+            newAlpha = currentAlpha / (self.daemonStrength * (annealedProportion + flowStatRatio))
         elif flowStatRatio < 0.0:
-            newAlpha = currentAlpha * (self.daemonStrength + annealedProportion + flowStatRatio)
+            newAlpha = currentAlpha * ((1 / self.daemonStrength) * (annealedProportion + flowStatRatio))
         else:
-            newAlpha = currentAlpha / (self.daemonStrength + annealedProportion)
+            newAlpha = currentAlpha / (self.daemonStrength * (1 + annealedProportion))
         return newAlpha
 
     def applyGlobalBinaryDaemon(self, individualID: int) -> None:
