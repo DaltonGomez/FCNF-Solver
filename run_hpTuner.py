@@ -16,18 +16,18 @@ if __name__ == "__main__":
     # Input graph and tuner object w/ options
     inputGraphs = ["huge_3"]
     runsPerGraph = 1
-    hpTuner = HyperparamTuner(inputGraphs, runsPerGraph)
+    hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=False,
+                              tuneOneDimAlpha=True, tuneManyDimAlpha=False,
+                              tuneOptimizedArcs=True, tuneNonOptimizedArcs=False)
 
     # Update the HP tuning search space
     hpTuner.hpSpace = {
-                "isOneDimAlphaTable": [True],
-                "isOptimizedArcSelections": [True],
                 "populationSize": [10, 25, 50],
                 "numGenerations": [10, 25, 50],
                 "initializationStrategy": ["perEdge"],
                 "initializationDistribution": ["digital"],
                 "initializationParams": [
-                                            [0, 100000],
+                                            [5.0, 1000000],
                                         ],
                 "selectionMethod": ["tournament"],
                 "tournamentSize": [3, 8],
@@ -37,12 +37,16 @@ if __name__ == "__main__":
                 "replacementStrategy": ["replaceWeakestTwo"],
                 "mutationMethod": ["randomPerEdge"],
                 "mutationRate": [0.05, 0.10, 0.25],
-                "perArcEdgeMutationRate": [0.25, 0.50, 1.0]
+                "perArcEdgeMutationRate": [0.25, 0.50, 1.0],
+                "isDaemonUsed": [True, False],
+                "annealingConstant": [0.25, 0.5, 1, 2],
+                "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
+                "daemonStrength": [0.5, 1, 2]
                 }
 
     # Solve the graph
     # NOTE - The grid search is not comprehensive of all the hyperparameters that could be tuned
-    hpTuner.conductGridSearch()
+    hpTuner.runTuningExperiment()
 
 
 """
@@ -52,8 +56,6 @@ self.hpSpace: Dict[str, List] = {
                         "numGenerations": [10, 25, 50, 100],
                         "terminationMethod": ["setGenerations", "stagnationPeriod"],
                         "stagnationPeriod": [5],
-                        "isOneDimAlphaTable": [True, False],
-                        "isOptimizedArcSelections": [True, False],
                         "initializationStrategy": ["perEdge", "perArc", "reciprocalCap"],
                         "initializationDistribution": ["uniform", "gaussian", "digital"],
                         "initializationParams": [
@@ -69,7 +71,11 @@ self.hpSpace: Dict[str, List] = {
                         "replacementStrategy": ["replaceWeakestTwo", "replaceParents"],
                         "mutationMethod": ["randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"],
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
-                        "perArcEdgeMutationRate": [0.01, 0.05, 0.10, 0.25, 0.50]
+                        "perArcEdgeMutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
+                        "isDaemonUsed": [True, False],
+                        "annealingConstant": [0.25, 0.5, 1, 2],
+                        "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
+                        "daemonStrength": [0.5, 1, 2]
                         }
 """
 

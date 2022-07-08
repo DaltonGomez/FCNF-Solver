@@ -4,29 +4,31 @@ GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Update README with documentation
 # TODO - Add unit tests
-# TODO - Update CPLEX solver class to append a log file on disc, allowing the best found so far and percent gap to be read during runtime
-# TODO - Try the CPLEX library instead of docplex (Lower level library => Less intuitive modeling but faster Python to CPLEX data transfer)
-# TODO - Implement a Data-In class to read in an input network from a csv, like SimCCS data
-# TODO - Use SimCCS source and sink data to generate capacity distributions to sample in network generation
-# TODO - Add parallelism to the alpha-relaxed solver to decrease runtime speed
-# DONE - Optimize redundant data structures and algorithm calls
+# DONE - Optimize redundant data structures and algorithm calls (at least the major optimizations)
+# DONE - Implement Alpha-Relaxed GA solver in CPLEX
+# DONE - Update MILP solver to report gaps, bounds, and include a runtime listener
+# ASK - Would any major improvements in speed results from adding parallelism to solve a generation?
+# ASK - Would anything major be gained by going to the lower level CPLEX library instead of docplex?
+# ASK - Should a class be added to read in real-world SimCCS datasets? What would that require?
+# ASK - Should the source/sink capacity ranges be modified to better fit real-world data?
 
 
 ALPHA GENETIC ALGORITHM:
 =====================================
+# TODO - Add a strategy to log the best known individual and prevent its alpha table from ever being overwritten
 # TODO - Break out GA operators as interfaces via a strategy pattern
-# Done - If initializing all arcs within an edge to be the same alpha values, reduce the alpha table to 1-dimensional
-# TODO - Implement a random per edge nudge mutation
-# TODO - Use a brief, interrupted run of CPLEX-MILP to generate initial alpha values for the population
-# TODO - Add a daemon update that updates X individual's alpha values by nudging down arc's in the global best and up otherwise (proportional to the assigned flow)
-# TODO - Add a daemon update that updates each individual's alpha values with up/down nudges based on the assigned flow in the individual's previous solution (to drive out low flow edges)
-# TODO - Anneal hyperparameters over time
-# TODO - Implement Pandas Dataframes and MatPlotLib to visualize algorithm properties (i.e. convergences, etc.)
-# TODO - Run tuning and results experiments
-# TODO - Measure population diversity at genotypic and phenotypic levels
-# TODO - Do sensitivity/perturbation analysis on alpha values
-# TODO - Correct pathing (if path based operators prove to be effective)
->> Recommended Pseudocode for Computing Pathlets:
+# TODO - Implement nudge mutations
+# TODO - Reconsider how the daemon update is computed/annealed
+# TODO - Measure population diversity over evolution at genotypic (not just the phenotypic level)
+# DONE - Implement basic GA population and operators
+# DONE - If initializing all arcs within an edge to be the same alpha values, reduce the alpha table to 1-dimensional to improve solver speed
+# DONE - Add in basic population statistics tracking and graphing
+# DONE - Build out tuning experiments
+# ASK - Would a brief, interrupted run of CPLEX-MILP generating initial alpha values for the population improve overall performance?
+# ASK - Should mutation rate also be annealed over time?
+# ASK - What information could be gained from a sensitivity/perturbation analysis on alpha values?
+# ASK - Should the topological-based operators (i.e. crossover and mutation based on selected paths/pathlets) be revisited?
+# NOTE - See below for proposed pseudocode of how to compute pathlets:
     >> On a copy of the network:
         >> for node in nodes:
             >> if node.degree == 2 and node.type != src/sink:
@@ -50,22 +52,22 @@ ANT COLONY OPTIMIZATION ALGORITHM:
 # TODO - Improve the hyperparameter tuning method and increase the search space
 # TODO - Analyze time constraints
 # TODO - Revisit and test pheromone deposition and arc "goodness" equations
->> Should "goodness" equation be, G(e) = cap(e) / (FC(e) + VC(e) * cap(e)), as this would be flow/$ if the pipeline was at capacity.
+# ASK - Should "goodness" equation be, G(e) = cap(e) / (FC(e) + VC(e) * cap(e)), as this would be flow/$ if the pipeline was at capacity?
 
 
 GA/ACO INTEGRATION:
 =====================================
->> Use the ants to determine paths/trim input graph and then use the GA to refine, potentially as an iterative process until convergence.
+# NOTE - Use the ants to determine paths/trim input graph and then use the GA to refine, potentially as an iterative process until convergence.
 
 
 OTHER FUTURE IDEAS:
 =====================================
->> Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
->> Use the dynamic nature of ACO for the sink capacity uncertainty
+# NOTE - Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
+# NOTE - Use the dynamic nature of ACO for the sink capacity uncertainty
 
 
 VERSIONS (AS BRANCHES):
 =====================================
->> main -> The most current development of the FCNF-Solver for the Genetic Algorithm matheuristic paper
->> VERSION_2 -> FCNF-Solver prior to data structure optimizations and design pattern revisions
->> VERSION_1 -> An initial development of the FCNF-Solver with a drastically different architecture than the main
+# NOTE - main -> The most current development of the FCNF-Solver for the Genetic Algorithm matheuristic paper
+# NOTE - VERSION_2 -> FCNF-Solver prior to data structure optimizations and design pattern revisions
+# NOTE - VERSION_1 -> An initial development of the FCNF-Solver with a drastically different architecture than the main

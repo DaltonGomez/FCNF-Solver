@@ -65,11 +65,10 @@ class Population:
         self.mutationRate: float = 0.05
         self.perArcEdgeMutationRate: float = 0.20
         # Daemon HPs
-        # TODO - WORK ON DAEMON
-        self.isDaemonUsed: bool = False
-        self.annealingConstant: float = 2
-        self.daemonStrategy: str = "globalBinary"  # :param : "globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"
-        self.daemonStrength: float = 1
+        self.isDaemonUsed: bool = True
+        self.annealingConstant: float = 0.5
+        self.daemonStrategy: str = "globalMean"  # :param : "globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"
+        self.daemonStrength: float = 1.0
 
         # =======================
         # EVOLUTION STATISTICS
@@ -83,22 +82,17 @@ class Population:
     # ============== HYPERPARAMETER SETTERS ==============
     # ====================================================
     def setPopulationHyperparams(self, populationSize=10, numGenerations=10,
-                                 terminationMethod="setGenerations", stagnationPeriod=5,
-                                 isOneDimAlphaTable=True, isOptimizedArcSelections=True) -> None:
+                                 terminationMethod="setGenerations", stagnationPeriod=5) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
         :param int numGenerations: Number of iterations the population evolves for
         :param str terminationMethod: One of following: {"setGenerations", "stagnationPeriod"}
         :param int stagnationPeriod: Number of stagnant consecutive generations needed for termination
-        :param bool isOneDimAlphaTable: Boolean indicating if the alpha table will be reduced to 1-dimension
-        :param bool isOptimizedArcSelections: Boolean indicating if post-processing will fit assigned flows to optimal capacity
         """
         self.populationSize = populationSize
         self.numGenerations = numGenerations
         self.terminationMethod = terminationMethod
         self.stagnationPeriod = stagnationPeriod
-        self.isOneDimAlphaTable = isOneDimAlphaTable
-        self.isOptimizedArcSelections = isOptimizedArcSelections
 
     def setInitializationHyperparams(self, initializationStrategy="perEdge", initializationDistribution="digital",
                                  initializationParams=(0.0, 100000.0)) -> None:
@@ -142,15 +136,14 @@ class Population:
         self.mutationRate = mutationRate
         self.perArcEdgeMutationRate = perArcEdgeMutationRate
 
-    def setDaemonHyperparams(self, isDaemonUsed=True, annealingConstant=2, daemonStrategy="personalMean",
-                             daemonStrength=0.25) -> None:
+    def setDaemonHyperparams(self, isDaemonUsed=True, annealingConstant=0.5, daemonStrategy="globalMean",
+                             daemonStrength=1.0) -> None:
         """Sets the GA attributes that determine the behavior of the annealed daemon update \n
         :param bool isDaemonUsed: Boolean indicating if a daemon update is attempted
         :param float annealingConstant: Constant k in the annealing schedule t = k*gen/(gen + maxGen)
         :param str daemonStrategy: One of following: {"globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"}
         :param float daemonStrength: Constant that determines how great of an impact the daemon updates have
         """
-        # TODO - WORK ON DAEMON
         self.isDaemonUsed = isDaemonUsed
         self.annealingConstant = annealingConstant
         self.daemonStrategy = daemonStrategy
@@ -601,7 +594,6 @@ class Population:
     # ===================================================
     # ============== DAEMON UPDATE METHODS ==============
     # ===================================================
-    # TODO - WORK ON DAEMON
     def applyDaemonUpdate(self, individualID: int) -> None:
         """Applies the daemon update strategy to the individual"""
         print("Doing a daemon update to individual " + str(individualID) + "...")
@@ -624,10 +616,10 @@ class Population:
 
     def getDaemonUpdatedAlphaValue(self, currentAlpha: float, flowStatRatio=0.0) -> float:
         """Returns a new alpha value based on the current alpha, daemon strength, annealing schedule and flow-stat ratio"""
-        # TODO - Figure out what to do when alpha values are less than or equal to 1.0???
-        # If the current alpha is below one, then all of these equations break!
-        # if currentAlpha <= 1.0:
-        #    return -2.0
+        # TODO - THIS REQUIRES MORE WORK... HOW SHOULD THE DAEMON UPDATE ALPHAS AND WHAT DO YOU DO WHEN THEY'RE <1?
+        if currentAlpha <= 1.0:
+            return currentAlpha + 1.0
+        # Otherwise
         annealedProportion = self.getAnnealedProportion()
         if flowStatRatio > 0.0:
             newAlpha = currentAlpha / (self.daemonStrength + annealedProportion + flowStatRatio)
@@ -635,7 +627,6 @@ class Population:
             newAlpha = currentAlpha * (self.daemonStrength + annealedProportion + flowStatRatio)
         else:
             newAlpha = currentAlpha / (self.daemonStrength + annealedProportion)
-        print("DEBUG --- OLD ALPHA = " + str(currentAlpha) + "\tNEW ALPHA = " + str(newAlpha))
         return newAlpha
 
     def applyGlobalBinaryDaemon(self, individualID: int) -> None:

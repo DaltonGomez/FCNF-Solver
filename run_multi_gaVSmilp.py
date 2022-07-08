@@ -1,14 +1,14 @@
 
-from src.Experiments.MultiGAvsCPLEX import MultiGAvsCPLEX
+from src.Experiments.MultiGAvsMILP import MultiGAvsMILP
 
 """
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
-py -3.8 run_multi_gaVScplex.py
+py -3.8 run_multi_gaVSmilp.py
 
 LINUX RUN COMMAND:
 cd Repos/FCNF-Solver/
-python3 run_multi_gaVScplex.py
+python3 run_multi_gaVSmilp.py
 """
 
 if __name__ == "__main__":
@@ -134,31 +134,37 @@ if __name__ == "__main__":
                    "massive_UB_8",
                    "massive_UB_9"
                    ]
+    # Option to reverse input graphs list (i.e. run large graphs first)
+    inputGraphs.reverse()
     # Number of runs per graph
     runsPerGraph = 3
 
     # Experiment object and hyperparameter settings
-    multiGAvsCPLEX = MultiGAvsCPLEX(inputGraphs, runsPerGraph, isSolvedWithGeneticAlg=True,
+    multiGAvsMILP = MultiGAvsMILP(inputGraphs, runsPerGraph, isSolvedWithGeneticAlg=True,
                                     isOneDimAlphaTable=True, isOptimizedArcSelections=True,
-                                    isSolvedWithCPLEX=True, isRace=True)
-    multiGAvsCPLEX.populationSize = 20
-    multiGAvsCPLEX.numGenerations = 20
-    multiGAvsCPLEX.terminationMethod = "setGenerations"
-    multiGAvsCPLEX.initializationStrategy = "perEdge"
-    multiGAvsCPLEX.initializationDistribution = "digital"
-    multiGAvsCPLEX.initializationParams = [0.0, 100000.0]
-    multiGAvsCPLEX.selectionMethod = "tournament"
-    multiGAvsCPLEX.tournamentSize = 4
-    multiGAvsCPLEX.crossoverMethod = "onePoint"
-    multiGAvsCPLEX.crossoverRate = 1.0
-    multiGAvsCPLEX.crossoverAttemptsPerGeneration = 1
-    multiGAvsCPLEX.replacementStrategy = "replaceWeakestTwo"
-    multiGAvsCPLEX.mutationMethod = "randomPerEdge"
-    multiGAvsCPLEX.mutationRate = 0.05
-    multiGAvsCPLEX.perArcEdgeMutationRate = 0.25
+                                    isSolvedWithMILP=True, isRace=True)
+    multiGAvsMILP.populationSize = 10
+    multiGAvsMILP.numGenerations = 10
+    multiGAvsMILP.terminationMethod = "setGenerations"
+    multiGAvsMILP.initializationStrategy = "perEdge"
+    multiGAvsMILP.initializationDistribution = "digital"
+    multiGAvsMILP.initializationParams = [5.0, 100000.0]
+    multiGAvsMILP.selectionMethod = "tournament"
+    multiGAvsMILP.tournamentSize = 4
+    multiGAvsMILP.crossoverMethod = "onePoint"
+    multiGAvsMILP.crossoverRate = 1.0
+    multiGAvsMILP.crossoverAttemptsPerGeneration = 1
+    multiGAvsMILP.replacementStrategy = "replaceWeakestTwo"
+    multiGAvsMILP.mutationMethod = "randomPerEdge"
+    multiGAvsMILP.mutationRate = 0.05
+    multiGAvsMILP.perArcEdgeMutationRate = 0.25
+    multiGAvsMILP.isDaemonUsed = True
+    multiGAvsMILP.annealingConstant = 0.5
+    multiGAvsMILP.daemonStrategy = "globalMean"
+    multiGAvsMILP.daemonStrength = 1
 
     # Execute all runs
-    multiGAvsCPLEX.runSolversOnAllGraphs()
+    multiGAvsMILP.runSolversOnAllGraphs()
 
 """
 # COMPLETE INPUT GRAPHS LIST

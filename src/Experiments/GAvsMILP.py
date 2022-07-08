@@ -12,23 +12,23 @@ from src.Graph.CandidateGraph import CandidateGraph
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 
 
-class GAvsCPLEX:
+class GAvsMILP:
     """Class that solves a single graph using the alpha-genetic algorithm and/or the MILP model in CPLEX"""
 
     def __init__(self, inputGraphName: str, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
-                 isOptimizedArcSelections=True, isSolvedWithCPLEX=True, isRace=True,
+                 isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=True,
                  isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True):
-        """Constructor of a GAvsCPLEX instance"""
+        """Constructor of a GAvsMILP instance"""
         # Graph solver options
-        self.runID = "GAvsCPLEX--" + inputGraphName + "--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+        self.runID = "GAvsMILP--" + inputGraphName + "--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
         self.isSolvedWithGeneticAlg: bool = isSolvedWithGeneticAlg
-        self.isSolvedWithCPLEX: bool = isSolvedWithCPLEX
+        self.isSolvedWithMILP: bool = isSolvedWithMILP
         self.isRace: bool = isRace
         self.isDrawing: bool = isDrawing
         self.isLabeling: bool = isLabeling
         self.isGraphing: bool = isGraphing
         if self.isGraphing is True:
-            matplotlib.use("agg")
+            matplotlib.use("agg")  # Simpler MatPlotLib backend for rendering high number of PNGs per run
         self.isOutputtingCPLEX: bool = isOutputtingCPLEX
 
         # Input graph attributes
@@ -40,12 +40,9 @@ class GAvsCPLEX:
         # Alpha-GA population attribute & hyperparameters
         self.geneticPop: Population = Population(self.graph, self.minTargetFlow,
                          isOneDimAlphaTable=isOneDimAlphaTable, isOptimizedArcSelections=isOptimizedArcSelections)
-        self.geneticPop.setPopulationHyperparams(populationSize=10,
-                                                 numGenerations=10,
-                                                 terminationMethod="setGenerations",
-                                                 isOneDimAlphaTable=isOneDimAlphaTable,
-                                                 isOptimizedArcSelections=isOptimizedArcSelections
-                                                 )
+        self.geneticPop.setPopulationHyperparams(populationSize=20,
+                                                 numGenerations=50,
+                                                 terminationMethod="setGenerations")
         self.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                  initializationDistribution="digital",
                                                  initializationParams=[0.0, 100000.0])
@@ -58,6 +55,8 @@ class GAvsCPLEX:
         self.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                mutationRate=0.05,
                                                perArcEdgeMutationRate=0.25)
+        self.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.5,
+                                                      daemonStrategy="globalMean", daemonStrength=1)
         self.gaSolution = None
 
         # MILP CPLEX attribute
@@ -94,7 +93,7 @@ class GAvsCPLEX:
             self.geneticRuntimeInSeconds = gaRuntime.seconds + gaRuntime.microseconds/1000000
             print("\nGA Runtime (in seconds): " + str(self.geneticRuntimeInSeconds))
         # Solve the MILP formulation in CPLEX
-        if self.isSolvedWithCPLEX is True:
+        if self.isSolvedWithMILP is True:
             print("\n============================================================================")
             print("Solving the " + self.graphName + " graph with a MILP formulation in CPLEX...\n")
             # Set time limit if CPLEX is racing GA
@@ -113,19 +112,20 @@ class GAvsCPLEX:
                 else:
                     milpVis.drawUnlabeledSolution(leadingText="MILP_")
             # Print solution details
-            print("\nCPLEX MILP Objective Value: " + str(self.milpCplexSolver.getObjectiveValue()))
-            print("CPLEX Runtime (in seconds): " + str(self.milpCplexSolver.getCplexRuntime()))
-            print("CPLEX Status " + self.milpCplexSolver.getCplexStatus())
-            print("CPLEX Gap: " + str(self.milpCplexSolver.getGap() * 100) + "%")
-            print("CPLEX Best Bound: " + str(self.milpCplexSolver.getBestBound()))
-        if self.isSolvedWithGeneticAlg is True and self.isSolvedWithCPLEX is True and self.isRace is True and self.isGraphing is True:
-            self.plotConvergenceAgainstCPLEX()
+            print("\nMILP Objective Value: " + str(self.milpCplexSolver.getObjectiveValue()))
+            print("MILP Runtime (in seconds): " + str(self.milpCplexSolver.getCplexRuntime()))
+            print("MILP Status " + self.milpCplexSolver.getCplexStatus())
+            print("MILP Gap: " + str(self.milpCplexSolver.getGap() * 100) + "%")
+            print("MILP Best Bound: " + str(self.milpCplexSolver.getBestBound()))
+        if self.isSolvedWithGeneticAlg is True and self.isSolvedWithMILP is True and self.isRace is True and self.isGraphing is True:
+            self.plotConvergenceAgainstMILP()
         self.saveOutputAsCSV()
         print("\nRun complete!\n")
 
-    def plotConvergenceAgainstCPLEX(self) -> None:
-        """Plots the convergence graph against CPLEX's best found solution and gap/best bound"""
-        # Get generations, CPLEX data and plt figure
+    def plotConvergenceAgainstMILP(self) -> None:
+        """Plots the convergence graph against the MILP's best found solution and gap/best bound"""
+        # Get generations, MILP data and plt figure
+        # TODO - Update to include a CPLEX listener to get runtime data
         numGenerations = len(self.geneticPop.convergenceStats)
         generations = list(range(numGenerations))
         cplexObjectiveValue = self.milpCplexSolver.getObjectiveValue()
@@ -136,10 +136,10 @@ class GAvsCPLEX:
         ax.plot(generations, self.geneticPop.convergenceStats, label="Most Fit Individual", color="g")
         ax.plot(generations, self.geneticPop.meanStats, label="Mean Pop. Fitness", color="b")
         ax.plot(generations, self.geneticPop.medianStats, label="Median Pop. Fitness", color="c")
-        ax.plot(generations, np.full(numGenerations, cplexObjectiveValue), label="CPLEX Best Soln", linestyle="--", color="y")
-        ax.plot(generations, np.full(numGenerations, cplexBestBound), label="CPLEX MILP Bound", linestyle=":", color="r")
+        ax.plot(generations, np.full(numGenerations, cplexObjectiveValue), label="MILP Best Soln", linestyle="--", color="y")
+        ax.plot(generations, np.full(numGenerations, cplexBestBound), label="MILP Bound", linestyle=":", color="r")
         # Add graph elements
-        ax.set_title("GA Convergence Against CPLEX over Equal Runtime")
+        ax.set_title("GA Convergence Against MILP over Equal Runtime")
         ax.legend(loc=4)
         ax.set_ylim(ymin=0, ymax=max(cplexObjectiveValue, max(self.geneticPop.meanStats))*1.25)
         ax.set_ylabel("Obj. Value")
@@ -165,14 +165,14 @@ class GAvsCPLEX:
             self.writeRowToCSV(["Std Dev"])
             self.writeRowToCSV(self.geneticPop.stdDevStats)
             self.writeRowToCSV([])
-        if self.isSolvedWithCPLEX is True:
-            self.writeRowToCSV(self.buildCPLEXHeaderRow())
-            self.writeRowToCSV(self.buildCPLEXDataRow())
+        if self.isSolvedWithMILP is True:
+            self.writeRowToCSV(self.buildMILPHeaderRow())
+            self.writeRowToCSV(self.buildMILPDataRow())
 
     def createCSV(self) -> None:
         """Creates a CSV file for the output data of the run and writes a header"""
         # Build Output Header
-        outputHeader = [["GA vs. CPLEX RESULTS OUTPUT", self.runID],
+        outputHeader = [["GA vs. MILP RESULTS", self.runID],
                         [],
                         ["INPUT GRAPH DATA"],
                         ["Graph Name", "Num Nodes", "Num Sources", "Num Sinks", "Num Edges",
@@ -207,7 +207,8 @@ class GAvsCPLEX:
         return ["Pop Size", "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                 "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                 "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                "Per Arc/Edge Mutate Rate", "GA Best Obj Val", "GA Runtime (sec)"]
+                "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Annealing Constant", "Daemon Strategy",
+                "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)"]
 
     def buildGAData(self) -> list:
         """Builds a list containing the population's hyperparameters for exporting to a CSV"""
@@ -219,16 +220,17 @@ class GAvsCPLEX:
                 self.geneticPop.tournamentSize, self.geneticPop.crossoverMethod, self.geneticPop.crossoverRate,
                 self.geneticPop.crossoverAttemptsPerGeneration, self.geneticPop.replacementStrategy,
                 self.geneticPop.mutationMethod, self.geneticPop.mutationRate, self.geneticPop.perArcEdgeMutationRate,
-                self.gaSolution.trueCost, self.geneticRuntimeInSeconds]
+                self.geneticPop.isDaemonUsed, self.geneticPop.annealingConstant, self.geneticPop.daemonStrategy,
+                self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.geneticRuntimeInSeconds]
 
     @staticmethod
-    def buildCPLEXHeaderRow() -> list:
-        """Builds a list containing the solution detail headers of the CPLEX solver on the MILP formulation"""
-        return ["CPLEX Obj Val", "CPLEX Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
+    def buildMILPHeaderRow() -> list:
+        """Builds a list containing the solution detail headers of the MILP formulation in CPLEX"""
+        return ["MILP Obj Val", "MILP Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
                 "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]
 
-    def buildCPLEXDataRow(self) -> list:
-        """Builds a list containing the solution details of the CPLEX solver on the MILP formulation"""
+    def buildMILPDataRow(self) -> list:
+        """Builds a list containing the solution details of the MILP formulation in CPLEX"""
         gaGap = 1 - self.milpCplexSolver.getBestBound()/self.gaSolution.trueCost
         return [self.milpCplexSolver.getObjectiveValue(), self.milpCplexSolver.getCplexRuntime(),
                 self.milpCplexSolver.getTimeLimit(), self.milpCplexSolver.getCplexStatus(),
@@ -248,13 +250,13 @@ class GAvsCPLEX:
             self.geneticRuntimeInSeconds = gaRuntime.seconds + gaRuntime.microseconds / 1000000
             print("GA Complete!")
         # Solve the MILP formulation in CPLEX
-        if self.isSolvedWithCPLEX is True:
+        if self.isSolvedWithMILP is True:
             if self.isRace is True:
                 self.milpCplexSolver.setTimeLimit(self.geneticRuntimeInSeconds)
             self.milpCplexSolver.findSolution(printDetails=False)
             print("CPLEX Complete!")
-        if self.isSolvedWithGeneticAlg is True and self.isSolvedWithCPLEX is True and self.isRace is True and self.isGraphing is True:
-            self.plotConvergenceAgainstCPLEX()
+        if self.isSolvedWithGeneticAlg is True and self.isSolvedWithMILP is True and self.isRace is True and self.isGraphing is True:
+            self.plotConvergenceAgainstMILP()
         return self.buildSingleRowRunData()
 
     def buildSingleRowRunHeaders(self) -> list:
@@ -263,8 +265,8 @@ class GAvsCPLEX:
          "Num Arc Caps", "Target Flow", "is Src/Sink Capped?", "is Src/Sink Charged?"]
         if self.isSolvedWithGeneticAlg is True:
             headerRow.extend(self.buildGAHeader())
-        if self.isSolvedWithCPLEX is True:
-            headerRow.extend(self.buildCPLEXHeaderRow())
+        if self.isSolvedWithMILP is True:
+            headerRow.extend(self.buildMILPHeaderRow())
         return headerRow
 
     def buildSingleRowRunData(self) -> list:
@@ -274,6 +276,6 @@ class GAvsCPLEX:
                          self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged]
         if self.isSolvedWithGeneticAlg is True:
             dataRow.extend(self.buildGAData())
-        if self.isSolvedWithCPLEX is True:
-            dataRow.extend(self.buildCPLEXDataRow())
+        if self.isSolvedWithMILP is True:
+            dataRow.extend(self.buildMILPDataRow())
         return dataRow

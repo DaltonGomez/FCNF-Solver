@@ -1,5 +1,5 @@
 
-from src.Experiments.GAvsCPLEX import GAvsCPLEX
+from src.Experiments.GAvsMILP import GAvsCPLEX
 
 """
 RUN COMMAND:
@@ -13,27 +13,28 @@ python3 sandbox.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "huge_3"
-    gaVScplex = GAvsCPLEX(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
+    inputGraph = "huge_UB_6"
+    sandboxSolver = GAvsCPLEX(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
                               isOptimizedArcSelections=True, isSolvedWithCPLEX=True, isRace=True,
                               isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
-    gaVScplex.geneticPop.setPopulationHyperparams(populationSize=10,
-                                             numGenerations=10,
+    sandboxSolver.geneticPop.setPopulationHyperparams(populationSize=20,
+                                             numGenerations=50,
                                              terminationMethod="setGenerations")
-    gaVScplex.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
+    sandboxSolver.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                  initializationDistribution="digital",
-                                                 initializationParams=[0.0, 100000.0])
-    gaVScplex.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
+                                                 initializationParams=[5.0, 1000000.0])
+    sandboxSolver.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
                                                       tournamentSize=3)
-    gaVScplex.geneticPop.setCrossoverHyperparams(crossoverMethod="onePoint",
+    sandboxSolver.geneticPop.setCrossoverHyperparams(crossoverMethod="onePoint",
                                             crossoverRate=1.0,
                                             crossoverAttemptsPerGeneration=1,
                                             replacementStrategy="replaceWeakestTwo")
-    gaVScplex.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                           mutationRate=0.05,
+    sandboxSolver.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
+                                           mutationRate=0.10,
                                            perArcEdgeMutationRate=0.25)
-
+    sandboxSolver.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.5,
+                                                  daemonStrategy="globalMean", daemonStrength=1)
     # Solve the graph
-    gaVScplex.solveGraph()
+    sandboxSolver.solveGraph()

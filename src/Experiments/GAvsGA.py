@@ -2,6 +2,7 @@ import csv
 import os
 from datetime import datetime
 
+import matplotlib
 from matplotlib import pyplot as plt
 
 from src.AlphaGenetic.Population import Population
@@ -12,14 +13,16 @@ from src.Graph.CandidateGraph import CandidateGraph
 class GAvsGA:
     """Class that solves a single graph using the two alpha-genetic populations for comparison"""
 
-    def __init__(self, inputGraphName: str, isOneDimAlphaPopOne=True, isArcOptimizedPopOne=True,
-                 isOneDimAlphaPopTwo=True, isArcOptimizedPopTwo=True, isDrawing=True, isLabeling=True, isGraphing=True):
+    def __init__(self, inputGraphName: str, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
+                 isPop2OneDimAlpha=False, isPop2ArcOptimized=True, isDrawing=True, isLabeling=True, isGraphing=True):
         """Constructor of a GAvsGA instance"""
         # Graph solver options
         self.runID = "GAvsGA--" + inputGraphName + "--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
         self.isDrawing: bool = isDrawing
         self.isLabeling: bool = isLabeling
         self.isGraphing: bool = isGraphing
+        if self.isGraphing is True:
+            matplotlib.use("agg")  # Simpler MatPlotLib backend for rendering high number of PNGs per run
 
         # Input graph attributes
         self.graphName: str = inputGraphName
@@ -29,13 +32,13 @@ class GAvsGA:
 
         # Alpha-GA population one attribute & hyperparameters
         self.geneticPopOne: Population = Population(self.graph, self.minTargetFlow,
-                         isOneDimAlphaTable=isOneDimAlphaPopOne, isOptimizedArcSelections=isArcOptimizedPopOne)
+                         isOneDimAlphaTable=isPop1OneDimAlpha, isOptimizedArcSelections=isPop1ArcOptimized)
         self.geneticPopOne.setPopulationHyperparams(populationSize=10,
                                                  numGenerations=10,
                                                  terminationMethod="setGenerations")
         self.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
                                                  initializationDistribution="digital",
-                                                 initializationParams=[0.0, 100000.0])
+                                                 initializationParams=[5.0, 100000.0])
         self.geneticPopOne.setIndividualSelectionHyperparams(selectionMethod="tournament",
                                                             tournamentSize=4)
         self.geneticPopOne.setCrossoverHyperparams(crossoverMethod="onePoint",
@@ -45,17 +48,21 @@ class GAvsGA:
         self.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                mutationRate=0.05,
                                                perArcEdgeMutationRate=0.25)
+        self.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True,
+                                                annealingConstant=0.5,
+                                                daemonStrategy="globalMean",
+                                                daemonStrength=1)
         self.gaSolutionOne = None
 
         # Alpha-GA population two attribute & hyperparameters
-        self.geneticPopTwo: Population = Population(self.graph, self.minTargetFlow, isOneDimAlphaTable=isOneDimAlphaPopTwo,
-                                                    isOptimizedArcSelections=isArcOptimizedPopTwo)
+        self.geneticPopTwo: Population = Population(self.graph, self.minTargetFlow, isOneDimAlphaTable=isPop2OneDimAlpha,
+                                                    isOptimizedArcSelections=isPop2ArcOptimized)
         self.geneticPopTwo.setPopulationHyperparams(populationSize=10,
                                                     numGenerations=10,
                                                     terminationMethod="setGenerations")
-        self.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perEdge",
+        self.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perArc",
                                                         initializationDistribution="digital",
-                                                        initializationParams=[0.0, 100000.0])
+                                                        initializationParams=[5.0, 100000.0])
         self.geneticPopTwo.setIndividualSelectionHyperparams(selectionMethod="tournament",
                                                              tournamentSize=4)
         self.geneticPopTwo.setCrossoverHyperparams(crossoverMethod="onePoint",
@@ -65,6 +72,10 @@ class GAvsGA:
         self.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                   mutationRate=0.05,
                                                   perArcEdgeMutationRate=0.25)
+        self.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True,
+                                                annealingConstant=0.5,
+                                                daemonStrategy="globalMean",
+                                                daemonStrength=1)
         self.gaSolutionTwo = None
 
     def solveGraph(self) -> None:
@@ -165,7 +176,7 @@ class GAvsGA:
     def createCSV(self) -> None:
         """Creates a CSV file for the output data of the run and writes a header"""
         # Build Output Header
-        outputHeader = [["GA vs. GA RESULTS OUTPUT", self.runID],
+        outputHeader = [["GA vs. GA RESULTS", self.runID],
                         [],
                         ["INPUT GRAPH DATA"],
                         ["Graph Name", "Num Nodes", "Num Sources", "Num Sinks", "Num Edges",
@@ -200,7 +211,8 @@ class GAvsGA:
         return ["Pop Size", "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                 "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                 "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                "Per Arc/Edge Mutate Rate", "GA Best Obj Val"]
+                "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Annealing Constant", "Daemon Strategy",
+                "Daemon Strength", "GA Best Obj Val"]
 
     def buildGA1Data(self) -> list:
         """Builds a list containing population 1's hyperparameters for exporting to a CSV"""
@@ -212,7 +224,8 @@ class GAvsGA:
                 self.geneticPopOne.tournamentSize, self.geneticPopOne.crossoverMethod, self.geneticPopOne.crossoverRate,
                 self.geneticPopOne.crossoverAttemptsPerGeneration, self.geneticPopOne.replacementStrategy,
                 self.geneticPopOne.mutationMethod, self.geneticPopOne.mutationRate, self.geneticPopOne.perArcEdgeMutationRate,
-                self.gaSolutionOne.trueCost]
+                self.geneticPopOne.isDaemonUsed, self.geneticPopOne.annealingConstant, self.geneticPopOne.daemonStrategy,
+                self.geneticPopOne.daemonStrength, self.gaSolutionOne.trueCost]
 
     def buildGA2Data(self) -> list:
         """Builds a list containing population 2's hyperparameters for exporting to a CSV"""
@@ -224,4 +237,5 @@ class GAvsGA:
                 self.geneticPopTwo.tournamentSize, self.geneticPopTwo.crossoverMethod, self.geneticPopTwo.crossoverRate,
                 self.geneticPopTwo.crossoverAttemptsPerGeneration, self.geneticPopTwo.replacementStrategy,
                 self.geneticPopTwo.mutationMethod, self.geneticPopTwo.mutationRate, self.geneticPopTwo.perArcEdgeMutationRate,
-                self.gaSolutionTwo.trueCost]
+                self.geneticPopTwo.isDaemonUsed, self.geneticPopTwo.annealingConstant, self.geneticPopTwo.daemonStrategy,
+                self.geneticPopTwo.daemonStrength, self.gaSolutionTwo.trueCost]

@@ -3,19 +3,19 @@ import os
 from datetime import datetime
 from typing import List
 
-from src.Experiments.GAvsCPLEX import GAvsCPLEX
+from src.Experiments.GAvsMILP import GAvsMILP
 
 
-class MultiGAvsCPLEX:
-    """Class that solves a multiple graphs using the alpha-genetic algorithm and/or the MILP model in CPLEX"""
+class MultiGAvsMILP:
+    """Class that solves multiple graphs using the alpha-genetic algorithm and/or the MILP model in CPLEX"""
 
     def __init__(self, inputGraphs: List[str], runsPerGraph: int, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
-                 isOptimizedArcSelections=True, isSolvedWithCPLEX=True, isRace=True):
-        """Constructor of a GAvsCPLEX instance"""
+                 isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=True):
+        """Constructor of a GAvsMILP instance"""
         # Graph solver options
-        self.multiRunID = "MultiGAvsCPLEX--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+        self.multiRunID = "MultiGAvsMILP--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
         self.isSolvedWithGeneticAlg: bool = isSolvedWithGeneticAlg
-        self.isSolvedWithCPLEX: bool = isSolvedWithCPLEX
+        self.isSolvedWithMILP: bool = isSolvedWithMILP
         self.isRace: bool = isRace
 
         # Input graphs attributes
@@ -25,12 +25,12 @@ class MultiGAvsCPLEX:
         # GA Hyperparameters
         self.isOneDimAlphaTable: bool = isOneDimAlphaTable
         self.isOptimizedArcSelections: bool = isOptimizedArcSelections
-        self.populationSize: int = 10
-        self.numGenerations: int = 10
+        self.populationSize: int = 20
+        self.numGenerations: int = 50
         self.terminationMethod: str = "setGenerations"
         self.initializationStrategy: str = "perEdge"
         self.initializationDistribution: str = "digital"
-        self.initializationParams: List[float] = [0.0, 100000.0]
+        self.initializationParams: List[float] = [5.0, 100000.0]
         self.selectionMethod: str = "tournament"
         self.tournamentSize: int = 4
         self.crossoverMethod: str = "onePoint"
@@ -40,6 +40,10 @@ class MultiGAvsCPLEX:
         self.mutationMethod: str = "randomPerEdge"
         self.mutationRate: float = 0.05
         self.perArcEdgeMutationRate: float = 0.25
+        self.isDaemonUsed: bool = True
+        self.annealingConstant: float = 0.5
+        self.daemonStrategy: str = "globalMean"
+        self.daemonStrength: float = 1.0
 
     def runSolversOnAllGraphs(self) -> None:
         """Solves each graph the specified number of times and writes each run to a CSV"""
@@ -49,16 +53,36 @@ class MultiGAvsCPLEX:
                 print("\n======================================")
                 print("GRAPH: " + graphName + "\tRUN: " + str(runNum))
                 print("======================================\n")
-                gaVScplex = GAvsCPLEX(graphName, isSolvedWithGeneticAlg=self.isSolvedWithGeneticAlg,
+                gaVSmilp = GAvsMILP(graphName, isSolvedWithGeneticAlg=self.isSolvedWithGeneticAlg,
                                       isOneDimAlphaTable=self.isOneDimAlphaTable,
                                       isOptimizedArcSelections=self.isOptimizedArcSelections,
-                                      isSolvedWithCPLEX=self.isSolvedWithCPLEX,
+                                      isSolvedWithMILP=self.isSolvedWithMILP,
                                       isRace=self.isRace,
                                       isDrawing=False,
                                       isLabeling=False,
                                       isGraphing=True,
                                       isOutputtingCPLEX=True)
-                thisRunData = gaVScplex.solveGraphWithoutPrints()
+                # Alpha-GA population attribute & hyperparameters
+                gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=self.populationSize,
+                                                              numGenerations=self.numGenerations,
+                                                              terminationMethod=self.terminationMethod)
+                gaVSmilp.geneticPop.setInitializationHyperparams(initializationStrategy=self.initializationStrategy,
+                                                                  initializationDistribution=self.initializationDistribution,
+                                                                  initializationParams=self.initializationParams)
+                gaVSmilp.geneticPop.setIndividualSelectionHyperparams(selectionMethod=self.selectionMethod,
+                                                                       tournamentSize=self.tournamentSize)
+                gaVSmilp.geneticPop.setCrossoverHyperparams(crossoverMethod=self.crossoverMethod,
+                                                             crossoverRate=self.crossoverRate,
+                                                             crossoverAttemptsPerGeneration=self.crossoverAttemptsPerGeneration,
+                                                             replacementStrategy=self.replacementStrategy)
+                gaVSmilp.geneticPop.setMutationHyperparams(mutationMethod=self.mutationMethod,
+                                                            mutationRate=self.mutationRate,
+                                                            perArcEdgeMutationRate=self.perArcEdgeMutationRate)
+                gaVSmilp.geneticPop.setDaemonHyperparams(isDaemonUsed=self.isDaemonUsed,
+                                                         annealingConstant=self.annealingConstant,
+                                                         daemonStrategy=self.daemonStrategy,
+                                                         daemonStrength=self.daemonStrength)
+                thisRunData = gaVSmilp.solveGraphWithoutPrints()
                 self.writeRowToCSV(thisRunData)
 
     def createCSV(self) -> None:
@@ -68,11 +92,12 @@ class MultiGAvsCPLEX:
                     "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                     "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                     "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                    "Per Arc/Edge Mutate Rate", "GA Best Obj Val", "GA Runtime (sec)", "CPLEX Obj Val",
-                    "CPLEX Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
+                    "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Annealing Constant", "Daemon Strategy",
+                    "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "MILP Obj Val",
+                    "MILP Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
                     "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]
         # Build Output Header
-        outputHeader = [["MULTI-GA vs. CPLEX RESULTS OUTPUT", self.multiRunID], headerRow]
+        outputHeader = [["MULTI-GA vs. MILP RESULTS", self.multiRunID], headerRow]
         # Create CSV File
         currDir = os.getcwd()
         csvName = self.multiRunID + ".csv"
