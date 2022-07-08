@@ -67,10 +67,19 @@ class HyperparamTuner:
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "perArcEdgeMutationRate": [0.01, 0.05, 0.10, 0.25, 0.50]
                         }
+        self.numTotalRuns = self.computeTotalRuns()
+
+    def computeTotalRuns(self) -> int:
+        """Computes the total number of runs (i.e. GA population evolutions) to complete the grid search"""
+        totalRuns = len(self.inputGraphs) * self.runsPerGraph
+        for hyperparam in self.hpSpace.keys():
+            totalRuns *= len(self.hpSpace[hyperparam])
+        return totalRuns
 
     def conductGridSearch(self) -> None:
         """Conducts the hyperparameter grid search tuning over the HP space and input graphs"""
         # NOTE - Not comprehensive of all hyperparameters that could be tuned
+        print("\nStarting a tuning experiment with " + str(self.numTotalRuns) + " total runs...\n")
         # Write CSV to disc and timestamp start
         self.createCSV()
         startTime = datetime.now()
