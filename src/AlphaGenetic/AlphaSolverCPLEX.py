@@ -123,8 +123,88 @@ class AlphaSolverCPLEX:
                                             for m in outgoingIndexes
                                             for n in range(self.graph.numArcsPerEdge)) == 0, ctname=ctName)
         elif self.isOneDimAlphaTable is True:
-            pass
-            # TODO - IMPLEMENT 1D ALPHA TABLE
+            # =================== DECISION VARIABLES ===================
+            # Source and sink decision variables and determines flow from/to each node - Indexed on src/sink matrix
+            self.sourceFlowVars = self.solver.continuous_var_list(self.graph.numSources, name="s", lb=0)
+            self.sinkFlowVars = self.solver.continuous_var_list(self.graph.numSinks, name="t", lb=0)
+            # Arc decision variables - Indexed on the arc matrix and determines flow on each arc
+            self.arcFlowVars = self.solver.continuous_var_matrix(self.graph.numEdges, 1, name="a", lb=0)
+
+            # =================== CONSTRAINTS ===================
+            # Minimum flow constraint (Constructed as the sum of all sinks in-flows)
+            self.solver.add_constraint(
+                sum(self.sinkFlowVars[i] for i in range(self.graph.numSinks)) >= self.minTargetFlow,
+                ctname="minFlow")
+
+            # Edge opening/capacity constraints
+            for i in range(self.graph.numEdges):
+                capacity = self.graph.possibleArcCapsArray[-1]
+                arcID = (self.graph.edgesArray[i][0], self.graph.edgesArray[i][1], capacity)
+                ctName = "a_" + str(arcID) + "_Cap"
+                self.solver.add_constraint(self.arcFlowVars[(i, 0)] <= capacity, ctname=ctName)
+
+            # Capacity constraints of sources
+            if self.graph.isSourceSinkCapacitated is True:
+                for i in range(self.graph.numSources):
+                    ctName = "s_" + str(self.graph.sourcesArray[i]) + "_Cap"
+                    self.solver.add_constraint(self.sourceFlowVars[i] <= self.graph.sourceCapsArray[i], ctname=ctName)
+
+            # Capacity constraints of sinks
+            if self.graph.isSourceSinkCapacitated is True:
+                for i in range(self.graph.numSinks):
+                    ctName = "t_" + str(self.graph.sinksArray[i]) + "_Cap"
+                    self.solver.add_constraint(self.sinkFlowVars[i] <= self.graph.sinkCapsArray[i], ctname=ctName)
+
+            # Conservation of flow constraints
+            # Source flow conservation
+            for s in range(self.graph.numSources):
+                source = self.graph.sourcesArray[s]
+                sourceObj = self.graph.nodesDict[source]
+                outgoingIndexes = []
+                for edge in sourceObj.outgoingEdges:
+                    outgoingIndexes.append(self.graph.edgesDict[edge])
+                incomingIndexes = []
+                for edge in sourceObj.incomingEdges:
+                    incomingIndexes.append(self.graph.edgesDict[edge])
+                ctName = "s_" + str(source) + "_Conserv"
+                self.solver.add_constraint(self.sourceFlowVars[s] ==
+                                           sum(self.arcFlowVars[(m, 0)]
+                                               for m in outgoingIndexes) -
+                                           sum(self.arcFlowVars[(i, 0)]
+                                               for i in incomingIndexes), ctName)
+
+            # Sink flow conservation
+            for t in range(self.graph.numSinks):
+                sink = self.graph.sinksArray[t]
+                sinkObj = self.graph.nodesDict[sink]
+                incomingIndexes = []
+                for edge in sinkObj.incomingEdges:
+                    incomingIndexes.append(self.graph.edgesDict[edge])
+                outgoingIndexes = []
+                for edge in sinkObj.outgoingEdges:
+                    outgoingIndexes.append(self.graph.edgesDict[edge])
+                ctName = "t_" + str(sink) + "_Conserv"
+                self.solver.add_constraint(self.sinkFlowVars[t] ==
+                                           sum(self.arcFlowVars[(m, 0)]
+                                               for m in incomingIndexes) -
+                                           sum(self.arcFlowVars[(i, 0)]
+                                               for i in outgoingIndexes), ctName)
+
+            # Intermediate node flow conservation
+            for n in range(self.graph.numInterNodes):
+                interNode = self.graph.interNodesArray[n]
+                nodeObj = self.graph.nodesDict[interNode]
+                incomingIndexes = []
+                for edge in nodeObj.incomingEdges:
+                    incomingIndexes.append(self.graph.edgesDict[edge])
+                outgoingIndexes = []
+                for edge in nodeObj.outgoingEdges:
+                    outgoingIndexes.append(self.graph.edgesDict[edge])
+                ctName = "n_" + str(interNode) + "_Conserv"
+                self.solver.add_constraint(sum(self.arcFlowVars[(i, 0)]
+                                               for i in incomingIndexes) -
+                                           sum(self.arcFlowVars[(m, 0)]
+                                               for m in outgoingIndexes) == 0, ctname=ctName)
 
     def updateObjectiveFunction(self, alphaValues: ndarray) -> None:
         """Updates the objective function based on the input alpha values"""
@@ -153,8 +233,24 @@ class AlphaSolverCPLEX:
                                     for i in range(self.graph.numEdges)
                                     for j in range(self.graph.numArcsPerEdge)))
         elif self.isOneDimAlphaTable is True:
-            pass
-            # TODO - IMPLEMENT 1D ALPHA TABLE
+            if self.graph.isSourceSinkCharged is True:
+                self.solver.set_objective("min", sum(
+                    self.arcFlowVars[(i, 0)] *
+                    (self.graph.getArcVariableCostFromEdgeCapIndices(i, self.graph.numArcsPerEdge - 1) +
+                     self.graph.getArcFixedCostFromEdgeCapIndices(i, self.graph.numArcsPerEdge - 1) *
+                     alphaValues[i][self.graph.numArcsPerEdge - 1])
+                    for i in range(self.graph.numEdges)) +
+                                          sum(self.sourceFlowVars[s] * self.graph.sourceVariableCostsArray[s]
+                                              for s in range(self.graph.numSources)) +
+                                          sum(self.sinkFlowVars[t] * self.graph.sinkVariableCostsArray[t]
+                                              for t in range(self.graph.numSinks)))
+            elif self.graph.isSourceSinkCharged is False:
+                self.solver.set_objective("min", sum(
+                    self.arcFlowVars[(i, 0)] *
+                    (self.graph.getArcVariableCostFromEdgeCapIndices(i, self.graph.numArcsPerEdge - 1) +
+                     self.graph.getArcFixedCostFromEdgeCapIndices(i, self.graph.numArcsPerEdge - 1) *
+                     alphaValues[i][self.graph.numArcsPerEdge - 1])
+                    for i in range(self.graph.numEdges)))
 
     def solveModel(self) -> None:
         """Solves the alpha-relaxed LP model in CPLEX"""
@@ -165,7 +261,19 @@ class AlphaSolverCPLEX:
 
     def getArcFlowsDict(self) -> dict:
         """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""
-        arcFlows = self.solver.solution.get_value_dict(self.arcFlowVars)
+        if self.isOneDimAlphaTable is False:
+            arcFlows = self.solver.solution.get_value_dict(self.arcFlowVars)
+        else:
+            arcFlows = {}
+            solverFlows = self.solver.solution.get_value_dict(self.arcFlowVars)
+            largestCapIndex = self.graph.numArcsPerEdge - 1
+            for edge in range(self.graph.numEdges):
+                for cap in range(self.graph.numArcsPerEdge):
+                    # Initialize all dictionary values with zero
+                    arcFlows[(edge, cap)] = 0
+                # Update largest capacity value for this edge
+                thisFlow = solverFlows[(edge, 0)]
+                arcFlows[(edge, largestCapIndex)] = thisFlow
         return arcFlows
 
     def getSrcFlowsList(self) -> list:

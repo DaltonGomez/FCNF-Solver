@@ -14,7 +14,7 @@ python3 sandbox.py
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
     inputGraph = "huge_3"
-    gaVScplex = GAvsCPLEX(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=False,
+    gaVScplex = GAvsCPLEX(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
                               isOptimizedArcSelections=True, isSolvedWithCPLEX=True, isRace=True,
                               isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
 
