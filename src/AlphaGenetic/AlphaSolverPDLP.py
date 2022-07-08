@@ -16,7 +16,7 @@ class AlphaSolverPDLP:
         self.minTargetFlow: float = minTargetFlow  # Target flow that the solution must capture
         self.isSourceSinkCapacitated: bool = self.graph.isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
         self.isSourceSinkCharged: bool = self.graph.isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
-        self.isOneDimAlphaTable = isOneDimAlphaTable  # Boolean indicating if the alpha table is only one dimensional (i.e. only one arc per edge)
+        self.isOneDimAlphaTable: bool = isOneDimAlphaTable  # Boolean indicating if the alpha table is only one dimensional (i.e. only one arc per edge)
         # Solver attributes
         self.solver: pywraplp.Solver = pywraplp.Solver.CreateSolver(
             "PDLP")  # Solver object acting as a wrapper to Google OR-Tools PDLP solver

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
 
-from src.AlphaGenetic.AlphaSolverPDLP import AlphaSolverPDLP
+from src.AlphaGenetic.AlphaSolverCPLEX import AlphaSolverCPLEX
 from src.AlphaGenetic.Individual import Individual
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
@@ -29,7 +29,7 @@ class Population:
         # Population & Solver Instance Objects
         self.population: List[Individual] = []  # List of Individual objects
         self.currentGeneration: int = 0  # Tracks generation number during evolution
-        self.solver: AlphaSolverPDLP = AlphaSolverPDLP(self.graph, self.minTargetFlow,
+        self.solver: AlphaSolverCPLEX = AlphaSolverCPLEX(self.graph, self.minTargetFlow,
                                                        isOneDimAlphaTable=isOneDimAlphaTable,
                                                        isOptimizedArcSelections=isOptimizedArcSelections)  # Solver object, which pre-builds variables and constraints once on initialization
         self.generationTimestamps: List[float] = []  # List of timestamps, in seconds after evolution start, for each generation
@@ -371,7 +371,9 @@ class Population:
         """Resets the output fields stored in the population"""
         self.isTerminated = False
         self.population = []
-        self.solver = AlphaSolverPDLP(self.graph, self.minTargetFlow)  # Pre-builds variables/constraints on init
+        self.solver = AlphaSolverCPLEX(self.graph, self.minTargetFlow,
+                                       isOneDimAlphaTable=self.isOneDimAlphaTable,
+                                       isOptimizedArcSelections=self.isOptimizedArcSelections)
         self.bestKnownSolution = None
         self.bestKnownCost = sys.maxsize
 
@@ -633,6 +635,7 @@ class Population:
             newAlpha = currentAlpha * (self.daemonStrength + annealedProportion + flowStatRatio)
         else:
             newAlpha = currentAlpha / (self.daemonStrength + annealedProportion)
+        print("DEBUG --- OLD ALPHA = " + str(currentAlpha) + "\tNEW ALPHA = " + str(newAlpha))
         return newAlpha
 
     def applyGlobalBinaryDaemon(self, individualID: int) -> None:
