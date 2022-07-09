@@ -15,6 +15,7 @@ GENERAL/NETWORK/SOLVERS:
 
 ALPHA GENETIC ALGORITHM:
 =====================================
+# TODO - Add an initialization heuristic that uses the best found solution from a quick CPLEX MILP run to set alphas
 # TODO - Add a strategy to log the best known individual and prevent its alpha table from ever being overwritten
 # TODO - Break out GA operators as interfaces via a strategy pattern
 # TODO - Implement nudge mutations
@@ -24,6 +25,7 @@ ALPHA GENETIC ALGORITHM:
 # DONE - If initializing all arcs within an edge to be the same alpha values, reduce the alpha table to 1-dimensional to improve solver speed
 # DONE - Add in basic population statistics tracking and graphing
 # DONE - Build out tuning experiments
+# ASK - What if the chromosome was made up of two types of genes, alpha and beta, that discounted the fixed cost and variable cost, respectively?
 # ASK - Would a brief, interrupted run of CPLEX-MILP generating initial alpha values for the population improve overall performance?
 # ASK - Should mutation rate also be annealed over time?
 # ASK - What information could be gained from a sensitivity/perturbation analysis on alpha values?

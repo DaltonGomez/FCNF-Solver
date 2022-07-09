@@ -140,7 +140,7 @@ class Population:
                              daemonStrength=1.0) -> None:
         """Sets the GA attributes that determine the behavior of the annealed daemon update \n
         :param bool isDaemonUsed: Boolean indicating if a daemon update is attempted
-        :param float annealingConstant: Constant k in the annealing schedule t = k*gen/(gen + maxGen)
+        :param float annealingConstant: Constant k in the annealing schedule t = k*gen/(gen + maxGen) - 2.0 = 1.0 proportion on the final generation
         :param str daemonStrategy: One of following: {"globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"}
         :param float daemonStrength: Constant that determines how great of an impact the daemon updates have
         """

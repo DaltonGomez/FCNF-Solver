@@ -214,7 +214,6 @@ class MILPsolverCPLEX:
         if self.isRun is False:
             print("You must run the solver before building a solution!")
         elif self.model.solution is not None:
-            # print("Building solution...")  # PRINT OPTION
             objValue = self.model.solution.get_objective_value()
             srcFlows = self.model.solution.get_value_list(self.sourceFlowVars)
             sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
@@ -223,7 +222,6 @@ class MILPsolverCPLEX:
                                                sinkFlows, arcFlows, "cplex_milp", self.isOneArcPerEdge,
                                                self.isSourceSinkCapacitated, self.isSourceSinkCharged,
                                                optionalDescription=str(self.model.get_solve_details()))
-            # print("Solution built!")  # PRINT OPTION
             return thisSolution
         else:
             print("No feasible solution exists!")
@@ -303,3 +301,34 @@ class MILPsolverCPLEX:
             self.model.print_solution()
         else:
             print("No feasible solution exists!")
+
+    def optimizeArcSelection(self, rawArcFlows: dict) -> dict:
+        """Iterates over all opened edges and picks the arc capacity that best fits the assigned flow"""
+        optimalArcFlows = {}
+        # Iterate over all edges in the candidate graph
+        for edgeIndex in range(self.graph.numEdges):
+            thisEdgeFlow = 0.0
+            # Iterate over all arcs and compute total assigned flow on the edge
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
+                try:
+                    thisEdgeFlow += rawArcFlows[(edgeIndex, arcIndex)]
+                except KeyError:
+                    print("ERROR: Key error on solution.arcFlows[" + str(
+                        (edgeIndex, arcIndex)) + "]! Assuming CPLEX decided zero flow...")
+            # Determine the optimal arc capacity to assign the edge
+            optimalCapIndex = self.getOptimalArcCapIndex(thisEdgeFlow)
+            # Iterate back over arcs, only opening/assigning flow to the optimal arc; close all others
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                arcKeyTuple = (edgeIndex, arcIndex)
+                if arcIndex == optimalCapIndex and thisEdgeFlow > 0.0:
+                    optimalArcFlows[arcKeyTuple] = thisEdgeFlow
+                else:
+                    optimalArcFlows[arcKeyTuple] = 0.0
+        return optimalArcFlows
+
+    def getOptimalArcCapIndex(self, totalAssignedFlow: float) -> int:
+        """Returns the optimal arc capacity for the edge based on the total assigned flow"""
+        for arcCapIndex in range(self.graph.numArcsPerEdge):
+            if self.graph.possibleArcCapsArray[arcCapIndex] >= totalAssignedFlow:
+                return arcCapIndex
