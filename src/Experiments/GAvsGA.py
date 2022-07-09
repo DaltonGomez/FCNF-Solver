@@ -13,8 +13,9 @@ from src.Graph.CandidateGraph import CandidateGraph
 class GAvsGA:
     """Class that solves a single graph using the two alpha-genetic populations for comparison"""
 
-    def __init__(self, inputGraphName: str, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
-                 isPop2OneDimAlpha=False, isPop2ArcOptimized=True, isDrawing=True, isLabeling=True, isGraphing=True):
+    def __init__(self, inputGraphName: str, isPop1OneDimAlpha=True, isPop1ArcOptimized=True, isPop1Penalized=True,
+                 isPop2OneDimAlpha=True, isPop2ArcOptimized=True, isPop2Penalized=False,
+                 isDrawing=True, isLabeling=True, isGraphing=True):
         """Constructor of a GAvsGA instance"""
         # Graph solver options
         self.runID = "GAvsGA--" + inputGraphName + "--" + datetime.now().strftime("%y-%m-%d-%H-%M-%S")
@@ -32,47 +33,51 @@ class GAvsGA:
 
         # Alpha-GA population one attribute & hyperparameters
         self.geneticPopOne: Population = Population(self.graph, self.minTargetFlow,
-                         isOneDimAlphaTable=isPop1OneDimAlpha, isOptimizedArcSelections=isPop1ArcOptimized)
+                                                    isOneDimAlphaTable=isPop1OneDimAlpha,
+                                                    isOptimizedArcSelections=isPop1ArcOptimized,
+                                                    isPenalizedObjective=isPop1Penalized)
         self.geneticPopOne.setPopulationHyperparams(populationSize=10,
                                                  numGenerations=10,
                                                  terminationMethod="setGenerations")
         self.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
-                                                 initializationDistribution="digital",
-                                                 initializationParams=[5.0, 100000.0])
+                                                 initializationDistribution="gaussian",
+                                                 initializationParams=[500.0, 100.0])
         self.geneticPopOne.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                            tournamentSize=4)
+                                                            tournamentSize=3)
         self.geneticPopOne.setCrossoverHyperparams(crossoverMethod="onePoint",
                                                 crossoverRate=1.0,
-                                                crossoverAttemptsPerGeneration=1,
+                                                crossoverAttemptsPerGeneration=2,
                                                 replacementStrategy="replaceWeakestTwo")
         self.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                               mutationRate=0.05,
+                                               mutationRate=0.20,
                                                perArcEdgeMutationRate=0.25)
-        self.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True,
+        self.geneticPopOne.setDaemonHyperparams(isDaemonUsed=False,
                                                 annealingConstant=0.5,
                                                 daemonStrategy="globalMean",
                                                 daemonStrength=1)
         self.gaSolutionOne = None
 
         # Alpha-GA population two attribute & hyperparameters
-        self.geneticPopTwo: Population = Population(self.graph, self.minTargetFlow, isOneDimAlphaTable=isPop2OneDimAlpha,
-                                                    isOptimizedArcSelections=isPop2ArcOptimized)
+        self.geneticPopTwo: Population = Population(self.graph, self.minTargetFlow,
+                                                    isOneDimAlphaTable=isPop2OneDimAlpha,
+                                                    isOptimizedArcSelections=isPop2ArcOptimized,
+                                                    isPenalizedObjective=isPop2Penalized)
         self.geneticPopTwo.setPopulationHyperparams(populationSize=10,
                                                     numGenerations=10,
                                                     terminationMethod="setGenerations")
-        self.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perArc",
-                                                        initializationDistribution="digital",
-                                                        initializationParams=[5.0, 100000.0])
+        self.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perEdge",
+                                                        initializationDistribution="gaussian",
+                                                        initializationParams=[500.0, 100.0])
         self.geneticPopTwo.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                             tournamentSize=4)
+                                                             tournamentSize=3)
         self.geneticPopTwo.setCrossoverHyperparams(crossoverMethod="onePoint",
                                                    crossoverRate=1.0,
-                                                   crossoverAttemptsPerGeneration=1,
+                                                   crossoverAttemptsPerGeneration=2,
                                                    replacementStrategy="replaceWeakestTwo")
         self.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                                  mutationRate=0.05,
+                                                  mutationRate=0.20,
                                                   perArcEdgeMutationRate=0.25)
-        self.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True,
+        self.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=False,
                                                 annealingConstant=0.5,
                                                 daemonStrategy="globalMean",
                                                 daemonStrength=1)

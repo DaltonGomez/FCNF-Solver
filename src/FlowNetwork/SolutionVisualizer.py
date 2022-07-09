@@ -90,8 +90,8 @@ class SolutionVisualizer:
                 rgbString = "rgba(" + str(rgbTuple[0]) + ", " + str(rgbTuple[1]) + ", " + str(rgbTuple[2]) + ", 1)"
                 self.netVis.add_edge(int(edge[1]), int(edge[0]), label=round(backFlow), color=rgbString, value=backFlow)
             elif flow == 0 and backFlow == 0:
-                self.netVis.add_edge(int(edge[0]), int(edge[1]), color="rgba(155, 155, 155, 0.35)", value=flow)
-                self.netVis.add_edge(int(edge[1]), int(edge[0]), color="rgba(155, 155, 155, 0.35)", value=backFlow)
+                self.netVis.add_edge(int(edge[0]), int(edge[1]), color="rgba(155, 155, 155, 0.25)", value=flow)
+                self.netVis.add_edge(int(edge[1]), int(edge[0]), color="rgba(155, 155, 155, 0.25)", value=backFlow)
 
     def makeScaledRGBTupleFromArcsOpened(self, arcsOpened: int) -> tuple:
         """Returns an RGB tuple from arcs opened on an edge, where

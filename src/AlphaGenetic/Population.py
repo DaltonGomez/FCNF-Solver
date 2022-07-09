@@ -21,7 +21,7 @@ class Population:
     # ============== CONSTRUCTOR ==============
     # =========================================
     def __init__(self, graph: CandidateGraph, minTargetFlow: float, populationSize=10, numGenerations=10,
-                 isOneDimAlphaTable=True, isOptimizedArcSelections=True):
+                 isOneDimAlphaTable=True, isOptimizedArcSelections=True, isPenalizedObjective=False):
         """Constructor of a Population instance"""
         # Input Attributes
         self.graph: CandidateGraph = graph  # Input candidate graph instance to be solved
@@ -31,7 +31,8 @@ class Population:
         self.currentGeneration: int = 0  # Tracks generation number during evolution
         self.solver: AlphaSolverCPLEX = AlphaSolverCPLEX(self.graph, self.minTargetFlow,
                                                        isOneDimAlphaTable=isOneDimAlphaTable,
-                                                       isOptimizedArcSelections=isOptimizedArcSelections)  # Solver object, which pre-builds variables and constraints once on initialization
+                                                       isOptimizedArcSelections=isOptimizedArcSelections,
+                                                       isPenalizedObjective=isPenalizedObjective)  # Solver object, which pre-builds variables and constraints once on initialization
         self.generationTimestamps: List[float] = []  # List of timestamps, in seconds after evolution start, for each generation
         self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
         self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
@@ -214,7 +215,7 @@ class Population:
     def enactDaemon(self) -> None:
         """Applies a daemon update to the population"""
         random.seed()
-        annealedDaemonProb = self.getAnnealedProportion()
+        annealedDaemonProb = self.getAnnealedDaemonRate()
         for individualID in range(self.populationSize):
             individual = self.population[individualID]
             if individual.isSolved is False:
@@ -604,6 +605,7 @@ class Population:
     # ===================================================
     def applyDaemonUpdate(self, individualID: int) -> None:
         """Applies the daemon update strategy to the individual"""
+        # TODO - Current daemon methods all only work with the perEdge initialization strategy
         print("Doing a daemon update to individual " + str(individualID) + "...")
         if self.daemonStrategy == "globalBinary":
             self.applyGlobalBinaryDaemon(individualID)
@@ -618,36 +620,54 @@ class Population:
         else:
             print("ERROR - INVALID DAEMON STRATEGY!!!")
 
-    def getAnnealedProportion(self) -> float:
+    def getAnnealedDaemonRate(self) -> float:
         """Returns a proportion (in [0, 1] if k=2) given the annealing schedule t = k*gen/(gen + maxGen)"""
         return self.annealingConstant * self.currentGeneration / (self.currentGeneration + self.numGenerations)
 
     def getDaemonUpdatedAlphaValue(self, currentAlpha: float, flowStatRatio=0.0) -> float:
         """Returns a new alpha value based on the current alpha, daemon strength, annealing schedule and flow-stat ratio"""
         # TODO - THIS REQUIRES MORE WORK... HOW SHOULD THE DAEMON UPDATE ALPHAS AND WHAT DO YOU DO WHEN THEY'RE <1?
-        if currentAlpha <= 1.0:
-            return currentAlpha + 1.0
-        # Otherwise
-        annealedProportion = self.getAnnealedProportion()
-        if flowStatRatio > 0.0:
-            newAlpha = currentAlpha / (self.daemonStrength * (annealedProportion + flowStatRatio))
-        elif flowStatRatio < 0.0:
-            newAlpha = currentAlpha * ((1 / self.daemonStrength) * (annealedProportion + flowStatRatio))
+        # If the arc is greater than the statistic
+        if flowStatRatio > 1.0:
+            # Sample a Gaussian distribution
+            nudgeVariance = currentAlpha * self.daemonStrength * flowStatRatio
+            nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+            # Until the new value is strictly less (i.e. an increased discounting) than the old but not negative
+            while nudgedAlpha > currentAlpha or nudgedAlpha < 0.0:
+                nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+        # If the arc is less than the statistic
+        elif flowStatRatio < 1.0:
+            # Sample a Gaussian distribution
+            nudgeVariance = currentAlpha * self.daemonStrength * (1 / flowStatRatio)
+            nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+            # Until the new value is strictly greater (i.e. a decreased discounting) than the old
+            while nudgedAlpha < currentAlpha:
+                nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+        # Else block used on the global binary method (or if the flow stat ratio actually is zero)
         else:
-            newAlpha = currentAlpha / (self.daemonStrength * (1 + annealedProportion))
-        return newAlpha
+            # Sample a Gaussian distribution
+            nudgeVariance = currentAlpha * self.daemonStrength
+            nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+            # Until the new value is strictly less (i.e. an increased discounting) than the old but not negative
+            while nudgedAlpha > currentAlpha or nudgedAlpha < 0.0:
+                nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+        return nudgedAlpha
 
     def applyGlobalBinaryDaemon(self, individualID: int) -> None:
         """Applies a daemon update that nudges alpha values for arcs opened in the global best solution"""
         individual = self.population[individualID]
         globalBestArcFlows = self.bestKnownSolution.arcFlows
-        for arc in globalBestArcFlows.keys():
-            # If the global best has the arc unopened, do nothing
-            if globalBestArcFlows[arc] == 0.0:
-                continue
-            # Else get new alpha value based on annealed proportion
-            else:
-                individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc])
+        for edgeIndex in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                # If the global best has the arc unopened, do nothing
+                if globalBestArcFlows[(edgeIndex, arcIndex)] == 0.0:
+                    continue
+                # Else get new alpha value based on annealed proportion
+                else:
+                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)])
+                    if self.initializationStrategy == "perEdge":
+                        for cap in range(self.graph.numArcsPerEdge):
+                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
         individual.resetOutputNetwork()
 
     def applyGlobalMeanDaemon(self, individualID: int) -> None:
@@ -658,14 +678,19 @@ class Population:
         arcFlowsArr = np.array(list(globalBestArcFlows.values()))
         arcFlowsArr[arcFlowsArr == 0.0] = np.nan
         globalMeanFlow = np.nanmean(arcFlowsArr)
-        for arc in globalBestArcFlows.keys():
-            # If the global best solution does not have the arc unopened, go to next arc
-            if globalBestArcFlows[arc] == 0.0:
-                continue
-            # Find the ratio of flow between this arc and the global best's mean arc flow
-            flowMeanRatio = globalBestArcFlows[arc] / globalMeanFlow
-            # Update the alpha value considering the ratio
-            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMeanRatio)
+        for edgeIndex in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                # If the global best has the arc unopened, do nothing
+                if globalBestArcFlows[(edgeIndex, arcIndex)] == 0.0:
+                    continue
+                # Else get new alpha value based on annealed proportion
+                else:
+                    # Find the ratio of flow between this arc and the global best's mean arc flow
+                    flowMeanRatio = globalBestArcFlows[(edgeIndex, arcIndex)] / globalMeanFlow
+                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)], flowStatRatio=flowMeanRatio)
+                    if self.initializationStrategy == "perEdge":
+                        for cap in range(self.graph.numArcsPerEdge):
+                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
         individual.resetOutputNetwork()
 
     def applyGlobalMedianDaemon(self, individualID: int) -> None:
@@ -676,14 +701,19 @@ class Population:
         arcFlowsArr = np.array(list(globalBestArcFlows.values()))
         arcFlowsArr[arcFlowsArr == 0.0] = np.nan
         globalMedianFlow = np.nanmedian(arcFlowsArr)
-        for arc in globalBestArcFlows.keys():
-            # If the global best solution does not have the arc unopened, go to next arc
-            if globalBestArcFlows[arc] == 0.0:
-                continue
-            # Find the ratio of flow between this arc and the global best's median arc flow
-            flowMedianRatio = globalBestArcFlows[arc] / globalMedianFlow
-            # Update the alpha value considering the ratio
-            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMedianRatio)
+        for edgeIndex in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                # If the global best has the arc unopened, do nothing
+                if globalBestArcFlows[(edgeIndex, arcIndex)] == 0.0:
+                    continue
+                # Else get new alpha value based on annealed proportion
+                else:
+                    # Find the ratio of flow between this arc and the global best's median arc flow
+                    flowMedianRatio = globalBestArcFlows[(edgeIndex, arcIndex)] / globalMedianFlow
+                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)], flowStatRatio=flowMedianRatio)
+                    if self.initializationStrategy == "perEdge":
+                        for cap in range(self.graph.numArcsPerEdge):
+                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
         individual.resetOutputNetwork()
 
     def applyPersonalMeanDaemon(self, individualID: int) -> None:
@@ -693,14 +723,20 @@ class Population:
         arcFlowsArr = np.array(list(individual.arcFlows.values()))
         arcFlowsArr[arcFlowsArr == 0.0] = np.nan
         personalMeanFlow = np.nanmean(arcFlowsArr)
-        for arc in individual.arcFlows.keys():
-            # If the personal solution does not have the arc unopened, go to next arc
-            if individual.arcFlows[arc] == 0.0:
-                continue
-            # Find the ratio of flow between this arc and the personal's mean arc flow
-            flowMeanRatio = individual.arcFlows[arc] / personalMeanFlow
-            # Update the alpha considering the ratio
-            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMeanRatio)
+        for edgeIndex in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                # If the individual has the arc unopened, do nothing
+                if individual.arcFlows[(edgeIndex, arcIndex)] == 0.0:
+                    continue
+                # Else get new alpha value based on annealed proportion
+                else:
+                    # Find the ratio of flow between this arc and the individual's mean arc flow
+                    flowMeanRatio = individual.arcFlows[(edgeIndex, arcIndex)] / personalMeanFlow
+                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)],
+                                                               flowStatRatio=flowMeanRatio)
+                    if self.initializationStrategy == "perEdge":
+                        for cap in range(self.graph.numArcsPerEdge):
+                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
         individual.resetOutputNetwork()
 
     def applyPersonalMedianDaemon(self, individualID: int) -> None:
@@ -710,14 +746,19 @@ class Population:
         arcFlowsArr = np.array(list(individual.arcFlows.values()))
         arcFlowsArr[arcFlowsArr == 0.0] = np.nan
         personalMedianFlow = np.nanmedian(arcFlowsArr)
-        for arc in individual.arcFlows.keys():
-            # If the personal solution does not have the arc unopened, go to next arc
-            if individual.arcFlows[arc] == 0.0:
-                continue
-            # Find the ratio of flow between this arc and the personal's median arc flow
-            flowMedianRatio = individual.arcFlows[arc] / personalMedianFlow
-            # Update the alpha considering the ratio
-            individual.alphaValues[arc] = self.getDaemonUpdatedAlphaValue(individual.alphaValues[arc], flowStatRatio=flowMedianRatio)
+        for edgeIndex in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                # If the individual has the arc unopened, do nothing
+                if individual.arcFlows[(edgeIndex, arcIndex)] == 0.0:
+                    continue
+                # Else get new alpha value based on annealed proportion
+                else:
+                    # Find the ratio of flow between this arc and the individual's median arc flow
+                    flowMedianRatio = individual.arcFlows[(edgeIndex, arcIndex)] / personalMedianFlow
+                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)], flowStatRatio=flowMedianRatio)
+                    if self.initializationStrategy == "perEdge":
+                        for cap in range(self.graph.numArcsPerEdge):
+                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
         individual.resetOutputNetwork()
 
     # ==========================================================

@@ -13,20 +13,20 @@ python3 sandbox.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "medium_6"
+    inputGraph = "__LIMIT__0"
     sandboxSolver = GAvsMILP(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
                               isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=True,
-                              isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
+                              isDrawing=True, isLabeling=False, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
-    sandboxSolver.geneticPop.setPopulationHyperparams(populationSize=2,
-                                             numGenerations=0,
+    sandboxSolver.geneticPop.setPopulationHyperparams(populationSize=10,
+                                             numGenerations=10,
                                              terminationMethod="setGenerations")
     sandboxSolver.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                  initializationDistribution="gaussian",
                                                  initializationParams=[500.0, 100.0])
-    sandboxSolver.geneticPop.setIndividualSelectionHyperparams(selectionMethod="random",
-                                                      tournamentSize=2)
+    sandboxSolver.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
+                                                      tournamentSize=3)
     sandboxSolver.geneticPop.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                             crossoverRate=1.0,
                                             crossoverAttemptsPerGeneration=2,

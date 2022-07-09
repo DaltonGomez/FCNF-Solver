@@ -19,7 +19,7 @@ class MILPsolverCPLEX:
         self.isSourceSinkCapacitated: bool = self.graph.isSourceSinkCapacitated  # Boolean indicating if the input graph contained src/sink capacities, which were considered by the solver
         self.isSourceSinkCharged: bool = self.graph.isSourceSinkCharged  # Boolean indicating if the input graph contained src/sink charges, which were considered by the solver
         # Solver model
-        self.model: Model = Model(name="FCNF-MILP-Solvers", log_output=logOutput, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
+        self.model: Model = Model(name="FCNF-MILP-Solver", log_output=logOutput, cts_by_name=True)  # Model object acting as a wrapper to local CPLEX installation
         self.progressDataRecorder: ProgressDataRecorder = ProgressDataRecorder(clock="gap")  # Create a progress listener for the MILP model in CPLEX
         self.model.add_progress_listener(self.progressDataRecorder)  # Attach the progress listener to the MILP model
         self.runtimeTimestamps: List = []  # Stores the runtime timestamps, in seconds, from CPLEX while solving the MILP
