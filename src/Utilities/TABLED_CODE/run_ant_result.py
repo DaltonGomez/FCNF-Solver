@@ -1,4 +1,4 @@
-from Utilities.IN_PROGRESS.AntColony import AntColonyResults
+from Utilities.TABLED_CODE.AntColony import AntColonyResults
 
 """
 RUN COMMAND:

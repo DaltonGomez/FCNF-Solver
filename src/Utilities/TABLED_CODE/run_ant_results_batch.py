@@ -1,8 +1,9 @@
 import math
 import random
 
-from Utilities.IN_PROGRESS.AntColony.AntColonyResults import AntColonyResults
-from Utilities.IN_PROGRESS.OLD_GraphMaker import GraphMaker
+from Utilities.TABLED_CODE.OLD_GraphMaker import GraphMaker
+
+from Utilities.TABLED_CODE.AntColony.AntColonyResults import AntColonyResults
 
 """
 RUN COMMAND:

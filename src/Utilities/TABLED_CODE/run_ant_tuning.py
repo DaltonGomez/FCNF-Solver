@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from Graph.CandidateGraph import CandidateGraph
-from Utilities.IN_PROGRESS.AntColony.AntColonyTuning import AntColonyTuning
+from Utilities.TABLED_CODE.AntColony.AntColonyTuning import AntColonyTuning
 
 """
 RUN COMMAND:

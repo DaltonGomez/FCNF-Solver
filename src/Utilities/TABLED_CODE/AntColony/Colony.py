@@ -1,7 +1,7 @@
 import sys
 
 from Graph.CandidateGraph import CandidateGraph
-from Utilities.IN_PROGRESS.AntColony.Ant import Ant
+from Utilities.TABLED_CODE.AntColony.Ant import Ant
 from src.FlowNetwork.FlowNetworkSolution import FlowNetworkSolution
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 

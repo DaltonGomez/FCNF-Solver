@@ -1,7 +1,7 @@
 import numpy as np
 
 from Graph.CandidateGraph import CandidateGraph
-from Utilities.IN_PROGRESS.AntColony.Colony import Colony
+from Utilities.TABLED_CODE.AntColony.Colony import Colony
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
