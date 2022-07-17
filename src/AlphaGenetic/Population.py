@@ -36,6 +36,7 @@ class Population:
         self.generationTimestamps: List[float] = []  # List of timestamps, in seconds after evolution start, for each generation
         self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
         self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
+        self.bestKnownAlphas: ndarray = np.array(0, dtype='f')  # Holds the alpha values of the best solution discovered during the evolution
         self.bestKnownSolution = None  # Holds the best (i.e. lowest cost) solution discovered during the evolution
 
         # =======================
@@ -228,12 +229,14 @@ class Population:
         if self.terminationMethod == "setGenerations":
             if newBestCost < self.bestKnownCost:
                 self.bestKnownCost = newBestCost
+                self.bestKnownAlphas = self.getMostFitIndividual().alphaValues.copy()
                 self.bestKnownSolution = self.writeIndividualsSolution(self.getMostFitIndividual())
             if generation >= self.numGenerations:
                 self.isTerminated = True
         elif self.terminationMethod == "stagnationPeriod":
             if newBestCost < self.bestKnownCost:
                 self.bestKnownCost = newBestCost
+                self.bestKnownAlphas = self.getMostFitIndividual().alphaValues.copy()
                 self.bestKnownSolution = self.writeIndividualsSolution(self.getMostFitIndividual())
                 self.consecutiveStagnantGenerations = 0
             elif newBestCost >= self.bestKnownCost:
@@ -307,8 +310,7 @@ class Population:
     # ============== RANKING METHODS ==============
     # =============================================
     def rankPopulation(self) -> list:
-        """Ranks the population not in place in ascending order of cost (i.e. Lower cost -> More fit) and returns"""
-        # NOTE: The population should never be sorted in-place as this will cause bugs in the execution of operators
+        """Ranks the population OUT-OF-PLACE in ascending order of cost (i.e. Lower cost -> More fit) and returns"""
         sortedPopulation = sorted(self.population, key=lambda x: x.trueCost)
         return sortedPopulation
 
