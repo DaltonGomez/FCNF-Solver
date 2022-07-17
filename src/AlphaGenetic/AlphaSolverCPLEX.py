@@ -25,7 +25,8 @@ class AlphaSolverCPLEX:
         self.isRun: bool = False  # Boolean indicating if the solver has been run
         self.isOptimizedArcSelections: bool = isOptimizedArcSelections  # Boolean indicating if the optimal arc should be selected for the assigned flow
         self.trueCost: float = 0.0  # True cost of the solution under the Fixed-Charge Network Flow model
-        # TODO - Decide if the penalized objective functions improve anything
+        # ASK - Does the penalized objective function get us anywhere? I don't think so!
+        # TODO - Remove penalized objective function
         self.isPenalizedObjective: bool = isPenalizedObjective
         self.penaltyFactor: float = 10000.0
         # Decision variables

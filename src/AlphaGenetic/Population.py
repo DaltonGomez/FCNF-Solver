@@ -267,6 +267,8 @@ class Population:
                 for cap in range(self.graph.numArcsPerEdge):
                     tempEdge.append(thisEdgesAlphaValue)
             elif self.initializationStrategy == "reciprocalCap":
+                # ASK - Does the reciprocalCap initialization strategy have any merit? I don't think so!
+                # TODO - Remove the reciprocalCap initialization strategy
                 for cap in range(self.graph.numArcsPerEdge):
                     thisArcsAlphaValue = self.getReciprocalOfMinCap(cap)
                     tempEdge.append(thisArcsAlphaValue)
@@ -605,7 +607,8 @@ class Population:
     # ===================================================
     def applyDaemonUpdate(self, individualID: int) -> None:
         """Applies the daemon update strategy to the individual"""
-        # TODO - Current daemon methods all only work with the perEdge initialization strategy
+        # NOTE - All current daemon methods only work with the perEdge initialization strategy
+        # TODO - Update to account for other initialization strategies
         print("Doing a daemon update to individual " + str(individualID) + "...")
         if self.daemonStrategy == "globalBinary":
             self.applyGlobalBinaryDaemon(individualID)
@@ -626,7 +629,6 @@ class Population:
 
     def getDaemonUpdatedAlphaValue(self, currentAlpha: float, flowStatRatio=0.0) -> float:
         """Returns a new alpha value based on the current alpha, daemon strength, annealing schedule and flow-stat ratio"""
-        # TODO - THIS REQUIRES MORE WORK... HOW SHOULD THE DAEMON UPDATE ALPHAS AND WHAT DO YOU DO WHEN THEY'RE <1?
         # If the arc is greater than the statistic
         if flowStatRatio > 1.0:
             # Sample a Gaussian distribution
