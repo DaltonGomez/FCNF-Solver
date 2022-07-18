@@ -26,13 +26,16 @@ class AlphaSolverCPLEX:
         self.isOptimizedArcSelections: bool = isOptimizedArcSelections  # Boolean indicating if the optimal arc should be selected for the assigned flow
         self.trueCost: float = 0.0  # True cost of the solution under the Fixed-Charge Network Flow model
         # ASK - Does the penalized objective function get us anywhere? I don't think so!
-        # TODO - Remove penalized objective function
+        # TODO - Remove penalized objective function code
         self.isPenalizedObjective: bool = isPenalizedObjective
         self.penaltyFactor: float = 10000.0
         # Decision variables
-        self.sourceFlowVars: List[float] = []  # List of the flow values assigned to each source, indexed the same as the graph.sourcesArray
-        self.sinkFlowVars: List[float] = []  # List of the flow values assigned to each sink, indexed the same as the graph.sinksArray
-        self.arcFlowVars: Dict[Tuple[int, int], float] = {}  # Dictionary mapping (edgeIndex, arcIndex) keys to assigned flow values
+        self.sourceFlowVars: List[
+            float] = []  # List of the flow values assigned to each source, indexed the same as the graph.sourcesArray
+        self.sinkFlowVars: List[
+            float] = []  # List of the flow values assigned to each sink, indexed the same as the graph.sinksArray
+        self.arcFlowVars: Dict[
+            Tuple[int, int], float] = {}  # Dictionary mapping (edgeIndex, arcIndex) keys to assigned flow values
         # Pre-build Model
         self.prebuildVariablesAndConstraints()  # Called on initialization to build only the variables and constraints in the model
 
@@ -229,10 +232,10 @@ class AlphaSolverCPLEX:
                          alphaValues[i][j])
                         for i in range(self.graph.numEdges)
                         for j in range(self.graph.numArcsPerEdge)) +
-                          sum(self.sourceFlowVars[s] * self.graph.sourceVariableCostsArray[s]
-                              for s in range(self.graph.numSources)) +
-                          sum(self.sinkFlowVars[t] * self.graph.sinkVariableCostsArray[t]
-                              for t in range(self.graph.numSinks)))
+                                              sum(self.sourceFlowVars[s] * self.graph.sourceVariableCostsArray[s]
+                                                  for s in range(self.graph.numSources)) +
+                                              sum(self.sinkFlowVars[t] * self.graph.sinkVariableCostsArray[t]
+                                                  for t in range(self.graph.numSinks)))
                 elif self.graph.isSourceSinkCharged is False:
                     self.solver.set_objective("min", sum(
                         self.arcFlowVars[(i, j)] *
@@ -277,9 +280,10 @@ class AlphaSolverCPLEX:
                                                   for s in range(self.graph.numSources)) +
                                               sum(self.sinkFlowVars[t] * self.graph.sinkVariableCostsArray[t]
                                                   for t in range(self.graph.numSinks)) +
-                                              penaltyMultiplier * sum((self.arcFlowVars[(i, j)]/self.graph.possibleArcCapsArray[j])
-                                                                      for i in range(self.graph.numEdges)
-                                                                      for j in range(self.graph.numArcsPerEdge)))
+                                              penaltyMultiplier * sum(
+                        (self.arcFlowVars[(i, j)] / self.graph.possibleArcCapsArray[j])
+                        for i in range(self.graph.numEdges)
+                        for j in range(self.graph.numArcsPerEdge)))
                 elif self.graph.isSourceSinkCharged is False:
                     self.solver.set_objective("min", sum(
                         self.arcFlowVars[(i, j)] *
@@ -288,9 +292,10 @@ class AlphaSolverCPLEX:
                          alphaValues[i][j])
                         for i in range(self.graph.numEdges)
                         for j in range(self.graph.numArcsPerEdge)) +
-                                              penaltyMultiplier * sum((self.arcFlowVars[(i, j)]/self.graph.possibleArcCapsArray[j])
-                                                                      for i in range(self.graph.numEdges)
-                                                                      for j in range(self.graph.numArcsPerEdge)))
+                                              penaltyMultiplier * sum(
+                        (self.arcFlowVars[(i, j)] / self.graph.possibleArcCapsArray[j])
+                        for i in range(self.graph.numEdges)
+                        for j in range(self.graph.numArcsPerEdge)))
             elif self.isOneDimAlphaTable is True:
                 if self.graph.isSourceSinkCharged is True:
                     self.solver.set_objective("min", sum(
@@ -303,22 +308,24 @@ class AlphaSolverCPLEX:
                                                   for s in range(self.graph.numSources)) +
                                               sum(self.sinkFlowVars[t] * self.graph.sinkVariableCostsArray[t]
                                                   for t in range(self.graph.numSinks)) +
-                                              penaltyMultiplier * sum((self.arcFlowVars[(i, 0)]/self.graph.possibleArcCapsArray[self.graph.numArcsPerEdge - 1])
-                                                  for i in range(self.graph.numEdges)))
+                                              penaltyMultiplier * sum(
+                        (self.arcFlowVars[(i, 0)] / self.graph.possibleArcCapsArray[self.graph.numArcsPerEdge - 1])
+                        for i in range(self.graph.numEdges)))
                 elif self.graph.isSourceSinkCharged is False:
                     self.solver.set_objective("min", sum(
                         self.arcFlowVars[(i, 0)] *
                         (self.graph.getArcVariableCostFromEdgeCapIndices(i, self.graph.numArcsPerEdge - 1) +
                          self.graph.getArcFixedCostFromEdgeCapIndices(i, self.graph.numArcsPerEdge - 1) *
                          alphaValues[i][self.graph.numArcsPerEdge - 1])
-                         for i in range(self.graph.numEdges)) +
-                         penaltyMultiplier * sum((self.arcFlowVars[(i, 0)]/self.graph.possibleArcCapsArray[self.graph.numArcsPerEdge - 1])
+                        for i in range(self.graph.numEdges)) +
+                                              penaltyMultiplier * sum(
+                        (self.arcFlowVars[(i, 0)] / self.graph.possibleArcCapsArray[self.graph.numArcsPerEdge - 1])
                         for i in range(self.graph.numEdges)))
 
     def getPenaltyMultiplier(self) -> float:
         """Computes the penalty multiplier from the penalty factor and input graph statistics"""
-        # NOTE - Gets penalty multiplier as k/n, where k = penalty hyperparam, n = num edges, and T = total demand
-        return self.penaltyFactor / (self.graph.numEdges)
+        # FORMULA: Gets penalty multiplier as k/n, where k = penalty hyperparam and n = num edges
+        return self.penaltyFactor / self.graph.numEdges
 
     def solveModel(self) -> None:
         """Solves the alpha-relaxed LP model in CPLEX"""

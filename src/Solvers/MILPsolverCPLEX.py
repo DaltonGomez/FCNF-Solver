@@ -66,8 +66,7 @@ class MILPsolverCPLEX:
                 self.model.add_constraint(self.arcFlowVars[(i, j)] <= self.arcOpenedVars[(i, j)] * capacity,
                                           ctname=ctName)
 
-        # Only one arc per edge can be opened constraint
-        # NOTE - Can be turned on/off as an optional param of this class
+        # Only one arc per edge can be opened constraint - Can be turned on/off with a bool kwargs in the constructor
         if self.isOneArcPerEdge is True:
             for i in range(self.graph.numEdges):
                 ctName = "e_" + str(i) + "_OneArcPerEdge"

@@ -1,9 +1,9 @@
 import numpy as np
 
 from Graph.CandidateGraph import CandidateGraph
+from Utilities.TABLED_CODE.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
-from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
 """
 RUN COMMAND:

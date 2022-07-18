@@ -6,8 +6,8 @@ class Arc:
 
     def __init__(self, numID: int, edgeID: tuple, capacity: int, distance: float, fixedCost: float,
                  variableCost: float):
-        """Constructor of an arc instance
-        NOTE: Edges are unidirectional connections between two nodes.
+        """Constructor of an arc instance.
+        Edges are unidirectional connections between two nodes.
         Several unidirectional arcs can span the same edge, each with their own capacity."""
         # Arc attributes
         self.numID: int = numID  # Unique identifier of the arc

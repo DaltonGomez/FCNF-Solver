@@ -158,7 +158,7 @@ class CandidateGraph:
         return node.xPos, node.yPos
 
     def setNodeType(self, nodeID: int, nodeType: int) -> None:
-        """Sets a node to a type (NOTE: nodeType = {0: source, 1: sink, 2: intermediate})"""
+        """Sets a node to a type (KEY: nodeType = {0: source, 1: sink, 2: intermediate})"""
         thisNode = self.nodesDict[nodeID]
         thisNode.nodeType = nodeType
 

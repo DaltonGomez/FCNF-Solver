@@ -2,7 +2,7 @@ TODOS & NOTES:
 
 GENERAL/NETWORK/SOLVERS:
 =====================================
-# TODO - Update README with documentation
+# TODO - Update/revise README with documentation
 # TODO - Add unit tests
 # DONE - Optimize redundant data structures and algorithm calls (at least the major optimizations)
 # DONE - Implement Alpha-Relaxed GA solver in CPLEX

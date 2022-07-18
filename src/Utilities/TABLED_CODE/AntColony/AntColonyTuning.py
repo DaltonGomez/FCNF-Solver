@@ -6,8 +6,8 @@ import numpy as np
 
 from Graph.CandidateGraph import CandidateGraph
 from Utilities.TABLED_CODE.AntColony.Colony import Colony
+from Utilities.TABLED_CODE.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
-from src.Solvers.RelaxedLPSolverPDLP import RelaxedLPSolverPDLP
 
 
 class AntColonyTuning:

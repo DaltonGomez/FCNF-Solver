@@ -10,7 +10,7 @@ cd Repos/FCNF-Solver/
 python3 run_graph_maker.py
 """
 
-# ORIGINAL COST DETERMINING TABLE ADAPTED FROM SIMCCS MODEL (see data/SimCCS_models/Pipeline Cost Model.xlsm)
+# ORIGINAL COST DETERMINING TABLE ADAPTED FROM SIMCCS MODEL (see data/models/PipelineCostModel.xlsm)
 # Format: cap, fixed cost, variable cost
 costLookupTable = [
     [0.19, 12.38148027, 10.68565602],

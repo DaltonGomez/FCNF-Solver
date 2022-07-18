@@ -51,9 +51,9 @@ class Population:
         self.terminationMethod: str = "setGenerations"  # :param : "setGenerations", "stagnationPeriod"
         self.stagnationPeriod: int = 5
         self.consecutiveStagnantGenerations: int = 0
-        self.initializationStrategy: str = "perEdge"  # :param : "perArc", "perEdge", "reciprocalCapThenNudge" NOTE - RECIPROCAL CAP DOES NOT APPLY TO MUTATION
-        self.initializationDistribution: str = "digital"  # :param : "uniform", "gaussian", "digital"
-        self.initializationParams: List[float] = [0.0, 100000.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
+        self.initializationStrategy: str = "perEdge"  # :param : "perArc", "perEdge", "reciprocalCap"
+        self.initializationDistribution: str = "gaussian"  # :param : "uniform", "gaussian", "digital"
+        self.initializationParams: List[float] = [500.0, 100.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
         # Individual Selection HPs
         self.selectionMethod: str = "tournament"  # :param : "tournament", "roulette", "random"
         self.tournamentSize: int = 3
@@ -96,8 +96,8 @@ class Population:
         self.terminationMethod = terminationMethod
         self.stagnationPeriod = stagnationPeriod
 
-    def setInitializationHyperparams(self, initializationStrategy="perEdge", initializationDistribution="digital",
-                                 initializationParams=(0.0, 100000.0)) -> None:
+    def setInitializationHyperparams(self, initializationStrategy="perEdge", initializationDistribution="gaussian",
+                                 initializationParams=(500.0, 100.0)) -> None:
         """Sets the GA attributes that dictate the initialization/updating of alpha values \n
         :param str initializationStrategy: One of following: {"perEdge", "perArc", "reciprocalCap"}
         :param str initializationDistribution: One of following: {"uniform", "gaussian", "digital"}
