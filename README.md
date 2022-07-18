@@ -57,11 +57,18 @@ The specific use case motivating this repository is carbon capture and storage i
 but not yet constructed. Additionally, several generalizations of FCNF exist. Source and sink nodes can take on their 
 own capacities and/or costs, resulting in Source/Sink-Capacitated FCNF and Source/Sink-Charged FCNF, respectively. By
 allowing a discrete number of parallel arcs per edge, where each arc has its own capacity and costs, the problem becomes
-the Parallel-Arc FCNF. 
+the Parallel-Arc FCNF.
+
+**For a comprehensive review on the Fixed-Charge Network Flow Problem, see:**         
+Crainic, T. G., Gendreau, M., & Gendron, B. (Eds.). (2021). 
+[*Network Design with Applications to Transportation and Logistics*](https://link.springer.com/book/10.1007/978-3-030-64018-7). 
+Springer.
 
 ## Repo Overview
 
-### 
+### Functionality
+
+
 
 **TODO - Update Structure and Class Descriptions**
 
