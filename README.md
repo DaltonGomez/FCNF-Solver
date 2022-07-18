@@ -15,24 +15,37 @@ linear program (MILP) is given below:
 
 **Compute:**
 
-$$ \min \sum_{(ij) \in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
+$$ \min \sum_{e_{ij} \in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
 
 
 **Subject to:**
 
-1) $$ y_{ij} \in \lbrace 0,1 \rbrace, \quad \forall (ij) \in E $$
+1) $$ y_{ij} \in \lbrace 0,1 \rbrace, \quad \forall e_{ij} \in E $$
 
 2) $$ \sum_{i \in T} t_i \geq d, \quad \forall i \in T $$
 
-3) $$ 0 \leq q_{ij} \leq c_{ij} y_{ij}, \quad \forall (ij) \in E $$
+3) $$ 0 \leq q_{ij} \leq c_{ij} y_{ij}, \quad \forall e_{ij} \in E $$
 
-4) $$ \sum_{j:(ij) \in E} q_{ij}-\sum_{j:(ji) \in E} q_{ji} =
+4) $$ \sum_{j:e_{ij} \in E} q_{ij}-\sum_{j:e_{ji} \in E} q_{ji} =
       \begin{cases}
           s_i, \text{if}\ j \in S\\
           -t_i, \text{if}\ j \in T\\
           0, \text{otherwise}\\
       \end{cases} 
-    , \quad \forall j\in N $$
+    , \quad \forall j \in N $$
+
+In this formulation, $N$ represents the set of all nodes, $S$ is the set of all sources, and $T$ is the set of all 
+sinks. $s_i$ and $t_i$ is the assigned flow produced or consumed at source or sink $i$, respectively. $E$ is the set of 
+all edges, where edge $e_{ij}$ spans from node $i$ to node $j$. (Note that, since the input graph is undirected, the 
+edge $e_{ij}$ implies an edge  $e_{ji}$.) For each edge $e_{ij}$ in $E$, $v_{ij}$ is the variable cost of the edge, 
+$f_{ij}$ is the fixed cost of the edge, and $c_{ij}$ is the capacity of the edge. These are input parameters of the 
+graph to be solved. The decision variables of FCNF are $q_{ij}$, the amount of flow in $\mathbb{R}^+$ assigned to edge 
+$e_{ij}$, and $y_{ij}$, the binary decision to open edge $e_{ij}$ and pay the full fixed cost. Constraint #1 forces 
+$y_{ij}$ to be binary and, therefore, discretizes the search space, causing this formulation to be a MILP. $d$ 
+is the target demand of the network set by the user, which is enforced by Constraint #2. Constraint #3 ensures that an
+edge is opened before it can be used and that no edge exceeds its capacity. Constraint #4 maintains conservation of
+flow by allowing only sources to produce flow, sinks to consume flow, and intermediate nodes to transport flow. Lastly,
+the objective function minimizes the total cost of the returned flow network.
 
 The returned output of the above optimization problem is the set of directed edges used and the amount of flow assigned 
 to each used edge. In this sense, FCNF allows us to model "from-scratch" transportation infrastructure as the act of 
