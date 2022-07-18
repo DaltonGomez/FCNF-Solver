@@ -14,7 +14,7 @@ given below:
 
 **Compute:**
 
-1) $$ \min \sum_{(ij)\in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
+1) $$ \min \sum_{(ij) \in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
 
 
 **Subject to:**
