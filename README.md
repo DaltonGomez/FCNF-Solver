@@ -14,18 +14,18 @@ given below:
 
 **Compute:**
 
-$$ \min \sum_{(ij)\in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
+1) $$ \min \sum_{(ij)\in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
 
 
 **Subject to:**
 
-$$ y_{ij} \in \{ 0,1 \}, \quad \forall (ij) \in E $$
+2) $$ y_{ij} \in \lbrace 0,1 \rbrace, \quad \forall (ij) \in E $$
 
-$$ \sum_{i \in T} t_i \geq d, \quad \forall i \in T $$
+3) $$ \sum_{i \in T} t_i \geq d, \quad \forall i \in T $$
 
-$$ 0 \leq q_{ij} \leq c_{ij} y_{ij}, \quad \forall (ij) \in E $$
+4) $$ 0 \leq q_{ij} \leq c_{ij} y_{ij}, \quad \forall (ij) \in E $$
 
-$$ \sum_{j:(ij) \in E} q_{ij}-\sum_{j:(ji) \in E} q_{ji} =
+5) $$ \sum_{j:(ij) \in E} q_{ij}-\sum_{j:(ji) \in E} q_{ji} =
       \begin{cases}
           s_i, \text{if}\ j \in S\\
           -t_i, \text{if}\ j \in T\\
