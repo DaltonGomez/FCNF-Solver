@@ -12,25 +12,26 @@ the total cost of the network, subject to meeting the target demand, abiding by 
 and maintaining conservation of flow from source to sink. FCNF formulated as a mixed-integer linear program (MILP) is 
 given below:
 
-Compute:
+**Compute:**
 
-$$\min \sum_{(ij)\in E} v_{ij} q_{ij} + f_{ij} y_{ij}$$
+$$ \min \sum_{(ij)\in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
 
 
-Subject to:
+**Subject to:**
 
-$$ y_{ij} \in \{0,1\} \forall (ij) \in E $$
+$$ y_{ij} \in \{ 0,1 \}, \quad \forall (ij) \in E $$
 
-$$ \sum_{i \in T} t_i \geq D \forall i \in T $$
+$$ \sum_{i \in T} t_i \geq d, \quad \forall i \in T $$
 
-$$ 0 \leq q_{ij} \leq c_{ij} y_{ij} \forall (ij) \in E $$
+$$ 0 \leq q_{ij} \leq c_{ij} y_{ij}, \quad \forall (ij) \in E $$
 
 $$ \sum_{j:(ij) \in E} q_{ij}-\sum_{j:(ji) \in E} q_{ji} =
-        \begin{cases}
-            s_i, \text{if}\ j \in S\\
-            -t_i, \text{if}\ j \in T\\
-            0, \text{otherwise}\\
-        \end{cases} \forall j\in N $$
+      \begin{cases}
+          s_i, \text{if}\ j \in S\\
+          -t_i, \text{if}\ j \in T\\
+          0, \text{otherwise}\\
+      \end{cases} 
+    , \quad \forall j\in N $$
 
 The returned output of the above optimization problem is the set of directed edges used and the amount of flow assigned 
 to each used edge. In this sense, FCNF allows us to model "from-scratch" transportation infrastructure as the act of 
