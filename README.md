@@ -28,8 +28,8 @@ $$ \min \sum_{e_{ij} \in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
 
 4) $$ \sum_{j:e_{ij} \in E} q_{ij}-\sum_{j:e_{ji} \in E} q_{ji} =
       \begin{cases}
-          s_i, \quad \text{if}\ j \in S\\
-          -t_i, \quad \text{if}\ j \in T\\
+          s_j, \quad \text{if}\ j \in S\\
+          -t_j, \quad \text{if}\ j \in T\\
           0, \quad \text{otherwise}\\
       \end{cases} 
     , \quad \forall j \in N $$
