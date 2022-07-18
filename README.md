@@ -20,13 +20,13 @@ $$ \min \sum_{(ij) \in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
 
 **Subject to:**
 
-2) $$ y_{ij} \in \lbrace 0,1 \rbrace, \quad \forall (ij) \in E $$
+1) $$ y_{ij} \in \lbrace 0,1 \rbrace, \quad \forall (ij) \in E $$
 
-3) $$ \sum_{i \in T} t_i \geq d, \quad \forall i \in T $$
+2) $$ \sum_{i \in T} t_i \geq d, \quad \forall i \in T $$
 
-4) $$ 0 \leq q_{ij} \leq c_{ij} y_{ij}, \quad \forall (ij) \in E $$
+3) $$ 0 \leq q_{ij} \leq c_{ij} y_{ij}, \quad \forall (ij) \in E $$
 
-5) $$ \sum_{j:(ij) \in E} q_{ij}-\sum_{j:(ji) \in E} q_{ji} =
+4) $$ \sum_{j:(ij) \in E} q_{ij}-\sum_{j:(ji) \in E} q_{ji} =
       \begin{cases}
           s_i, \text{if}\ j \in S\\
           -t_i, \text{if}\ j \in T\\
