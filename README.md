@@ -1,20 +1,21 @@
 # FCNF-Solver
 
+FCNF-Solver is a sandbox codebase for the NP-Hard *Fixed Charge Network Flow Problem* (FCNF).
+
 ## Problem Description
-FCNF-Solver is a sandbox codebase for the NP-Hard *Fixed Charge Network Flow Problem* (FCNF). FCNF is a 
-network design problem that optimizes the topology and routing of a commodity over an input graph, returning the flow 
-network solution as output. The input comprises a target demand (i.e. total amount of flow the output network must 
-realize) and an undirected graph of nodes and edges. Each node is identified as either a source, sink, or intermediate 
-node, making FCNF a specific type of the transshipment problem. Each edge in the graph has a capacity (i.e. max flow it 
-can be assigned), a variable cost (i.e. a cost paid per unit of flow assigned to the edge), and a fixed cost (i.e. an 
-all-or-nothing cost paid if any amount of flow is assigned to the edge). FCNF is an optimization problem that minimizes
-the total cost of the network, subject to meeting the target demand, abiding by the capacity constraints of the edges,
-and maintaining conservation of flow from source to sink. FCNF formulated as a mixed-integer linear program (MILP) is 
-given below:
+FCNF is a network design problem that optimizes the topology and routing of a commodity over an input graph, returning 
+the flow network solution as output. The input comprises a target demand (i.e. total amount of flow the output network 
+must realize) and an undirected graph of nodes and edges. Each node is identified as either a source, sink, or 
+intermediate node, making FCNF a specific type of the transshipment problem. Each edge in the graph has a capacity 
+(i.e. max flow it can be assigned), a variable cost (i.e. a cost paid per unit of flow assigned to the edge), and a 
+fixed cost (i.e. an all-or-nothing cost paid if any amount of flow is assigned to the edge). FCNF is an optimization 
+problem that minimizes the total cost of the network, subject to meeting the target demand, abiding by the capacity 
+constraints of the edges, and maintaining conservation of flow from source to sink. FCNF formulated as a mixed-integer 
+linear program (MILP) is given below:
 
 **Compute:**
 
-1) $$ \min \sum_{(ij) \in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
+$$ \min \sum_{(ij) \in E} v_{ij} q_{ij} + f_{ij} y_{ij} $$
 
 
 **Subject to:**
