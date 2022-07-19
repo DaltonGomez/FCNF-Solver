@@ -106,8 +106,8 @@ FlowNetworkSolution class can also be visualized by instantiating the
 
 #### 3. Metahueristic Approaches to FCNF
 
-**While code is available in the repo for this functionality, it is currently under active research/development. As 
-such, no description is given at this time. Stay tuned!**
+*While code is available in the repo for this functionality, it is currently under active research/development. As 
+such, no description is given at this time. Stay tuned!*
 
 ### Project Dependencies
 
@@ -121,4 +121,4 @@ such, no description is given at this time. Stay tuned!**
 
 ### Tests
 
-**Unit and integration tests coming soon!**
+*Unit and integration tests coming soon!*
