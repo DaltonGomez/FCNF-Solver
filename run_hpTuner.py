@@ -14,26 +14,8 @@ python3 run_hpTuner.py
 
 if __name__ == "__main__":
     # Input graph and tuner object w/ options
-    inputGraphs = ["huge_0",
-                   "huge_1",
-                   "huge_2",
-                   "huge_3",
-                   "huge_4",
-                   "huge_5",
-                   "huge_6",
-                   "huge_7",
-                   "huge_8",
-                   "huge_9",
-                   "massive_0",
-                   "massive_1",
-                   "massive_2",
-                   "massive_3",
-                   "massive_4",
-                   "massive_5",
-                   "massive_6",
-                   "massive_7",
-                   "massive_8",
-                   "massive_9"
+    inputGraphs = [
+                   "massive_2"
                    ]
     runsPerGraph = 3
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
@@ -42,8 +24,8 @@ if __name__ == "__main__":
 
     # Update the HP tuning search space
     hpTuner.hpSpace = {
-                "populationSize": [20],
-                "numGenerations": [30],
+                "populationSize": [25],
+                "numGenerations": [25, 50],
                 "initializationStrategy": ["perEdge"],
                 "initializationDistribution": ["gaussian"],
                 "initializationParams": [
@@ -51,7 +33,7 @@ if __name__ == "__main__":
                                         ],
                 "selectionMethod": ["tournament"],
                 "tournamentSize": [5],
-                "crossoverMethod": ["onePoint"],
+                "crossoverMethod": ["twoPoint"],
                 "crossoverRate": [1.0],
                 "crossoverAttemptsPerGeneration": [2],
                 "replacementStrategy": ["replaceWeakestTwo"],
