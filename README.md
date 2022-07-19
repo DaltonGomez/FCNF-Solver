@@ -91,6 +91,8 @@ capacity. Finally, an object of the [GraphVisualizer](src/Graph/GraphVisualizer.
 visualizations of the graph instances, rendered as HTML files using PyVis, a wrapper of jsVis.
 
 ![Visualization of input graph medium_6.p](data/figures/medium_6_input.PNG)
+*The input graph `medium_6.p` visualized, where blue nodes are sources, red nodes are sinks, and black nodes are 
+intermediate.*
 
 #### 2. MILP Solver for FCNF
 
@@ -103,6 +105,8 @@ FlowNetworkSolution class can also be visualized by instantiating the
 [SolutionVisualizer](src/FlowNetwork/SolutionVisualizer.py) class.
 
 ![Visualization of optimal MILP solution for medium_6.p, solved at the maximum demand of the input graph](data/figures/medium_6_optMILP_d=133_c=33710.PNG)
+*The optimal MILP solution to input graph `medium_6.p`, solved at the maximum demand of the network. Opened edges are 
+black with the assigned flow in orange font. Unopened edges are grey.*
 
 #### 3. Metahueristic Approaches to FCNF
 
@@ -111,8 +115,8 @@ such, no description is given at this time. Stay tuned!*
 
 ### Project Dependencies
 
-* Python 3.8 *(latest version compatible with docplex)*
-* [CPLEX 20.0+](https://www.ibm.com/analytics/cplex-optimizer) *(local installation)*
+* [Python 3.8](https://www.python.org/downloads/release/python-380/) *(latest version compatible with docplex)*
+* [CPLEX 20.0+](https://www.ibm.com/analytics/cplex-optimizer) *(local installation required)*
 * [docplex](https://ibmdecisionoptimization.github.io/docplex-doc/)
 * [PyVis](https://pyvis.readthedocs.io/en/latest/index.html)
 * [Numpy](https://numpy.org/)
