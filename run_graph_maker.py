@@ -27,23 +27,23 @@ costLookupTable = [
 ]
 
 if __name__ == "__main__":
-    numGraphs = 1
+    numGraphs = 10
     for n in range(numGraphs):
         # Input parameters
-        name = "__LIMIT__" + str(n)
-        numNodes = 2000
-        numSources = 100
-        numSinks = 100
+        name = "massive_" + str(n)
+        numNodes = 500
+        numSources = 50
+        numSinks = 50
         # Cluster parameters
-        minSourceClusters = 1
-        sourcesPerClusterRange = (100, 100)
-        minSinkClusters = 1
-        sinksPerClusterRange = (100, 100)
+        minSourceClusters = 4
+        sourcesPerClusterRange = (7, 14)
+        minSinkClusters = 4
+        sinksPerClusterRange = (7, 14)
         clusterRadiusRange = (10, 20)
         # Source/sink cap ranges
         isSrcSinkCapacitated = True
-        srcCapRange = (0.5, 3)
-        sinkCapRange = (0.5, 3)
+        srcCapRange = (5, 20)
+        sinkCapRange = (5, 20)
         # Make graph
         graphMaker = GraphGenerator(name, numNodes, numSources, minSourceClusters, sourcesPerClusterRange,
                                     numSinks, minSinkClusters, sinksPerClusterRange, clusterRadiusRange)

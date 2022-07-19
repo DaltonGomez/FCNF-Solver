@@ -96,7 +96,7 @@ class HyperparamTuner:
 
     def runTuningExperiment(self) -> None:
         """Conducts the hyperparameter grid search tuning over the HP space and input graphs"""
-        # NOTE - Not comprehensive of all hyperparameters that could be tuned
+        # NOTE - Nested FOR loops are not comprehensive of all hyperparameters that could be tuned
         self.numTotalRuns = self.computeTotalRuns()
         print("\nStarting a tuning experiment with " + str(self.numTotalRuns) + " total runs...\n")
         # Write CSV to disc and timestamp start
