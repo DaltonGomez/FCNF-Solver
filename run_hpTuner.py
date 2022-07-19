@@ -14,34 +14,54 @@ python3 run_hpTuner.py
 
 if __name__ == "__main__":
     # Input graph and tuner object w/ options
-    inputGraphs = ["huge_3"]
-    runsPerGraph = 1
-    hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=False,
+    inputGraphs = ["huge_0",
+                   "huge_1",
+                   "huge_2",
+                   "huge_3",
+                   "huge_4",
+                   "huge_5",
+                   "huge_6",
+                   "huge_7",
+                   "huge_8",
+                   "huge_9",
+                   "massive_0",
+                   "massive_1",
+                   "massive_2",
+                   "massive_3",
+                   "massive_4",
+                   "massive_5",
+                   "massive_6",
+                   "massive_7",
+                   "massive_8",
+                   "massive_9"
+                   ]
+    runsPerGraph = 3
+    hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
                               tuneOneDimAlpha=True, tuneManyDimAlpha=False,
                               tuneOptimizedArcs=True, tuneNonOptimizedArcs=False)
 
     # Update the HP tuning search space
     hpTuner.hpSpace = {
-                "populationSize": [10, 25, 50],
-                "numGenerations": [10, 25, 50],
+                "populationSize": [20],
+                "numGenerations": [30],
                 "initializationStrategy": ["perEdge"],
                 "initializationDistribution": ["gaussian"],
                 "initializationParams": [
                                             [500.0, 100.0],
                                         ],
                 "selectionMethod": ["tournament"],
-                "tournamentSize": [3, 8],
+                "tournamentSize": [5],
                 "crossoverMethod": ["onePoint"],
                 "crossoverRate": [1.0],
-                "crossoverAttemptsPerGeneration": [1, 3],
-                "replacementStrategy": ["replaceWeakestTwo", "replaceRandomTwo"],
+                "crossoverAttemptsPerGeneration": [2],
+                "replacementStrategy": ["replaceWeakestTwo"],
                 "mutationMethod": ["randomPerEdge"],
                 "mutationRate": [0.05, 0.10, 0.25],
-                "perArcEdgeMutationRate": [0.25, 0.50, 1.0],
-                "isDaemonUsed": [True, False],
-                "annealingConstant": [0.10, 0.25, 0.5, 1],
-                "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
-                "daemonStrength": [0.05, 0.10, 0.25, 0.5]
+                "perArcEdgeMutationRate": [0.25, 0.50],
+                "isDaemonUsed": [True],
+                "annealingConstant": [0.10, 0.25, 0.5],
+                "daemonStrategy": ["globalMedian", "personalMedian"],
+                "daemonStrength": [0.10, 0.50]
                 }
 
     # Solve the graph

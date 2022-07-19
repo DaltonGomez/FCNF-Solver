@@ -132,27 +132,29 @@ class HyperparamTuner:
 
     def conductGridSearchWithDaemon(self, isOneDimAlpha: bool, isArcOptimized: bool) -> None:
         """Completes the grid search of the hyperparams with the given n-Dim alpha and arc optimization settings"""
-        # Iterate over all graphs, each for n runs
+        # Iterate over all graphs
         for graphName in self.inputGraphs:
-            for runNum in range(self.runsPerGraph):
-                # Iterate over remaining HPs
-                for popSize in self.hpSpace["populationSize"]:
-                    for numGens in self.hpSpace["numGenerations"]:
-                        for initStrat in self.hpSpace["initializationStrategy"]:
-                            for initDist in self.hpSpace["initializationDistribution"]:
-                                for initParams in self.hpSpace["initializationParams"]:
-                                    for select in self.hpSpace["selectionMethod"]:
-                                        for crossMeth in self.hpSpace["crossoverMethod"]:
-                                            for crossRate in self.hpSpace["crossoverRate"]:
-                                                for crossAPG in self.hpSpace["crossoverAttemptsPerGeneration"]:
-                                                    for replace in self.hpSpace["replacementStrategy"]:
-                                                        for mutateMeth in self.hpSpace["mutationMethod"]:
-                                                            for mutateRate in self.hpSpace["mutationRate"]:
-                                                                for perAeMutate in self.hpSpace["perArcEdgeMutationRate"]:
-                                                                    for isDaemon in self.hpSpace["isDaemonUsed"]:
-                                                                        for annealConst in self.hpSpace["annealingConstant"]:
-                                                                            for daemonStrat in self.hpSpace["daemonStrategy"]:
-                                                                                for daemonStrength in self.hpSpace["daemonStrength"]:
+            # Iterate over HPs
+            for popSize in self.hpSpace["populationSize"]:
+                for numGens in self.hpSpace["numGenerations"]:
+                    for initStrat in self.hpSpace["initializationStrategy"]:
+                        for initDist in self.hpSpace["initializationDistribution"]:
+                            for initParams in self.hpSpace["initializationParams"]:
+                                for select in self.hpSpace["selectionMethod"]:
+                                    for crossMeth in self.hpSpace["crossoverMethod"]:
+                                        for crossRate in self.hpSpace["crossoverRate"]:
+                                            for crossAPG in self.hpSpace["crossoverAttemptsPerGeneration"]:
+                                                for replace in self.hpSpace["replacementStrategy"]:
+                                                    for mutateMeth in self.hpSpace["mutationMethod"]:
+                                                        for mutateRate in self.hpSpace["mutationRate"]:
+                                                            for perAeMutate in self.hpSpace["perArcEdgeMutationRate"]:
+                                                                for isDaemon in self.hpSpace["isDaemonUsed"]:
+                                                                    for annealConst in self.hpSpace["annealingConstant"]:
+                                                                        for daemonStrat in self.hpSpace["daemonStrategy"]:
+                                                                            for daemonStrength in self.hpSpace["daemonStrength"]:
+                                                                                # Iterate over runs
+                                                                                for runNum in range(self.runsPerGraph):
+                                                                                    # Search tourny size only if tournament is selection strategy
                                                                                     if select == "tournament":
                                                                                         for tourny in self.hpSpace["tournamentSize"]:
                                                                                             # Instantiate GA pop
