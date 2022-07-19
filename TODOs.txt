@@ -2,8 +2,8 @@ TODOS & NOTES:
 
 GENERAL/NETWORK/SOLVERS:
 =====================================
-# TODO - Update/revise README with documentation
-# TODO - Add unit tests
+# TODO - Continue to build out the README with documentation
+# TODO - Add unit and integration tests
 # DONE - Optimize redundant data structures and algorithm calls (at least the major optimizations)
 # DONE - Implement Alpha-Relaxed GA solver in CPLEX
 # DONE - Update MILP solver to report gaps, bounds, and include a runtime listener

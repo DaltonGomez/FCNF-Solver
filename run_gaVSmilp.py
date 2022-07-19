@@ -13,29 +13,30 @@ python3 run_gaVSmilp.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "huge_2"
+    # inputGraph = "massive_3"
+    inputGraph = "__LIMIT__0"
     gaVSmilp = GAvsMILP(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
                               isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=True,
-                              isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
+                              isDrawing=True, isLabeling=False, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
-    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=20,
-                                             numGenerations=25,
+    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=15,
+                                             numGenerations=30,
                                              terminationMethod="setGenerations")
     gaVSmilp.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
-                                                 initializationDistribution="digital",
-                                                 initializationParams=[2.0, 100000.0])
+                                                     initializationDistribution="gaussian",
+                                                     initializationParams=[500.0, 100.0])
     gaVSmilp.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
                                                       tournamentSize=4)
-    gaVSmilp.geneticPop.setCrossoverHyperparams(crossoverMethod="onePoint",
+    gaVSmilp.geneticPop.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                             crossoverRate=1.0,
-                                            crossoverAttemptsPerGeneration=1,
+                                            crossoverAttemptsPerGeneration=2,
                                             replacementStrategy="replaceWeakestTwo")
     gaVSmilp.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                           mutationRate=0.05,
+                                           mutationRate=0.20,
                                            perArcEdgeMutationRate=0.25)
-    gaVSmilp.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.5,
-                                                  daemonStrategy="globalMean", daemonStrength=1)
+    gaVSmilp.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.50,
+                                                  daemonStrategy="globalMedian", daemonStrength=0.20)
 
     # Solve the graph
     gaVSmilp.solveGraph()

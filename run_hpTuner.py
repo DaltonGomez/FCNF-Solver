@@ -25,9 +25,9 @@ if __name__ == "__main__":
                 "populationSize": [10, 25, 50],
                 "numGenerations": [10, 25, 50],
                 "initializationStrategy": ["perEdge"],
-                "initializationDistribution": ["digital"],
+                "initializationDistribution": ["gaussian"],
                 "initializationParams": [
-                                            [5.0, 1000000],
+                                            [500.0, 100.0],
                                         ],
                 "selectionMethod": ["tournament"],
                 "tournamentSize": [3, 8],
@@ -39,9 +39,9 @@ if __name__ == "__main__":
                 "mutationRate": [0.05, 0.10, 0.25],
                 "perArcEdgeMutationRate": [0.25, 0.50, 1.0],
                 "isDaemonUsed": [True, False],
-                "annealingConstant": [0.25, 0.5, 1, 2],
+                "annealingConstant": [0.10, 0.25, 0.5, 1],
                 "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
-                "daemonStrength": [0.5, 1, 2]
+                "daemonStrength": [0.05, 0.10, 0.25, 0.5]
                 }
 
     # Solve the graph
