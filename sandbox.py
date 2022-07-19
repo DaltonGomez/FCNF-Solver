@@ -1,4 +1,3 @@
-
 from src.Experiments.GAvsMILP import GAvsMILP
 
 """
@@ -13,9 +12,9 @@ python3 sandbox.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "__LIMIT__0"
-    sandboxSolver = GAvsMILP(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
-                              isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=True,
+    inputGraph = "small_UB_0"
+    sandboxSolver = GAvsMILP(inputGraph, isSolvedWithGeneticAlg=False, isOneDimAlphaTable=True,
+                              isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=False,
                               isDrawing=True, isLabeling=False, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters

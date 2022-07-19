@@ -56,7 +56,7 @@ class GraphVisualizer:
                                     "enabled": false
                                 },
                                 "nodes": {
-                                    "size": 10,
+                                    "size": 5,
                                     "borderWidth": 3,
                                     "color": {
                                         "inherit": true
@@ -72,8 +72,8 @@ class GraphVisualizer:
                                         "strokeColor": "rgba(0, 200, 0, 0)"
                                     },
                                     "scaling": {
-                                        "min": 5,
-                                        "max": 20
+                                        "min": 3,
+                                        "max": 9
                                     },
                                     "shadow": {
                                         "enabled": true,
@@ -98,8 +98,8 @@ class GraphVisualizer:
                                         }
                                     },
                                     "scaling": {
-                                        "min": 2,
-                                        "max": 16
+                                        "min": 3,
+                                        "max": 15
                                     },
                                     "smooth": {
                                         "enabled": false,
