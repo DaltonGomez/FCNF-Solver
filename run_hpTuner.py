@@ -1,4 +1,3 @@
-
 from src.Experiments.HyperparamTuner import HyperparamTuner
 
 """
@@ -11,45 +10,45 @@ cd Repos/FCNF-Solver/
 python3 run_hpTuner.py
 """
 
-
 if __name__ == "__main__":
     # Input graph and tuner object w/ options
     inputGraphs = [
-                   "massive_2"
-                   ]
-    runsPerGraph = 3
+        "massive_2",
+        "massive_5",
+        "massive_6"
+    ]
+    runsPerGraph = 1
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
-                              tuneOneDimAlpha=True, tuneManyDimAlpha=False,
+                              tuneOneDimAlpha=True, tuneManyDimAlpha=True,
                               tuneOptimizedArcs=True, tuneNonOptimizedArcs=False)
-
+    # TODO - Revise HP Tuner class to remove the "isDaemonUsed" key from the hpSpace dict and only use the kwargs
     # Update the HP tuning search space
     hpTuner.hpSpace = {
-                "populationSize": [25],
-                "numGenerations": [25, 50],
-                "initializationStrategy": ["perEdge"],
-                "initializationDistribution": ["gaussian"],
-                "initializationParams": [
-                                            [500.0, 100.0],
-                                        ],
-                "selectionMethod": ["tournament"],
-                "tournamentSize": [5],
-                "crossoverMethod": ["twoPoint"],
-                "crossoverRate": [1.0],
-                "crossoverAttemptsPerGeneration": [2],
-                "replacementStrategy": ["replaceWeakestTwo"],
-                "mutationMethod": ["randomPerEdge"],
-                "mutationRate": [0.05, 0.10, 0.25],
-                "perArcEdgeMutationRate": [0.25, 0.50],
-                "isDaemonUsed": [True],
-                "annealingConstant": [0.10, 0.25, 0.5],
-                "daemonStrategy": ["globalMedian", "personalMedian"],
-                "daemonStrength": [0.10, 0.50]
-                }
+        "populationSize": [25],
+        "numGenerations": [25],
+        "initializationStrategy": ["perEdge"],
+        "initializationDistribution": ["gaussian"],
+        "initializationParams": [
+            [500.0, 100.0],
+        ],
+        "selectionMethod": ["tournament"],
+        "tournamentSize": [3, 5, 8],
+        "crossoverMethod": ["twoPoint"],
+        "crossoverRate": [1.0],
+        "crossoverAttemptsPerGeneration": [1, 3],
+        "replacementStrategy": ["replaceWeakestTwo", "replaceParents"],
+        "mutationMethod": ["randomPerEdge"],
+        "mutationRate": [0.05, 0.10, 0.25],
+        "perArcEdgeMutationRate": [0.25, 0.50],
+        "isDaemonUsed": [True],
+        "annealingConstant": [0.10, 0.50],
+        "daemonStrategy": ["globalMedian"],
+        "daemonStrength": [0.10, 0.50]
+    }
 
     # Solve the graph
     # NOTE - The grid search is not comprehensive of all the hyperparameters that could be tuned
     hpTuner.runTuningExperiment()
-
 
 """
 # COMPLETE HP SEARCH-SPACE DICTIONARY:

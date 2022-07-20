@@ -30,7 +30,7 @@ if __name__ == "__main__":
     numGraphs = 10
     for n in range(numGraphs):
         # Input parameters
-        name = "massive_" + str(n)
+        name = "__NAME__" + str(n)
         numNodes = 500
         numSources = 50
         numSinks = 50

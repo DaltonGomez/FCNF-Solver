@@ -92,6 +92,10 @@ class HyperparamTuner:
                 trimmedHpSpaceKeys.remove(daemonHP)
             for hyperparam in trimmedHpSpaceKeys:
                 totalRuns *= len(self.hpSpace[hyperparam])
+        if self.tuneOneDimAlpha is True and self.tuneManyDimAlpha is True:
+            totalRuns *= 2
+        if self.tuneOptimizedArcs is True and self.tuneNonOptimizedArcs is True:
+            totalRuns *= 2
         return totalRuns
 
     def runTuningExperiment(self) -> None:
