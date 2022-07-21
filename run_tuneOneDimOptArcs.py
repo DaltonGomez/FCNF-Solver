@@ -13,9 +13,10 @@ python3 run_tuneOneDimOptArcs.py
 if __name__ == "__main__":
     # Input graph and tuner object w/ options
     inputGraphs = [
-        "massive_2",
-        "massive_5",
-        "massive_6"
+        # "massive_2",
+        # "massive_5",
+        # "massive_6",
+        "massive_8",
     ]
     runsPerGraph = 3
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
