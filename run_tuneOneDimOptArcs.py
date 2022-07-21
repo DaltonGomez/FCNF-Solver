@@ -3,11 +3,11 @@ from src.Experiments.HyperparamTuner import HyperparamTuner
 """
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
-py -3.8 run_hpTuner.py
+py -3.8 run_tuneOneDimOptArcs.py
 
 LINUX RUN COMMAND:
 cd Repos/FCNF-Solver/
-python3 run_hpTuner.py
+python3 run_tuneOneDimOptArcs.py
 """
 
 if __name__ == "__main__":
@@ -21,7 +21,6 @@ if __name__ == "__main__":
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
                               tuneOneDimAlpha=True, tuneManyDimAlpha=False,
                               tuneOptimizedArcs=True, tuneNonOptimizedArcs=False)
-    # TODO - Revise HP Tuner class to remove the "isDaemonUsed" key from the hpSpace dict and only use the kwargs
     # Update the HP tuning search space
     hpTuner.hpSpace = {
         "populationSize": [20],

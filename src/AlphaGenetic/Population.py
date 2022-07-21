@@ -154,7 +154,7 @@ class Population:
     # ====================================================
     # ============== EVOLUTION LOOP/METHODS ==============
     # ====================================================
-    def evolvePopulation(self, printGenerations=True, drawing=True, drawLabels=False,
+    def evolvePopulation(self, printGenerations=True, drawing=True, drawLabels=True,
                          isGraphing=True, runID="") -> FlowNetworkSolution:
         """Evolves the population for a specified number of generations"""
         # Initialize population and solve
@@ -380,7 +380,7 @@ class Population:
     # ===================================================
     # ============== VISUALIZATION METHODS ==============
     # ===================================================
-    def visualizeIndividual(self, individual: Individual, labels=False, leadingText="") -> None:
+    def visualizeIndividual(self, individual: Individual, labels=True, leadingText="") -> None:
         """Renders the visualization for a specified individual"""
         solution = self.writeIndividualsSolution(individual)
         visualizer = SolutionVisualizer(solution)
@@ -389,12 +389,12 @@ class Population:
         else:
             visualizer.drawUnlabeledSolution(leadingText=leadingText)
 
-    def visualizeBestIndividual(self, labels=False, leadingText="") -> None:
+    def visualizeBestIndividual(self, labels=True, leadingText="") -> None:
         """Renders the visualization for the most fit individual in the population at any time"""
         bestIndividual = self.getMostFitIndividual()
         self.visualizeIndividual(bestIndividual, labels=labels, leadingText=leadingText)
 
-    def visualizeAllIndividuals(self, labels=False, leadingText="") -> None:
+    def visualizeAllIndividuals(self, labels=True, leadingText="") -> None:
         """Renders the visualization for all individuals in the population at any time"""
         i = 0
         for individual in self.population:

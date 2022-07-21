@@ -3,30 +3,28 @@ from src.Experiments.HyperparamTuner import HyperparamTuner
 """
 RUN COMMAND:
 cd PycharmProjects/FCNF-Solver
-py -3.8 run_hpTuner.py
+py -3.8 run_tuneManyDimOptArcs.py
 
 LINUX RUN COMMAND:
 cd Repos/FCNF-Solver/
-python3 run_hpTuner.py
+python3 run_tuneManyDimOptArcs.py
 """
 
+# TODO - AlphaSolverCPLEX throws KEY ERROR- Needs to be addressed before confidently running this script
 if __name__ == "__main__":
     # Input graph and tuner object w/ options
     inputGraphs = [
         "massive_2",
-        "massive_5",
-        "massive_6"
     ]
     runsPerGraph = 3
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
-                              tuneOneDimAlpha=True, tuneManyDimAlpha=False,
+                              tuneOneDimAlpha=False, tuneManyDimAlpha=True,
                               tuneOptimizedArcs=True, tuneNonOptimizedArcs=False)
-    # TODO - Revise HP Tuner class to remove the "isDaemonUsed" key from the hpSpace dict and only use the kwargs
     # Update the HP tuning search space
     hpTuner.hpSpace = {
         "populationSize": [20],
         "numGenerations": [30],
-        "initializationStrategy": ["perEdge"],
+        "initializationStrategy": ["perArc"],
         "initializationDistribution": ["gaussian"],
         "initializationParams": [
             [500.0, 100.0],
@@ -37,14 +35,14 @@ if __name__ == "__main__":
         "crossoverMethod": ["twoPoint"],
         "crossoverRate": [1.0],
         "crossoverAttemptsPerGeneration": [1, 3],
-        "replacementStrategy": ["replaceWeakestTwo", "replaceRandom"],
-        "mutationMethod": ["randomPerEdge"],
-        "mutationRate": [0.05, 0.10, 0.25],
-        "perArcEdgeMutationRate": [0.10, 0.25, 0.50],
+        "replacementStrategy": ["replaceWeakestTwo"],
+        "mutationMethod": ["randomPerArc"],
+        "mutationRate": [0.05, 0.25],
+        "perArcEdgeMutationRate": [0.10, 0.50],
         "isDaemonUsed": [True],
-        "annealingConstant": [0.10, 0.50, 1.0],
+        "annealingConstant": [0.10, 0.50],
         "daemonStrategy": ["globalMedian"],
-        "daemonStrength": [0.10, 0.25, 0.50]
+        "daemonStrength": [0.10, 0.50]
     }
 
     # Solve the graph
