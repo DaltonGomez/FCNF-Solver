@@ -4,6 +4,7 @@ GENERAL/NETWORK/SOLVERS:
 =====================================
 # TODO - Continue to build out the README with documentation
 # TODO - Add unit and integration tests
+# TODO - Modify MILP class to build model on initialization, then add a method to clear solution values and use that in the HP tuner (thus reducing the time wasted rebuilding the same model)
 # DONE - Optimize redundant data structures and algorithm calls (at least the major optimizations)
 # DONE - Implement Alpha-Relaxed GA solver in CPLEX
 # DONE - Update MILP solver to report gaps, bounds, and include a runtime listener
