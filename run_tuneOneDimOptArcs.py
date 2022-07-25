@@ -16,7 +16,7 @@ if __name__ == "__main__":
         # "massive_2",
         # "massive_5",
         # "massive_6",
-        "massive_8",
+        # "massive_8",
     ]
     runsPerGraph = 3
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # Update the HP tuning search space
     hpTuner.hpSpace = {
         "populationSize": [20],
-        "numGenerations": [30],
+        "numGenerations": [40],
         "initializationStrategy": ["perEdge"],
         "initializationDistribution": ["gaussian"],
         "initializationParams": [
@@ -33,18 +33,18 @@ if __name__ == "__main__":
             [500.0, 10.0]
         ],
         "selectionMethod": ["tournament"],
-        "tournamentSize": [3, 5, 8],
+        "tournamentSize": [2, 8],
         "crossoverMethod": ["twoPoint"],
         "crossoverRate": [1.0],
         "crossoverAttemptsPerGeneration": [1, 3],
-        "replacementStrategy": ["replaceWeakestTwo", "replaceRandom"],
+        "replacementStrategy": ["replaceWeakestTwo", "replaceRandomTwo"],
         "mutationMethod": ["randomPerEdge"],
-        "mutationRate": [0.05, 0.10, 0.25],
-        "perArcEdgeMutationRate": [0.10, 0.25, 0.50],
+        "mutationRate": [0.05, 0.25],
+        "perArcEdgeMutationRate": [0.10, 0.50],
         "isDaemonUsed": [True],
-        "annealingConstant": [0.10, 0.50, 1.0],
-        "daemonStrategy": ["globalMedian"],
-        "daemonStrength": [0.10, 0.25, 0.50]
+        "annealingConstant": [0.10, 1.0],
+        "daemonStrategy": ["globalMedian", "personalMedian"],
+        "daemonStrength": [0.10, 0.50]
     }
 
     # Solve the graph
