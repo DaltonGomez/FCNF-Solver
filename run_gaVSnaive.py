@@ -15,11 +15,11 @@ if __name__ == "__main__":
     # Input graph and experiment object w/ options
     inputGraph = "massive_2"
     gaVSmilp = GAvsNaive(inputGraph, isSolvedWithGeneticAlg=True, isSolvedWithNaive=True, isOneDimAlphaTable=True,
-                         isOptimizedArcSelections=True, isDrawing=True, isLabeling=True, isGraphing=True)
+                         isOptimizedArcSelections=True, isDrawing=False, isLabeling=True, isGraphing=True)
 
     # Alpha-GA population attribute & hyperparameters
-    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=5,
-                                                 numGenerations=5,
+    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=25,
+                                                 numGenerations=200,
                                                  terminationMethod="setGenerations")
     gaVSmilp.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                      initializationDistribution="gaussian",
@@ -37,8 +37,8 @@ if __name__ == "__main__":
                                              daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Naive-HC population attribute & hyperparameters
-    gaVSmilp.naivePop.setPopulationHyperparams(populationSize=5,
-                                                 numGenerations=5,
+    gaVSmilp.naivePop.setPopulationHyperparams(populationSize=25,
+                                                 numGenerations=50,
                                                  terminationMethod="setGenerations")
 
     # Solve the graph

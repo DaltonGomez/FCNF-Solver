@@ -80,7 +80,7 @@ class GAvsNaive:
             # Evolve the Alpha-GA population
             self.gaSolution = self.geneticPop.evolvePopulation(printGenerations=True, drawing=self.isDrawing,
                                                           drawLabels=self.isLabeling, isGraphing=self.isGraphing,
-                                                          runID=self.runID)
+                                                          runID=self.runID + "--GA")
             print("\nGenetic Algorithm Complete!!!\nBest Solution Found = " + str(self.gaSolution.trueCost))
             # Draw if expected
             if self.isDrawing is True:
@@ -103,15 +103,15 @@ class GAvsNaive:
             naiveStartTime = datetime.now()
             self.naiveSolution = self.naivePop.solveWithNaiveHillClimb(printGenerations=True, drawing=self.isDrawing,
                                                                drawLabels=self.isLabeling, isGraphing=self.isGraphing,
-                                                               runID=self.runID)
-            print("\nGenetic Algorithm Complete!!!\nBest Solution Found = " + str(self.gaSolution.trueCost))
+                                                               runID=self.runID + "--HC")
+            print("\nNaive Hill Climb Complete!!!\nBest Solution Found = " + str(self.naiveSolution.trueCost))
             # Draw if expected
             if self.isDrawing is True:
                 naiveVis = SolutionVisualizer(self.naiveSolution)
                 if self.isLabeling is True:
-                    naiveVis.drawLabeledSolution(leadingText="GA-BEST_")
+                    naiveVis.drawLabeledSolution(leadingText="HC-BEST_")
                 else:
-                    naiveVis.drawUnlabeledSolution(leadingText="GA-BEST_")
+                    naiveVis.drawUnlabeledSolution(leadingText="HC-BEST_")
             # Timestamp and stop the GA
             naiveFinishTime = datetime.now()
             naiveRuntime = naiveFinishTime - naiveStartTime
