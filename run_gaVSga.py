@@ -13,7 +13,7 @@ python3 run_gaVSga.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "massive_2"
+    inputGraph = "huge_2"
     gaVSga = GAvsGA(inputGraph, isPop1OneDimAlpha=True, isPop1ArcOptimized=True, isPop1Penalized=False,
                     isPop2OneDimAlpha=False, isPop2ArcOptimized=True, isPop2Penalized=False,
                     isDrawing=True, isLabeling=True, isGraphing=True)

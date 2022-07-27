@@ -818,35 +818,41 @@ class Population:
     # ===============================================================
     # ============== HYPER-MUTATION/HILL CLIMB METHODS ==============
     # ===============================================================
-    def solveWithNaiveHillClimb(self, printGenerations=True, drawing=True, drawLabels=False, isGraphing=True) -> FlowNetworkSolution:
+    def solveWithNaiveHillClimb(self, printGenerations=True, drawing=True, drawLabels=False, isGraphing=True,
+                                runID="") -> FlowNetworkSolution:
         """Solves the population with a naive hill climb method"""
         # Initialize Population and Solve
+        startTime = datetime.now()
         self.initializePopulation()
         self.solvePopulation()
-        generation = 0
         if isGraphing is True:
             self.computeEvolutionStatistics()
+        self.currentGeneration = 1
+        self.logGenerationTimestamp(startTime)
         # Execute Hill Climb
         while self.isTerminated is not True:
+            print("Starting Generation " + str(self.currentGeneration) + "...")
             # Execute Hill Climb and Solve
             self.naiveHillClimb()
             self.solvePopulation()
             # Update Current Best Individual and Evaluate Termination
             bestIndividual = self.getMostFitIndividual()
-            self.evaluateTermination(generation, bestIndividual.trueCost)
+            self.evaluateTermination(self.currentGeneration, bestIndividual.trueCost)
             # Compute Statistics
             if isGraphing is True:
                 self.computeEvolutionStatistics()
             # Visualize & Print
             if printGenerations is True:
-                print("Generation = " + str(generation) + "\tBest Individual = " + str(
+                print("Generation = " + str(self.currentGeneration) + "\tBest Individual = " + str(
                     bestIndividual.id) + "\tFitness = " + str(round(bestIndividual.trueCost, 2)))
             if drawing is True:
-                self.visualizeBestIndividual(labels=drawLabels, leadingText="HC_Gen" + str(generation) + "_")
-            generation += 1
+                self.visualizeBestIndividual(labels=drawLabels,
+                                             leadingText="HC_Gen" + str(self.currentGeneration) + "_")
+            self.currentGeneration += 1
+            self.logGenerationTimestamp(startTime)
         # Plot Statistics
         if isGraphing is True:
-            self.plotEvolutionStatistics()
+            self.plotEvolutionStatistics(runID=runID)
         # Return Best Solution Discovered
         return self.bestKnownSolution
 
