@@ -5,7 +5,6 @@ GENERAL ARCHITECTURE/REPO:
 # TODO - Continue to build out the README with documentation
 # TODO - Add unit and integration tests
 # TODO - Break out GA operators as interfaces via a strategy pattern
-# TODO - Delete unnecessary code (i.e. penalty term on solvers, 1/cap initialization strategy, etc.)
 # ASK - Would any major improvements in speed results from adding parallelism to solve a generation/tune over populations?
 # ASK - Would anything major be gained by going to the lower level CPLEX library instead of docplex?
 
@@ -23,6 +22,7 @@ ALPHA GENETIC ALGORITHM:
 # TODO - Add a strategy to log the best known individual and prevent its alpha table from ever being overwritten (thus making the population strictly convergent)
 # TODO - Implement nudge-based mutations
 # TODO - Revise the daemon update to be a true local search (i.e. iteratively update based on the personal/global median until improvements are no longer made)
+# TODO - Revise AlphaSolverCPLEX to be robust to key errors in the solution values dict returned by CPLEX (see run_tuneManyDimOptArcs.py)
 # ASK - Should the topological-based operators (i.e. crossover and mutation based on selected paths/pathlets) be revisited?
 # NOTE - See below for proposed pseudocode of how to compute pathlets:
     >> On a copy of the network:
@@ -35,6 +35,7 @@ ALPHA GENETIC ALGORITHM:
 
 GA EXPERIMENTS:
 =====================================
+# TODO - Clean-up the GAvsNaive experiment so that it can output data to a CSV
 # TODO - Collect data on the number of fitness evaluations used to solve the GA and MILP and use that as a comparison metric
 # TODO - Modify MILP class to build model on initialization, then clear solution values and resolve in the HP tuner (thus reducing the time wasted rebuilding the same model)
 # TODO - Measure population diversity over evolution at genotypic (not just the phenotypic) level

@@ -112,23 +112,23 @@ class HyperparamTuner:
                 if self.isDaemonUsed is True:
                     self.conductGridSearchWithDaemon(isOneDimAlpha=True, isArcOptimized=True)
                 else:
-                    self.conductGridSearchWithOutDaemon(isOneDimAlpha=True, isArcOptimized=True)
+                    self.conductGridSearchWithoutDaemon(isOneDimAlpha=True, isArcOptimized=True)
             if self.tuneNonOptimizedArcs is True:
                 if self.isDaemonUsed is True:
                     self.conductGridSearchWithDaemon(isOneDimAlpha=True, isArcOptimized=False)
                 else:
-                    self.conductGridSearchWithOutDaemon(isOneDimAlpha=True, isArcOptimized=False)
+                    self.conductGridSearchWithoutDaemon(isOneDimAlpha=True, isArcOptimized=False)
         if self.tuneManyDimAlpha is True:
             if self.tuneOptimizedArcs is True:
                 if self.isDaemonUsed is True:
                     self.conductGridSearchWithDaemon(isOneDimAlpha=False, isArcOptimized=True)
                 else:
-                    self.conductGridSearchWithOutDaemon(isOneDimAlpha=False, isArcOptimized=True)
+                    self.conductGridSearchWithoutDaemon(isOneDimAlpha=False, isArcOptimized=True)
             if self.tuneNonOptimizedArcs is True:
                 if self.isDaemonUsed is True:
                     self.conductGridSearchWithDaemon(isOneDimAlpha=False, isArcOptimized=False)
                 else:
-                    self.conductGridSearchWithOutDaemon(isOneDimAlpha=False, isArcOptimized=False)
+                    self.conductGridSearchWithoutDaemon(isOneDimAlpha=False, isArcOptimized=False)
         totalTuningRuntime = datetime.now() - startTime
         totalTuningMinutes = totalTuningRuntime.seconds/60
         self.writeRowToCSV(["Total Tuning Runtime (in min):", totalTuningMinutes])
@@ -202,7 +202,7 @@ class HyperparamTuner:
                                                                                             thisRunData = tunerRun.solveGraphWithoutPrints()
                                                                                             self.writeRowToCSV(thisRunData)
 
-    def conductGridSearchWithOutDaemon(self, isOneDimAlpha: bool, isArcOptimized: bool) -> None:
+    def conductGridSearchWithoutDaemon(self, isOneDimAlpha: bool, isArcOptimized: bool) -> None:
         """Completes the grid search of the hyperparams with the given n-Dim alpha and arc optimization settings, not searching daemon HPs"""
         # Iterate over all graphs, each for n runs
         for graphName in self.inputGraphs:

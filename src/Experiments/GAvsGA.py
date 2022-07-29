@@ -13,8 +13,8 @@ from src.Graph.CandidateGraph import CandidateGraph
 class GAvsGA:
     """Class that solves a single graph using the two alpha-genetic populations for comparison"""
 
-    def __init__(self, inputGraphName: str, isPop1OneDimAlpha=True, isPop1ArcOptimized=True, isPop1Penalized=True,
-                 isPop2OneDimAlpha=True, isPop2ArcOptimized=True, isPop2Penalized=False,
+    def __init__(self, inputGraphName: str, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
+                 isPop2OneDimAlpha=True, isPop2ArcOptimized=True,
                  isDrawing=True, isLabeling=True, isGraphing=True):
         """Constructor of a GAvsGA instance"""
         # Graph solver options
@@ -34,8 +34,7 @@ class GAvsGA:
         # Alpha-GA population one attribute & hyperparameters
         self.geneticPopOne: Population = Population(self.graph, self.minTargetFlow,
                                                     isOneDimAlphaTable=isPop1OneDimAlpha,
-                                                    isOptimizedArcSelections=isPop1ArcOptimized,
-                                                    isPenalizedObjective=isPop1Penalized)
+                                                    isOptimizedArcSelections=isPop1ArcOptimized)
         self.geneticPopOne.setPopulationHyperparams(populationSize=20,
                                                  numGenerations=40,
                                                  terminationMethod="setGenerations")
@@ -60,8 +59,7 @@ class GAvsGA:
         # Alpha-GA population two attribute & hyperparameters
         self.geneticPopTwo: Population = Population(self.graph, self.minTargetFlow,
                                                     isOneDimAlphaTable=isPop2OneDimAlpha,
-                                                    isOptimizedArcSelections=isPop2ArcOptimized,
-                                                    isPenalizedObjective=isPop2Penalized)
+                                                    isOptimizedArcSelections=isPop2ArcOptimized)
         self.geneticPopTwo.setPopulationHyperparams(populationSize=20,
                                                     numGenerations=40,
                                                     terminationMethod="setGenerations")
@@ -146,7 +144,7 @@ class GAvsGA:
         plt.close(fig)
 
     def saveOutputAsCSV(self) -> None:
-        """Writes all of the output data to disc as a CSV file"""
+        """Writes the output data to disc as a CSV file"""
         print("\nWriting output to disc as '" + self.runID + ".csv'...")
         self.createCSV()
         self.writeRowToCSV(["POPULATION ONE"])

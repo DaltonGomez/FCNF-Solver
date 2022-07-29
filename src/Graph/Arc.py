@@ -8,7 +8,7 @@ class Arc:
                  variableCost: float):
         """Constructor of an arc instance.
         Edges are unidirectional connections between two nodes.
-        Several unidirectional arcs can span the same edge, each with their own capacity."""
+        Several unidirectional arcs may span the same edge, each with their own capacity."""
         # Arc attributes
         self.numID: int = numID  # Unique identifier of the arc
         self.edgeID: Tuple[int, int] = edgeID  # Tuple representing the arc the edge spans, given as (fromNodeID, toNodeID)

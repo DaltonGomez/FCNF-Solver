@@ -10,7 +10,7 @@ cd Repos/FCNF-Solver/
 python3 run_tuneManyDimOptArcs.py
 """
 
-# TODO - AlphaSolverCPLEX throws KEY ERROR- Needs to be addressed before confidently running this script
+# TODO - AlphaSolverCPLEX throws KEY_ERROR-Needs to be addressed before confidently running this script
 if __name__ == "__main__":
     # Input graph and tuner object w/ options
     inputGraphs = [

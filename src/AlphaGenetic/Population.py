@@ -21,7 +21,7 @@ class Population:
     # ============== CONSTRUCTOR ==============
     # =========================================
     def __init__(self, graph: CandidateGraph, minTargetFlow: float, populationSize=10, numGenerations=10,
-                 isOneDimAlphaTable=True, isOptimizedArcSelections=True, isPenalizedObjective=False):
+                 isOneDimAlphaTable=True, isOptimizedArcSelections=True):
         """Constructor of a Population instance"""
         # Input Attributes
         self.graph: CandidateGraph = graph  # Input candidate graph instance to be solved
@@ -31,13 +31,12 @@ class Population:
         self.currentGeneration: int = 0  # Tracks generation number during evolution
         self.solver: AlphaSolverCPLEX = AlphaSolverCPLEX(self.graph, self.minTargetFlow,
                                                        isOneDimAlphaTable=isOneDimAlphaTable,
-                                                       isOptimizedArcSelections=isOptimizedArcSelections,
-                                                       isPenalizedObjective=isPenalizedObjective)  # Solver object, which pre-builds variables and constraints once on initialization
+                                                       isOptimizedArcSelections=isOptimizedArcSelections)  # Solver object, which pre-builds variables and constraints once on initialization
         self.generationTimestamps: List[float] = []  # List of timestamps, in seconds after evolution start, for each generation
         self.isTerminated: bool = False  # Boolean indicating if the termination criteria has been reached
         self.bestKnownCost: float = sys.maxsize  # Holds the true cost of the best solution discovered during the evolution
         self.bestKnownAlphas: ndarray = np.array(0, dtype='f')  # Holds the alpha values of the best solution discovered during the evolution
-        self.bestKnownSolution = None  # Holds the best (i.e. lowest cost) solution discovered during the evolution
+        self.bestKnownSolution = None  # Holds the best (i.e. minimum cost) solution discovered during the evolution
 
         # =======================
         # GA HYPERPARAMETERS
@@ -269,12 +268,6 @@ class Population:
                 thisEdgesAlphaValue = self.getAlphaValue()
                 for cap in range(self.graph.numArcsPerEdge):
                     tempEdge.append(thisEdgesAlphaValue)
-            elif self.initializationStrategy == "reciprocalCap":
-                # ASK - Does the reciprocalCap initialization strategy have any merit? I don't think so!
-                # TODO - Remove the reciprocalCap initialization strategy
-                for cap in range(self.graph.numArcsPerEdge):
-                    thisArcsAlphaValue = self.getReciprocalOfMinCap(cap)
-                    tempEdge.append(thisArcsAlphaValue)
             else:
                 print("ERROR - INVALID INITIALIZATION STRATEGY!!!")
             tempAlphaValues.append(tempEdge)
@@ -296,15 +289,6 @@ class Population:
         if randomGene < 0.0:
             randomGene = 0.0
         return randomGene
-
-    def getReciprocalOfMinCap(self, arcIndex: int) -> float:
-        """Returns the reciprocal of the lower bound of the capacity for the arc size"""
-        # If the arc is the smallest, return an arbitrarily large number
-        if arcIndex == 0:
-            return 100
-        # Else return the reciprocal of the capacity just below this arc
-        else:
-            return 1 / (self.graph.possibleArcCapsArray[arcIndex-1] + 0.01)
 
     # =============================================
     # ============== RANKING METHODS ==============
@@ -870,6 +854,6 @@ class Population:
         individual.resetOutputNetwork()
 
     def hypermutatePopulation(self) -> None:
-        """Reinitializes the entire population (i.e. an extinction event with a brand new population spawned)"""
+        """Reinitializes the entire population (i.e. an extinction event with a brand-new population spawned)"""
         for individualNum in range(len(self.population)):
             self.hypermutateIndividual(individualNum)

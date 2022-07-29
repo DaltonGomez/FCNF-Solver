@@ -275,7 +275,7 @@ class AlphaSolverPDLP:
                 for cap in range(self.graph.numArcsPerEdge):
                     # Initialize all dictionary values with zero
                     arcFlows[(edge, cap)] = 0
-                # Update largest capacity value for this edge
+                # Update maximum capacity value for this edge
                 thisFlow = self.solver.LookupVariable("a_" + str(edge) + "_" + str(-1)).SolutionValue()
                 arcFlows[(edge, largestCapIndex)] = thisFlow
         return arcFlows

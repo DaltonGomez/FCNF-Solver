@@ -169,7 +169,7 @@ class GAvsMILP:
         plt.close(fig)
 
     def saveOutputAsCSV(self) -> None:
-        """Writes all of the output data to disc as a CSV file"""
+        """Writes the output data to disc as a CSV file"""
         print("\nWriting output to disc as '" + self.runID + ".csv'...")
         self.createCSV()
         if self.isSolvedWithGeneticAlg is True:

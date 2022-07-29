@@ -14,8 +14,8 @@ python3 run_gaVSga.py
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
     inputGraph = "huge_2"
-    gaVSga = GAvsGA(inputGraph, isPop1OneDimAlpha=True, isPop1ArcOptimized=True, isPop1Penalized=False,
-                    isPop2OneDimAlpha=True, isPop2ArcOptimized=True, isPop2Penalized=False,
+    gaVSga = GAvsGA(inputGraph, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
+                    isPop2OneDimAlpha=True, isPop2ArcOptimized=True,
                     isDrawing=True, isLabeling=True, isGraphing=True)
 
     # Alpha-GA population one hyperparameter setters

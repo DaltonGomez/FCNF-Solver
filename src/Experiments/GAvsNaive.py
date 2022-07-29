@@ -41,10 +41,10 @@ class GAvsNaive:
                                                  numGenerations=40,
                                                  terminationMethod="setGenerations")
         self.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
-                                                 initializationDistribution="gaussian",
-                                                 initializationParams=[500.0, 100.0])
+                                                     initializationDistribution="gaussian",
+                                                     initializationParams=[500.0, 100.0])
         self.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                            tournamentSize=5)
+                                                          tournamentSize=5)
         self.geneticPop.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                                 crossoverRate=1.0,
                                                 crossoverAttemptsPerGeneration=1,
@@ -53,13 +53,13 @@ class GAvsNaive:
                                                mutationRate=0.20,
                                                perArcEdgeMutationRate=0.25)
         self.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.10,
-                                                      daemonStrategy="globalMedian", daemonStrength=0.10)
+                                             daemonStrategy="globalMedian", daemonStrength=0.10)
         self.gaSolution = None
 
         # Naive hillclimb attribute
         self.naivePop: Population = Population(self.graph, self.minTargetFlow,
-                                                 isOneDimAlphaTable=isOneDimAlphaTable,
-                                                 isOptimizedArcSelections=isOptimizedArcSelections)
+                                               isOneDimAlphaTable=isOneDimAlphaTable,
+                                               isOptimizedArcSelections=isOptimizedArcSelections)
         self.geneticPop.setPopulationHyperparams(populationSize=20,
                                                  numGenerations=40,
                                                  terminationMethod="setGenerations")
@@ -79,8 +79,8 @@ class GAvsNaive:
             gaStartTime = datetime.now()
             # Evolve the Alpha-GA population
             self.gaSolution = self.geneticPop.evolvePopulation(printGenerations=True, drawing=self.isDrawing,
-                                                          drawLabels=self.isLabeling, isGraphing=self.isGraphing,
-                                                          runID=self.runID + "--GA")
+                                                               drawLabels=self.isLabeling, isGraphing=self.isGraphing,
+                                                               runID=self.runID + "--GA")
             print("\nGenetic Algorithm Complete!!!\nBest Solution Found = " + str(self.gaSolution.trueCost))
             # Draw if expected
             if self.isDrawing is True:
@@ -99,11 +99,13 @@ class GAvsNaive:
             print("\n============================================================================")
             # Timestamp and start the HC
             print("\n\nSolving the " + self.graphName + " graph with a naive-HC population of " +
-                  str(self.geneticPop.populationSize) + " for " + str(self.geneticPop.numGenerations) + " generations...\n")
+                  str(self.geneticPop.populationSize) + " for " + str(
+                self.geneticPop.numGenerations) + " generations...\n")
             naiveStartTime = datetime.now()
             self.naiveSolution = self.naivePop.solveWithNaiveHillClimb(printGenerations=True, drawing=self.isDrawing,
-                                                               drawLabels=self.isLabeling, isGraphing=self.isGraphing,
-                                                               runID=self.runID + "--HC")
+                                                                       drawLabels=self.isLabeling,
+                                                                       isGraphing=self.isGraphing,
+                                                                       runID=self.runID + "--HC")
             print("\nNaive Hill Climb Complete!!!\nBest Solution Found = " + str(self.naiveSolution.trueCost))
             # Draw if expected
             if self.isDrawing is True:
@@ -128,12 +130,17 @@ class GAvsNaive:
         fig = plt.figure()
         ax = fig.add_subplot()
         # Plot all data
-        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.convergenceStats, label="Most Fit GA Ind", color="g")
-        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.meanStats, label="Mean GA Fitness", color="b", linestyle="--")
-        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.medianStats, label="Median GA Fitness", color="c", linestyle="--")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.convergenceStats, label="Most Fit GA Ind",
+                color="g")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.meanStats, label="Mean GA Fitness", color="b",
+                linestyle="--")
+        ax.plot(self.geneticPop.generationTimestamps, self.geneticPop.medianStats, label="Median GA Fitness", color="c",
+                linestyle="--")
         ax.plot(self.naivePop.generationTimestamps, self.naivePop.convergenceStats, label="Most Fit HC Ind", color="r")
-        ax.plot(self.naivePop.generationTimestamps, self.naivePop.meanStats, label="Mean HC Fitness", color="y", linestyle=":")
-        ax.plot(self.naivePop.generationTimestamps, self.naivePop.medianStats, label="Median HC Fitness", color="m", linestyle=":")
+        ax.plot(self.naivePop.generationTimestamps, self.naivePop.meanStats, label="Mean HC Fitness", color="y",
+                linestyle=":")
+        ax.plot(self.naivePop.generationTimestamps, self.naivePop.medianStats, label="Median HC Fitness", color="m",
+                linestyle=":")
         # Add graph elements
         ax.set_title("GA Convergence Against Naive HC")
         ax.legend(loc=1)
@@ -142,7 +149,6 @@ class GAvsNaive:
         # Save timestamped plot
         plt.savefig(self.runID + ".png")
         plt.close(fig)
-
 
     # TODO - REVISE HERE DOWN FOR OUTPUTTING CSV FILE
     def saveOutputAsCSV(self) -> None:
@@ -238,7 +244,7 @@ class GAvsNaive:
 
     def buildNaiveDataRow(self) -> list:
         """Builds a list containing the solution details of the MILP formulation in CPLEX"""
-        gaGap = 1 - self.milpCplexSolver.getBestBound()/self.gaSolution.trueCost
+        gaGap = 1 - self.milpCplexSolver.getBestBound() / self.gaSolution.trueCost
         return [self.milpCplexSolver.getObjectiveValue(), self.milpCplexSolver.getCplexRuntime(),
                 self.milpCplexSolver.getTimeLimit(), self.milpCplexSolver.getCplexStatus(),
                 self.milpCplexSolver.getCplexStatusCode(), self.milpCplexSolver.getBestBound(),
@@ -269,7 +275,7 @@ class GAvsNaive:
     def buildSingleRowRunHeaders(self) -> list:
         """Builds the headers for a single row containing the data of the run"""
         headerRow = ["Run ID", "Graph Name", "Num Nodes", "Num Sources", "Num Sinks", "Num Edges",
-         "Num Arc Caps", "Target Flow", "is Src/Sink Capped?", "is Src/Sink Charged?"]
+                     "Num Arc Caps", "Target Flow", "is Src/Sink Capped?", "is Src/Sink Charged?"]
         if self.isSolvedWithGeneticAlg is True:
             headerRow.extend(self.buildGAHeader())
         if self.isSolvedWithMILP is True:
@@ -279,8 +285,8 @@ class GAvsNaive:
     def buildSingleRowRunData(self) -> list:
         """Builds a single row containing the data of the run"""
         dataRow = [self.runID, self.graphName, self.graph.numTotalNodes, self.graph.numSources, self.graph.numSinks,
-                         self.graph.numEdges, self.graph.numArcsPerEdge, self.minTargetFlow,
-                         self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged]
+                   self.graph.numEdges, self.graph.numArcsPerEdge, self.minTargetFlow,
+                   self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged]
         if self.isSolvedWithGeneticAlg is True:
             dataRow.extend(self.buildGAData())
         if self.isSolvedWithMILP is True:
