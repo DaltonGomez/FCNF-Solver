@@ -143,25 +143,25 @@ if __name__ == "__main__":
     multiGAvsMILP = MultiGAvsMILP(inputGraphs, runsPerGraph, isSolvedWithGeneticAlg=True,
                                     isOneDimAlphaTable=True, isOptimizedArcSelections=True,
                                     isSolvedWithMILP=True, isRace=True)
-    multiGAvsMILP.populationSize = 10
-    multiGAvsMILP.numGenerations = 10
+    multiGAvsMILP.populationSize = 20
+    multiGAvsMILP.numGenerations = 40
     multiGAvsMILP.terminationMethod = "setGenerations"
     multiGAvsMILP.initializationStrategy = "perEdge"
-    multiGAvsMILP.initializationDistribution = "digital"
-    multiGAvsMILP.initializationParams = [5.0, 100000.0]
+    multiGAvsMILP.initializationDistribution = "gaussian"
+    multiGAvsMILP.initializationParams = [500.0, 100.0]
     multiGAvsMILP.selectionMethod = "tournament"
-    multiGAvsMILP.tournamentSize = 4
-    multiGAvsMILP.crossoverMethod = "onePoint"
+    multiGAvsMILP.tournamentSize = 5
+    multiGAvsMILP.crossoverMethod = "twoPoint"
     multiGAvsMILP.crossoverRate = 1.0
     multiGAvsMILP.crossoverAttemptsPerGeneration = 1
     multiGAvsMILP.replacementStrategy = "replaceWeakestTwo"
     multiGAvsMILP.mutationMethod = "randomPerEdge"
-    multiGAvsMILP.mutationRate = 0.05
+    multiGAvsMILP.mutationRate = 0.20
     multiGAvsMILP.perArcEdgeMutationRate = 0.25
     multiGAvsMILP.isDaemonUsed = True
-    multiGAvsMILP.annealingConstant = 0.5
-    multiGAvsMILP.daemonStrategy = "globalMean"
-    multiGAvsMILP.daemonStrength = 1
+    multiGAvsMILP.annealingConstant = 0.10
+    multiGAvsMILP.daemonStrategy = "globalMedian"
+    multiGAvsMILP.daemonStrength = 0.10
 
     # Execute all runs
     multiGAvsMILP.runSolversOnAllGraphs()

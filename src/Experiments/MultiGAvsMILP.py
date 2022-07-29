@@ -26,24 +26,24 @@ class MultiGAvsMILP:
         self.isOneDimAlphaTable: bool = isOneDimAlphaTable
         self.isOptimizedArcSelections: bool = isOptimizedArcSelections
         self.populationSize: int = 20
-        self.numGenerations: int = 50
+        self.numGenerations: int = 40
         self.terminationMethod: str = "setGenerations"
         self.initializationStrategy: str = "perEdge"
-        self.initializationDistribution: str = "digital"
-        self.initializationParams: List[float] = [5.0, 100000.0]
+        self.initializationDistribution: str = "gaussian"
+        self.initializationParams: List[float] = [500.0, 100.0]
         self.selectionMethod: str = "tournament"
-        self.tournamentSize: int = 4
-        self.crossoverMethod: str = "onePoint"
+        self.tournamentSize: int = 5
+        self.crossoverMethod: str = "twoPoint"
         self.crossoverRate: float = 1.0
         self.crossoverAttemptsPerGeneration: int = 1
         self.replacementStrategy: str = "replaceWeakestTwo"
         self.mutationMethod: str = "randomPerEdge"
-        self.mutationRate: float = 0.05
+        self.mutationRate: float = 0.20
         self.perArcEdgeMutationRate: float = 0.25
         self.isDaemonUsed: bool = True
-        self.annealingConstant: float = 0.5
-        self.daemonStrategy: str = "globalMean"
-        self.daemonStrength: float = 1.0
+        self.annealingConstant: float = 0.10
+        self.daemonStrategy: str = "globalMedian"
+        self.daemonStrength: float = 0.10
 
     def runSolversOnAllGraphs(self) -> None:
         """Solves each graph the specified number of times and writes each run to a CSV"""

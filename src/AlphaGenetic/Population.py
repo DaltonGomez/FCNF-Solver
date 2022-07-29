@@ -56,21 +56,21 @@ class Population:
         self.initializationParams: List[float] = [500.0, 100.0]  # :param: range if uniform distribution, mu and sigma if Gaussian, low and high value if digital
         # Individual Selection HPs
         self.selectionMethod: str = "tournament"  # :param : "tournament", "roulette", "random"
-        self.tournamentSize: int = 3
+        self.tournamentSize: int = 5
         # Crossover HPs
-        self.crossoverMethod: str = "onePoint"  # :param : "onePoint", "twoPoint"
+        self.crossoverMethod: str = "twoPoint"  # :param : "onePoint", "twoPoint"
         self.crossoverRate: float = 1.0
         self.crossoverAttemptsPerGeneration: int = 1
         self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents", "replaceRandomTwo"
         # Mutation HPs
         self.mutationMethod: str = "randomPerEdge"  # :param : "randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"
-        self.mutationRate: float = 0.05
-        self.perArcEdgeMutationRate: float = 0.20
+        self.mutationRate: float = 0.20
+        self.perArcEdgeMutationRate: float = 0.25
         # Daemon HPs
         self.isDaemonUsed: bool = True
-        self.annealingConstant: float = 0.5
-        self.daemonStrategy: str = "globalMean"  # :param : "globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"
-        self.daemonStrength: float = 1.0
+        self.annealingConstant: float = 0.10
+        self.daemonStrategy: str = "globalMedian"  # :param : "globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"
+        self.daemonStrength: float = 0.10
 
         # =======================
         # EVOLUTION STATISTICS
@@ -83,7 +83,7 @@ class Population:
     # ====================================================
     # ============== HYPERPARAMETER SETTERS ==============
     # ====================================================
-    def setPopulationHyperparams(self, populationSize=10, numGenerations=10,
+    def setPopulationHyperparams(self, populationSize=20, numGenerations=40,
                                  terminationMethod="setGenerations", stagnationPeriod=5) -> None:
         """Sets the GA class field that dictates the range when randomly initializing/updating alpha values \n
         :param int populationSize: Number of individuals in the GA population
@@ -107,7 +107,7 @@ class Population:
         self.initializationDistribution = initializationDistribution
         self.initializationParams = initializationParams
 
-    def setIndividualSelectionHyperparams(self, selectionMethod="tournament", tournamentSize=3) -> None:
+    def setIndividualSelectionHyperparams(self, selectionMethod="tournament", tournamentSize=5) -> None:
         """Sets the GA attributes that dictate how the selection of individuals is carried out \n
         :param str selectionMethod: One of following: {"tournament", "roulette", "random"}
         :param int tournamentSize: Size of tournament subset used if selectionMethod = "tournament"
@@ -115,7 +115,7 @@ class Population:
         self.selectionMethod = selectionMethod
         self.tournamentSize = tournamentSize
 
-    def setCrossoverHyperparams(self, crossoverMethod="onePoint", crossoverRate=1.0,
+    def setCrossoverHyperparams(self, crossoverMethod="twoPoint", crossoverRate=1.0,
                                 crossoverAttemptsPerGeneration=1, replacementStrategy="replaceWeakestTwo") -> None:
         """Sets the GA attributes that dictate how the crossover of individuals is carried out \n
         :param str crossoverMethod: One of following: {"onePoint", "twoPoint"}
@@ -128,7 +128,7 @@ class Population:
         self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
         self.replacementStrategy = replacementStrategy
 
-    def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.05, perArcEdgeMutationRate=0.20) -> None:
+    def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.20, perArcEdgeMutationRate=0.25) -> None:
         """Sets the GA attributes that dictate how the mutation of individuals is carried out \n
         :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"}
         :param float mutationRate: Probability in [0,1] that an individual mutates
@@ -138,8 +138,8 @@ class Population:
         self.mutationRate = mutationRate
         self.perArcEdgeMutationRate = perArcEdgeMutationRate
 
-    def setDaemonHyperparams(self, isDaemonUsed=True, annealingConstant=0.5, daemonStrategy="globalMean",
-                             daemonStrength=1.0) -> None:
+    def setDaemonHyperparams(self, isDaemonUsed=True, annealingConstant=0.10, daemonStrategy="globalMedian",
+                             daemonStrength=0.10) -> None:
         """Sets the GA attributes that determine the behavior of the annealed daemon update \n
         :param bool isDaemonUsed: Boolean indicating if a daemon update is attempted
         :param float annealingConstant: Constant k in the annealing schedule t = k*gen/(gen + maxGen) - 2.0 = 1.0 proportion on the final generation

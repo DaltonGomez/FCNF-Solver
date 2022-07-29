@@ -18,23 +18,23 @@ if __name__ == "__main__":
                               isDrawing=True, isLabeling=False, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
-    sandboxSolver.geneticPop.setPopulationHyperparams(populationSize=10,
-                                             numGenerations=10,
+    sandboxSolver.geneticPop.setPopulationHyperparams(populationSize=20,
+                                             numGenerations=40,
                                              terminationMethod="setGenerations")
     sandboxSolver.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                  initializationDistribution="gaussian",
                                                  initializationParams=[500.0, 100.0])
     sandboxSolver.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                      tournamentSize=3)
+                                                      tournamentSize=5)
     sandboxSolver.geneticPop.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                             crossoverRate=1.0,
-                                            crossoverAttemptsPerGeneration=2,
+                                            crossoverAttemptsPerGeneration=1,
                                             replacementStrategy="replaceWeakestTwo")
     sandboxSolver.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
                                            mutationRate=0.20,
                                            perArcEdgeMutationRate=0.25)
-    sandboxSolver.geneticPop.setDaemonHyperparams(isDaemonUsed=False, annealingConstant=0.5,
-                                                  daemonStrategy="personalMedian", daemonStrength=5)
+    sandboxSolver.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.10,
+                                                  daemonStrategy="globalMedian", daemonStrength=0.10)
     # Solve the graph
     sandboxSolver.solveGraph()
 

@@ -19,20 +19,20 @@ if __name__ == "__main__":
                         isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
-    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=25,
-                                                 numGenerations=25,
+    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=20,
+                                                 numGenerations=40,
                                                  terminationMethod="setGenerations")
     gaVSmilp.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                      initializationDistribution="gaussian",
                                                      initializationParams=[500.0, 100.0])
     gaVSmilp.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                          tournamentSize=3)
+                                                          tournamentSize=5)
     gaVSmilp.geneticPop.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                                 crossoverRate=1.0,
-                                                crossoverAttemptsPerGeneration=2,
+                                                crossoverAttemptsPerGeneration=1,
                                                 replacementStrategy="replaceWeakestTwo")
     gaVSmilp.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                               mutationRate=0.10,
+                                               mutationRate=0.20,
                                                perArcEdgeMutationRate=0.25)
     gaVSmilp.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.10,
                                              daemonStrategy="globalMedian", daemonStrength=0.10)

@@ -41,22 +41,22 @@ class GAvsMILP:
         self.geneticPop: Population = Population(self.graph, self.minTargetFlow,
                          isOneDimAlphaTable=isOneDimAlphaTable, isOptimizedArcSelections=isOptimizedArcSelections)
         self.geneticPop.setPopulationHyperparams(populationSize=20,
-                                                 numGenerations=50,
+                                                 numGenerations=40,
                                                  terminationMethod="setGenerations")
         self.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
-                                                 initializationDistribution="digital",
-                                                 initializationParams=[0.0, 100000.0])
+                                                 initializationDistribution="gaussian",
+                                                 initializationParams=[500.0, 100.0])
         self.geneticPop.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                            tournamentSize=4)
-        self.geneticPop.setCrossoverHyperparams(crossoverMethod="onePoint",
+                                                            tournamentSize=5)
+        self.geneticPop.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                                 crossoverRate=1.0,
                                                 crossoverAttemptsPerGeneration=1,
                                                 replacementStrategy="replaceWeakestTwo")
         self.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                               mutationRate=0.05,
+                                               mutationRate=0.20,
                                                perArcEdgeMutationRate=0.25)
-        self.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.5,
-                                                      daemonStrategy="globalMean", daemonStrength=1)
+        self.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.10,
+                                                      daemonStrategy="globalMedian", daemonStrength=0.10)
         self.gaSolution = None
 
         # MILP CPLEX attribute
