@@ -1,38 +1,28 @@
 TODOS & NOTES:
 
-GENERAL/NETWORK/SOLVERS:
+GENERAL ARCHITECTURE/REPO:
 =====================================
 # TODO - Continue to build out the README with documentation
 # TODO - Add unit and integration tests
-# TODO - Modify MILP class to build model on initialization, then add a method to clear solution values and use that in the HP tuner (thus reducing the time wasted rebuilding the same model)
-# DONE - Optimize redundant data structures and algorithm calls (at least the major optimizations)
-# DONE - Implement Alpha-Relaxed GA solver in CPLEX
-# DONE - Update MILP solver to report gaps, bounds, and include a runtime listener
-# ASK - Would any major improvements in speed results from adding parallelism to solve a generation?
+# TODO - Break out GA operators as interfaces via a strategy pattern
+# TODO - Delete unnecessary code (i.e. penalty term on solvers, 1/cap initialization strategy, etc.)
+# ASK - Would any major improvements in speed results from adding parallelism to solve a generation/tune over populations?
 # ASK - Would anything major be gained by going to the lower level CPLEX library instead of docplex?
+
+
+NETWORK GENERATION/VISUALIZATION:
+=====================================
+# TODO - Mess around in PyVis source code to further improve how the visualizations render
+# TODO - Figure out why labels don't render on Dell/Ubuntu when making PyVis graphs
 # ASK - Should a class be added to read in real-world SimCCS datasets? What would that require?
 # ASK - Should the source/sink capacity ranges be modified to better fit real-world data?
 
 
 ALPHA GENETIC ALGORITHM:
 =====================================
-# TODO - Figure out why labels don't render on Dell/Ubuntu when making PyVis graphs
-# NOTE - Mess around in PyVis source code to further improve how the visualizations render
-# TODO - Add a strategy to log the best known individual and prevent its alpha table from ever being overwritten
-# TODO - Break out GA operators as interfaces via a strategy pattern
-# TODO - Implement nudge mutations
-# TODO - Measure population diversity over evolution at genotypic (not just the phenotypic) level
-# TODO - Parallelize the hyperparameter tuning experiment
-# DONE - Implement basic GA population and operators
-# DONE - Reconsider how the daemon updates via Gaussian nudge
-# DONE - If initializing all arcs within an edge to be the same alpha values, reduce the alpha table to 1-dimensional to improve solver speed
-# DONE - Add in basic population statistics tracking and graphing
-# DONE - Build out tuning experiments
-# ASK - What if the chromosome was made up of two types of genes, alpha and beta, that discounted the fixed cost and variable cost, respectively?
-# ASK - Would a random search strategy work better than grid search for hyperparameter tuning?
-# ASK - Would a brief, interrupted run of CPLEX-MILP generating initial alpha values for the population improve overall performance?
-# ASK - Should mutation rate also be annealed over time?
-# ASK - What information could be gained from a sensitivity/perturbation analysis on alpha values?
+# TODO - Add a strategy to log the best known individual and prevent its alpha table from ever being overwritten (thus making the population strictly convergent)
+# TODO - Implement nudge-based mutations
+# TODO - Revise the daemon update to be a true local search (i.e. iteratively update based on the personal/global median until improvements are no longer made)
 # ASK - Should the topological-based operators (i.e. crossover and mutation based on selected paths/pathlets) be revisited?
 # NOTE - See below for proposed pseudocode of how to compute pathlets:
     >> On a copy of the network:
@@ -41,6 +31,19 @@ ALPHA GENETIC ALGORITHM:
                 >> collapseEdges(node.edges)
                 >> remove(node)
             >> return pathlet graph as (remaining nodes, collapsed edges, dict[collapsedEdge] = listOfOriginalEdges)
+
+
+GA EXPERIMENTS:
+=====================================
+# TODO - Collect data on the number of fitness evaluations used to solve the GA and MILP and use that as a comparison metric
+# TODO - Modify MILP class to build model on initialization, then clear solution values and resolve in the HP tuner (thus reducing the time wasted rebuilding the same model)
+# TODO - Measure population diversity over evolution at genotypic (not just the phenotypic) level
+# TODO - Revise the "naive hillclimb" approach to be a Gaussian nudge rather than hypermutation
+# ASK - Would a random search strategy work better than grid search for hyperparameter tuning?
+# ASK - What information could be gained from a sensitivity/perturbation analysis on alpha values?
+# ASK - Would a brief, interrupted run of CPLEX-MILP generating initial alpha values for the population improve overall performance?
+# ASK - Should mutation rate also be annealed over time?
+# ASK - Should other metahueristic strategies (e.g. binary GA, differential evolution, etc.) be implemented for experimentation
 
 
 ANT COLONY OPTIMIZATION ALGORITHM:
@@ -61,13 +64,9 @@ ANT COLONY OPTIMIZATION ALGORITHM:
 # ASK - Should "goodness" equation be, G(e) = cap(e) / (FC(e) + VC(e) * cap(e)), as this would be flow/$ if the pipeline was at capacity?
 
 
-GA/ACO INTEGRATION:
+GA/ACO INTEGRATION & OTHER FUTURE IDEAS:
 =====================================
 # NOTE - Use the ants to determine paths/trim input graph and then use the GA to refine, potentially as an iterative process until convergence.
-
-
-OTHER FUTURE IDEAS:
-=====================================
 # NOTE - Use the dynamic nature of ACO for the optimal sink location within a feasible geologic region (i.e. polygon)
 # NOTE - Use the dynamic nature of ACO for the sink capacity uncertainty
 
