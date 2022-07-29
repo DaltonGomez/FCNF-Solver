@@ -165,7 +165,7 @@ class MILPsolverCPLEX:
         """Solves the MILP model in CPLEX"""
         self.model.solve()
         self.isRun = True
-        self.verifyTrueCost()
+        # self.verifyTrueCost()
         self.extractRuntimeData()
 
     def verifyTrueCost(self) -> float:

@@ -14,7 +14,7 @@ python3 run_milp.py
 """
 
 if __name__ == "__main__":
-    inputGraph = "medium_6.p"
+    inputGraph = "medium_7.p"
     graphInstance = CandidateGraph()
     graphInstance = graphInstance.loadCandidateGraph(inputGraph)
     minTargetFlow = graphInstance.totalPossibleDemand
@@ -25,3 +25,6 @@ if __name__ == "__main__":
     milpSoln = milpSolver.writeSolution()
     milpVis = SolutionVisualizer(milpSoln)
     milpVis.drawLabeledSolution()
+    milpSoln.saveSolution()
+    print("\n\nMILP formulation solved optimally! Solution written to disc...")
+    print("Total CPLEX runtime: " + str(milpSolver.getCplexRuntime()) + " seconds")
