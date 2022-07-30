@@ -31,14 +31,14 @@ if __name__ == "__main__":
     for n in range(numGraphs):
         # Input parameters
         name = "__NAME__" + str(n)
-        numNodes = 500
-        numSources = 50
-        numSinks = 50
+        numNodes = 100
+        numSources = 15
+        numSinks = 15
         # Cluster parameters
-        minSourceClusters = 4
-        sourcesPerClusterRange = (7, 14)
-        minSinkClusters = 4
-        sinksPerClusterRange = (7, 14)
+        minSourceClusters = 3
+        sourcesPerClusterRange = (3, 7)
+        minSinkClusters = 3
+        sinksPerClusterRange = (3, 7)
         clusterRadiusRange = (10, 20)
         # Source/sink cap ranges
         isSrcSinkCapacitated = True

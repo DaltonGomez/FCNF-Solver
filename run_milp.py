@@ -14,7 +14,7 @@ python3 run_milp.py
 """
 
 if __name__ == "__main__":
-    inputGraph = "medium_7.p"
+    inputGraph = "large_3.p"
     graphInstance = CandidateGraph()
     graphInstance = graphInstance.loadCandidateGraph(inputGraph)
     minTargetFlow = graphInstance.totalPossibleDemand
