@@ -1,1 +1,9 @@
 SOLUTION NOTES
+==================
+
+
+OPT SOLVE TIMES:
+
+medium_7.p  ==> 1.2577 hours (Optimally)
+
+large_3.p ==> 20.1 hours (Suboptimal 1.71% Gap)
