@@ -172,7 +172,7 @@ class Population:
             self.doMutations()
             self.solvePopulation()
             # Apply a daemon update if used
-            if self.isDaemonUsed is True:
+            if self.isDaemonUsed is True and self.currentGeneration != 1:
                 self.enactDaemon()
             # Update current best individual and evaluate termination
             bestIndividual = self.getMostFitIndividual()
@@ -496,13 +496,12 @@ class Population:
     def nudgePerArcMutation(self, individualID: int) -> None:
         """Iterates over all (edge, arc) pairs and nudges if the mutationStrength rate rng rolls"""
         random.seed()
-        mutationVarianceMultiplier = 0.05  # TODO - Decide if the multiplier value "works"
         individual = self.population[individualID]
         for edge in range(self.graph.numEdges):
             for arcIndex in range(self.graph.numArcsPerEdge):
-                if random.random() < self.mutationStrength:
+                if random.random() < self.mutationRate:
                     currentAlpha = individual.alphaValues[edge][arcIndex]
-                    nudgeVariance = currentAlpha * mutationVarianceMultiplier
+                    nudgeVariance = currentAlpha * self.mutationStrength
                     nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
                     while nudgedAlpha < 0.0:
                         nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
@@ -512,21 +511,20 @@ class Population:
     def nudgePerEdgeMutation(self, individualID: int) -> None:
         """Iterates over all edges and nudges at all arcs if the mutationStrength rate rng rolls"""
         random.seed()
-        mutationVarianceMultiplier = 0.05  # TODO - Decide if the multiplier value "works"
         individual = self.population[individualID]
         for edge in range(self.graph.numEdges):
-            if random.random() < self.mutationStrength:
+            if random.random() < self.mutationRate:
                 if self.initializationStrategy == "perArc":
                     for arcIndex in range(self.graph.numArcsPerEdge):
                         currentAlpha = individual.alphaValues[edge][arcIndex]
-                        nudgeVariance = currentAlpha * mutationVarianceMultiplier
+                        nudgeVariance = currentAlpha * self.mutationStrength
                         nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
                         while nudgedAlpha < 0.0:
                             nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
                         individual.alphaValues[edge][arcIndex] = nudgedAlpha
                 elif self.initializationStrategy == "perEdge":
                     currentAlpha = individual.alphaValues[edge][0]
-                    nudgeVariance = currentAlpha * mutationVarianceMultiplier
+                    nudgeVariance = currentAlpha * self.mutationStrength
                     nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
                     while nudgedAlpha < 0.0:
                         nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
@@ -539,13 +537,21 @@ class Population:
         random.seed()
         individual = self.population[individualID]
         for edge in range(self.graph.numEdges):
-            for arcIndex in range(self.graph.numArcsPerEdge):
-                if random.random() < self.mutationStrength:
+            if self.initializationStrategy == "perArc":
+                for arcIndex in range(self.graph.numArcsPerEdge):
                     currentAlpha = individual.alphaValues[edge][arcIndex]
                     nudgeVariance = currentAlpha * self.mutationStrength
                     nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
                     while nudgedAlpha < 0.0:
                         nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                    individual.alphaValues[edge][arcIndex] = nudgedAlpha
+            elif self.initializationStrategy == "perEdge":
+                currentAlpha = individual.alphaValues[edge][0]
+                nudgeVariance = currentAlpha * self.mutationStrength
+                nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                while nudgedAlpha < 0.0:
+                    nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                for arcIndex in range(self.graph.numArcsPerEdge):
                     individual.alphaValues[edge][arcIndex] = nudgedAlpha
         individual.resetOutputNetwork()
 

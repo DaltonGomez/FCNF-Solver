@@ -13,7 +13,7 @@ python3 run_gaVSga.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "massive_8"
+    inputGraph = "massive_2"
     gaVSga = GAvsGA(inputGraph, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
                     isPop2OneDimAlpha=True, isPop2ArcOptimized=True,
                     isDrawing=False, isLabeling=True, isGraphing=True)
@@ -31,8 +31,8 @@ if __name__ == "__main__":
                                                  crossoverRate=1.0,
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
-    gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                                mutationRate=0.10,
+    gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="nudgeAll",
+                                                mutationRate=0.20,
                                                 mutationStrength=0.25)
     gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
@@ -51,10 +51,10 @@ if __name__ == "__main__":
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                                mutationRate=0.10,
+                                                mutationRate=0.20,
                                                 mutationStrength=0.25)
-    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=False, daemonAnnealingRate=0.25,
-                                              daemonStrategy="personalMedian", daemonStrength=0.10)
+    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
+                                              daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Solve the graph
     gaVSga.solveGraph()
