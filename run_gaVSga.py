@@ -13,10 +13,10 @@ python3 run_gaVSga.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "huge_2"
+    inputGraph = "massive_2"
     gaVSga = GAvsGA(inputGraph, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
                     isPop2OneDimAlpha=True, isPop2ArcOptimized=True,
-                    isDrawing=True, isLabeling=True, isGraphing=True)
+                    isDrawing=False, isLabeling=True, isGraphing=True)
 
     # Alpha-GA population one hyperparameter setters
     gaVSga.geneticPopOne.setPopulationHyperparams(populationSize=20,
@@ -32,9 +32,9 @@ if __name__ == "__main__":
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                                mutationRate=0.20,
+                                                mutationRate=0.10,
                                                 perArcEdgeMutationRate=0.25)
-    gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.10,
+    gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.50,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Alpha-GA population two hyperparameter setters
@@ -50,11 +50,11 @@ if __name__ == "__main__":
                                                  crossoverRate=1.0,
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
-    gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerArc",
-                                                mutationRate=0.20,
+    gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
+                                                mutationRate=0.10,
                                                 perArcEdgeMutationRate=0.25)
-    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.10,
-                                              daemonStrategy="globalMedian", daemonStrength=0.10)
+    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.50,
+                                              daemonStrategy="personalMedian", daemonStrength=0.10)
 
     # Solve the graph
     gaVSga.solveGraph()

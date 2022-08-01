@@ -596,18 +596,30 @@ class Population:
         # NOTE - All current daemon methods only work with the perEdge initialization strategy
         # TODO - Update to account for other initialization strategies
         print("Doing a daemon update to individual " + str(individualID) + "...")
-        if self.daemonStrategy == "globalBinary":
-            self.applyGlobalBinaryDaemon(individualID)
-        elif self.daemonStrategy == "globalMean":
-            self.applyGlobalMeanDaemon(individualID)
-        elif self.daemonStrategy == "globalMedian":
-            self.applyGlobalMedianDaemon(individualID)
-        elif self.daemonStrategy == "personalMean":
-            self.applyPersonalMeanDaemon(individualID)
-        elif self.daemonStrategy == "personalMedian":
-            self.applyPersonalMedianDaemon(individualID)
-        else:
-            print("ERROR - INVALID DAEMON STRATEGY!!!")
+        currentIndividual = self.population[individualID]
+        while True:
+            if self.daemonStrategy == "globalBinary":
+                newIndividual = self.tryGlobalBinaryDaemon(individualID)
+            elif self.daemonStrategy == "globalMean":
+                newIndividual = self.tryGlobalMeanDaemon(individualID)
+            elif self.daemonStrategy == "globalMedian":
+                newIndividual = self.tryGlobalMedianDaemon(individualID)
+            elif self.daemonStrategy == "personalMean":
+                newIndividual = self.tryPersonalMeanDaemon(individualID)
+            elif self.daemonStrategy == "personalMedian":
+                newIndividual = self.tryPersonalMedianDaemon(individualID)
+            else:
+                print("ERROR - INVALID DAEMON STRATEGY!!!")
+                break
+            # Add the updated individual into the population if improvement seen
+            if newIndividual.trueCost < currentIndividual.trueCost:
+                print("Daemon update improved individual " + str(individualID) + "- Applying another...")
+                currentIndividual = newIndividual
+                currentIndividual.id = individualID
+                self.population[individualID] = currentIndividual
+            # Otherwise exit the daemon update for that individual
+            else:
+                break
 
     def getAnnealedDaemonRate(self) -> float:
         """Returns a proportion (in [0, 1] if k=2) given the annealing schedule t = k*gen/(gen + maxGen)"""
@@ -641,9 +653,9 @@ class Population:
                 nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
         return nudgedAlpha
 
-    def applyGlobalBinaryDaemon(self, individualID: int) -> None:
-        """Applies a daemon update that nudges alpha values for arcs opened in the global best solution"""
-        individual = self.population[individualID]
+    def tryGlobalBinaryDaemon(self, individualID: int) -> Individual:
+        """Attempts a daemon update that nudges alpha values for arcs opened in the global best solution"""
+        updatedAlphas = np.copy(self.population[individualID].alphaValues)
         globalBestArcFlows = self.bestKnownSolution.arcFlows
         for edgeIndex in range(self.graph.numEdges):
             for arcIndex in range(self.graph.numArcsPerEdge):
@@ -652,15 +664,34 @@ class Population:
                     continue
                 # Else get new alpha value based on annealed proportion
                 else:
-                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)])
+                    newAlpha = self.getDaemonUpdatedAlphaValue(updatedAlphas[(edgeIndex, arcIndex)])
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
-                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
-        individual.resetOutputNetwork()
+                            updatedAlphas[(edgeIndex, cap)] = newAlpha
+        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
+        newIndividual = Individual(-1, self.graph, updatedAlphas)
+        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
+        self.solver.solveModel()
+        # Write expressed network output data to individual
+        newIndividual.isSolved = True
+        newIndividual.arcFlows = self.solver.getArcFlowsDict()
+        newIndividual.srcFlows = self.solver.getSrcFlowsList()
+        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
+        if self.solver.isOptimizedArcSelections is True:
+            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
+        newIndividual.trueCost = self.solver.calculateTrueCost()
+        newIndividual.fakeCost = self.solver.getObjectiveValue()
+        # If no solution was found, hypermutate individual and recursively solve until solution is found
+        if newIndividual.trueCost == 0:
+            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
+            newIndividual.trueCost = sys.maxsize
+        # Reset solver
+        self.solver.resetSolver()
+        return newIndividual
 
-    def applyGlobalMeanDaemon(self, individualID: int) -> None:
-        """Applies a daemon update that nudges alpha values based on the mean assigned flow in the global best solution"""
-        individual = self.population[individualID]
+    def tryGlobalMeanDaemon(self, individualID: int) -> Individual:
+        """Attempts a daemon update that nudges alpha values based on the mean assigned flow in the global best solution"""
+        updatedAlphas = np.copy(self.population[individualID].alphaValues)
         globalBestArcFlows = self.bestKnownSolution.arcFlows
         # Find mean flow in the global best solution after removing all unopened arcs from the calculation
         arcFlowsArr = np.array(list(globalBestArcFlows.values()))
@@ -675,15 +706,34 @@ class Population:
                 else:
                     # Find the ratio of flow between this arc and the global best's mean arc flow
                     flowMeanRatio = globalBestArcFlows[(edgeIndex, arcIndex)] / globalMeanFlow
-                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)], flowStatRatio=flowMeanRatio)
+                    newAlpha = self.getDaemonUpdatedAlphaValue(updatedAlphas[(edgeIndex, arcIndex)], flowStatRatio=flowMeanRatio)
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
-                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
-        individual.resetOutputNetwork()
+                            updatedAlphas[(edgeIndex, cap)] = newAlpha
+        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
+        newIndividual = Individual(-1, self.graph, updatedAlphas)
+        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
+        self.solver.solveModel()
+        # Write expressed network output data to individual
+        newIndividual.isSolved = True
+        newIndividual.arcFlows = self.solver.getArcFlowsDict()
+        newIndividual.srcFlows = self.solver.getSrcFlowsList()
+        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
+        if self.solver.isOptimizedArcSelections is True:
+            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
+        newIndividual.trueCost = self.solver.calculateTrueCost()
+        newIndividual.fakeCost = self.solver.getObjectiveValue()
+        # If no solution was found, hypermutate individual and recursively solve until solution is found
+        if newIndividual.trueCost == 0:
+            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
+            newIndividual.trueCost = sys.maxsize
+        # Reset solver
+        self.solver.resetSolver()
+        return newIndividual
 
-    def applyGlobalMedianDaemon(self, individualID: int) -> None:
-        """Applies a daemon update that nudges alpha values based on the median assigned flow in the global best solution"""
-        individual = self.population[individualID]
+    def tryGlobalMedianDaemon(self, individualID: int) -> Individual:
+        """Attempts a daemon update that nudges alpha values based on the median assigned flow in the global best solution"""
+        updatedAlphas = np.copy(self.population[individualID].alphaValues)
         globalBestArcFlows = self.bestKnownSolution.arcFlows
         # Find median flow in the global best solution after removing all unopened arcs from the calculation
         arcFlowsArr = np.array(list(globalBestArcFlows.values()))
@@ -698,15 +748,35 @@ class Population:
                 else:
                     # Find the ratio of flow between this arc and the global best's median arc flow
                     flowMedianRatio = globalBestArcFlows[(edgeIndex, arcIndex)] / globalMedianFlow
-                    newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)], flowStatRatio=flowMedianRatio)
+                    newAlpha = self.getDaemonUpdatedAlphaValue(updatedAlphas[(edgeIndex, arcIndex)], flowStatRatio=flowMedianRatio)
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
-                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
-        individual.resetOutputNetwork()
+                            updatedAlphas[(edgeIndex, cap)] = newAlpha
+        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
+        newIndividual = Individual(-1, self.graph, updatedAlphas)
+        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
+        self.solver.solveModel()
+        # Write expressed network output data to individual
+        newIndividual.isSolved = True
+        newIndividual.arcFlows = self.solver.getArcFlowsDict()
+        newIndividual.srcFlows = self.solver.getSrcFlowsList()
+        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
+        if self.solver.isOptimizedArcSelections is True:
+            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
+        newIndividual.trueCost = self.solver.calculateTrueCost()
+        newIndividual.fakeCost = self.solver.getObjectiveValue()
+        # If no solution was found, hypermutate individual and recursively solve until solution is found
+        if newIndividual.trueCost == 0:
+            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
+            newIndividual.trueCost = sys.maxsize
+        # Reset solver
+        self.solver.resetSolver()
+        return newIndividual
 
-    def applyPersonalMeanDaemon(self, individualID: int) -> None:
-        """Applies a daemon update that nudges alpha values based on the mean assigned flow in the personal solution"""
+    def tryPersonalMeanDaemon(self, individualID: int) -> Individual:
+        """Attempts a daemon update that nudges alpha values based on the mean assigned flow in the personal solution"""
         individual = self.population[individualID]
+        updatedAlphas = np.copy(self.population[individualID].alphaValues)
         # Find mean flow in the personal solution after removing all unopened arcs from the calculation
         arcFlowsArr = np.array(list(individual.arcFlows.values()))
         arcFlowsArr[arcFlowsArr == 0.0] = np.nan
@@ -724,12 +794,32 @@ class Population:
                                                                flowStatRatio=flowMeanRatio)
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
-                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
-        individual.resetOutputNetwork()
+                            updatedAlphas[(edgeIndex, cap)] = newAlpha
+        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
+        newIndividual = Individual(-1, self.graph, updatedAlphas)
+        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
+        self.solver.solveModel()
+        # Write expressed network output data to individual
+        newIndividual.isSolved = True
+        newIndividual.arcFlows = self.solver.getArcFlowsDict()
+        newIndividual.srcFlows = self.solver.getSrcFlowsList()
+        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
+        if self.solver.isOptimizedArcSelections is True:
+            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
+        newIndividual.trueCost = self.solver.calculateTrueCost()
+        newIndividual.fakeCost = self.solver.getObjectiveValue()
+        # If no solution was found, hypermutate individual and recursively solve until solution is found
+        if newIndividual.trueCost == 0:
+            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
+            newIndividual.trueCost = sys.maxsize
+        # Reset solver
+        self.solver.resetSolver()
+        return newIndividual
 
-    def applyPersonalMedianDaemon(self, individualID: int) -> None:
-        """Applies a daemon update that nudges alpha values based on the median assigned flow in the personal solution"""
+    def tryPersonalMedianDaemon(self, individualID: int) -> Individual:
+        """Attempts a daemon update that nudges alpha values based on the median assigned flow in the personal solution"""
         individual = self.population[individualID]
+        updatedAlphas = np.copy(self.population[individualID].alphaValues)
         # Find median flow in the personal solution after removing all unopened arcs from the calculation
         arcFlowsArr = np.array(list(individual.arcFlows.values()))
         arcFlowsArr[arcFlowsArr == 0.0] = np.nan
@@ -746,8 +836,27 @@ class Population:
                     newAlpha = self.getDaemonUpdatedAlphaValue(individual.alphaValues[(edgeIndex, arcIndex)], flowStatRatio=flowMedianRatio)
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
-                            individual.alphaValues[(edgeIndex, cap)] = newAlpha
-        individual.resetOutputNetwork()
+                            updatedAlphas[(edgeIndex, cap)] = newAlpha
+        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
+        newIndividual = Individual(-1, self.graph, updatedAlphas)
+        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
+        self.solver.solveModel()
+        # Write expressed network output data to individual
+        newIndividual.isSolved = True
+        newIndividual.arcFlows = self.solver.getArcFlowsDict()
+        newIndividual.srcFlows = self.solver.getSrcFlowsList()
+        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
+        if self.solver.isOptimizedArcSelections is True:
+            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
+        newIndividual.trueCost = self.solver.calculateTrueCost()
+        newIndividual.fakeCost = self.solver.getObjectiveValue()
+        # If no solution was found, hypermutate individual and recursively solve until solution is found
+        if newIndividual.trueCost == 0:
+            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
+            newIndividual.trueCost = sys.maxsize
+        # Reset solver
+        self.solver.resetSolver()
+        return newIndividual
 
     # ==========================================================
     # ============== EVOLUTION STATISTICS METHODS ==============

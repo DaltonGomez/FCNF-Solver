@@ -129,10 +129,10 @@ class GAvsGA:
         ax = fig.add_subplot()
         # Plot all data
         ax.plot(gaOneTimestamps, self.geneticPopOne.convergenceStats, label="GA 1 Most Fit", color="b")
-        ax.plot(gaTwoTimestamps, self.geneticPopTwo.convergenceStats, label="GA 2 Most Fit", color="c")
+        ax.plot(gaTwoTimestamps, self.geneticPopTwo.convergenceStats, label="GA 2 Most Fit", color="r")
         # ax.plot(gaOneTimestamps, self.geneticPopOne.meanStats, label="GA 1 Mean", color="r", linestyle="--")
         # ax.plot(gaTwoTimestamps, self.geneticPopTwo.meanStats, label="GA 2 Mean", color="m", linestyle="--")
-        ax.plot(gaOneTimestamps, self.geneticPopOne.medianStats, label="GA 1 Median", color="g", linestyle=":")
+        ax.plot(gaOneTimestamps, self.geneticPopOne.medianStats, label="GA 1 Median", color="c", linestyle=":")
         ax.plot(gaTwoTimestamps, self.geneticPopTwo.medianStats, label="GA 2 Median", color="y", linestyle=":")
         # Add graph elements
         ax.set_title("GA Convergence Against One Another")

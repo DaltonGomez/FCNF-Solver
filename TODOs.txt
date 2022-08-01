@@ -35,7 +35,6 @@ ALPHA GENETIC ALGORITHM:
 
 GA EXPERIMENTS:
 =====================================
-# TODO - Clean-up the GAvsNaive experiment so that it can output data to a CSV
 # TODO - Collect data on the number of fitness evaluations used to solve the GA and MILP and use that as a comparison metric
 # TODO - Modify MILP class to build model on initialization, then clear solution values and resolve in the HP tuner (thus reducing the time wasted rebuilding the same model)
 # TODO - Measure population diversity over evolution at genotypic (not just the phenotypic) level
@@ -75,5 +74,6 @@ GA/ACO INTEGRATION & OTHER FUTURE IDEAS:
 VERSIONS (AS BRANCHES):
 =====================================
 # NOTE - main -> The most current development of the FCNF-Solver for the Genetic Algorithm matheuristic paper
-# NOTE - VERSION_2 -> FCNF-Solver prior to data structure optimizations and design pattern revisions
-# NOTE - VERSION_1 -> An initial development of the FCNF-Solver with a drastically different architecture than the main
+# NOTE - VERSION_3.0 -> FCNF-Solver prior to overhaul of daemon update mechanics
+# NOTE - VERSION_2.0 -> FCNF-Solver prior to data structure optimizations and design pattern revisions
+# NOTE - VERSION_1.0 -> An initial development of the FCNF-Solver with a drastically different architecture than the main
