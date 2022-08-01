@@ -41,7 +41,7 @@ class MultiGAvsMILP:
         self.mutationRate: float = 0.20
         self.perArcEdgeMutationRate: float = 0.25
         self.isDaemonUsed: bool = True
-        self.annealingConstant: float = 0.10
+        self.daemonAnnealingRate: float = 0.10
         self.daemonStrategy: str = "globalMedian"
         self.daemonStrength: float = 0.10
 
@@ -79,7 +79,7 @@ class MultiGAvsMILP:
                                                             mutationRate=self.mutationRate,
                                                             perArcEdgeMutationRate=self.perArcEdgeMutationRate)
                 gaVSmilp.geneticPop.setDaemonHyperparams(isDaemonUsed=self.isDaemonUsed,
-                                                         annealingConstant=self.annealingConstant,
+                                                         daemonAnnealingRate=self.daemonAnnealingRate,
                                                          daemonStrategy=self.daemonStrategy,
                                                          daemonStrength=self.daemonStrength)
                 thisRunData = gaVSmilp.solveGraphWithoutPrints()
@@ -92,7 +92,7 @@ class MultiGAvsMILP:
                     "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                     "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                     "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                    "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Annealing Constant", "Daemon Strategy",
+                    "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
                     "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "MILP Obj Val",
                     "MILP Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
                     "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]

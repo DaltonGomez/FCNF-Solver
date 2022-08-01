@@ -73,7 +73,7 @@ class HyperparamTuner:
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "perArcEdgeMutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "isDaemonUsed": [True, False],
-                        "annealingConstant": [0.25, 0.5, 1, 2],
+                        "daemonAnnealingRate": [0.25, 0.5, 1, 2],
                         "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
                         "daemonStrength": [0.5, 1, 2]
                         }
@@ -153,7 +153,7 @@ class HyperparamTuner:
                                                         for mutateRate in self.hpSpace["mutationRate"]:
                                                             for perAeMutate in self.hpSpace["perArcEdgeMutationRate"]:
                                                                 for isDaemon in self.hpSpace["isDaemonUsed"]:
-                                                                    for annealConst in self.hpSpace["annealingConstant"]:
+                                                                    for daemonAnneal in self.hpSpace["daemonAnnealingRate"]:
                                                                         for daemonStrat in self.hpSpace["daemonStrategy"]:
                                                                             for daemonStrength in self.hpSpace["daemonStrength"]:
                                                                                 # Iterate over runs
@@ -195,7 +195,7 @@ class HyperparamTuner:
                                                                                                 perArcEdgeMutationRate=perAeMutate)
                                                                                             tunerRun.geneticPop.setDaemonHyperparams(
                                                                                                 isDaemonUsed=isDaemon,
-                                                                                                annealingConstant=annealConst,
+                                                                                                daemonAnnealingRate=daemonAnneal,
                                                                                                 daemonStrategy=daemonStrat,
                                                                                                 daemonStrength=daemonStrength)
                                                                                             # Evolve and save results
@@ -257,7 +257,7 @@ class HyperparamTuner:
                                                                                 perArcEdgeMutationRate=perAeMutate)
                                                                             tunerRun.geneticPop.setDaemonHyperparams(
                                                                                 isDaemonUsed=False,
-                                                                                annealingConstant=0.5,
+                                                                                daemonAnnealingRate=0.5,
                                                                                 daemonStrategy="globalMean",
                                                                                 daemonStrength=1.0)
                                                                             # Evolve and save results
@@ -272,7 +272,7 @@ class HyperparamTuner:
                     "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                     "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                     "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                    "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Annealing Constant", "Daemon Strategy",
+                    "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
                     "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "MILP Obj Val",
                     "MILP Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
                     "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]

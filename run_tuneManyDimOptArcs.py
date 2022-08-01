@@ -40,7 +40,7 @@ if __name__ == "__main__":
         "mutationRate": [0.05, 0.25],
         "perArcEdgeMutationRate": [0.10, 0.50],
         "isDaemonUsed": [True],
-        "annealingConstant": [0.10, 0.50],
+        "daemonAnnealingRate": [0.10, 0.50],
         "daemonStrategy": ["globalMedian"],
         "daemonStrength": [0.10, 0.50]
     }
@@ -73,7 +73,7 @@ self.hpSpace: Dict[str, List] = {
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "perArcEdgeMutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "isDaemonUsed": [True, False],
-                        "annealingConstant": [0.25, 0.5, 1, 2],
+                        "daemonAnnealingRate": [0.25, 0.5, 1, 2],
                         "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
                         "daemonStrength": [0.5, 1, 2]
                         }

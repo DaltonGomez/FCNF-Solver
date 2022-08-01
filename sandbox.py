@@ -33,7 +33,7 @@ if __name__ == "__main__":
     sandboxSolver.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
                                            mutationRate=0.20,
                                            perArcEdgeMutationRate=0.25)
-    sandboxSolver.geneticPop.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.10,
+    sandboxSolver.geneticPop.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.10,
                                                   daemonStrategy="globalMedian", daemonStrength=0.10)
     # Solve the graph
     sandboxSolver.solveGraph()

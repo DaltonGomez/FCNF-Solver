@@ -159,7 +159,7 @@ if __name__ == "__main__":
     multiGAvsMILP.mutationRate = 0.20
     multiGAvsMILP.perArcEdgeMutationRate = 0.25
     multiGAvsMILP.isDaemonUsed = True
-    multiGAvsMILP.annealingConstant = 0.10
+    multiGAvsMILP.daemonAnnealingRate = 0.10
     multiGAvsMILP.daemonStrategy = "globalMedian"
     multiGAvsMILP.daemonStrength = 0.10
 

@@ -67,7 +67,7 @@ class Population:
         self.perArcEdgeMutationRate: float = 0.25
         # Daemon HPs
         self.isDaemonUsed: bool = True
-        self.annealingConstant: float = 0.10
+        self.daemonAnnealingRate: float = 0.10
         self.daemonStrategy: str = "globalMedian"  # :param : "globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"
         self.daemonStrength: float = 0.10
 
@@ -137,16 +137,16 @@ class Population:
         self.mutationRate = mutationRate
         self.perArcEdgeMutationRate = perArcEdgeMutationRate
 
-    def setDaemonHyperparams(self, isDaemonUsed=True, annealingConstant=0.10, daemonStrategy="globalMedian",
+    def setDaemonHyperparams(self, isDaemonUsed=True, daemonAnnealingRate=0.10, daemonStrategy="globalMedian",
                              daemonStrength=0.10) -> None:
         """Sets the GA attributes that determine the behavior of the annealed daemon update \n
         :param bool isDaemonUsed: Boolean indicating if a daemon update is attempted
-        :param float annealingConstant: Constant k in the annealing schedule t = k*gen/(gen + maxGen) - 2.0 = 1.0 proportion on the final generation
+        :param float daemonAnnealingRate: Constant k in the annealing schedule t = k*gen/(gen + maxGen) - 2.0 = 1.0 proportion on the final generation
         :param str daemonStrategy: One of following: {"globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"}
         :param float daemonStrength: Constant that determines how great of an impact the daemon updates have
         """
         self.isDaemonUsed = isDaemonUsed
-        self.annealingConstant = annealingConstant
+        self.daemonAnnealingRate = daemonAnnealingRate
         self.daemonStrategy = daemonStrategy
         self.daemonStrength = daemonStrength
 
@@ -172,7 +172,7 @@ class Population:
             self.doMutations()
             self.solvePopulation()
             # Apply a daemon update if used
-            if self.isDaemonUsed is True and self.currentGeneration != 1:
+            if self.isDaemonUsed is True:
                 self.enactDaemon()
             # Update current best individual and evaluate termination
             bestIndividual = self.getMostFitIndividual()
@@ -620,7 +620,7 @@ class Population:
 
     def getAnnealedDaemonRate(self) -> float:
         """Returns a proportion (in [0, 1] if k=2) given the annealing schedule t = k*gen/(gen + maxGen)"""
-        return self.annealingConstant * self.currentGeneration / (self.currentGeneration + self.numGenerations)
+        return self.daemonAnnealingRate * self.currentGeneration / (self.currentGeneration + self.numGenerations)
 
     def getDaemonUpdatedAlphaValue(self, currentAlpha: float, flowStatRatio=0.0) -> float:
         """Returns a new alpha value based on the current alpha, daemon strength, annealing schedule and flow-stat ratio"""
