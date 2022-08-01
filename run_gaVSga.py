@@ -34,7 +34,7 @@ if __name__ == "__main__":
     gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
                                                 perArcEdgeMutationRate=0.25)
-    gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.50,
+    gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.25,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Alpha-GA population two hyperparameter setters
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
                                                 perArcEdgeMutationRate=0.25)
-    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.50,
+    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, annealingConstant=0.25,
                                               daemonStrategy="personalMedian", daemonStrength=0.10)
 
     # Solve the graph

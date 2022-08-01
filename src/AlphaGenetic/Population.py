@@ -167,13 +167,13 @@ class Population:
         # Evolve population
         while self.isTerminated is not True:
             print("Starting Generation " + str(self.currentGeneration) + "...")
-            # Perform operators and solve
+            # Perform standard GA operators and solve
             self.selectAndCrossover()
             self.doMutations()
+            self.solvePopulation()
             # Apply a daemon update if used
             if self.isDaemonUsed is True and self.currentGeneration != 1:
                 self.enactDaemon()
-            self.solvePopulation()
             # Update current best individual and evaluate termination
             bestIndividual = self.getMostFitIndividual()
             self.evaluateTermination(self.currentGeneration, bestIndividual.trueCost)
@@ -217,9 +217,6 @@ class Population:
         random.seed()
         annealedDaemonProb = self.getAnnealedDaemonRate()
         for individualID in range(self.populationSize):
-            individual = self.population[individualID]
-            if individual.isSolved is False:
-                continue
             if random.random() < annealedDaemonProb:
                 self.applyDaemonUpdate(individualID)
 
