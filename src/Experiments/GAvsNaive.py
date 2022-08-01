@@ -100,7 +100,7 @@ class GAvsNaive:
             # Timestamp and start the HC
             print("\n\nSolving the " + self.graphName + " graph with a naive-HC population of " +
                   str(self.geneticPop.populationSize) + " for " + str(
-                self.geneticPop.numGenerations) + " generations...\n")
+                    self.geneticPop.numGenerations) + " generations...\n")
             naiveStartTime = datetime.now()
             self.naiveSolution = self.naivePop.solveWithNaiveHillClimb(printGenerations=True, drawing=self.isDrawing,
                                                                        drawLabels=self.isLabeling,
@@ -121,7 +121,7 @@ class GAvsNaive:
             print("\nNaive HC Runtime (in seconds): " + str(self.naiveRuntimeInSeconds))
         if self.isSolvedWithGeneticAlg is True and self.isSolvedWithNaive is True and self.isGraphing is True:
             self.plotRuntimeConvergenceAgainstNaive()
-        # self.saveOutputAsCSV()  # TODO - UNCOMMENT AFTER REVISING CSV FORMATTING
+        self.saveOutputAsCSV()
         print("\nRun complete!\n")
 
     def plotRuntimeConvergenceAgainstNaive(self) -> None:
@@ -150,9 +150,8 @@ class GAvsNaive:
         plt.savefig(self.runID + ".png")
         plt.close(fig)
 
-    # TODO - REVISE HERE DOWN FOR OUTPUTTING CSV FILE
     def saveOutputAsCSV(self) -> None:
-        """Writes all of the output data to disc as a CSV file"""
+        """Writes all the output data to disc as a CSV file"""
         print("\nWriting output to disc as '" + self.runID + ".csv'...")
         self.createCSV()
         if self.isSolvedWithGeneticAlg is True:
@@ -170,22 +169,24 @@ class GAvsNaive:
             self.writeRowToCSV(["Std Dev"])
             self.writeRowToCSV(self.geneticPop.stdDevStats)
             self.writeRowToCSV([])
-        if self.isSolvedWithMILP is True:
-            self.writeRowToCSV(self.buildMILPHeaderRow())
-            self.writeRowToCSV(self.buildMILPDataRow())
-            self.writeRowToCSV(["MILP Solver Timestamps"])
-            self.writeRowToCSV(self.milpCplexSolver.runtimeTimestamps)
-            self.writeRowToCSV(["MILP Runtime Obj Values"])
-            self.writeRowToCSV(self.milpCplexSolver.runtimeObjectiveValues)
-            self.writeRowToCSV(["MILP Runtime Bound"])
-            self.writeRowToCSV(self.milpCplexSolver.runtimeBestBounds)
-            self.writeRowToCSV(["MILP Runtime Gap"])
-            self.writeRowToCSV(self.milpCplexSolver.runtimeGaps)
+        if self.isSolvedWithNaive is True:
+            self.writeRowToCSV(self.buildNaiveHeaderRow())
+            self.writeRowToCSV(self.buildNaiveDataRow())
+            self.writeRowToCSV(["Naive Generation Timestamps"])
+            self.writeRowToCSV(self.naivePop.generationTimestamps)
+            self.writeRowToCSV(["Naive Most Fit Ind."])
+            self.writeRowToCSV(self.naivePop.convergenceStats)
+            self.writeRowToCSV(["Naive Mean Fitness"])
+            self.writeRowToCSV(self.naivePop.meanStats)
+            self.writeRowToCSV(["Naive Median Fitness"])
+            self.writeRowToCSV(self.naivePop.medianStats)
+            self.writeRowToCSV(["Naive Std Dev"])
+            self.writeRowToCSV(self.naivePop.stdDevStats)
 
     def createCSV(self) -> None:
         """Creates a CSV file for the output data of the run and writes a header"""
         # Build Output Header
-        outputHeader = [["GA vs. MILP RESULTS", self.runID],
+        outputHeader = [["GA vs. NAIVE RESULTS", self.runID],
                         [],
                         ["INPUT GRAPH DATA"],
                         ["Graph Name", "Num Nodes", "Num Sources", "Num Sinks", "Num Edges",
@@ -234,61 +235,13 @@ class GAvsNaive:
                 self.geneticPop.crossoverAttemptsPerGeneration, self.geneticPop.replacementStrategy,
                 self.geneticPop.mutationMethod, self.geneticPop.mutationRate, self.geneticPop.perArcEdgeMutationRate,
                 self.geneticPop.isDaemonUsed, self.geneticPop.annealingConstant, self.geneticPop.daemonStrategy,
-                self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.geneticRuntimeInSeconds]
+                self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.gaRuntimeInSeconds]
 
     @staticmethod
     def buildNaiveHeaderRow() -> list:
-        """Builds a list containing the solution detail headers of the MILP formulation in CPLEX"""
-        return ["MILP Obj Val", "MILP Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
-                "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]
+        """Builds a list containing the solution detail headers of the naive solution"""
+        return ["Naive Obj Val", "Naive Runtime (sec)"]
 
     def buildNaiveDataRow(self) -> list:
-        """Builds a list containing the solution details of the MILP formulation in CPLEX"""
-        gaGap = 1 - self.milpCplexSolver.getBestBound() / self.gaSolution.trueCost
-        return [self.milpCplexSolver.getObjectiveValue(), self.milpCplexSolver.getCplexRuntime(),
-                self.milpCplexSolver.getTimeLimit(), self.milpCplexSolver.getCplexStatus(),
-                self.milpCplexSolver.getCplexStatusCode(), self.milpCplexSolver.getBestBound(),
-                self.milpCplexSolver.getGap(), gaGap, self.milpCplexSolver.getGap() - gaGap]
-
-    def solveGraphWithoutPrints(self) -> list:
-        """Solves the graph using the GA vs. CPLEX method but without printing (for use in multi-run experiments)"""
-        # Solve the alpha-GA population
-        if self.isSolvedWithGeneticAlg is True:
-            gaStartTime = datetime.now()
-            self.gaSolution = self.geneticPop.evolvePopulation(printGenerations=False, drawing=False,
-                                                               drawLabels=False, isGraphing=self.isGraphing,
-                                                               runID=self.runID)
-            gaFinishOptStart = datetime.now()
-            gaRuntime = gaFinishOptStart - gaStartTime
-            self.geneticRuntimeInSeconds = gaRuntime.seconds + gaRuntime.microseconds / 1000000
-            print("GA Complete!")
-        # Solve the MILP formulation in CPLEX
-        if self.isSolvedWithMILP is True:
-            if self.isRace is True:
-                self.milpCplexSolver.setTimeLimit(self.geneticRuntimeInSeconds)
-            self.milpCplexSolver.findSolution(printDetails=False)
-            print("CPLEX Complete!")
-        if self.isSolvedWithGeneticAlg is True and self.isSolvedWithMILP is True and self.isRace is True and self.isGraphing is True:
-            self.plotRuntimeConvergenceAgainstMILP()
-        return self.buildSingleRowRunData()
-
-    def buildSingleRowRunHeaders(self) -> list:
-        """Builds the headers for a single row containing the data of the run"""
-        headerRow = ["Run ID", "Graph Name", "Num Nodes", "Num Sources", "Num Sinks", "Num Edges",
-                     "Num Arc Caps", "Target Flow", "is Src/Sink Capped?", "is Src/Sink Charged?"]
-        if self.isSolvedWithGeneticAlg is True:
-            headerRow.extend(self.buildGAHeader())
-        if self.isSolvedWithMILP is True:
-            headerRow.extend(self.buildMILPHeaderRow())
-        return headerRow
-
-    def buildSingleRowRunData(self) -> list:
-        """Builds a single row containing the data of the run"""
-        dataRow = [self.runID, self.graphName, self.graph.numTotalNodes, self.graph.numSources, self.graph.numSinks,
-                   self.graph.numEdges, self.graph.numArcsPerEdge, self.minTargetFlow,
-                   self.graph.isSourceSinkCapacitated, self.graph.isSourceSinkCharged]
-        if self.isSolvedWithGeneticAlg is True:
-            dataRow.extend(self.buildGAData())
-        if self.isSolvedWithMILP is True:
-            dataRow.extend(self.buildMILPDataRow())
-        return dataRow
+        """Builds a list containing the solution details of the naive solution"""
+        return [self.naiveSolution.trueCost, self.naiveRuntimeInSeconds]
