@@ -32,7 +32,7 @@ if __name__ == "__main__":
                                                 replacementStrategy="replaceWeakestTwo")
     gaVSmilp.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                mutationRate=0.20,
-                                               perArcEdgeMutationRate=0.25)
+                                               mutationStrength=0.25)
     gaVSmilp.geneticPop.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.10,
                                              daemonStrategy="globalMedian", daemonStrength=0.10)
 

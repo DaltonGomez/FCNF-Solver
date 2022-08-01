@@ -51,7 +51,7 @@ class GAvsNaive:
                                                 replacementStrategy="replaceWeakestTwo")
         self.geneticPop.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                mutationRate=0.20,
-                                               perArcEdgeMutationRate=0.25)
+                                               mutationStrength=0.25)
         self.geneticPop.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.10,
                                              daemonStrategy="globalMedian", daemonStrength=0.10)
         self.gaSolution = None
@@ -221,7 +221,7 @@ class GAvsNaive:
         return ["Pop Size", "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                 "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                 "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
+                "Mutation Strength", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
                 "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)"]
 
     def buildGAData(self) -> list:
@@ -233,7 +233,7 @@ class GAvsNaive:
                 self.geneticPop.initializationParams[1], self.geneticPop.selectionMethod,
                 self.geneticPop.tournamentSize, self.geneticPop.crossoverMethod, self.geneticPop.crossoverRate,
                 self.geneticPop.crossoverAttemptsPerGeneration, self.geneticPop.replacementStrategy,
-                self.geneticPop.mutationMethod, self.geneticPop.mutationRate, self.geneticPop.perArcEdgeMutationRate,
+                self.geneticPop.mutationMethod, self.geneticPop.mutationRate, self.geneticPop.mutationStrength,
                 self.geneticPop.isDaemonUsed, self.geneticPop.daemonAnnealingRate, self.geneticPop.daemonStrategy,
                 self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.gaRuntimeInSeconds]
 

@@ -33,7 +33,7 @@ if __name__ == "__main__":
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
-                                                perArcEdgeMutationRate=0.25)
+                                                mutationStrength=0.25)
     gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
@@ -52,7 +52,7 @@ if __name__ == "__main__":
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
-                                                perArcEdgeMutationRate=0.25)
+                                                mutationStrength=0.25)
     gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=False, daemonAnnealingRate=0.25,
                                               daemonStrategy="personalMedian", daemonStrength=0.10)
 

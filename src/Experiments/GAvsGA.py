@@ -49,7 +49,7 @@ class GAvsGA:
                                                 replacementStrategy="replaceWeakestTwo")
         self.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                mutationRate=0.20,
-                                               perArcEdgeMutationRate=0.25)
+                                               mutationStrength=0.25)
         self.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True,
                                                 daemonAnnealingRate=0.10,
                                                 daemonStrategy="globalMedian",
@@ -74,7 +74,7 @@ class GAvsGA:
                                                    replacementStrategy="replaceWeakestTwo")
         self.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                   mutationRate=0.20,
-                                                  perArcEdgeMutationRate=0.25)
+                                                  mutationStrength=0.25)
         self.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True,
                                                 daemonAnnealingRate=0.10,
                                                 daemonStrategy="globalMedian",
@@ -214,7 +214,7 @@ class GAvsGA:
         return ["Pop Size", "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                 "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                 "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
+                "Mutation Strength", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
                 "Daemon Strength", "GA Best Obj Val"]
 
     def buildGA1Data(self) -> list:
@@ -226,7 +226,7 @@ class GAvsGA:
                 self.geneticPopOne.initializationParams[1], self.geneticPopOne.selectionMethod,
                 self.geneticPopOne.tournamentSize, self.geneticPopOne.crossoverMethod, self.geneticPopOne.crossoverRate,
                 self.geneticPopOne.crossoverAttemptsPerGeneration, self.geneticPopOne.replacementStrategy,
-                self.geneticPopOne.mutationMethod, self.geneticPopOne.mutationRate, self.geneticPopOne.perArcEdgeMutationRate,
+                self.geneticPopOne.mutationMethod, self.geneticPopOne.mutationRate, self.geneticPopOne.mutationStrength,
                 self.geneticPopOne.isDaemonUsed, self.geneticPopOne.daemonAnnealingRate, self.geneticPopOne.daemonStrategy,
                 self.geneticPopOne.daemonStrength, self.gaSolutionOne.trueCost]
 
@@ -239,6 +239,6 @@ class GAvsGA:
                 self.geneticPopTwo.initializationParams[1], self.geneticPopTwo.selectionMethod,
                 self.geneticPopTwo.tournamentSize, self.geneticPopTwo.crossoverMethod, self.geneticPopTwo.crossoverRate,
                 self.geneticPopTwo.crossoverAttemptsPerGeneration, self.geneticPopTwo.replacementStrategy,
-                self.geneticPopTwo.mutationMethod, self.geneticPopTwo.mutationRate, self.geneticPopTwo.perArcEdgeMutationRate,
+                self.geneticPopTwo.mutationMethod, self.geneticPopTwo.mutationRate, self.geneticPopTwo.mutationStrength,
                 self.geneticPopTwo.isDaemonUsed, self.geneticPopTwo.daemonAnnealingRate, self.geneticPopTwo.daemonStrategy,
                 self.geneticPopTwo.daemonStrength, self.gaSolutionTwo.trueCost]

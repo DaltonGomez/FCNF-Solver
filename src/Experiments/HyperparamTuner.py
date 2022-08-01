@@ -27,7 +27,7 @@ self.hpSpace: Dict[str, List] = {
                         "replacementStrategy": ["replaceWeakestTwo", "replaceParents", "replaceRandomTwo"],
                         "mutationMethod": ["randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"],
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
-                        "perArcEdgeMutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
+                        "mutationStrength": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "isDaemonUsed": [True, False],
                         "annealingConstant": [0.25, 0.5, 1, 2],
                         "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
@@ -71,7 +71,7 @@ class HyperparamTuner:
                         "replacementStrategy": ["replaceWeakestTwo", "replaceParents", "replaceRandomTwo"],
                         "mutationMethod": ["randomPerArc", "randomPerEdge", "randomTotal"],
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
-                        "perArcEdgeMutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
+                        "mutationStrength": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "isDaemonUsed": [True, False],
                         "daemonAnnealingRate": [0.25, 0.5, 1, 2],
                         "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
@@ -151,7 +151,7 @@ class HyperparamTuner:
                                                 for replace in self.hpSpace["replacementStrategy"]:
                                                     for mutateMeth in self.hpSpace["mutationMethod"]:
                                                         for mutateRate in self.hpSpace["mutationRate"]:
-                                                            for perAeMutate in self.hpSpace["perArcEdgeMutationRate"]:
+                                                            for mutateStrength in self.hpSpace["mutationStrength"]:
                                                                 for isDaemon in self.hpSpace["isDaemonUsed"]:
                                                                     for daemonAnneal in self.hpSpace["daemonAnnealingRate"]:
                                                                         for daemonStrat in self.hpSpace["daemonStrategy"]:
@@ -192,7 +192,7 @@ class HyperparamTuner:
                                                                                             tunerRun.geneticPop.setMutationHyperparams(
                                                                                                 mutationMethod=mutateMeth,
                                                                                                 mutationRate=mutateRate,
-                                                                                                perArcEdgeMutationRate=perAeMutate)
+                                                                                                mutationStrength=mutateStrength)
                                                                                             tunerRun.geneticPop.setDaemonHyperparams(
                                                                                                 isDaemonUsed=isDaemon,
                                                                                                 daemonAnnealingRate=daemonAnneal,
@@ -220,7 +220,7 @@ class HyperparamTuner:
                                                     for replace in self.hpSpace["replacementStrategy"]:
                                                         for mutateMeth in self.hpSpace["mutationMethod"]:
                                                             for mutateRate in self.hpSpace["mutationRate"]:
-                                                                for perAeMutate in self.hpSpace["perArcEdgeMutationRate"]:
+                                                                for mutateStrength in self.hpSpace["mutationStrength"]:
                                                                     if select == "tournament":
                                                                         for tourny in self.hpSpace["tournamentSize"]:
                                                                             # Instantiate GA pop
@@ -254,7 +254,7 @@ class HyperparamTuner:
                                                                             tunerRun.geneticPop.setMutationHyperparams(
                                                                                 mutationMethod=mutateMeth,
                                                                                 mutationRate=mutateRate,
-                                                                                perArcEdgeMutationRate=perAeMutate)
+                                                                                mutationStrength=mutateStrength)
                                                                             tunerRun.geneticPop.setDaemonHyperparams(
                                                                                 isDaemonUsed=False,
                                                                                 daemonAnnealingRate=0.5,

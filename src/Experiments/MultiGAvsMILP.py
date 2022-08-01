@@ -39,7 +39,7 @@ class MultiGAvsMILP:
         self.replacementStrategy: str = "replaceWeakestTwo"
         self.mutationMethod: str = "randomPerEdge"
         self.mutationRate: float = 0.20
-        self.perArcEdgeMutationRate: float = 0.25
+        self.mutationStrength: float = 0.25
         self.isDaemonUsed: bool = True
         self.daemonAnnealingRate: float = 0.10
         self.daemonStrategy: str = "globalMedian"
@@ -77,7 +77,7 @@ class MultiGAvsMILP:
                                                              replacementStrategy=self.replacementStrategy)
                 gaVSmilp.geneticPop.setMutationHyperparams(mutationMethod=self.mutationMethod,
                                                             mutationRate=self.mutationRate,
-                                                            perArcEdgeMutationRate=self.perArcEdgeMutationRate)
+                                                            mutationStrength=self.mutationStrength)
                 gaVSmilp.geneticPop.setDaemonHyperparams(isDaemonUsed=self.isDaemonUsed,
                                                          daemonAnnealingRate=self.daemonAnnealingRate,
                                                          daemonStrategy=self.daemonStrategy,
@@ -92,7 +92,7 @@ class MultiGAvsMILP:
                     "Num Gens", "is 1D Alphas?", "is Optimized Arcs?", "termination", "stagnation",
                     "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                     "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
-                    "Per Arc/Edge Mutate Rate", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
+                    "Mutation Strength", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
                     "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "MILP Obj Val",
                     "MILP Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
                     "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]

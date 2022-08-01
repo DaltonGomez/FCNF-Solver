@@ -62,9 +62,9 @@ class Population:
         self.crossoverAttemptsPerGeneration: int = 1
         self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents", "replaceRandomTwo"
         # Mutation HPs
-        self.mutationMethod: str = "randomPerEdge"  # :param : "randomPerArc", "randomPerEdge", "randomTotal"
+        self.mutationMethod: str = "randomPerEdge"  # :param : "randomPerArc", "randomPerEdge", "nudgePerArc", "nudgePerEdge", "nudgeAll", "randomTotal"
         self.mutationRate: float = 0.20
-        self.perArcEdgeMutationRate: float = 0.25
+        self.mutationStrength: float = 0.25
         # Daemon HPs
         self.isDaemonUsed: bool = True
         self.daemonAnnealingRate: float = 0.10
@@ -127,15 +127,16 @@ class Population:
         self.crossoverAttemptsPerGeneration = crossoverAttemptsPerGeneration
         self.replacementStrategy = replacementStrategy
 
-    def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.20, perArcEdgeMutationRate=0.25) -> None:
+    def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.20, mutationStrength=0.25) -> None:
         """Sets the GA attributes that dictate how the mutation of individuals is carried out \n
-        :param str mutationMethod: One of following: {"randomPerArc", "randomPerEdge", "randomTotal"}
+        :param str mutationMethod: One of following: {"randomPerArc", "randomPerEdge", "nudgePerArc", "nudgePerEdge", "nudgeAll", "randomTotal"}
         :param float mutationRate: Probability in [0,1] that an individual mutates
-        :param float perArcEdgeMutationRate: Probability in [0,1] that an edge/arc mutates given that an individual mutates
+        :param float mutationStrength: Probability in [0,1] that an edge/arc mutates given that an individual mutates
+        # TODO - Update the description of the above param
         """
         self.mutationMethod = mutationMethod
         self.mutationRate = mutationRate
-        self.perArcEdgeMutationRate = perArcEdgeMutationRate
+        self.mutationStrength = mutationStrength
 
     def setDaemonHyperparams(self, isDaemonUsed=True, daemonAnnealingRate=0.10, daemonStrategy="globalMedian",
                              daemonStrength=0.10) -> None:
@@ -468,7 +469,7 @@ class Population:
         individual = self.population[individualID]
         for edge in range(self.graph.numEdges):
             for arcIndex in range(self.graph.numArcsPerEdge):
-                if random.random() < self.perArcEdgeMutationRate:
+                if random.random() < self.mutationStrength:
                     individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
         individual.resetOutputNetwork()
 
@@ -477,7 +478,7 @@ class Population:
         random.seed()
         individual = self.population[individualID]
         for edge in range(self.graph.numEdges):
-            if random.random() < self.perArcEdgeMutationRate:
+            if random.random() < self.mutationStrength:
                 if self.initializationStrategy == "perArc":
                     for arcIndex in range(self.graph.numArcsPerEdge):
                         individual.alphaValues[edge][arcIndex] = self.getAlphaValue()
@@ -592,7 +593,7 @@ class Population:
                 break
 
     def getAnnealedDaemonRate(self) -> float:
-        """Returns a proportion (in [0, 1] if k=2) given the annealing schedule t = k*gen/(gen + maxGen)"""
+        """Returns a proportion (in [0, 1] if k=2) given the annealing schedule P(daemon) = k*gen/(gen + maxGen)"""
         return self.daemonAnnealingRate * self.currentGeneration / (self.currentGeneration + self.numGenerations)
 
     def getDaemonUpdatedAlphaValue(self, currentAlpha: float, flowStatRatio=0.0) -> float:

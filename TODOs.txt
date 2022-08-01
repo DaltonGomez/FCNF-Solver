@@ -41,7 +41,6 @@ GA EXPERIMENTS:
 # ASK - Would a random search strategy work better than grid search for hyperparameter tuning?
 # ASK - What information could be gained from a sensitivity/perturbation analysis on alpha values?
 # ASK - Would a brief, interrupted run of CPLEX-MILP generating initial alpha values for the population improve overall performance?
-# ASK - Should mutation rate also be annealed over time?
 # ASK - Should other metahueristic strategies (e.g. binary GA, differential evolution, etc.) be implemented for experimentation
 
 

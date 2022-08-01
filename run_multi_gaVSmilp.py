@@ -157,7 +157,7 @@ if __name__ == "__main__":
     multiGAvsMILP.replacementStrategy = "replaceWeakestTwo"
     multiGAvsMILP.mutationMethod = "randomPerEdge"
     multiGAvsMILP.mutationRate = 0.20
-    multiGAvsMILP.perArcEdgeMutationRate = 0.25
+    multiGAvsMILP.mutationStrength = 0.25
     multiGAvsMILP.isDaemonUsed = True
     multiGAvsMILP.daemonAnnealingRate = 0.10
     multiGAvsMILP.daemonStrategy = "globalMedian"
