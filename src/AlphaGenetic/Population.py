@@ -131,8 +131,7 @@ class Population:
         """Sets the GA attributes that dictate how the mutation of individuals is carried out \n
         :param str mutationMethod: One of following: {"randomPerArc", "randomPerEdge", "nudgePerArc", "nudgePerEdge", "nudgeAll", "randomTotal"}
         :param float mutationRate: Probability in [0,1] that an individual mutates
-        :param float mutationStrength: Probability in [0,1] that an edge/arc mutates given that an individual mutates
-        # TODO - Update the description of the above param
+        :param float mutationStrength: Probability in [0,1] that an edge/arc mutates given that an individual mutates or the strength at which a nudge occurs
         """
         self.mutationMethod = mutationMethod
         self.mutationRate = mutationRate
@@ -460,11 +459,17 @@ class Population:
             self.randomPerArcMutation(individualID)
         elif self.mutationMethod == "randomPerEdge":
             self.randomPerEdgeMutation(individualID)
+        elif self.mutationMethod == "nudgePerArc":
+            self.nudgePerArcMutation(individualID)
+        elif self.mutationMethod == "nudgePerEdge":
+            self.nudgePerEdgeMutation(individualID)
+        elif self.mutationMethod == "nudgeAll":
+            self.nudgeAllMutation(individualID)
         else:
             print("ERROR - INVALID MUTATION METHOD!!!")
 
     def randomPerArcMutation(self, individualID: int) -> None:
-        """Iterates over all (edge, arc) pairs and mutates if the perArcEdgeMutation rate rng rolls"""
+        """Iterates over all (edge, arc) pairs and reinitializes if the mutationStrength rate rng rolls"""
         random.seed()
         individual = self.population[individualID]
         for edge in range(self.graph.numEdges):
@@ -474,7 +479,7 @@ class Population:
         individual.resetOutputNetwork()
 
     def randomPerEdgeMutation(self, individualID: int) -> None:
-        """Iterates over all edges and mutates at all arcs if the perArcEdgeMutation rate rng rolls"""
+        """Iterates over all edges and reinitializes at all arcs if the mutationStrength rate rng rolls"""
         random.seed()
         individual = self.population[individualID]
         for edge in range(self.graph.numEdges):
@@ -486,6 +491,62 @@ class Population:
                     thisEdgeAlpha = self.getAlphaValue()
                     for arcIndex in range(self.graph.numArcsPerEdge):
                         individual.alphaValues[edge][arcIndex] = thisEdgeAlpha
+        individual.resetOutputNetwork()
+
+    def nudgePerArcMutation(self, individualID: int) -> None:
+        """Iterates over all (edge, arc) pairs and nudges if the mutationStrength rate rng rolls"""
+        random.seed()
+        mutationVarianceMultiplier = 0.05  # TODO - Decide if the multiplier value "works"
+        individual = self.population[individualID]
+        for edge in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                if random.random() < self.mutationStrength:
+                    currentAlpha = individual.alphaValues[edge][arcIndex]
+                    nudgeVariance = currentAlpha * mutationVarianceMultiplier
+                    nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                    while nudgedAlpha < 0.0:
+                        nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                    individual.alphaValues[edge][arcIndex] = nudgedAlpha
+        individual.resetOutputNetwork()
+
+    def nudgePerEdgeMutation(self, individualID: int) -> None:
+        """Iterates over all edges and nudges at all arcs if the mutationStrength rate rng rolls"""
+        random.seed()
+        mutationVarianceMultiplier = 0.05  # TODO - Decide if the multiplier value "works"
+        individual = self.population[individualID]
+        for edge in range(self.graph.numEdges):
+            if random.random() < self.mutationStrength:
+                if self.initializationStrategy == "perArc":
+                    for arcIndex in range(self.graph.numArcsPerEdge):
+                        currentAlpha = individual.alphaValues[edge][arcIndex]
+                        nudgeVariance = currentAlpha * mutationVarianceMultiplier
+                        nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                        while nudgedAlpha < 0.0:
+                            nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                        individual.alphaValues[edge][arcIndex] = nudgedAlpha
+                elif self.initializationStrategy == "perEdge":
+                    currentAlpha = individual.alphaValues[edge][0]
+                    nudgeVariance = currentAlpha * mutationVarianceMultiplier
+                    nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                    while nudgedAlpha < 0.0:
+                        nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                    for arcIndex in range(self.graph.numArcsPerEdge):
+                        individual.alphaValues[edge][arcIndex] = nudgedAlpha
+        individual.resetOutputNetwork()
+
+    def nudgeAllMutation(self, individualID: int) -> None:
+        """Iterates over all edges and nudges based on the mutationStrength"""
+        random.seed()
+        individual = self.population[individualID]
+        for edge in range(self.graph.numEdges):
+            for arcIndex in range(self.graph.numArcsPerEdge):
+                if random.random() < self.mutationStrength:
+                    currentAlpha = individual.alphaValues[edge][arcIndex]
+                    nudgeVariance = currentAlpha * self.mutationStrength
+                    nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                    while nudgedAlpha < 0.0:
+                        nudgedAlpha = random.gauss(currentAlpha, nudgeVariance)
+                    individual.alphaValues[edge][arcIndex] = nudgedAlpha
         individual.resetOutputNetwork()
 
     # =================================================
