@@ -13,7 +13,7 @@ python3 run_gaVSga.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "massive_5"
+    inputGraph = "massive_8"
     gaVSga = GAvsGA(inputGraph, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
                     isPop2OneDimAlpha=True, isPop2ArcOptimized=True,
                     isDrawing=False, isLabeling=True, isGraphing=True)
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
                                                 perArcEdgeMutationRate=0.25)
-    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
+    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=False, daemonAnnealingRate=0.25,
                                               daemonStrategy="personalMedian", daemonStrength=0.10)
 
     # Solve the graph

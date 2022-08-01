@@ -62,7 +62,7 @@ class Population:
         self.crossoverAttemptsPerGeneration: int = 1
         self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents", "replaceRandomTwo"
         # Mutation HPs
-        self.mutationMethod: str = "randomPerEdge"  # :param : "randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"
+        self.mutationMethod: str = "randomPerEdge"  # :param : "randomPerArc", "randomPerEdge", "randomTotal"
         self.mutationRate: float = 0.20
         self.perArcEdgeMutationRate: float = 0.25
         # Daemon HPs
@@ -98,7 +98,7 @@ class Population:
     def setInitializationHyperparams(self, initializationStrategy="perEdge", initializationDistribution="gaussian",
                                  initializationParams=(500.0, 100.0)) -> None:
         """Sets the GA attributes that dictate the initialization/updating of alpha values \n
-        :param str initializationStrategy: One of following: {"perEdge", "perArc", "reciprocalCap"}
+        :param str initializationStrategy: One of following: {"perEdge", "perArc"}
         :param str initializationDistribution: One of following: {"uniform", "gaussian", "digital"}
         :param list initializationParams: Lower and upper bounds if uniform distribution; mu and sigma if Gaussian; low and high value if digital
         """
@@ -129,7 +129,7 @@ class Population:
 
     def setMutationHyperparams(self, mutationMethod="randomPerEdge", mutationRate=0.20, perArcEdgeMutationRate=0.25) -> None:
         """Sets the GA attributes that dictate how the mutation of individuals is carried out \n
-        :param str mutationMethod: One of following: {"randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"}
+        :param str mutationMethod: One of following: {"randomPerArc", "randomPerEdge", "randomTotal"}
         :param float mutationRate: Probability in [0,1] that an individual mutates
         :param float perArcEdgeMutationRate: Probability in [0,1] that an edge/arc mutates given that an individual mutates
         """
@@ -455,39 +455,12 @@ class Population:
         print("Performing mutation on individual " + str(individualID) + "...")
         if self.mutationMethod == "randomTotal":
             self.hypermutateIndividual(individualID)
-        elif self.mutationMethod == "randomSingleArc":
-            self.randomSingleArcMutation(individualID)
-        elif self.mutationMethod == "randomSingleEdge":
-            self.randomSingleEdgeMutation(individualID)
         elif self.mutationMethod == "randomPerArc":
             self.randomPerArcMutation(individualID)
         elif self.mutationMethod == "randomPerEdge":
             self.randomPerEdgeMutation(individualID)
         else:
             print("ERROR - INVALID MUTATION METHOD!!!")
-
-    def randomSingleArcMutation(self, individualID: int) -> None:
-        """Mutates an individual at only one random arc in the chromosome"""
-        random.seed()
-        mutatedEdge = random.randint(0, self.graph.numEdges - 1)
-        mutatedCap = random.randint(0, self.graph.numArcsPerEdge - 1)
-        individual = self.population[individualID]
-        individual.alphaValues[mutatedEdge][mutatedCap] = self.getAlphaValue()
-        individual.resetOutputNetwork()
-
-    def randomSingleEdgeMutation(self, individualID: int) -> None:
-        """Mutates an individual at all arcs in a random edge in the chromosome"""
-        random.seed()
-        mutatedEdge = random.randint(0, self.graph.numEdges - 1)
-        individual = self.population[individualID]
-        if self.initializationStrategy == "perArc":
-            for arcIndex in range(self.graph.numArcsPerEdge):
-                individual.alphaValues[mutatedEdge][arcIndex] = self.getAlphaValue()
-        elif self.initializationStrategy == "perEdge":
-            thisEdgeAlpha = self.getAlphaValue()
-            for arcIndex in range(self.graph.numArcsPerEdge):
-                individual.alphaValues[mutatedEdge][arcIndex] = thisEdgeAlpha
-        individual.resetOutputNetwork()
 
     def randomPerArcMutation(self, individualID: int) -> None:
         """Iterates over all (edge, arc) pairs and mutates if the perArcEdgeMutation rate rng rolls"""
