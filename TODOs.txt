@@ -36,14 +36,14 @@ GA EXPERIMENTS:
 =====================================
 # TODO - Modify MILP class to build model on initialization, then clear solution values and resolve in the HP tuner (thus reducing the time wasted rebuilding the same model)
 # TODO - Measure population diversity over evolution at genotypic (not just the phenotypic) level
-# TODO - Revise the "naive hillclimb" approach to be a Gaussian nudge rather than hypermutation
-# ASK - Does the naive hillclimb need to be nudge-mutation-based?
+# ASK - Does the naive hillclimb need to be nudge-mutation-based as Sheppard suggested?
 # ASK - Would a random search strategy work better than grid search for hyperparameter tuning?
 # ASK - What information could be gained from a sensitivity/perturbation analysis on alpha values?
 # ASK - Would a brief, interrupted run of CPLEX-MILP generating initial alpha values for the population improve overall performance?
 # ASK - Should other metahueristic strategies (e.g. binary GA, differential evolution, etc.) be implemented for experimentation
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ANT COLONY OPTIMIZATION ALGORITHM:
 =====================================
 # TODO - Determine if source/sink arcs should have special pheromone deposition and/or "goodness" of arc calculations

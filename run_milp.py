@@ -1,7 +1,5 @@
-from src.FlowNetwork.SolutionVisualizer import SolutionVisualizer
-from src.Graph.CandidateGraph import CandidateGraph
-from src.Graph.GraphVisualizer import GraphVisualizer
-from src.Solvers.MILPsolverCPLEX import MILPsolverCPLEX
+
+from src.Experiments.MILP import MILP
 
 """
 RUN COMMAND:
@@ -14,18 +12,9 @@ python3 run_milp.py
 """
 
 if __name__ == "__main__":
-    # TODO - Update to produce graphs/output runtime data
-    inputGraph = "large_3.p"
-    graphInstance = CandidateGraph()
-    graphInstance = graphInstance.loadCandidateGraph(inputGraph)
-    minTargetFlow = graphInstance.totalPossibleDemand
-    graphVis = GraphVisualizer(graphInstance)
-    graphVis.drawUnlabeledGraph()
-    milpSolver = MILPsolverCPLEX(graphInstance, minTargetFlow, isOneArcPerEdge=True, logOutput=True)
-    milpSolver.findSolution(printDetails=False)
-    milpSoln = milpSolver.writeSolution()
-    milpVis = SolutionVisualizer(milpSoln)
-    milpVis.drawLabeledSolution()
-    milpSoln.saveSolution()
-    print("\n\nMILP formulation solved optimally! Solution written to disc...")
-    print("Total CPLEX runtime: " + str(milpSolver.getCplexRuntime()) + " seconds")
+    # Graph
+    inputGraph = "small_9"
+    # Solver
+    milp = MILP(inputGraph, isTimeConstrained=False, timeLimit=-1.0, isOneArcPerEdge=True,
+                isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True, isSolutionSaved=True)
+    milp.solveGraph()
