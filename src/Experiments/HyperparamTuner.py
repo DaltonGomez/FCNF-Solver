@@ -28,7 +28,6 @@ self.hpSpace: Dict[str, List] = {
                         "mutationMethod": ["randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"],
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "mutationStrength": [0.01, 0.05, 0.10, 0.25, 0.50],
-                        "isDaemonUsed": [True, False],
                         "annealingConstant": [0.25, 0.5, 1, 2],
                         "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
                         "daemonStrength": [0.5, 1, 2]
@@ -72,7 +71,6 @@ class HyperparamTuner:
                         "mutationMethod": ["randomPerArc", "randomPerEdge", "randomTotal"],
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "mutationStrength": [0.01, 0.05, 0.10, 0.25, 0.50],
-                        "isDaemonUsed": [True, False],
                         "daemonAnnealingRate": [0.25, 0.5, 1, 2],
                         "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
                         "daemonStrength": [0.5, 1, 2]
@@ -152,55 +150,54 @@ class HyperparamTuner:
                                                     for mutateMeth in self.hpSpace["mutationMethod"]:
                                                         for mutateRate in self.hpSpace["mutationRate"]:
                                                             for mutateStrength in self.hpSpace["mutationStrength"]:
-                                                                for isDaemon in self.hpSpace["isDaemonUsed"]:
-                                                                    for daemonAnneal in self.hpSpace["daemonAnnealingRate"]:
-                                                                        for daemonStrat in self.hpSpace["daemonStrategy"]:
-                                                                            for daemonStrength in self.hpSpace["daemonStrength"]:
-                                                                                # Iterate over runs
-                                                                                for runNum in range(self.runsPerGraph):
-                                                                                    # Search tourny size only if tournament is selection strategy
-                                                                                    if select == "tournament":
-                                                                                        for tourny in self.hpSpace["tournamentSize"]:
-                                                                                            # Instantiate GA pop
-                                                                                            tunerRun = GAvsMILP(
-                                                                                                graphName,
-                                                                                                isSolvedWithGeneticAlg=True,
-                                                                                                isOneDimAlphaTable=isOneDimAlpha,
-                                                                                                isOptimizedArcSelections=isArcOptimized,
-                                                                                                isSolvedWithMILP=True,
-                                                                                                isRace=True,
-                                                                                                isDrawing=False,
-                                                                                                isLabeling=False,
-                                                                                                isGraphing=False,
-                                                                                                isOutputtingCPLEX=True)
-                                                                                            # Set hyperparameter settings
-                                                                                            tunerRun.geneticPop.setPopulationHyperparams(
-                                                                                                populationSize=popSize,
-                                                                                                numGenerations=numGens)
-                                                                                            tunerRun.geneticPop.setInitializationHyperparams(
-                                                                                                initializationStrategy=initStrat,
-                                                                                                initializationDistribution=initDist,
-                                                                                                initializationParams=initParams)
-                                                                                            tunerRun.geneticPop.setIndividualSelectionHyperparams(
-                                                                                                selectionMethod=select,
-                                                                                                tournamentSize=tourny)
-                                                                                            tunerRun.geneticPop.setCrossoverHyperparams(
-                                                                                                crossoverMethod=crossMeth,
-                                                                                                crossoverRate=crossRate,
-                                                                                                crossoverAttemptsPerGeneration=crossAPG,
-                                                                                                replacementStrategy=replace)
-                                                                                            tunerRun.geneticPop.setMutationHyperparams(
-                                                                                                mutationMethod=mutateMeth,
-                                                                                                mutationRate=mutateRate,
-                                                                                                mutationStrength=mutateStrength)
-                                                                                            tunerRun.geneticPop.setDaemonHyperparams(
-                                                                                                isDaemonUsed=isDaemon,
-                                                                                                daemonAnnealingRate=daemonAnneal,
-                                                                                                daemonStrategy=daemonStrat,
-                                                                                                daemonStrength=daemonStrength)
-                                                                                            # Evolve and save results
-                                                                                            thisRunData = tunerRun.solveGraphWithoutPrints()
-                                                                                            self.writeRowToCSV(thisRunData)
+                                                                for daemonAnneal in self.hpSpace["daemonAnnealingRate"]:
+                                                                    for daemonStrat in self.hpSpace["daemonStrategy"]:
+                                                                        for daemonStrength in self.hpSpace["daemonStrength"]:
+                                                                            # Iterate over runs
+                                                                            for runNum in range(self.runsPerGraph):
+                                                                                # Search tourny size only if tournament is selection strategy
+                                                                                if select == "tournament":
+                                                                                    for tourny in self.hpSpace["tournamentSize"]:
+                                                                                        # Instantiate GA pop
+                                                                                        tunerRun = GAvsMILP(
+                                                                                            graphName,
+                                                                                            isSolvedWithGeneticAlg=True,
+                                                                                            isOneDimAlphaTable=isOneDimAlpha,
+                                                                                            isOptimizedArcSelections=isArcOptimized,
+                                                                                            isSolvedWithMILP=True,
+                                                                                            isRace=True,
+                                                                                            isDrawing=False,
+                                                                                            isLabeling=False,
+                                                                                            isGraphing=False,
+                                                                                            isOutputtingCPLEX=True)
+                                                                                        # Set hyperparameter settings
+                                                                                        tunerRun.geneticPop.setPopulationHyperparams(
+                                                                                            populationSize=popSize,
+                                                                                            numGenerations=numGens)
+                                                                                        tunerRun.geneticPop.setInitializationHyperparams(
+                                                                                            initializationStrategy=initStrat,
+                                                                                            initializationDistribution=initDist,
+                                                                                            initializationParams=initParams)
+                                                                                        tunerRun.geneticPop.setIndividualSelectionHyperparams(
+                                                                                            selectionMethod=select,
+                                                                                            tournamentSize=tourny)
+                                                                                        tunerRun.geneticPop.setCrossoverHyperparams(
+                                                                                            crossoverMethod=crossMeth,
+                                                                                            crossoverRate=crossRate,
+                                                                                            crossoverAttemptsPerGeneration=crossAPG,
+                                                                                            replacementStrategy=replace)
+                                                                                        tunerRun.geneticPop.setMutationHyperparams(
+                                                                                            mutationMethod=mutateMeth,
+                                                                                            mutationRate=mutateRate,
+                                                                                            mutationStrength=mutateStrength)
+                                                                                        tunerRun.geneticPop.setDaemonHyperparams(
+                                                                                            isDaemonUsed=True,
+                                                                                            daemonAnnealingRate=daemonAnneal,
+                                                                                            daemonStrategy=daemonStrat,
+                                                                                            daemonStrength=daemonStrength)
+                                                                                        # Evolve and save results
+                                                                                        thisRunData = tunerRun.solveGraphWithoutPrints()
+                                                                                        self.writeRowToCSV(thisRunData)
 
     def conductGridSearchWithoutDaemon(self, isOneDimAlpha: bool, isArcOptimized: bool) -> None:
         """Completes the grid search of the hyperparams with the given n-Dim alpha and arc optimization settings, not searching daemon HPs"""

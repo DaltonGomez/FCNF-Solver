@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 
 import matplotlib
-import numpy as np
 from matplotlib import pyplot as plt
 
 from src.AlphaGenetic.Population import Population
@@ -143,31 +142,6 @@ class GAvsMILP:
         plt.savefig(self.runID + ".png")
         plt.close(fig)
 
-    def plotGenerationsConvergenceAgainstMILP(self) -> None:
-        """Plots the convergence graph against the MILP's best found solution and gap/best bound at the end"""
-        # Get generations, MILP data and plt figure
-        numGenerations = len(self.geneticPop.convergenceStats)
-        generations = list(range(numGenerations))
-        cplexObjectiveValue = self.milpCplexSolver.getObjectiveValue()
-        cplexBestBound = self.milpCplexSolver.getBestBound()
-        fig = plt.figure()
-        ax = fig.add_subplot()
-        # Plot all data
-        ax.plot(generations, self.geneticPop.convergenceStats, label="Most Fit Individual", color="g")
-        ax.plot(generations, self.geneticPop.meanStats, label="Mean Pop. Fitness", color="b", linestyle="--")
-        ax.plot(generations, self.geneticPop.medianStats, label="Median Pop. Fitness", color="c", linestyle="--")
-        ax.plot(generations, np.full(numGenerations, cplexObjectiveValue), label="MILP Best Soln", color="y", linestyle=":")
-        ax.plot(generations, np.full(numGenerations, cplexBestBound), label="MILP Bound", color="r", linestyle=":")
-        # Add graph elements
-        ax.set_title("GA Convergence Against MILP over Equal Runtime")
-        ax.legend(loc=1)
-        ax.set_ylim(ymin=0, ymax=max(cplexObjectiveValue, max(self.geneticPop.meanStats))*1.25)
-        ax.set_ylabel("Obj. Value")
-        ax.set_xlabel("Runtime (in generations)")
-        # Save timestamped plot
-        plt.savefig(self.runID + ".png")
-        plt.close(fig)
-
     def saveOutputAsCSV(self) -> None:
         """Writes the output data to disc as a CSV file"""
         print("\nWriting output to disc as '" + self.runID + ".csv'...")
@@ -186,6 +160,8 @@ class GAvsMILP:
             self.writeRowToCSV(self.geneticPop.medianStats)
             self.writeRowToCSV(["Std Dev"])
             self.writeRowToCSV(self.geneticPop.stdDevStats)
+            self.writeRowToCSV(["Cumulative Evals"])
+            self.writeRowToCSV(self.geneticPop.cumulativeEvaluations)
             self.writeRowToCSV([])
         if self.isSolvedWithMILP is True:
             self.writeRowToCSV(self.buildMILPHeaderRow())
@@ -238,7 +214,7 @@ class GAvsMILP:
                 "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                 "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
                 "Mutation Strength", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
-                "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)"]
+                "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "Num Evals"]
 
     def buildGAData(self) -> list:
         """Builds a list containing the population's hyperparameters for exporting to a CSV"""
@@ -251,7 +227,8 @@ class GAvsMILP:
                 self.geneticPop.crossoverAttemptsPerGeneration, self.geneticPop.replacementStrategy,
                 self.geneticPop.mutationMethod, self.geneticPop.mutationRate, self.geneticPop.mutationStrength,
                 self.geneticPop.isDaemonUsed, self.geneticPop.daemonAnnealingRate, self.geneticPop.daemonStrategy,
-                self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.geneticRuntimeInSeconds]
+                self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.geneticRuntimeInSeconds,
+                self.geneticPop.individualsEvaluated]
 
     @staticmethod
     def buildMILPHeaderRow() -> list:

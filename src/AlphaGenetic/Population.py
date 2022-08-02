@@ -921,16 +921,16 @@ class Population:
         fig, axs = plt.subplots(2, 2)
         fig.suptitle("Population Fitness Statistics over Evaluations")
         # Most Fit Individual Subplot
-        axs[0, 0].plot(self.generationTimestamps, self.convergenceStats, color="b")
+        axs[0, 0].plot(self.cumulativeEvaluations, self.convergenceStats, color="b")
         axs[0, 0].set_title("Most Fit")
         # Mean Fitness Subplot
-        axs[0, 1].plot(self.generationTimestamps, self.meanStats, color="r")
+        axs[0, 1].plot(self.cumulativeEvaluations, self.meanStats, color="r")
         axs[0, 1].set_title("Mean")
         # Std. Dev. Subplot
-        axs[1, 0].plot(self.generationTimestamps, self.stdDevStats, color="g")
+        axs[1, 0].plot(self.cumulativeEvaluations, self.stdDevStats, color="g")
         axs[1, 0].set_title("Std. Dev.")
         # Median Subplot
-        axs[1, 1].plot(self.generationTimestamps, self.medianStats, color="m")
+        axs[1, 1].plot(self.cumulativeEvaluations, self.medianStats, color="m")
         axs[1, 1].set_title("Median")
         # Add spacing
         plt.subplots_adjust(left=0.2,

@@ -21,7 +21,6 @@ if __name__ == "__main__":
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
                               tuneOneDimAlpha=True, tuneManyDimAlpha=False,
                               tuneOptimizedArcs=True, tuneNonOptimizedArcs=False)
-    # TODO - Revise HP Tuner class to remove the "isDaemonUsed" key from the hpSpace dict and only use the kwargs
     # Update the HP tuning search space
     hpTuner.hpSpace = {
         "populationSize": [20],
@@ -41,7 +40,6 @@ if __name__ == "__main__":
         "mutationMethod": ["randomPerEdge"],
         "mutationRate": [0.05, 0.10, 0.25],
         "mutationStrength": [0.10, 0.25, 0.50],
-        "isDaemonUsed": [True],
         "daemonAnnealingRate": [0.10, 0.50, 1.0],
         "daemonStrategy": ["globalMedian"],
         "daemonStrength": [0.10, 0.25, 0.50]
@@ -74,7 +72,6 @@ self.hpSpace: Dict[str, List] = {
                         "mutationMethod": ["randomSingleArc", "randomSingleEdge", "randomPerArc", "randomPerEdge", "randomTotal"],
                         "mutationRate": [0.01, 0.05, 0.10, 0.25, 0.50],
                         "mutationStrength": [0.01, 0.05, 0.10, 0.25, 0.50],
-                        "isDaemonUsed": [True, False],
                         "daemonAnnealingRate": [0.25, 0.5, 1, 2],
                         "daemonStrategy": ["globalBinary", "globalMean", "globalMedian", "personalMean", "personalMedian"],
                         "daemonStrength": [0.5, 1, 2]

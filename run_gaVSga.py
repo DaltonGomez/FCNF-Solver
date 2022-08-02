@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # Alpha-GA population one hyperparameter setters
     gaVSga.geneticPopOne.setPopulationHyperparams(populationSize=20,
-                                                  numGenerations=40,
+                                                  numGenerations=20,
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
                                                     initializationDistribution="gaussian",
@@ -31,15 +31,15 @@ if __name__ == "__main__":
                                                  crossoverRate=1.0,
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
-    gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="nudgeAll",
+    gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
-                                                mutationStrength=0.50)
+                                                mutationStrength=0.25)
     gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Alpha-GA population two hyperparameter setters
     gaVSga.geneticPopTwo.setPopulationHyperparams(populationSize=20,
-                                                  numGenerations=40,
+                                                  numGenerations=20,
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perEdge",
                                                       initializationDistribution="gaussian",
@@ -52,8 +52,8 @@ if __name__ == "__main__":
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
-                                                mutationStrength=0.50)
-    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
+                                                mutationStrength=0.25)
+    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=1.0,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Solve the graph

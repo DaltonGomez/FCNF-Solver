@@ -122,7 +122,35 @@ class GAvsGA:
         print("\nRun complete!\n")
 
     def plotGeneticConvergenceAgainstAnother(self) -> None:
-        """Plots the convergence graph of the two alpha GA solutions"""
+        """Plots all the convergence graphs comparing the two GA evolutions"""
+        self.plotConvergenceOverGenerations()
+        self.plotConvergenceOverRuntime()
+        self.plotConvergenceOverEvaluations()
+
+    def plotConvergenceOverGenerations(self) -> None:
+        """Plots the convergence graph of the two alpha GA solutions over generations"""
+        gaOneGenerations = list(range(len(self.geneticPopOne.convergenceStats)))
+        gaTwoGenerations = list(range(len(self.geneticPopTwo.convergenceStats)))
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        # Plot all data
+        ax.plot(gaOneGenerations, self.geneticPopOne.convergenceStats, label="GA 1 Most Fit", color="b")
+        ax.plot(gaTwoGenerations, self.geneticPopTwo.convergenceStats, label="GA 2 Most Fit", color="r")
+        # ax.plot(gaOneTimestamps, self.geneticPopOne.meanStats, label="GA 1 Mean", color="r", linestyle="--")
+        # ax.plot(gaTwoTimestamps, self.geneticPopTwo.meanStats, label="GA 2 Mean", color="m", linestyle="--")
+        ax.plot(gaOneGenerations, self.geneticPopOne.medianStats, label="GA 1 Median", color="c", linestyle=":")
+        ax.plot(gaTwoGenerations, self.geneticPopTwo.medianStats, label="GA 2 Median", color="y", linestyle=":")
+        # Add graph elements
+        ax.set_title("GA Convergences Over Generations")
+        ax.legend(loc=1)
+        ax.set_ylabel("Obj. Value")
+        ax.set_xlabel("Generations")
+        # Save timestamped plot
+        plt.savefig(self.runID + "--generationConvergence.png")
+        plt.close(fig)
+
+    def plotConvergenceOverRuntime(self) -> None:
+        """Plots the convergence graph of the two alpha GA solutions over runtime"""
         gaOneTimestamps = self.geneticPopOne.generationTimestamps
         gaTwoTimestamps = self.geneticPopTwo.generationTimestamps
         fig = plt.figure()
@@ -135,12 +163,34 @@ class GAvsGA:
         ax.plot(gaOneTimestamps, self.geneticPopOne.medianStats, label="GA 1 Median", color="c", linestyle=":")
         ax.plot(gaTwoTimestamps, self.geneticPopTwo.medianStats, label="GA 2 Median", color="y", linestyle=":")
         # Add graph elements
-        ax.set_title("GA Convergence Against One Another")
+        ax.set_title("GA Convergences Over Runtime")
         ax.legend(loc=1)
         ax.set_ylabel("Obj. Value")
-        ax.set_xlabel("Runtime (in seconds)")
+        ax.set_xlabel("Runtime (in sec)")
         # Save timestamped plot
-        plt.savefig(self.runID + ".png")
+        plt.savefig(self.runID + "--runtimeConvergence.png")
+        plt.close(fig)
+
+    def plotConvergenceOverEvaluations(self) -> None:
+        """Plots the convergence graph of the two alpha GA solutions over runtime"""
+        gaOneEvals = self.geneticPopOne.cumulativeEvaluations
+        gaTwoEvals = self.geneticPopTwo.cumulativeEvaluations
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        # Plot all data
+        ax.plot(gaOneEvals, self.geneticPopOne.convergenceStats, label="GA 1 Most Fit", color="b")
+        ax.plot(gaTwoEvals, self.geneticPopTwo.convergenceStats, label="GA 2 Most Fit", color="r")
+        # ax.plot(gaOneTimestamps, self.geneticPopOne.meanStats, label="GA 1 Mean", color="r", linestyle="--")
+        # ax.plot(gaTwoTimestamps, self.geneticPopTwo.meanStats, label="GA 2 Mean", color="m", linestyle="--")
+        ax.plot(gaOneEvals, self.geneticPopOne.medianStats, label="GA 1 Median", color="c", linestyle=":")
+        ax.plot(gaTwoEvals, self.geneticPopTwo.medianStats, label="GA 2 Median", color="y", linestyle=":")
+        # Add graph elements
+        ax.set_title("GA Convergences Over Evaluations")
+        ax.legend(loc=1)
+        ax.set_ylabel("Obj. Value")
+        ax.set_xlabel("Individuals Evaluated")
+        # Save timestamped plot
+        plt.savefig(self.runID + "--evalsConvergence.png")
         plt.close(fig)
 
     def saveOutputAsCSV(self) -> None:
@@ -160,6 +210,8 @@ class GAvsGA:
         self.writeRowToCSV(self.geneticPopOne.medianStats)
         self.writeRowToCSV(["POP1 Std Dev"])
         self.writeRowToCSV(self.geneticPopOne.stdDevStats)
+        self.writeRowToCSV(["POP1 Cumulative Evals"])
+        self.writeRowToCSV(self.geneticPopOne.cumulativeEvaluations)
         self.writeRowToCSV([])
         self.writeRowToCSV(["POPULATION TWO"])
         self.writeRowToCSV(self.buildGAHeader())
@@ -174,6 +226,8 @@ class GAvsGA:
         self.writeRowToCSV(self.geneticPopTwo.medianStats)
         self.writeRowToCSV(["POP2 Std Dev"])
         self.writeRowToCSV(self.geneticPopTwo.stdDevStats)
+        self.writeRowToCSV(["POP2 Cumulative Evals"])
+        self.writeRowToCSV(self.geneticPopTwo.cumulativeEvaluations)
         self.writeRowToCSV([])
 
     def createCSV(self) -> None:
@@ -215,7 +269,7 @@ class GAvsGA:
                 "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                 "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
                 "Mutation Strength", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
-                "Daemon Strength", "GA Best Obj Val"]
+                "Daemon Strength", "GA Best Obj Val", "Num Evals"]
 
     def buildGA1Data(self) -> list:
         """Builds a list containing population 1's hyperparameters for exporting to a CSV"""
@@ -228,7 +282,7 @@ class GAvsGA:
                 self.geneticPopOne.crossoverAttemptsPerGeneration, self.geneticPopOne.replacementStrategy,
                 self.geneticPopOne.mutationMethod, self.geneticPopOne.mutationRate, self.geneticPopOne.mutationStrength,
                 self.geneticPopOne.isDaemonUsed, self.geneticPopOne.daemonAnnealingRate, self.geneticPopOne.daemonStrategy,
-                self.geneticPopOne.daemonStrength, self.gaSolutionOne.trueCost]
+                self.geneticPopOne.daemonStrength, self.gaSolutionOne.trueCost, self.geneticPopOne.individualsEvaluated]
 
     def buildGA2Data(self) -> list:
         """Builds a list containing population 2's hyperparameters for exporting to a CSV"""
@@ -241,4 +295,4 @@ class GAvsGA:
                 self.geneticPopTwo.crossoverAttemptsPerGeneration, self.geneticPopTwo.replacementStrategy,
                 self.geneticPopTwo.mutationMethod, self.geneticPopTwo.mutationRate, self.geneticPopTwo.mutationStrength,
                 self.geneticPopTwo.isDaemonUsed, self.geneticPopTwo.daemonAnnealingRate, self.geneticPopTwo.daemonStrategy,
-                self.geneticPopTwo.daemonStrength, self.gaSolutionTwo.trueCost]
+                self.geneticPopTwo.daemonStrength, self.gaSolutionTwo.trueCost, self.geneticPopTwo.individualsEvaluated]

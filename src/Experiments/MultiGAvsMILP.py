@@ -93,7 +93,7 @@ class MultiGAvsMILP:
                     "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                     "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
                     "Mutation Strength", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
-                    "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "MILP Obj Val",
+                    "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "GA Num Evals", "MILP Obj Val",
                     "MILP Runtime (sec)", "Time Limit", "Status", "Status Code", "Best Bound",
                     "MILP Gap", "GA Gap", "MILP Gap - GA GAP"]
         # Build Output Header

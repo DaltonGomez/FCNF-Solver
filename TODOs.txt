@@ -5,6 +5,7 @@ GENERAL ARCHITECTURE/REPO:
 # TODO - Continue to build out the README with documentation
 # TODO - Add unit and integration tests
 # TODO - Break out GA operators as interfaces via a strategy pattern
+# TODO - Revise code to be less verbose/more concise & Pythonic!
 # ASK - Would any major improvements in speed results from adding parallelism to solve a generation/tune over populations?
 # ASK - Would anything major be gained by going to the lower level CPLEX library instead of docplex?
 
@@ -20,7 +21,6 @@ NETWORK GENERATION/VISUALIZATION:
 ALPHA GENETIC ALGORITHM:
 =====================================
 # TODO - Add a strategy to log the best known individual and prevent its alpha table from ever being overwritten (thus making the population strictly convergent)
-# TODO - Add counter for the number of individual evaluations in the GA evolution
 # TODO - Revise AlphaSolverCPLEX to be robust to key errors in the solution values dict returned by CPLEX (see run_tuneManyDimOptArcs.py)
 # ASK - Should the topological-based operators (i.e. crossover and mutation based on selected paths/pathlets) be revisited?
 # NOTE - See below for proposed pseudocode of how to compute pathlets:
@@ -34,10 +34,10 @@ ALPHA GENETIC ALGORITHM:
 
 GA EXPERIMENTS:
 =====================================
-# TODO - Collect data on the number of fitness evaluations used to solve the GA and MILP and use that as a comparison metric
 # TODO - Modify MILP class to build model on initialization, then clear solution values and resolve in the HP tuner (thus reducing the time wasted rebuilding the same model)
 # TODO - Measure population diversity over evolution at genotypic (not just the phenotypic) level
 # TODO - Revise the "naive hillclimb" approach to be a Gaussian nudge rather than hypermutation
+# ASK - Does the naive hillclimb need to be nudge-mutation-based?
 # ASK - Would a random search strategy work better than grid search for hyperparameter tuning?
 # ASK - What information could be gained from a sensitivity/perturbation analysis on alpha values?
 # ASK - Would a brief, interrupted run of CPLEX-MILP generating initial alpha values for the population improve overall performance?

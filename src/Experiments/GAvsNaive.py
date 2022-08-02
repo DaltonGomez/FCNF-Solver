@@ -102,10 +102,11 @@ class GAvsNaive:
                   str(self.geneticPop.populationSize) + " for " + str(
                     self.geneticPop.numGenerations) + " generations...\n")
             naiveStartTime = datetime.now()
-            self.naiveSolution = self.naivePop.solveWithNaiveHillClimb(printGenerations=True, drawing=self.isDrawing,
-                                                                       drawLabels=self.isLabeling,
-                                                                       isGraphing=self.isGraphing,
-                                                                       runID=self.runID + "--HC")
+            self.naiveSolution = self.naivePop.solveWithNaiveHypermutationHillClimb(printGenerations=True,
+                                                                                    drawing=self.isDrawing,
+                                                                                    drawLabels=self.isLabeling,
+                                                                                    isGraphing=self.isGraphing,
+                                                                                    runID=self.runID + "--HillClimb")
             print("\nNaive Hill Climb Complete!!!\nBest Solution Found = " + str(self.naiveSolution.trueCost))
             # Draw if expected
             if self.isDrawing is True:
@@ -160,14 +161,16 @@ class GAvsNaive:
             self.writeRowToCSV([])
             self.writeRowToCSV(["GA Generation Timestamps"])
             self.writeRowToCSV(self.geneticPop.generationTimestamps)
-            self.writeRowToCSV(["Most Fit Ind."])
+            self.writeRowToCSV(["GA Most Fit Ind."])
             self.writeRowToCSV(self.geneticPop.convergenceStats)
-            self.writeRowToCSV(["Mean Fitness"])
+            self.writeRowToCSV(["GA Mean Fitness"])
             self.writeRowToCSV(self.geneticPop.meanStats)
-            self.writeRowToCSV(["Median Fitness"])
+            self.writeRowToCSV(["GA Median Fitness"])
             self.writeRowToCSV(self.geneticPop.medianStats)
-            self.writeRowToCSV(["Std Dev"])
+            self.writeRowToCSV(["GA Std Dev"])
             self.writeRowToCSV(self.geneticPop.stdDevStats)
+            self.writeRowToCSV(["GA Cumulative Evals"])
+            self.writeRowToCSV(self.geneticPop.cumulativeEvaluations)
             self.writeRowToCSV([])
         if self.isSolvedWithNaive is True:
             self.writeRowToCSV(self.buildNaiveHeaderRow())
@@ -182,6 +185,8 @@ class GAvsNaive:
             self.writeRowToCSV(self.naivePop.medianStats)
             self.writeRowToCSV(["Naive Std Dev"])
             self.writeRowToCSV(self.naivePop.stdDevStats)
+            self.writeRowToCSV(["Naive Cumulative Evals"])
+            self.writeRowToCSV(self.naivePop.cumulativeEvaluations)
 
     def createCSV(self) -> None:
         """Creates a CSV file for the output data of the run and writes a header"""
@@ -222,7 +227,7 @@ class GAvsNaive:
                 "Init Strategy", "Init Dist", "Init Param 0", "Init Param 1", "Selection", "Tourny Size",
                 "Crossover", "CO Rate", "CO Attempts/Gen", "Replacement Strategy", "Mutation", "Mutate Rate",
                 "Mutation Strength", "is Daemon Used?", "Daemon Annealing Rate", "Daemon Strategy",
-                "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)"]
+                "Daemon Strength", "GA Best Obj Val", "GA Runtime (sec)", "Num Evals"]
 
     def buildGAData(self) -> list:
         """Builds a list containing the population's hyperparameters for exporting to a CSV"""
@@ -235,13 +240,14 @@ class GAvsNaive:
                 self.geneticPop.crossoverAttemptsPerGeneration, self.geneticPop.replacementStrategy,
                 self.geneticPop.mutationMethod, self.geneticPop.mutationRate, self.geneticPop.mutationStrength,
                 self.geneticPop.isDaemonUsed, self.geneticPop.daemonAnnealingRate, self.geneticPop.daemonStrategy,
-                self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.gaRuntimeInSeconds]
+                self.geneticPop.daemonStrength, self.gaSolution.trueCost, self.gaRuntimeInSeconds,
+                self.geneticPop.individualsEvaluated]
 
     @staticmethod
     def buildNaiveHeaderRow() -> list:
         """Builds a list containing the solution detail headers of the naive solution"""
-        return ["Naive Obj Val", "Naive Runtime (sec)"]
+        return ["Naive Obj Val", "Naive Runtime (sec)", "Naive Evals"]
 
     def buildNaiveDataRow(self) -> list:
         """Builds a list containing the solution details of the naive solution"""
-        return [self.naiveSolution.trueCost, self.naiveRuntimeInSeconds]
+        return [self.naiveSolution.trueCost, self.naiveRuntimeInSeconds, self.naivePop.individualsEvaluated]
