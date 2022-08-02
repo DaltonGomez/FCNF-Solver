@@ -854,6 +854,12 @@ class Population:
 
     def plotEvolutionStatistics(self, runID="") -> None:
         """Renders MatPlotLib graphs for each of the evolution statistics lists"""
+        self.plotEvolutionStatisticsOverGenerations(runID=runID)
+        self.plotEvolutionStatisticsOverRuntime(runID=runID)
+        self.plotEvolutionStatisticsOverEvaluations(runID=runID)
+
+    def plotEvolutionStatisticsOverGenerations(self, runID="") -> None:
+        """Renders MatPlotLib graphs for each of the evolution statistics over the generations"""
         # Get generations and build figure/subplots
         generations = list(range(len(self.convergenceStats)))
         fig, axs = plt.subplots(2, 2)
@@ -878,7 +884,63 @@ class Population:
                             wspace=0.6,
                             hspace=0.4)
         # Save timestamped plot
-        plt.savefig("GeneticEvoStats--" + runID + ".png")
+        plt.savefig("EvoStatsOverGens--" + runID + ".png")
+        plt.close(fig)
+
+    def plotEvolutionStatisticsOverRuntime(self, runID="") -> None:
+        """Renders MatPlotLib graphs for each of the evolution statistics over the runtime in seconds"""
+        # Build figure/subplots
+        fig, axs = plt.subplots(2, 2)
+        fig.suptitle("Population Fitness Statistics over Runtime (in sec)")
+        # Most Fit Individual Subplot
+        axs[0, 0].plot(self.generationTimestamps, self.convergenceStats, color="b")
+        axs[0, 0].set_title("Most Fit")
+        # Mean Fitness Subplot
+        axs[0, 1].plot(self.generationTimestamps, self.meanStats, color="r")
+        axs[0, 1].set_title("Mean")
+        # Std. Dev. Subplot
+        axs[1, 0].plot(self.generationTimestamps, self.stdDevStats, color="g")
+        axs[1, 0].set_title("Std. Dev.")
+        # Median Subplot
+        axs[1, 1].plot(self.generationTimestamps, self.medianStats, color="m")
+        axs[1, 1].set_title("Median")
+        # Add spacing
+        plt.subplots_adjust(left=0.2,
+                            bottom=0.1,
+                            right=0.9,
+                            top=0.9,
+                            wspace=0.6,
+                            hspace=0.4)
+        # Save timestamped plot
+        plt.savefig("EvoStatsOverRuntime--" + runID + ".png")
+        plt.close(fig)
+
+    def plotEvolutionStatisticsOverEvaluations(self, runID="") -> None:
+        """Renders MatPlotLib graphs for each of the evolution statistics over the number of evaluations"""
+        # Build figure/subplots
+        fig, axs = plt.subplots(2, 2)
+        fig.suptitle("Population Fitness Statistics over Evaluations")
+        # Most Fit Individual Subplot
+        axs[0, 0].plot(self.generationTimestamps, self.convergenceStats, color="b")
+        axs[0, 0].set_title("Most Fit")
+        # Mean Fitness Subplot
+        axs[0, 1].plot(self.generationTimestamps, self.meanStats, color="r")
+        axs[0, 1].set_title("Mean")
+        # Std. Dev. Subplot
+        axs[1, 0].plot(self.generationTimestamps, self.stdDevStats, color="g")
+        axs[1, 0].set_title("Std. Dev.")
+        # Median Subplot
+        axs[1, 1].plot(self.generationTimestamps, self.medianStats, color="m")
+        axs[1, 1].set_title("Median")
+        # Add spacing
+        plt.subplots_adjust(left=0.2,
+                            bottom=0.1,
+                            right=0.9,
+                            top=0.9,
+                            wspace=0.6,
+                            hspace=0.4)
+        # Save timestamped plot
+        plt.savefig("EvoStatsOverEvals--" + runID + ".png")
         plt.close(fig)
 
     def logGenerationTimestamp(self, startTime: datetime) -> None:
