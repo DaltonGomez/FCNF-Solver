@@ -74,10 +74,12 @@ class Population:
         # =======================
         # EVOLUTION STATISTICS
         # -----------------------
+        self.individualsEvaluated: int = 0  # Counter for the number of alpha-relaxed LPs solved/objective function evaluations
         self.convergenceStats: List = []  # Logs the objective value of the best individual in the population at each generation
         self.meanStats: List = []  # Logs the mean objective value of the population at each generation
         self.medianStats: List = []  # Logs the median objective value of the population at each generation
         self.stdDevStats: List = []  # Logs the standard deviation of the population at each generation
+        self.cumulativeEvaluations: List = []  # Logs the cumulative number of evaluations at each generation
 
     # ====================================================
     # ============== HYPERPARAMETER SETTERS ==============
@@ -339,8 +341,33 @@ class Population:
             print("ERROR: Individual " + str(individualNum) + " is infeasible! Hypermutating individual...")
             self.hypermutateIndividual(individualNum)
             self.solveIndividual(individualNum)
-        # Reset solver
+        # Reset solver and increment individuals evaluated
         self.solver.resetSolver()
+        self.individualsEvaluated += 1
+
+    def solveProposedIndividual(self, updatedAlphas: ndarray) -> Individual:
+        """On input of an alpha array, constructs a new individual, not in the population, and solves/evaluates it"""
+        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
+        newIndividual = Individual(-1, self.graph, updatedAlphas)
+        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
+        self.solver.solveModel()
+        # Write expressed network output data to individual
+        newIndividual.isSolved = True
+        newIndividual.arcFlows = self.solver.getArcFlowsDict()
+        newIndividual.srcFlows = self.solver.getSrcFlowsList()
+        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
+        if self.solver.isOptimizedArcSelections is True:
+            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
+        newIndividual.trueCost = self.solver.calculateTrueCost()
+        newIndividual.fakeCost = self.solver.getObjectiveValue()
+        # If no solution was found, return unsolved individual of infinite cost
+        if newIndividual.trueCost == 0:
+            print("ERROR: Proposed individual " + str(-1) + " is infeasible! Returning unsolved with infinite cost...")
+            newIndividual.trueCost = sys.maxsize
+        # Reset solver and increment individuals evaluated
+        self.solver.resetSolver()
+        self.individualsEvaluated += 1
+        return newIndividual
 
     def writeIndividualsSolution(self, individual: Individual) -> FlowNetworkSolution:
         """Writes the individual's output to as solution object"""
@@ -630,9 +657,8 @@ class Population:
     # ============== DAEMON UPDATE METHODS ==============
     # ===================================================
     def applyDaemonUpdate(self, individualID: int) -> None:
-        """Applies the daemon update strategy to the individual"""
-        # NOTE - All current daemon methods only work with the perEdge initialization strategy
-        # TODO - Update to account for other initialization strategies
+        """Applies the daemon update strategy to the individual
+        (WARN - All current daemon methods only work with the perEdge initialization strategy)"""
         print("Doing a daemon update to individual " + str(individualID) + "...")
         currentIndividual = self.population[individualID]
         while True:
@@ -706,25 +732,8 @@ class Population:
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
                             updatedAlphas[(edgeIndex, cap)] = newAlpha
-        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
-        newIndividual = Individual(-1, self.graph, updatedAlphas)
-        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
-        self.solver.solveModel()
-        # Write expressed network output data to individual
-        newIndividual.isSolved = True
-        newIndividual.arcFlows = self.solver.getArcFlowsDict()
-        newIndividual.srcFlows = self.solver.getSrcFlowsList()
-        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
-        if self.solver.isOptimizedArcSelections is True:
-            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
-        newIndividual.trueCost = self.solver.calculateTrueCost()
-        newIndividual.fakeCost = self.solver.getObjectiveValue()
-        # If no solution was found, hypermutate individual and recursively solve until solution is found
-        if newIndividual.trueCost == 0:
-            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
-            newIndividual.trueCost = sys.maxsize
-        # Reset solver
-        self.solver.resetSolver()
+        # Hand off daemon updated individual to solver
+        newIndividual = self.solveProposedIndividual(updatedAlphas)
         return newIndividual
 
     def tryGlobalMeanDaemon(self, individualID: int) -> Individual:
@@ -748,25 +757,8 @@ class Population:
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
                             updatedAlphas[(edgeIndex, cap)] = newAlpha
-        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
-        newIndividual = Individual(-1, self.graph, updatedAlphas)
-        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
-        self.solver.solveModel()
-        # Write expressed network output data to individual
-        newIndividual.isSolved = True
-        newIndividual.arcFlows = self.solver.getArcFlowsDict()
-        newIndividual.srcFlows = self.solver.getSrcFlowsList()
-        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
-        if self.solver.isOptimizedArcSelections is True:
-            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
-        newIndividual.trueCost = self.solver.calculateTrueCost()
-        newIndividual.fakeCost = self.solver.getObjectiveValue()
-        # If no solution was found, hypermutate individual and recursively solve until solution is found
-        if newIndividual.trueCost == 0:
-            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
-            newIndividual.trueCost = sys.maxsize
-        # Reset solver
-        self.solver.resetSolver()
+        # Hand off daemon updated individual to solver
+        newIndividual = self.solveProposedIndividual(updatedAlphas)
         return newIndividual
 
     def tryGlobalMedianDaemon(self, individualID: int) -> Individual:
@@ -790,25 +782,8 @@ class Population:
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
                             updatedAlphas[(edgeIndex, cap)] = newAlpha
-        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
-        newIndividual = Individual(-1, self.graph, updatedAlphas)
-        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
-        self.solver.solveModel()
-        # Write expressed network output data to individual
-        newIndividual.isSolved = True
-        newIndividual.arcFlows = self.solver.getArcFlowsDict()
-        newIndividual.srcFlows = self.solver.getSrcFlowsList()
-        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
-        if self.solver.isOptimizedArcSelections is True:
-            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
-        newIndividual.trueCost = self.solver.calculateTrueCost()
-        newIndividual.fakeCost = self.solver.getObjectiveValue()
-        # If no solution was found, hypermutate individual and recursively solve until solution is found
-        if newIndividual.trueCost == 0:
-            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
-            newIndividual.trueCost = sys.maxsize
-        # Reset solver
-        self.solver.resetSolver()
+        # Hand off daemon updated individual to solver
+        newIndividual = self.solveProposedIndividual(updatedAlphas)
         return newIndividual
 
     def tryPersonalMeanDaemon(self, individualID: int) -> Individual:
@@ -833,25 +808,8 @@ class Population:
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
                             updatedAlphas[(edgeIndex, cap)] = newAlpha
-        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
-        newIndividual = Individual(-1, self.graph, updatedAlphas)
-        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
-        self.solver.solveModel()
-        # Write expressed network output data to individual
-        newIndividual.isSolved = True
-        newIndividual.arcFlows = self.solver.getArcFlowsDict()
-        newIndividual.srcFlows = self.solver.getSrcFlowsList()
-        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
-        if self.solver.isOptimizedArcSelections is True:
-            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
-        newIndividual.trueCost = self.solver.calculateTrueCost()
-        newIndividual.fakeCost = self.solver.getObjectiveValue()
-        # If no solution was found, hypermutate individual and recursively solve until solution is found
-        if newIndividual.trueCost == 0:
-            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
-            newIndividual.trueCost = sys.maxsize
-        # Reset solver
-        self.solver.resetSolver()
+        # Hand off daemon updated individual to solver
+        newIndividual = self.solveProposedIndividual(updatedAlphas)
         return newIndividual
 
     def tryPersonalMedianDaemon(self, individualID: int) -> Individual:
@@ -875,25 +833,8 @@ class Population:
                     if self.initializationStrategy == "perEdge":
                         for cap in range(self.graph.numArcsPerEdge):
                             updatedAlphas[(edgeIndex, cap)] = newAlpha
-        # Instantiate attempted individual, overwrite objective function with new alpha values and solve
-        newIndividual = Individual(-1, self.graph, updatedAlphas)
-        self.solver.updateObjectiveFunction(newIndividual.alphaValues)
-        self.solver.solveModel()
-        # Write expressed network output data to individual
-        newIndividual.isSolved = True
-        newIndividual.arcFlows = self.solver.getArcFlowsDict()
-        newIndividual.srcFlows = self.solver.getSrcFlowsList()
-        newIndividual.sinkFlows = self.solver.getSinkFlowsList()
-        if self.solver.isOptimizedArcSelections is True:
-            newIndividual.arcFlows = self.solver.optimizeArcSelection(newIndividual.arcFlows)
-        newIndividual.trueCost = self.solver.calculateTrueCost()
-        newIndividual.fakeCost = self.solver.getObjectiveValue()
-        # If no solution was found, hypermutate individual and recursively solve until solution is found
-        if newIndividual.trueCost == 0:
-            print("ERROR: Individual " + str(-1) + " is infeasible! Throwing out attempted daemon update...")
-            newIndividual.trueCost = sys.maxsize
-        # Reset solver
-        self.solver.resetSolver()
+        # Hand off daemon updated individual to solver
+        newIndividual = self.solveProposedIndividual(updatedAlphas)
         return newIndividual
 
     # ==========================================================
@@ -909,6 +850,7 @@ class Population:
         self.meanStats.append(np.mean(fitnessArray))
         self.medianStats.append(np.median(fitnessArray))
         self.stdDevStats.append(np.std(fitnessArray))
+        self.cumulativeEvaluations.append(self.individualsEvaluated)
 
     def plotEvolutionStatistics(self, runID="") -> None:
         """Renders MatPlotLib graphs for each of the evolution statistics lists"""
@@ -949,7 +891,7 @@ class Population:
     # ===============================================================
     # ============== HYPER-MUTATION/HILL CLIMB METHODS ==============
     # ===============================================================
-    def solveWithNaiveHillClimb(self, printGenerations=True, drawing=True, drawLabels=False, isGraphing=True,
+    def solveWithNaiveHypermutationHillClimb(self, printGenerations=True, drawing=True, drawLabels=False, isGraphing=True,
                                 runID="") -> FlowNetworkSolution:
         """Solves the population with a naive hill climb method"""
         # Initialize Population and Solve
@@ -964,7 +906,7 @@ class Population:
         while self.isTerminated is not True:
             print("Starting Generation " + str(self.currentGeneration) + "...")
             # Execute Hill Climb and Solve
-            self.naiveHillClimb()
+            self.naiveHillClimbByHypermutation()
             self.solvePopulation()
             # Update Current Best Individual and Evaluate Termination
             bestIndividual = self.getMostFitIndividual()
@@ -987,7 +929,7 @@ class Population:
         # Return Best Solution Discovered
         return self.bestKnownSolution
 
-    def naiveHillClimb(self) -> None:
+    def naiveHillClimbByHypermutation(self) -> None:
         """Hypermutates all but the best individual"""
         sortedPopulation = self.rankPopulation()
         for i in range(1, self.populationSize):

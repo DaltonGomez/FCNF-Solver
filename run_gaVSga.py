@@ -32,8 +32,8 @@ if __name__ == "__main__":
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="nudgeAll",
-                                                mutationRate=0.20,
-                                                mutationStrength=0.25)
+                                                mutationRate=0.10,
+                                                mutationStrength=0.50)
     gaVSga.geneticPopOne.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
@@ -51,8 +51,8 @@ if __name__ == "__main__":
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
-                                                mutationRate=0.20,
-                                                mutationStrength=0.25)
+                                                mutationRate=0.10,
+                                                mutationStrength=0.50)
     gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 

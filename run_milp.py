@@ -14,6 +14,7 @@ python3 run_milp.py
 """
 
 if __name__ == "__main__":
+    # TODO - Update to produce graphs/output runtime data
     inputGraph = "large_3.p"
     graphInstance = CandidateGraph()
     graphInstance = graphInstance.loadCandidateGraph(inputGraph)
