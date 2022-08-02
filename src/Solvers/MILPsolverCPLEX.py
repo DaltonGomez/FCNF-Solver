@@ -168,36 +168,6 @@ class MILPsolverCPLEX:
         # self.verifyTrueCost()
         self.extractRuntimeData()
 
-    def verifyTrueCost(self) -> float:
-        """Checks the true cost of the MILP's output against the solver's returned objective value"""
-        srcFlows = self.model.solution.get_value_list(self.sourceFlowVars)
-        sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
-        arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
-        trueCost = 0.0
-        if self.isSourceSinkCharged is True:
-            for s in range(self.graph.numSources):
-                trueCost += self.graph.sourceVariableCostsArray[s] * srcFlows[s]
-            for t in range(self.graph.numSinks):
-                trueCost += self.graph.sinkVariableCostsArray[t] * sinkFlows[t]
-        for edge in range(self.graph.numEdges):
-            for cap in range(self.graph.numArcsPerEdge):
-                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
-                try:
-                    if arcFlows[(edge, cap)] > 0.0:
-                        arcVariableCost = self.graph.getArcVariableCostFromEdgeCapIndices(edge, cap)
-                        arcFixedCost = self.graph.getArcFixedCostFromEdgeCapIndices(edge, cap)
-                        trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
-                except KeyError:
-                    print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
-        # Print verification check
-        if round(self.model.solution.get_objective_value()) == round(trueCost):
-            print("\nMILP cost is verified accurate!\n")
-        else:
-            print("\nERROR - TRUE COST OF SOLUTION DOES NOT MATCH THE SOLVER'S OBJECTIVE VALUE!")
-            print("True Cost = " + str(trueCost))
-            print("Solver Obj. Value = " + str(self.model.solution.get_objective_value()))
-        return trueCost
-
     def extractRuntimeData(self) -> None:
         """Pulls runtime data out of the progress listener after solving"""
         cplexRuntimeDate = self.progressDataRecorder.recorded
@@ -208,6 +178,23 @@ class MILPsolverCPLEX:
             self.runtimeBestBounds.append(progressData[3])  # Index 3 is the current known best bound
             self.runtimeGaps.append(progressData[4])  # Index 4 is the current gap
 
+    def cleanArcFlowsKeyErrors(self) -> dict:
+        """Iterates over CPLEX's dictionary of arc flows and resolves any key errors by assuming 0.0"""
+        print("\nResolving any key errors from CPLEX before writing solution...")
+        cplexArcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
+        for edge in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
+                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the arc flows dict
+                try:
+                    if cplexArcFlows[(edge, cap)] >= 0.0:
+                        continue
+                except KeyError:
+                    print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
+                    cplexArcFlows[(edge, cap)] = 0.0
+                    print(str((edge, cap)))
+                    print(cplexArcFlows[(edge, cap)])
+        return cplexArcFlows
+
     def writeSolution(self) -> FlowNetworkSolution:
         """Writes out the solution instance"""
         if self.isRun is False:
@@ -216,7 +203,7 @@ class MILPsolverCPLEX:
             objValue = self.model.solution.get_objective_value()
             srcFlows = self.model.solution.get_value_list(self.sourceFlowVars)
             sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
-            arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
+            arcFlows = self.cleanArcFlowsKeyErrors()
             thisSolution = FlowNetworkSolution(self.graph, self.minTargetFlow, objValue, objValue, srcFlows,
                                                sinkFlows, arcFlows, "cplex_milp", self.isOneArcPerEdge,
                                                self.isSourceSinkCapacitated, self.isSourceSinkCharged,
@@ -313,8 +300,8 @@ class MILPsolverCPLEX:
                 try:
                     thisEdgeFlow += rawArcFlows[(edgeIndex, arcIndex)]
                 except KeyError:
-                    print("ERROR: Key error on solution.arcFlows[" + str(
-                        (edgeIndex, arcIndex)) + "]! Assuming CPLEX decided zero flow...")
+                    print("ERROR: Key error on solution.arcFlows[" + str((edgeIndex, arcIndex)) + "]! Assuming CPLEX decided zero flow...")
+                    rawArcFlows[(edgeIndex, arcIndex)] = 0.0
             # Determine the optimal arc capacity to assign the edge
             optimalCapIndex = self.getOptimalArcCapIndex(thisEdgeFlow)
             # Iterate back over arcs, only opening/assigning flow to the optimal arc; close all others
@@ -331,3 +318,33 @@ class MILPsolverCPLEX:
         for arcCapIndex in range(self.graph.numArcsPerEdge):
             if self.graph.possibleArcCapsArray[arcCapIndex] >= totalAssignedFlow:
                 return arcCapIndex
+
+    def verifyTrueCost(self) -> float:
+        """Checks the true cost of the MILP's output against the solver's returned objective value"""
+        srcFlows = self.model.solution.get_value_list(self.sourceFlowVars)
+        sinkFlows = self.model.solution.get_value_list(self.sinkFlowVars)
+        arcFlows = self.model.solution.get_value_dict(self.arcFlowVars)
+        trueCost = 0.0
+        if self.isSourceSinkCharged is True:
+            for s in range(self.graph.numSources):
+                trueCost += self.graph.sourceVariableCostsArray[s] * srcFlows[s]
+            for t in range(self.graph.numSinks):
+                trueCost += self.graph.sinkVariableCostsArray[t] * sinkFlows[t]
+        for edge in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
+                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the solution object
+                try:
+                    if arcFlows[(edge, cap)] > 0.0:
+                        arcVariableCost = self.graph.getArcVariableCostFromEdgeCapIndices(edge, cap)
+                        arcFixedCost = self.graph.getArcFixedCostFromEdgeCapIndices(edge, cap)
+                        trueCost += arcVariableCost * arcFlows[(edge, cap)] + arcFixedCost
+                except KeyError:
+                    print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
+        # Print verification check
+        if round(self.model.solution.get_objective_value()) == round(trueCost):
+            print("\nMILP cost is verified accurate!\n")
+        else:
+            print("\nERROR - TRUE COST OF SOLUTION DOES NOT MATCH THE SOLVER'S OBJECTIVE VALUE!")
+            print("True Cost = " + str(trueCost))
+            print("Solver Obj. Value = " + str(self.model.solution.get_objective_value()))
+        return trueCost

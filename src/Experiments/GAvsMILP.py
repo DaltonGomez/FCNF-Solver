@@ -99,12 +99,10 @@ class GAvsMILP:
             if self.isRace is True:
                 self.milpCplexSolver.setTimeLimit(self.geneticRuntimeInSeconds)
             # Call CPLEX to solve MILP
-            self.milpCplexSolver.findSolution(printDetails=False)
+            self.milpSolution = self.milpCplexSolver.findSolution(printDetails=False)
             print("\nCPLEX MILP Solver Complete!!!\nBest Solution Found = " + str(self.milpCplexSolver.getObjectiveValue()))
             # Draw if expected
             if self.isDrawing is True:
-                print("\nFLAGGING ANY KEY ERRORS FROM CPLEX...")
-                self.milpSolution = self.milpCplexSolver.writeSolution()
                 milpVis = SolutionVisualizer(self.milpSolution)
                 if self.isLabeling is True:
                     milpVis.drawLabeledSolution(leadingText="MILP_")

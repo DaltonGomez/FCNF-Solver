@@ -62,12 +62,10 @@ class MILP:
         print("\n============================================================================")
         print("Solving the " + self.graphName + " graph with a MILP formulation in CPLEX...\n")
         # Call CPLEX to solve MILP
-        self.milpCplexSolver.findSolution(printDetails=False)
+        self.milpSolution = self.milpCplexSolver.findSolution(printDetails=False)
         print("\nCPLEX MILP Solver Complete!!!\nBest Solution Found = " + str(self.milpCplexSolver.getObjectiveValue()))
         # Draw if expected
         if self.isDrawing is True:
-            print("\nFLAGGING ANY KEY ERRORS FROM CPLEX...")
-            self.milpSolution = self.milpCplexSolver.writeSolution()
             milpVis = SolutionVisualizer(self.milpSolution)
             if self.isLabeling is True:
                 milpVis.drawLabeledSolution(leadingText="MILP_")
