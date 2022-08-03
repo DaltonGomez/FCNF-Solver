@@ -275,7 +275,22 @@ class AlphaSolverCPLEX:
                 # Update maximum capacity value for this edge
                 thisFlow = solverFlows[(edge, 0)]
                 arcFlows[(edge, largestCapIndex)] = thisFlow
-        return arcFlows
+        cleanArcFlows = self.cleanArcFlowsKeyErrors(arcFlows)
+        return cleanArcFlows
+
+    def cleanArcFlowsKeyErrors(self, uncleanArcFlows: dict) -> dict:
+        """Iterates over CPLEX's dictionary of arc flows and resolves any key errors by assuming 0.0"""
+        print("\nResolving any key errors from CPLEX before writing solution...")
+        for edge in range(self.graph.numEdges):
+            for cap in range(self.graph.numArcsPerEdge):
+                # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the arc flows dict
+                try:
+                    if uncleanArcFlows[(edge, cap)] >= 0.0:
+                        continue
+                except KeyError:
+                    print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
+                    uncleanArcFlows[(edge, cap)] = 0.0
+        return uncleanArcFlows
 
     def getSrcFlowsList(self) -> list:
         """Returns the list of source flows"""

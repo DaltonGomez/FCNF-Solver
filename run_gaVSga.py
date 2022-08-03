@@ -15,12 +15,12 @@ if __name__ == "__main__":
     # Input graph and experiment object w/ options
     inputGraph = "massive_2"
     gaVSga = GAvsGA(inputGraph, isPop1OneDimAlpha=True, isPop1ArcOptimized=True,
-                    isPop2OneDimAlpha=True, isPop2ArcOptimized=True,
-                    isDrawing=False, isLabeling=True, isGraphing=True)
+                    isPop2OneDimAlpha=False, isPop2ArcOptimized=True,
+                    isDrawing=True, isLabeling=True, isGraphing=True)
 
     # Alpha-GA population one hyperparameter setters
-    gaVSga.geneticPopOne.setPopulationHyperparams(populationSize=20,
-                                                  numGenerations=20,
+    gaVSga.geneticPopOne.setPopulationHyperparams(populationSize=25,
+                                                  numGenerations=50,
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
                                                     initializationDistribution="gaussian",
@@ -29,7 +29,7 @@ if __name__ == "__main__":
                                                            tournamentSize=5)
     gaVSga.geneticPopOne.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                                  crossoverRate=1.0,
-                                                 crossoverAttemptsPerGeneration=1,
+                                                 crossoverAttemptsPerGeneration=2,
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopOne.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
@@ -38,8 +38,8 @@ if __name__ == "__main__":
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Alpha-GA population two hyperparameter setters
-    gaVSga.geneticPopTwo.setPopulationHyperparams(populationSize=20,
-                                                  numGenerations=20,
+    gaVSga.geneticPopTwo.setPopulationHyperparams(populationSize=25,
+                                                  numGenerations=50,
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perEdge",
                                                       initializationDistribution="gaussian",
@@ -48,12 +48,12 @@ if __name__ == "__main__":
                                                            tournamentSize=5)
     gaVSga.geneticPopTwo.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                                  crossoverRate=1.0,
-                                                 crossoverAttemptsPerGeneration=1,
+                                                 crossoverAttemptsPerGeneration=2,
                                                  replacementStrategy="replaceWeakestTwo")
     gaVSga.geneticPopTwo.setMutationHyperparams(mutationMethod="randomPerEdge",
                                                 mutationRate=0.10,
                                                 mutationStrength=0.25)
-    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=1.0,
+    gaVSga.geneticPopTwo.setDaemonHyperparams(isDaemonUsed=True, daemonAnnealingRate=0.25,
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Solve the graph

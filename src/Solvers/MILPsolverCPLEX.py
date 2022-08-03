@@ -191,8 +191,6 @@ class MILPsolverCPLEX:
                 except KeyError:
                     print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
                     cplexArcFlows[(edge, cap)] = 0.0
-                    print(str((edge, cap)))
-                    print(cplexArcFlows[(edge, cap)])
         return cplexArcFlows
 
     def writeSolution(self) -> FlowNetworkSolution:
