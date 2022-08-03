@@ -13,14 +13,14 @@ python3 run_gaVSmilp.py
 
 if __name__ == "__main__":
     # Input graph and experiment object w/ options
-    inputGraph = "test_0"
+    inputGraph = "massive_2"
     gaVSmilp = GAvsMILP(inputGraph, isSolvedWithGeneticAlg=True, isOneDimAlphaTable=True,
-                        isOptimizedArcSelections=True, isSolvedWithMILP=True, isRace=True,
-                        isDrawing=True, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
+                        isOptimizedArcSelections=True, isSolvedWithMILP=False, isRace=True,
+                        isDrawing=False, isLabeling=True, isGraphing=True, isOutputtingCPLEX=True)
 
     # Alpha-GA population attribute & hyperparameters
-    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=20,
-                                                 numGenerations=40,
+    gaVSmilp.geneticPop.setPopulationHyperparams(populationSize=5,
+                                                 numGenerations=5,
                                                  terminationMethod="setGenerations")
     gaVSmilp.geneticPop.setInitializationHyperparams(initializationStrategy="perEdge",
                                                      initializationDistribution="gaussian",

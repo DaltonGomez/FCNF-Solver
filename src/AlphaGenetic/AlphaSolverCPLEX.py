@@ -280,7 +280,6 @@ class AlphaSolverCPLEX:
 
     def cleanArcFlowsKeyErrors(self, uncleanArcFlows: dict) -> dict:
         """Iterates over CPLEX's dictionary of arc flows and resolves any key errors by assuming 0.0"""
-        print("\nResolving any key errors from CPLEX before writing solution...")
         for edge in range(self.graph.numEdges):
             for cap in range(self.graph.numArcsPerEdge):
                 # Try/Except/Else block as CPLEX sometimes fails to write flow decision variables to the arc flows dict
@@ -378,6 +377,7 @@ class AlphaSolverCPLEX:
     def resetSolver(self) -> None:
         """Resets all the output data structures of the solver (but model variables and constraints remain)"""
         self.isRun = False
+        self.solver.solution.clear()
         self.trueCost = 0.0
 
     def setTimeLimit(self, timeLimitInSeconds: float) -> None:

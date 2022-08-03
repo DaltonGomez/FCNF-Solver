@@ -210,6 +210,10 @@ class MILPsolverCPLEX:
         else:
             print("No feasible solution exists!")
 
+    def clearSolution(self) -> None:
+        """Clears all solution data for the solver while leaving the objective and constraints unchanged"""
+        self.model.solution.clear()
+
     def getObjectiveValue(self) -> float:
         """Returns the objective value found by the CPLEX MILP solver"""
         return self.model.solution.get_objective_value()
