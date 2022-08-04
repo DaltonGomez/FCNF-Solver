@@ -260,7 +260,7 @@ class AlphaSolverCPLEX:
         self.solver.solve()
         self.isRun = True
 
-    def getArcFlowsDict(self) -> dict:
+    def getArcFlowsDict(self, isCostCalc=False) -> dict:
         """Returns the dictionary of arc flows with key (edgeIndex, capIndex)"""
         if self.isOneDimAlphaTable is False:
             arcFlows = self.solver.solution.get_value_dict(self.arcFlowVars)
@@ -275,10 +275,10 @@ class AlphaSolverCPLEX:
                 # Update maximum capacity value for this edge
                 thisFlow = solverFlows[(edge, 0)]
                 arcFlows[(edge, largestCapIndex)] = thisFlow
-        cleanArcFlows = self.cleanArcFlowsKeyErrors(arcFlows)
+        cleanArcFlows = self.cleanArcFlowsKeyErrors(arcFlows, isCostCalc=isCostCalc)
         return cleanArcFlows
 
-    def cleanArcFlowsKeyErrors(self, uncleanArcFlows: dict) -> dict:
+    def cleanArcFlowsKeyErrors(self, uncleanArcFlows: dict, isCostCalc=False) -> dict:
         """Iterates over CPLEX's dictionary of arc flows and resolves any key errors by assuming 0.0"""
         for edge in range(self.graph.numEdges):
             for cap in range(self.graph.numArcsPerEdge):
@@ -287,7 +287,8 @@ class AlphaSolverCPLEX:
                     if uncleanArcFlows[(edge, cap)] >= 0.0:
                         continue
                 except KeyError:
-                    print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
+                    if isCostCalc is True:
+                        print("ERROR: Key error on solution.arcFlows[" + str((edge, cap)) + "]! Assuming CPLEX decided zero flow...")
                     uncleanArcFlows[(edge, cap)] = 0.0
         return uncleanArcFlows
 
@@ -331,7 +332,7 @@ class AlphaSolverCPLEX:
         """Calculates the true cost of the alpha-relaxed LP's output with the true discrete FCNF objective function"""
         srcFlows = self.getSrcFlowsList()
         sinkFlows = self.getSinkFlowsList()
-        arcFlows = self.getArcFlowsDict()
+        arcFlows = self.getArcFlowsDict(isCostCalc=True)
         if self.isOptimizedArcSelections is True:
             arcFlows = self.optimizeArcSelection(arcFlows)
         trueCost = 0.0
