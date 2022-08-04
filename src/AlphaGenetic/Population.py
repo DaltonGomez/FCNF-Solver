@@ -60,11 +60,12 @@ class Population:
         self.crossoverMethod: str = "twoPoint"  # :param : "onePoint", "twoPoint"
         self.crossoverRate: float = 1.0
         self.crossoverAttemptsPerGeneration: int = 1
-        self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents", "replaceRandomTwo"
+        self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents", "replaceRandomTwo", "appendOffspring"
         # Mutation HPs
         self.mutationMethod: str = "randomPerEdge"  # :param : "randomPerArc", "randomPerEdge", "nudgePerArc", "nudgePerEdge", "nudgeAll", "randomTotal"
         self.mutationRate: float = 0.20
         self.mutationStrength: float = 0.25
+        self.isMostFitImmune = True  # Boolean that protects the most fit individual from mutating
         # Daemon HPs
         self.isDaemonUsed: bool = True
         self.daemonAnnealingRate: float = 0.10
@@ -122,7 +123,7 @@ class Population:
         :param str crossoverMethod: One of following: {"onePoint", "twoPoint"}
         :param float crossoverRate: Probability in [0,1] that a crossover occurs
         :param int crossoverAttemptsPerGeneration: Number of attempted crossovers per generation
-        :param str replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents", "replaceRandomTwo"}
+        :param str replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents", "replaceRandomTwo", "appendOffspring"}
         """
         self.crossoverMethod = crossoverMethod
         self.crossoverRate = crossoverRate
@@ -207,7 +208,10 @@ class Population:
     def doMutations(self) -> None:
         """Performs mutations on individuals given a mutation probability"""
         random.seed()
-        for individualID in range(self.populationSize):
+        mostFitID = self.getMostFitIndividual().id
+        for individualID in range(len(self.population)):
+            if self.isMostFitImmune is True and individualID == mostFitID:
+                continue
             individual = self.population[individualID]
             if individual.isSolved is False:
                 continue
@@ -218,7 +222,7 @@ class Population:
         """Applies a daemon update to the population"""
         random.seed()
         annealedDaemonProb = self.getAnnealedDaemonRate()
-        for individualID in range(self.populationSize):
+        for individualID in range(len(self.population)):
             if random.random() < annealedDaemonProb:
                 self.applyDaemonUpdate(individualID)
 
@@ -650,6 +654,11 @@ class Population:
             self.population[randomTwoIndividualIDs[0]].resetOutputNetwork()
             self.population[randomTwoIndividualIDs[1]].alphaValues = offspringTwoChromosome
             self.population[randomTwoIndividualIDs[1]].resetOutputNetwork()
+        elif self.replacementStrategy == "appendOffspring":
+            offspringOne = Individual(len(self.population), self.graph, offspringOneChromosome)
+            self.population.append(offspringOne)
+            offspringTwo = Individual(len(self.population), self.graph, offspringOneChromosome)
+            self.population.append(offspringTwo)
         else:
             print("ERROR - INVALID REPLACEMENT STRATEGY!!!")
 

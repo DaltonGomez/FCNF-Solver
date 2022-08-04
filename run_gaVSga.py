@@ -24,7 +24,7 @@ if __name__ == "__main__":
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
                                                     initializationDistribution="gaussian",
-                                                    initializationParams=[500.0, 100.0])
+                                                    initializationParams=[1.0, 0.25])
     gaVSga.geneticPopOne.setIndividualSelectionHyperparams(selectionMethod="tournament",
                                                            tournamentSize=5)
     gaVSga.geneticPopOne.setCrossoverHyperparams(crossoverMethod="twoPoint",
@@ -43,7 +43,7 @@ if __name__ == "__main__":
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perEdge",
                                                       initializationDistribution="gaussian",
-                                                      initializationParams=[50.0, 10.0])
+                                                      initializationParams=[50000.0, 10000.0])
     gaVSga.geneticPopTwo.setIndividualSelectionHyperparams(selectionMethod="tournament",
                                                            tournamentSize=5)
     gaVSga.geneticPopTwo.setCrossoverHyperparams(crossoverMethod="twoPoint",
