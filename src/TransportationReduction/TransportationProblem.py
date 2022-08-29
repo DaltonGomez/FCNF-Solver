@@ -85,7 +85,7 @@ class TransportationProblem:
         # Build origin nodes from the sink --> supersink "arcs" in the input graphs
         for sinkIndex in range(len(self.inputGraph.sinksArray)):
             sinkID = self.inputGraph.sinksArray[sinkIndex]
-            sinkCap = self.inputGraph.sinkCapsArray[sinkID]
+            sinkCap = self.inputGraph.sinkCapsArray[sinkIndex]
             if self.inputGraph.isSourceSinkCharged:
                 sinkVariableCost = self.inputGraph.sinkVariableCostsArray[sinkIndex]
             else:
