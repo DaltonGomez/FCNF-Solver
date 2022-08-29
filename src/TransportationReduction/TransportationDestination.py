@@ -8,8 +8,8 @@ class TransportationDestination:
     # =========================================
     # ============== CONSTRUCTOR ==============
     # =========================================
-    def __init__(self, originalNode: Node):
+    def __init__(self, originalNode: Node, demand: float):
         """Constructor of a Transportation Node instance"""
-        self.id: int = originalNode.nodeID
-        self.originalArc: Node = originalNode
-        self.demand: float = 0.0  # TODO - Update per the rules of the reduction
+        self.destinationID: int = originalNode.nodeID
+        self.originalNode: Node = originalNode
+        self.demand: float = demand
