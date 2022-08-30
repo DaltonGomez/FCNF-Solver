@@ -1,7 +1,6 @@
-from FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from Graph.CandidateGraph import CandidateGraph
 from Graph.GraphVisualizer import GraphVisualizer
-from Solvers.MILPsolverCPLEX import MILPsolverCPLEX
+from TransportationReduction.FCTPsolverCPLEX import FCTPsolverCPLEX
 from TransportationReduction.TransportationProblem import TransportationProblem
 
 """
@@ -47,18 +46,24 @@ if __name__ == "__main__":
     """
 
     # Load and draw graph
-    graphFile = "FCTP_TEST2.p"
+    graphFile = "FCTP_TEST.p"
     inputGraph = CandidateGraph()
     inputGraph = inputGraph.loadCandidateGraph(graphFile)
     minTargetFlow = inputGraph.calculateTotalPossibleDemand()
     graphVis = GraphVisualizer(inputGraph, directed=True, supers=False)
     graphVis.drawLabeledGraph()
     # Perform reduction
-    fctp = TransportationProblem(inputGraph, minTargetFlow)
+    reducedTransportProblem = TransportationProblem(inputGraph, minTargetFlow)
 
+    # Solve reduced FCTP
+    fctpSolver = FCTPsolverCPLEX(reducedTransportProblem, minTargetFlow, logOutput=True)
+    fctpSolver.findSolution()
+    fctpSolver.printAllSolverData()
+
+    """
     # Solve optimally
-    milpSolver = MILPsolverCPLEX(inputGraph, minTargetFlow, isOneArcPerEdge=True, logOutput=True)
+    milpSolver = MILPsolverCPLEX(inputGraph, minTargetFlow, isOneArcPerEdge=True, logOutput=False)
     milpSolution = milpSolver.findSolution()
     solVis = SolutionVisualizer(milpSolution)
     solVis.drawLabeledSolution(leadingText="MILP")
-
+    """

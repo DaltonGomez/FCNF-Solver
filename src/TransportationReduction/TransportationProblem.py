@@ -113,3 +113,25 @@ class TransportationProblem:
             toNodeTransportArcObj = TransportationArc(toNodeTransportArcID, originObj.originalArc.fixedCost, originObj.originalArc.variableCost)
             self.transportArcs[toNodeTransportArcID] = toNodeTransportArcObj
             self.destinations[originID[1]].addIncomingTransportArc(toNodeTransportArcID)
+        # =========================
+        # === BALANCE SUPPLY/DEMAND
+        # =========================
+        # TODO - Figure out how to correctly balance the FCTP
+        """
+        totalSupply = 0.0
+        for originID in self.origins.keys():
+            totalSupply += self.origins[originID].supply
+        totalDemand = 0.0
+        for destID in self.destinations.keys():
+            totalDemand += self.destinations[destID].demand
+        netDemand = totalSupply + totalDemand
+        # If supply > demand, add dummy dest
+        if netDemand > 0:
+            dummyID = -3
+            dummyNode = Node(dummyID, 5.0, 5.0)
+            dummyDest = TransportationDestination(dummyNode, -netDemand)
+            self.destinations[dummyID] = dummyDest
+        # If supply < demand, add dummy origin
+        elif netDemand < 0:
+            pass
+        """

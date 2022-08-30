@@ -45,20 +45,22 @@ class FCTPsolverCPLEX:
         # Origin supply satisfaction constraint
         for originID in self.transportProblem.origins.keys():
             originCtname = str(originID) + "_originSupply"
-            self.model.add_constraint(self.transportArcFlowVars[(originID, originID[0])] + self.transportArcFlowVars[(originID, originID[1])], ctname=originCtname)
+            originObj = self.transportProblem.origins[originID]
+            self.model.add_constraint(abs(originObj.supply) == self.transportArcFlowVars[(originID, originID[0])] + self.transportArcFlowVars[(originID, originID[1])], ctname=originCtname)
 
         # Destination demand satisfaction constraint
         for destinationID in self.transportProblem.destinations.keys():
             destCtname = str(destinationID) + "_destDemand"
             destinationObj = self.transportProblem.destinations[destinationID]
-            self.model.add_constraint(sum(self.transportArcFlowVars[incomingTransportArc] for incomingTransportArc in destinationObj.incomingTransportArcs), ctname=destCtname)
+            self.model.add_constraint(abs(destinationObj.demand) == sum(self.transportArcFlowVars[incomingTransportArc]
+                                for incomingTransportArc in destinationObj.incomingTransportArcs), ctname=destCtname)
 
         # Edge opening/capacity constraints
         for transportArcID in self.transportProblem.transportArcs.keys():
             arcCtname = str(transportArcID) + "_transportArc"
             originSupply = self.transportProblem.origins[transportArcID[0]].supply
             destinationDemand = self.transportProblem.destinations[transportArcID[1]].demand
-            transportArcCap = min(originSupply, destinationDemand)
+            transportArcCap = min(abs(originSupply), abs(destinationDemand))
             self.model.add_constraint(self.transportArcFlowVars[transportArcID] <= self.transportArcOpenedVars[transportArcID] * transportArcCap, ctname=arcCtname)
 
         # =================== OBJECTIVE FUNCTION ===================
@@ -111,6 +113,7 @@ class FCTPsolverCPLEX:
     def writeSolution(self) -> None:
         """Writes out the solution instance"""
         # TODO - Revise to account for solution writing
+        print(self.transportArcFlowVars)
         pass
         """
         if self.isRun is False:
@@ -173,7 +176,6 @@ class FCTPsolverCPLEX:
         self.model.print_information()
         if self.isRun is True:
             print(self.model.get_solve_details())
-            print("Solved by= " + self.model.solution.solved_by + "\n")
             self.model.print_solution()
 
     def printModel(self) -> None:
@@ -195,7 +197,6 @@ class FCTPsolverCPLEX:
         print("=============== SOLUTION DETAILS ========================")
         print(self.model.get_solve_details())
         if self.isRun is True:
-            print("Solved by= " + self.model.solution.solved_by + "\n")
             print("=============== SOLUTION VALUES ========================")
             self.model.print_solution()
         else:
