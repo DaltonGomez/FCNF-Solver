@@ -1,5 +1,7 @@
+from FlowNetwork.SolutionVisualizer import SolutionVisualizer
 from Graph.CandidateGraph import CandidateGraph
 from Graph.GraphVisualizer import GraphVisualizer
+from Solvers.MILPsolverCPLEX import MILPsolverCPLEX
 from TransportationReduction.TransportationProblem import TransportationProblem
 
 """
@@ -54,4 +56,9 @@ if __name__ == "__main__":
     # Perform reduction
     fctp = TransportationProblem(inputGraph, minTargetFlow)
 
+    # Solve optimally
+    milpSolver = MILPsolverCPLEX(inputGraph, minTargetFlow, isOneArcPerEdge=True, logOutput=True)
+    milpSolution = milpSolver.findSolution()
+    solVis = SolutionVisualizer(milpSolution)
+    solVis.drawLabeledSolution(leadingText="MILP")
 

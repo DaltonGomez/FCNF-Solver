@@ -24,6 +24,9 @@ class TransportationProblem:
         self.destinations: Dict[int, TransportationDestination] = {}
         self.transportArcs: Dict[Tuple[Tuple[int, int, float], int], TransportationArc] = {}
         self.performReduction()
+        self.numOrigins = len(self.origins)
+        self.numDestination = len(self.destinations)
+        self.numTransportArcs = len(self.transportArcs)
 
     # ===============================================
     # ============== REDUCTION METHODS ==============
@@ -104,8 +107,9 @@ class TransportationProblem:
             fromNodeTransportArcID = (originID, originID[0])
             fromNodeTransportArcObj = TransportationArc(fromNodeTransportArcID, 0.0, 0.0)
             self.transportArcs[fromNodeTransportArcID] = fromNodeTransportArcObj
+            self.destinations[originID[0]].addIncomingTransportArc(fromNodeTransportArcID)
             # To node arc (with cost equal to input arc)
             toNodeTransportArcID = (originID, originID[1])
             toNodeTransportArcObj = TransportationArc(toNodeTransportArcID, originObj.originalArc.fixedCost, originObj.originalArc.variableCost)
             self.transportArcs[toNodeTransportArcID] = toNodeTransportArcObj
-
+            self.destinations[originID[1]].addIncomingTransportArc(toNodeTransportArcID)
