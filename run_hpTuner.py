@@ -14,8 +14,6 @@ if __name__ == "__main__":
     # Input graph and tuner object w/ options
     inputGraphs = [
         "massive_2",
-        "massive_5",
-        "massive_6"
     ]
     runsPerGraph = 3
     hpTuner = HyperparamTuner(inputGraphs, runsPerGraph, isDaemonUsed=True,
@@ -23,8 +21,8 @@ if __name__ == "__main__":
                               tuneOptimizedArcs=True, tuneNonOptimizedArcs=False)
     # Update the HP tuning search space
     hpTuner.hpSpace = {
-        "populationSize": [20],
-        "numGenerations": [30],
+        "populationSize": [20, 40],
+        "numGenerations": [20, 40],
         "initializationStrategy": ["perEdge"],
         "initializationDistribution": ["gaussian"],
         "initializationParams": [
