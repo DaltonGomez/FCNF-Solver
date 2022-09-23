@@ -21,7 +21,7 @@ NETWORK GENERATION/VISUALIZATION:
 ALPHA GENETIC ALGORITHM:
 =====================================
 # TODO - Add a strategy to log the best known individual and prevent its alpha table from ever being overwritten (thus making the population strictly convergent)
-# TODO - Implement the uniform crossover and frequency crossover operators described on PDF page 114 of the Canadian's book
+# TODO - Implement the frequency crossover operator described on PDF page 114 of the Canadian's book (if it's even possible w/ continuous genes)
 # ASK - Should the topological-based operators (i.e. crossover and mutation based on selected paths/pathlets) be revisited?
 # NOTE - See below for proposed pseudocode of how to compute pathlets:
     >> On a copy of the network:

@@ -19,15 +19,15 @@ if __name__ == "__main__":
                     isDrawing=True, isLabeling=True, isGraphing=True)
 
     # Alpha-GA population one hyperparameter setters
-    gaVSga.geneticPopOne.setPopulationHyperparams(populationSize=100,
-                                                  numGenerations=50,
+    gaVSga.geneticPopOne.setPopulationHyperparams(populationSize=25,
+                                                  numGenerations=25,
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopOne.setInitializationHyperparams(initializationStrategy="perEdge",
                                                     initializationDistribution="gaussian",
                                                     initializationParams=[1.0, 0.25])
     gaVSga.geneticPopOne.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                           tournamentSize=20)
-    gaVSga.geneticPopOne.setCrossoverHyperparams(crossoverMethod="twoPoint",
+                                                           tournamentSize=8)
+    gaVSga.geneticPopOne.setCrossoverHyperparams(crossoverMethod="uniform",
                                                  crossoverRate=1.0,
                                                  crossoverAttemptsPerGeneration=1,
                                                  replacementStrategy="replaceWeakestTwo")
@@ -38,14 +38,14 @@ if __name__ == "__main__":
                                               daemonStrategy="globalMedian", daemonStrength=0.10)
 
     # Alpha-GA population two hyperparameter setters
-    gaVSga.geneticPopTwo.setPopulationHyperparams(populationSize=50,
-                                                  numGenerations=50,
+    gaVSga.geneticPopTwo.setPopulationHyperparams(populationSize=25,
+                                                  numGenerations=25,
                                                   terminationMethod="setGenerations")
     gaVSga.geneticPopTwo.setInitializationHyperparams(initializationStrategy="perEdge",
                                                       initializationDistribution="gaussian",
                                                       initializationParams=[1.0, 0.25])
     gaVSga.geneticPopTwo.setIndividualSelectionHyperparams(selectionMethod="tournament",
-                                                           tournamentSize=20)
+                                                           tournamentSize=8)
     gaVSga.geneticPopTwo.setCrossoverHyperparams(crossoverMethod="twoPoint",
                                                  crossoverRate=1.0,
                                                  crossoverAttemptsPerGeneration=1,

@@ -57,7 +57,7 @@ class Population:
         self.selectionMethod: str = "tournament"  # :param : "tournament", "roulette", "random"
         self.tournamentSize: int = 5
         # Crossover HPs
-        self.crossoverMethod: str = "twoPoint"  # :param : "onePoint", "twoPoint"
+        self.crossoverMethod: str = "twoPoint"  # :param : "onePoint", "twoPoint", "uniform"
         self.crossoverRate: float = 1.0
         self.crossoverAttemptsPerGeneration: int = 1
         self.replacementStrategy: str = "replaceWeakestTwo"  # : param : "replaceWeakestTwo", "replaceParents", "replaceRandomTwo", "appendOffspring"
@@ -120,7 +120,7 @@ class Population:
     def setCrossoverHyperparams(self, crossoverMethod="twoPoint", crossoverRate=1.0,
                                 crossoverAttemptsPerGeneration=1, replacementStrategy="replaceWeakestTwo") -> None:
         """Sets the GA attributes that dictate how the crossover of individuals is carried out \n
-        :param str crossoverMethod: One of following: {"onePoint", "twoPoint"}
+        :param str crossoverMethod: One of following: {"onePoint", "twoPoint", "uniform"}
         :param float crossoverRate: Probability in [0,1] that a crossover occurs
         :param int crossoverAttemptsPerGeneration: Number of attempted crossovers per generation
         :param str replacementStrategy: One of following: {"replaceWeakestTwo", "replaceParents", "replaceRandomTwo", "appendOffspring"}
@@ -596,6 +596,8 @@ class Population:
             self.randomOnePointCrossover(parentOneID, parentTwoID)
         elif self.crossoverMethod == "twoPoint":
             self.randomTwoPointCrossover(parentOneID, parentTwoID)
+        elif self.crossoverMethod == "uniform":
+            self.randomUniformCrossover(parentOneID, parentTwoID)
         else:
             print("ERROR - INVALID CROSSOVER METHOD!!!")
 
