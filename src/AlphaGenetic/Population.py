@@ -634,6 +634,31 @@ class Population:
         # Do replacement with offspring
         self.replaceWithOffspring(parentOneID, parentTwoID, childOne, childTwo)
 
+    def randomUniformCrossover(self, parentOneID: int, parentTwoID: int) -> None:
+        """Crossover of 2 chromosomes based on a coin toss per gene (i.e. alpha value)\n
+        :param int parentOneID: Index of first parent in population
+        :param int parentTwoID: Index of second parent in population
+        """
+        random.seed()
+        # Simplify parent chromosomes naming
+        parentOne = self.population[parentOneID].alphaValues
+        parentTwo = self.population[parentTwoID].alphaValues
+        # Create children chromosomes
+        childOne = np.empty(shape=(self.graph.numEdges, self.graph.numArcsPerEdge), dtype='f')
+        childTwo = np.empty(shape=(self.graph.numEdges, self.graph.numArcsPerEdge), dtype='f')
+        # Perform crossover by iterating through all genes in the chromosome and flipping a coin
+        for edge in range(self.graph.numEdges):
+            for arcCap in range(self.graph.numArcsPerEdge):
+                rng = random.random()
+                if rng > 0.50:
+                    childOne[edge][arcCap] = parentOne[edge][arcCap]
+                    childTwo[edge][arcCap] = parentTwo[edge][arcCap]
+                else:
+                    childOne[edge][arcCap] = parentTwo[edge][arcCap]
+                    childTwo[edge][arcCap] = parentOne[edge][arcCap]
+        # Do replacement with offspring
+        self.replaceWithOffspring(parentOneID, parentTwoID, childOne, childTwo)
+
     def replaceWithOffspring(self, parentOneID: int, parentTwoID: int, offspringOneChromosome: ndarray,
                              offspringTwoChromosome: ndarray) -> None:
         """Takes the offspring's alpha values and carries out the replacement strategy"""
